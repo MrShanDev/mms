@@ -7,3 +7,6 @@
 [submodule "mms-system"]
 	path = mms-system
 	url = https://gitee.com/mmsAdmin/mms-system.git
+[submodule "mms-ui"]
+	path = mms-ui
+	url = https://gitee.com/mmsAdmin/mms-ui.git
