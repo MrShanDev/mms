@@ -1,0 +1,3 @@
+[submodule "mms-modules"]
+	path = mms-modules
+	url = https://gitee.com/mmsAdmin/mms-modules.git
