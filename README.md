@@ -1,7 +1,7 @@
 <div align="center">
    <br/> 
    <a href="#">
-     <img width="150" src="https://www.mmsadmin.cn/logo.png">
+     <img width="150" src="https://sxpcwlkj.oss-accelerate-overseas.aliyuncs.com/doc/logo.png">
    </a>
    <h1>模块化管理系统</h1>
    <br/>
@@ -18,7 +18,9 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 
 > 项目代码、文档 均开源免费可商用 ,活到老写到老 为兴趣而开源 为学习而开源.
 
-系统演示: [传送门](https://demo.sxpcwlkj.com)
+系统演示: [传送门](https://demo.mmsadmin.cn)
+
+后端项目地址: [mms](https://gitee.com/mmsAdmin/mms)
 
 前端项目地址: [mms-ui](https://gitee.com/mmsAdmin/mms-ui)
 
@@ -27,13 +29,12 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 
 ## 🧩系统版本
 
-<img src="https://img.shields.io/badge/MMS-V1.0.0-green"/>
+<img src="https://img.shields.io/badge/MMS-V1.X-green"/>
 
-| 名称     |   项目名    |                     项目地址                      | 注意事项                                                                        |
-|--------|:--------:|:---------------------------------------------:|-----------------------------------------------------------------------------|
-| 基础版-后端 |   mms    |   - [Gitee](https://gitee.com/mmsAdmin/mms)    | 🙋‍♂️适用：纯后端的系统                                                              |
-| 基础版-前端 |  mms-ui  |  - [Gitee](https://gitee.com/mmsAdmin/mms-ui)  | 🙋‍♂️适配：基础版后端系统                                                            |
-| MMS商城版 | mms-mall | - [Gitee](https://gitee.com/mmsAdmin/mms-mall) | 🙋‍♂️若遇到问题请联系我们（备注：mms）<br>📢微信号：qq942879858<br>📢Q&nbsp;&nbsp;Q号：942879858 |
+| 名称          | 别名  |                     项目地址                      | 注意事项                                                                                                       |
+|-------------|:---:|:---------------------------------------------:|------------------------------------------------------------------------------------------------------------|
+| MMS         | 基础版 |   - [Gitee](https://gitee.com/mmsAdmin/mms)    | 适用：项目快速管理系统开发的脚手架系统                                                                                        |
+| MMSPLUS | 商城版 | - [Gitee](https://gitee.com/mmsAdmin/mms-plus) | 适用：具备商城项目常用功能App、小程序、公众号  <br/>🙋‍♂️若遇到问题请联系我们（备注：mms）<br>📢微信号：qq942879858<br>📢Q&nbsp;&nbsp;Q号：942879858 |
 
 ## 📦开发语言
 
