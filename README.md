@@ -24,17 +24,17 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 
 前端项目地址: [mms-ui](https://gitee.com/mmsAdmin/mms-ui)
 
-文档地址: [mms-doc](https://www.mmsadmin.cn/)
+文档地址: [mms-doc](https://mmsadmin.cn)
 
 
 ## 🧩系统版本
 
 <img src="https://img.shields.io/badge/MMS-V1.X-green"/>
 
-| 名称          | 别名  |                     项目地址                      | 注意事项                                                                                                       |
-|-------------|:---:|:---------------------------------------------:|------------------------------------------------------------------------------------------------------------|
-| MMS         | 基础版 |   - [Gitee](https://gitee.com/mmsAdmin/mms)    | 适用：项目快速管理系统开发的脚手架系统                                                                                        |
-| MMSPLUS | 商城版 | - [Gitee](https://gitee.com/mmsAdmin/mms-plus) | 适用：具备商城项目常用功能App、小程序、公众号  <br/>🙋‍♂️若遇到问题请联系我们（备注：mms）<br>📢微信号：qq942879858<br>📢Q&nbsp;&nbsp;Q号：942879858 |
+| 名称       | 别名  |                      项目地址                       | 注意事项                                                                                                       |
+|----------|:---:|:-----------------------------------------------:|------------------------------------------------------------------------------------------------------------|
+| mms      | 基础版 |    - [Gitee](https://gitee.com/mmsAdmin/mms)    | 适用：项目快速管理系统开发的脚手架系统                                                                                        |
+| mmsAdmin | 商城版 | - [Gitee](https://gitee.com/mmsAdmin/mms-admin) | 适用：具备商城项目常用功能App、小程序、公众号  <br/>🙋‍♂️若遇到问题请联系我们（备注：mms）<br>📢微信号：qq942879858<br>📢Q&nbsp;&nbsp;Q号：942879858 |
 
 ## 📦开发语言
 
@@ -107,80 +107,80 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
    <th><p>后台首页</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/01.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/02.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/01.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/02.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>用户管理</p></th>
    <th><p>新增用户</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/03.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/04.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/03.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/04.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>角色管理</p></th>
    <th><p>添加角色</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/05.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/06.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/05.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/06.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>菜单管理</p></th>
    <th><p>部门管理</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/07.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/08.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/07.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/08.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>字典管理</p></th>
    <th><p>添加字典</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/09.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/10.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/09.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/10.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>系统设置</p></th>
    <th><p>消息公告</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/11.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/12.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/11.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/12.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>代码生成1</p></th>
    <th><p>代码生成2</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/13.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/14.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/13.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/14.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>代码生成3</p></th>
    <th><p>代码生成4</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/15.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/16.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/15.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/16.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>定时任务</p></th>
    <th><p>对象存储</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/17.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/18.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/17.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/18.png" alt=""/></th>
   </tr>
 <tr>
    <th><p>扩展工具</p></th>
    <th><p>个人中心</p></th>
   </tr>
   <tr>
-   <th><img src="https://www.mmsadmin.cn/images/mms/19.png"/></th>
-   <th><img src="https://www.mmsadmin.cn/images/mms/20.png"/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/19.png" alt=""/></th>
+   <th><img src="https://www.mmsadmin.cn/images/mms/20.png" alt=""/></th>
   </tr>
 </table>
 
