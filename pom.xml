@@ -561,7 +561,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>mms-system</module>
+        <module>mms-admin</module>
         <module>mms-modules</module>
         <module>mms-patulous</module>
     </modules>
