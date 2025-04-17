@@ -1,7 +1,7 @@
 <div align="center">
    <br/> 
    <a href="#">
-     <img width="150" src="https://sxpcwlkj.oss-accelerate-overseas.aliyuncs.com/doc/logo.png" alt="">
+     <img width="150" src="https://www.mmsadmin.cn/logo.png" alt="">
    </a>
    <h1>模块化管理系统</h1>
    <br/>
