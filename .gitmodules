@@ -4,9 +4,6 @@
 [submodule "mms-patulous"]
 	path = mms-patulous
 	url = https://gitee.com/mmsAdmin/mms-patulous.git
-[submodule "mms-system"]
-	path = mms-system
-	url = https://gitee.com/mmsAdmin/mms-system.git
 [submodule "mms-ui"]
 	path = mms-ui
 	url = https://gitee.com/mmsAdmin/mms-ui.git
