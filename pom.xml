@@ -510,6 +510,12 @@
                 <artifactId>mms-ai</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <!-- CMS模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-cms</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!--支付-微信-->
             <dependency>
                 <groupId>com.github.javen205</groupId>
@@ -555,6 +561,7 @@
 
     <modules>
         <module>mms-admin</module>
+        <module>mms-cms</module>
         <module>mms-modules</module>
         <module>mms-patulous</module>
     </modules>
