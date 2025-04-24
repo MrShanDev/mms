@@ -338,13 +338,6 @@
                 <version>${alibaba-ttl.version}</version>
             </dependency>
 
-            <!-- 代码生成 https://gitee.com/makunet/maku-generator.git -->
-            <dependency>
-                <groupId>net.maku</groupId>
-                <artifactId>maku-generator-boot-starter</artifactId>
-                <version>${maku-generator.version}</version>
-            </dependency>
-
             <!-- 分布式定时任务  PowerJob -->
             <dependency>
                 <groupId>tech.powerjob</groupId>
