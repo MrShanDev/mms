@@ -13,6 +13,3 @@
 [submodule "mms-admin"]
 	path = mms-admin
 	url = https://gitee.com/mmsAdmin/mms-admin.git
-[submodule "mms-cms"]
-	path = mms-cms
-	url = https://gitee.com/mmsAdmin/mms-cms.git
