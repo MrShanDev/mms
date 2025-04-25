@@ -7,7 +7,7 @@ sxpcwlkj:
 powerjob:
   worker:
     # 如何开启调度中心请查看文档教程
-    enabled: true
+    enabled: false
     # 需要先在 powerjob 登录页执行应用注册后才能使用
     app-name: mms
     enable-test-mode: false

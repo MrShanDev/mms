@@ -9,7 +9,7 @@ powerjob:
     # 如何开启调度中心请查看文档教程
     enabled: false
     # 需要先在 powerjob 登录页执行应用注册后才能使用
-    app-name: mms-job
+    app-name: mms
     enable-test-mode: false
     max-appended-wf-context-length: 4096
     max-result-length: 4096
