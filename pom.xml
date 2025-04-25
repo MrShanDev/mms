@@ -561,7 +561,6 @@
 
     <modules>
         <module>mms-admin</module>
-        <module>mms-cms</module>
         <module>mms-modules</module>
         <module>mms-patulous</module>
     </modules>
