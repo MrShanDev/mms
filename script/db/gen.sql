@@ -129,7 +129,7 @@ CREATE TABLE `sys_gen_project_modify` (
 
 LOCK TABLES `sys_gen_project_modify` WRITE;
 /*!40000 ALTER TABLE `sys_gen_project_modify` DISABLE KEYS */;
-INSERT INTO `sys_gen_project_modify` VALUES (1,'MMS','mms','com.sxpcwlkj','D:/mms','mms-boot','mms','com.sxpcwlkj','.git,.idea,target,logs','java,xml,yml,txt',NULL,'2024-01-21 01:57:21');
+INSERT INTO `sys_gen_project_modify` VALUES (1,'MMS','mms','com.sxpcwlkj','D:/mms','mms','mms','com.sxpcwlkj','.git,.idea,target,logs','java,xml,yml,txt',NULL,'2024-01-21 01:57:21');
 /*!40000 ALTER TABLE `sys_gen_project_modify` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -164,7 +164,7 @@ CREATE TABLE `sys_gen_table` (
   `span` int DEFAULT '24' COMMENT '表单排列',
   PRIMARY KEY (`id`),
   UNIQUE KEY `table_name` (`table_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1913155383791427587 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表';
+) ENGINE=InnoDB AUTO_INCREMENT=1913853443831947266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,7 +207,7 @@ CREATE TABLE `sys_gen_table_field` (
   `query_type` varchar(200) DEFAULT NULL COMMENT '查询方式',
   `query_form_type` varchar(200) DEFAULT NULL COMMENT '查询表单类型',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1913155383917256706 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表字段';
+) ENGINE=InnoDB AUTO_INCREMENT=1913853444012302338 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表字段';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -228,4 +228,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-18 17:07:31
+-- Dump completed on 2025-04-25 20:44:52

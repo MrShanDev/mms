@@ -62,11 +62,10 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-ai</artifactId>
         </dependency>
-        <!-- adminMall模块-->
-<!--        <dependency>-->
-<!--            <groupId>com.sxpcwlkj</groupId>-->
-<!--            <artifactId>mms-admin-mall</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-demo</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
