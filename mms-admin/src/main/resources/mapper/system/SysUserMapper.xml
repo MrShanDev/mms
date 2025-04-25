@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sxpcwlkj.system.mapper.SysUserMapper">
+    <update id="updateRsa">
+        UPDATE `sys_user` SET `public_key`=#{publicKey} , `private_key`=#{priverKey}  WHERE `tenant_id`=#{tenantId}  AND `user_id`=#{userId}
+    </update>
+
+    <select id="selectByUserName" resultType="com.sxpcwlkj.system.entity.SysUser">
+        SELECT * FROM `sys_user` WHERE `user_name`=#{userName} LIMIT 1
+    </select>
+    <select id="selectByUserPhone" resultType="com.sxpcwlkj.system.entity.SysUser">
+        SELECT * FROM `sys_user` WHERE `phone_number`=#{userPhone} LIMIT 1
+    </select>
+    <select id="selectByUserEmail" resultType="com.sxpcwlkj.system.entity.SysUser">
+        SELECT * FROM `sys_user` WHERE `email`=#{userEmail} LIMIT 1
+    </select>
+    <select id="selectPageUserList" resultType="com.sxpcwlkj.system.entity.vo.SysUserVo">
+        SELECT dp.`dept_name` AS department,  u.*
+        FROM
+        `sys_user` u LEFT JOIN  `sys_dept` dp ON u.`dept_id`=dp.`dept_id`
+         ${ew.getCustomSqlSegment}
+    </select>
+</mapper>

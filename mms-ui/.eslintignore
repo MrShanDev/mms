@@ -1,0 +1,18 @@
+#指定在 ESLint 代码检查过程中需要忽略的文件和目录
+*.sh
+node_modules
+lib
+*.md
+*.scss
+*.woff
+*.ttf
+.vscode
+.idea
+dist
+mock
+public
+bin
+build
+config
+index.html
+src/assets

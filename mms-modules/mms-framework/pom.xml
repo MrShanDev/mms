@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>mms-modules</artifactId>
+        <groupId>com.sxpcwlkj</groupId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>mms-framework</artifactId>
+    <description>framework框架核心</description>
+
+
+    <dependencies>
+
+        <!-- SpringBoot Web容器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- 高性能 Web 服务器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-undertow</artifactId>
+        </dependency>
+        <!-- Spring框架核心工具 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+
+        <!-- SpringBoot 拦截器 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- 限流 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- SBA客户端 整合-->
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+        </dependency>
+        <!--健康检测扩展框架 检测系统的健康情况、当前的Beans、系统的缓存等-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- 离线IP地址定位库 ip2region -->
+        <dependency>
+            <groupId>org.lionsoul</groupId>
+            <artifactId>ip2region</artifactId>
+        </dependency>
+
+
+        <!-- 自定义验证注解 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!--validation 依赖-->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <!--数据源模块（包括common、redis、authority）-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-datasource</artifactId>
+        </dependency>
+        <!--websocket模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-websocket</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>redisson</artifactId>
+                    <groupId>org.redisson</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--excel模块-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-common</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.sxpcwlkj</groupId>
+        <artifactId>mms-modules</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mms-email</artifactId>
+    <description>邮件模块</description>
+    <dependencies>
+        <!-- 公共模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dromara.sms4j</groupId>
+            <artifactId>sms4j-email-jakarta-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-redis</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

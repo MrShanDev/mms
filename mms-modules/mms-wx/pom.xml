@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.sxpcwlkj</groupId>
+        <artifactId>mms-modules</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mms-wx</artifactId>
+    <description>支付模块</description>
+    <dependencies>
+        <!-- 公共模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-miniapp</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-open</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-mp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-cp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-pay</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.javen205</groupId>
+            <artifactId>IJPay-WxPay</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-redis</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

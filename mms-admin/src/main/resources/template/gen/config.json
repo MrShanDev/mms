@@ -1,0 +1,71 @@
+{
+  "project": {
+    "packageName": "com.sxpcwlkj",
+    "version": "1.0.0",
+    "backendPath": "sxpcwlkj/admin",
+    "frontendPath": "sxpcwlkj/front"
+  },
+  "developer": {
+    "author": "西决",
+    "email": "942879858@qq.com",
+    "website": "<a href='https://www.mmsadmin.com'>MMS文档</a>"
+  },
+  "templates": [
+    {
+      "templateName": "java/entity/Entity.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/entity/${ClassName}.java"
+    },
+    {
+      "templateName": "java/entity/vo/Vo.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/entity/vo/${ClassName}Vo.java"
+    },
+    {
+      "templateName": "java/entity/bo/Bo.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/entity/bo/${ClassName}Bo.java"
+    },
+    {
+      "templateName": "java/entity/export/Export.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/entity/export/${ClassName}Export.java"
+    },
+    {
+      "templateName": "java/controller/Controller.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/controller/${ClassName}Controller.java"
+    },
+    {
+      "templateName": "java/service/Service.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/service/${ClassName}Service.java"
+    },
+    {
+      "templateName": "java/service/impl/ServiceImpl.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/service/impl/${ClassName}ServiceImpl.java"
+    },
+    {
+      "templateName": "java/mapper/Mapper.java.ftl",
+      "generatorPath": "${backendPath}/src/main/java/${packagePath}/${moduleName}/mapper/${ClassName}Mapper.java"
+    },
+    {
+      "templateName": "xml/Mapper.xml.ftl",
+      "generatorPath": "${backendPath}/src/main/resources/mapper/${moduleName}/${ClassName}Mapper.xml"
+    },
+    {
+      "templateName": "sql/menu.sql.ftl",
+      "generatorPath": "${backendPath}/menu/${tableName}_menu.sql"
+    },
+    {
+      "templateName": "vue/api.ts.ftl",
+      "generatorPath": "${frontendPath}/src/api/${moduleName}/${functionName}/index.ts"
+    },
+    {
+      "templateName": "vue/type.ts.ftl",
+      "generatorPath": "${frontendPath}/src/api/${moduleName}/${functionName}/type.ts"
+    },
+    {
+      "templateName": "vue/index.vue.ftl",
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/index.vue"
+    },
+    {
+      "templateName": "vue/dialog.vue.ftl",
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/dialog.vue"
+    }
+  ]
+}

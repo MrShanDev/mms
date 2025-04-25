@@ -1,0 +1,148 @@
+package com.sxpcwlkj.system.controller;
+
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import com.sxpcwlkj.common.annotation.MssSafety;
+import com.sxpcwlkj.common.code.controller.BaseController;
+import com.sxpcwlkj.common.utils.MapstructUtil;
+import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.common.code.entity.PrintObject;
+import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
+import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.framework.utils.ExcelUtil;
+import com.sxpcwlkj.system.entity.bo.SysNoticeBo;
+import com.sxpcwlkj.system.entity.vo.SysNoticeVo;
+import com.sxpcwlkj.system.entity.export.SysNoticeExport;
+import com.sxpcwlkj.system.service.SysNoticeService;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * 系统公告
+ *
+ * @author 西决
+ * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
+ */
+@Slf4j
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("system/notice")
+public class SysNoticeController extends BaseController{
+    private final SysNoticeService baseService;
+
+    /**
+    * 分页列表
+    * @param bo 查询条件
+    * @return 分页对象
+    */
+    @SaCheckPermission("system:notice:list")
+    @PostMapping("/list")
+    public TableDataInfo<SysNoticeVo> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysNoticeBo bo){
+        return baseService.selectListVoPage(bo, bo.getPageQuery());
+    }
+
+    /**
+    * 根据id查询
+    * @param id ID
+    * @return 对象
+    */
+    @SaCheckPermission("system:notice:query")
+    @GetMapping("/{id}")
+    public R<SysNoticeVo> queryById(@PathVariable String id) {
+        return success(baseService.selectVoById(id));
+    }
+
+    /**
+    * 修改
+    * @param bo 对象
+    * @return true:成功 false:失败
+    */
+    @SaCheckPermission("system:notice:edit")
+    @PutMapping
+    public R<Boolean> edit(@RequestBody @Validated(ValidatedGroupConfig.update.class) SysNoticeBo bo) {
+        return success(baseService.updateById(bo));
+    }
+
+    /**
+    * 新增
+    * @param bo 对象
+    * @return true:成功 false:失败
+    */
+    @SaCheckPermission("system:notice:insert")
+    @PostMapping
+    public R<Boolean> insert(@RequestBody @Validated(ValidatedGroupConfig.insert.class) SysNoticeBo bo) {
+        return success(baseService.insert(bo));
+    }
+
+    /**
+    * 删除
+    * @param ids ID
+    * @return true:成功 false:失败
+    */
+    @SaCheckPermission("system:notice:delete")
+    @DeleteMapping("/{ids}")
+    public R<Boolean> delete(@PathVariable String ids) {
+        return success(baseService.deleteById(ids));
+    }
+
+    /**
+    * 模版下载
+    */
+    @SaCheckPermission("system:notice:import")
+    @PostMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse response) throws IOException {
+        ExcelUtil.download(response, SysNoticeExport.class, "系统公告");
+    }
+
+    /**
+    * 导入系统用户
+    * @param file 模版文件
+    */
+    @MssSafety
+    @Transactional
+    @SaCheckPermission("system:notice:import")
+    @PostMapping("/import")
+    public R<Boolean> imports(@RequestParam("file") MultipartFile file) throws Exception {
+        Set<SysNoticeExport> list=  ExcelUtil.imports(file, SysNoticeExport.class);
+        Boolean state= baseService.imports(list);
+        return R.ok(state,state?"数据导入成功!":"数据导入失败!");
+    }
+
+    /**
+    * 导出系统用户
+    */
+    @MssSafety
+    @Transactional
+    @SaCheckPermission("system:notice:export")
+    @PostMapping("/export")
+    public void export(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysNoticeBo bo,HttpServletResponse response) throws IOException {
+        List<SysNoticeVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
+        List<SysNoticeExport> data= MapstructUtil.convert(list,SysNoticeExport.class);
+        ExcelUtil.export(response, SysNoticeExport.class, "系统公告",data);
+    }
+
+    /**
+    * 打印系统用户
+    */
+    @MssSafety
+    @Transactional
+    @SaCheckPermission("system:notice:print")
+    @PostMapping("/print")
+    public R<PrintObject<SysNoticeExport>> print(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysNoticeBo bo) throws Exception {
+        List<SysNoticeVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
+        List<SysNoticeExport> data= MapstructUtil.convert(list,SysNoticeExport.class);
+        PrintObject<SysNoticeExport>  printObject=   new PrintObject<SysNoticeExport>()
+             .setTitle("系统公告")
+             .setData(data);
+             return R.response(Boolean.TRUE,printObject);
+    }
+}

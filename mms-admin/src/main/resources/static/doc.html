@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能对话助手 | AI Chat</title>
+
+    <!-- 依赖库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="index.css" rel="stylesheet">
+    <style>
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+            }
+            .input-group {
+                display: flex;
+                gap: 1rem;
+                width: 98%;
+            }
+            .copy-toast{
+                bottom: 100px;
+            }
+        }
+        .chat-container {
+            overflow-y: auto;
+            padding: 2rem;
+            background: rgba(245, 247, 251, 0.5);
+            scroll-behavior: smooth;
+            height: 85vh;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 新增侧边栏 -->
+
+    <div class="main-content">
+        <div class="header">
+            <h1 style="margin: 0"><i class="fas fa-robot"></i>丽诺尔AI助手</h1>
+        </div>
+        <div class="chat-container" id="chatBox">
+            <div class="message bot-message">
+                🤖 您好,请输入您想了解的问题！
+            </div>
+        </div>
+        <div class="input-section">
+            <div class="tool-box">
+                <div class="tool-left">
+                    <div class="input-group">
+                        <input type="text" id="userInput" placeholder="输入您的问题...">
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="sendBtn" onclick="handleSend()">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>发送</span>
+                    </button>
+                    <button id="stopBtn" onclick="stopConversation()">
+                        <i class="fas fa-stop"></i>
+                        <span>停止</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copy-toast" id="copyToast">内容已复制</div>
+    <div class="loading" id="loading">
+        <div class="loading-wave">
+            <div style="animation-delay: 0s"></div>
+            <div style="animation-delay: 0.2s"></div>
+            <div style="animation-delay: 0.4s"></div>
+            <div style="animation-delay: 0.6s"></div>
+        </div>
+    </div>
+</div>
+<script>
+    // 新增历史记录管理功能
+    let chatHistory = JSON.parse(localStorage.getItem('chatHistory')) || [];
+
+    let currentSessionId = generateSessionId();
+    // 生成唯一sessionId
+    function generateSessionId() {
+        const storedId = localStorage.getItem('chatSessionId');
+        if (storedId) return storedId;
+        const newId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('chatSessionId', newId);
+        return newId;
+    }
+
+    // 配置 Markdown 解析
+    marked.setOptions({
+        highlight: (code, lang) => Prism.highlight(code, Prism.languages[lang] || Prism.languages.autoit, lang),
+        langPrefix: 'language-'
+    });
+
+    // DOM 元素
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const loading = document.getElementById('loading');
+
+    // 全局变量
+    let controller = null;
+    let files = [];
+
+    // 发生对话处理
+    async function handleSend() {
+        const prompt = userInput.value.trim();
+        if (!prompt && files.length === 0) return;
+
+        // 更新UI状态
+        toggleUIState(true);
+        userInput.value = '';
+
+        // 添加用户消息
+        if (prompt) addMessage(prompt, true);
+        if (files.length > 0) {
+            addMessage(`📎 上传文件：${files.map(f => f.name).join(', ')}`, true);
+        }
+
+        try {
+            controller = new AbortController();
+            const formData = new FormData();
+            formData.append('message', prompt);
+            formData.append('sessionId', currentSessionId);
+            files.forEach(file => formData.append('files', file));
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                body: formData,
+                signal: controller.signal
+            });
+
+            await processStreamResponse(response);
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                addMessage(`⚠️ 请求失败: ${err.message}`, false);
+            }
+        } finally {
+            toggleUIState(false);
+        }
+    }
+
+    // 处理流式响应
+    async function processStreamResponse(response) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullResponse = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            console.log("OK"+done)
+            if(done){
+                const lastMsg = document.querySelector('.bot-message:last-child');
+                lastMsg.dataset.rawContent = lastMsg.textContent;
+                lastMsg.appendChild(createCopyBtn(lastMsg));
+                break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            const chunks = buffer.split('\n\n');
+
+            for (let i = 0; i < chunks.length - 1; i++) {
+                const eventData = chunks[i].split('\n')
+                    .find(line => line.startsWith('data:'))
+                    ?.replace('data:', '').trim();
+
+                if (eventData) {
+                    try {
+                        const data = JSON.parse(eventData);
+                        fullResponse += data.content;
+                        const lastMsg = document.querySelector('.bot-message:last-child');
+                        if (lastMsg) {
+                            lastMsg.innerHTML =marked.parse(fullResponse);
+                            Prism.highlightAllUnder(lastMsg);
+                        } else {
+                            addMessage(fullResponse);
+                        }
+                        scrollToBottom();
+                    } catch(e) {
+                        console.error('解析错误:', e);
+                    }
+                }
+            }
+            buffer = chunks[chunks.length - 1];
+        }
+    }
+
+    // 停止对话
+    function stopConversation() {
+        if (controller) {
+            controller.abort();
+            addMessage('⏹️ 对话已停止', false);
+            toggleUIState(false);
+        }
+    }
+    // 思考状态管理
+    function toggleUIState(isProcessing) {
+        sendBtn.style.display = isProcessing ? 'none' : 'flex';
+        stopBtn.style.display = isProcessing ? 'flex' : 'none';
+        loading.style.display = isProcessing ? 'block' : 'none';
+
+        if(isProcessing) {
+            document.querySelectorAll('.loading-wave div').forEach((bar, index) => {
+                bar.style.animationDelay = `${index * 0.2}s`;
+            });
+        }
+    }
+    // 添加消息
+    function addMessage(content, isUser = false) {
+        // 创建消息容器
+        const message = document.createElement('div');
+        message.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+
+        // 创建内容包装器
+        const contentWrapper = document.createElement('div');
+        contentWrapper.className = 'message-wrapper';
+
+        // 创建内容容器
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'message-content';
+        contentContainer.innerHTML = marked.parse(content);
+
+        // 保存原始文本
+        message.dataset.rawContent = content;
+
+        // 组装元素
+        contentWrapper.appendChild(contentContainer);
+        contentWrapper.appendChild(createCopyBtn(message)); // 将复制按钮添加到内容包装器
+        message.appendChild(contentWrapper);
+
+
+        // 添加到聊天框
+        chatBox.appendChild(message);
+
+        // 触发动画
+        setTimeout(() => {
+            message.style.opacity = '1';
+            message.style.transform = 'translateY(0)';
+        }, 10);
+
+        // 高亮代码
+        Prism.highlightAllUnder(message);
+        scrollToBottom();
+    }
+    //添加复制按钮
+    function createCopyBtn(message){
+        // 创建复制按钮
+        const copyBtn = document.createElement('div');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = `
+        <i class="fas fa-copy"></i>
+        <span class="copy-text">复制</span>
+    `;
+        // 添加点击事件委托
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            copyMessageContent(message);
+        };
+        return copyBtn;
+    }
+
+    // 自动滚动
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    // 新增复制功能
+    function copyMessageContent(messageElement) {
+        const content = messageElement.dataset.rawContent;
+        navigator.clipboard.writeText(content).then(() => {
+            showCopyToast();
+        }).catch(err => {
+            console.error('复制失败:', err);
+        });
+    }
+    // 显示复制成功提示
+    function showCopyToast() {
+        const toast = document.getElementById('copyToast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+    // 移动端优化：调整复制按钮显示
+    function adjustCopyButton() {
+        const isMobile = window.innerWidth <= 768;
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.style.opacity = isMobile ? '1' : '';
+            btn.querySelector('.copy-text').style.display = isMobile ? 'none' : 'inline';
+        });
+    }
+
+    // 回车发送
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleSend();
+    });
+    // 初始化时执行
+    window.addEventListener('DOMContentLoaded', adjustCopyButton);
+    window.addEventListener('resize', adjustCopyButton);
+</script>
+
+</body>
+</html>

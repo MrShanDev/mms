@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.sxpcwlkj</groupId>
+        <artifactId>mms-modules</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>mms-sms</artifactId>
+    <description>短信模块</description>
+    <dependencies>
+        <!-- 公共模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-common</artifactId>
+        </dependency>
+        <!--redis模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-redis</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sxpcwlkj</groupId>
+                    <artifactId>mms-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- 短信 -->
+        <dependency>
+            <groupId>org.dromara.sms4j</groupId>
+            <artifactId>sms4j-spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

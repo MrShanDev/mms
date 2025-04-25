@@ -1,0 +1,277 @@
+package com.sxpcwlkj.framework.exception;
+
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
+import cn.dev33.satoken.exception.NotRoleException;
+import com.sxpcwlkj.common.enums.ErrorCodeEnum;
+import com.sxpcwlkj.common.exception.*;
+import com.sxpcwlkj.common.utils.R;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.MyBatisSystemException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.nio.file.AccessDeniedException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ * 全局异常类
+ *
+ * @author shanpengnian
+ */
+@Slf4j
+@RestControllerAdvice
+public class GlobalException {
+
+    /**
+     * 根据错误码匹配
+     */
+    private Map<String, Object> getResult(ErrorCodeEnum e) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", false);
+        map.put("code", e.getKey());
+        map.put("msg", e.getValue());
+        return map;
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public R<Void> handleAccessDeniedException(AccessDeniedException e,
+                                               HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址{},权限校验失败{}", requestUrl, e.getMessage());
+        return R.fail(HttpStatus.FORBIDDEN.value(), "没有权限，请联系管理员授权");
+    }
+
+    /**
+     * 参数校验不通过
+     *
+     * @param e       异常信息
+     * @param request 请求信息
+     */
+    @ExceptionHandler(value = ParamsException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> handleObjectExistException(ParamsException e,
+                                                          HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',参数异常'{}'", requestUrl, e.getMessage());
+        return getResult(ErrorCodeEnum.PARAM_EXIST_EXCEPTION);
+    }
+
+
+    /**
+     * 用户校验不通过
+     *
+     * @param e       异常信息
+     * @param request 请求信息
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @ExceptionHandler(value = TokenExpireException.class)
+    public Map<String, Object> handle(TokenExpireException e, HttpServletRequest request) {
+        return getResult(ErrorCodeEnum.USER_NOT_LOGIN);
+    }
+
+    /**
+     * 权限码异常
+     */
+    @ExceptionHandler(NotPermissionException.class)
+    public R<Void> handleNotPermissionException(NotPermissionException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',权限码校验失败'{}'", requestUrl, e.getMessage());
+        return R.fail(cn.hutool.http.HttpStatus.HTTP_FORBIDDEN, "没有访问权限，请联系管理员授权");
+    }
+
+    /**
+     * 角色权限异常
+     */
+    @ExceptionHandler(NotRoleException.class)
+    public R<Void> handleNotRoleException(NotRoleException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',角色权限校验失败'{}'", requestUrl, e.getMessage());
+        return R.fail(cn.hutool.http.HttpStatus.HTTP_FORBIDDEN, "没有访问权限，请联系管理员授权");
+    }
+
+    /**
+     * 认证失败
+     */
+    @ExceptionHandler(NotLoginException.class)
+    public R<Void> handleNotLoginException(NotLoginException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',认证失败'{}',无法访问系统资源", requestUrl, e.getMessage());
+        return R.fail(cn.hutool.http.HttpStatus.HTTP_UNAUTHORIZED, "认证失败，无法访问系统资源");
+    }
+
+    /**
+     * 请求方式不支持
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public R<Void> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException e,
+                                                       HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',不支持'{}'请求", requestUrl, e.getMethod());
+        return R.fail(e.getMessage());
+    }
+
+    /**
+     * 主键或UNIQUE索引，数据重复异常
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public R<Void> handleDuplicateKeyException(DuplicateKeyException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',数据库中已存在记录'{}'", requestUrl, e.getMessage());
+        return R.fail("数据库中已存在该记录，请联系管理员确认");
+    }
+
+    /**
+     * Mybatis系统异常 通用处理
+     */
+    @ExceptionHandler(MyBatisSystemException.class)
+    public R<Void> handleCannotFindDataSourceException(MyBatisSystemException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        String message = e.getMessage();
+        if (message.contains("CannotFindDataSourceException")) {
+            log.error("请求地址'{}', 未找到数据源", requestUrl);
+            return R.fail("未找到数据源，请联系管理员确认");
+        }
+        log.error("请求地址'{}', Mybatis系统异常", requestUrl, e);
+        return R.fail(message);
+    }
+
+
+    /**
+     * 拦截未知的运行时异常
+     */
+    @ExceptionHandler(RuntimeException.class)
+    public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生未知异常.", requestUrl, e);
+        return R.fail(e.getMessage());
+    }
+
+
+    /**
+     * 自定义验证异常
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public R<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生验证异常:'{}'", requestUrl, e.getMessage());
+        String message = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
+        return R.fail(message);
+    }
+
+    /**
+     * 自定义验证异常
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public R<Void> handleMethodArgumentNotValidException(ConstraintViolationException e, HttpServletRequest request) {
+
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生验证异常:'{}'", requestUrl, e.getMessage());
+        String message = Objects.requireNonNull(e.getMessage());
+        return R.fail(message);
+    }
+
+    /**
+     * 租户异常
+     */
+    @ExceptionHandler(LoginException.class)
+    public R<Void> loginException(LoginException e, HttpServletRequest request) {
+
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',登录异常:'{}'", requestUrl, e.getMessage());
+        String message = e.getMessage();
+        return R.fail(message);
+    }
+
+    /**
+     * 租户异常
+     */
+    @ExceptionHandler(TenantException.class)
+    public R<Void> tenantException(TenantException e, HttpServletRequest request) {
+
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生验证异常:'{}'", requestUrl, e.getMessage());
+        String message = e.getMessage();
+        return R.fail(message);
+    }
+
+
+    /**
+     * 演示模式异常
+     */
+    @ExceptionHandler(DemoModeException.class)
+    public R<Void> handleDemoModeException(DemoModeException e) {
+        return R.fail("演示模式，不允许操作");
+    }
+
+    /**
+     * 错误SQL语句异常
+     */
+    @ExceptionHandler(BadSqlGrammarException.class)
+    public R<Void> handleBadSqlGrammarException(BadSqlGrammarException e,
+                                                HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
+        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+    }
+
+    /**
+     * 拦截表示违反数据库的完整性约束导致的异常
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public R<Void> handleDataIntegrityViolationException(DataIntegrityViolationException e,
+                                                         HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
+        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+    }
+
+    /**
+     * 拦截违反数据库的非完整性约束导致的异常，可能也会拦截一些也包括 SQL 语句错误、连接问题、权限问题等各种数据库异常
+     */
+    @ExceptionHandler(UncategorizedSQLException.class)
+    public R<Void> handleUncategorizedSqlException(UncategorizedSQLException e,
+                                                   HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
+        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+    }
+
+    /**
+     * 系统异常
+     */
+    @ExceptionHandler(MmsException.class)
+    public R<Void> handleServiceException(MmsException e,
+                                          HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}','{}'.", requestUrl, e.getMessage());
+        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), e.getMessage());
+    }
+
+
+    /**
+     * 系统异常,全局异常
+     */
+    @ExceptionHandler(Exception.class)
+    public R<Void> handleException(Exception e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',发生系统异常.", requestUrl, e);
+        return R.fail(e.getMessage());
+    }
+
+
+}
+
