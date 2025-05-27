@@ -101,4 +101,5 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+# 忽略mall模块
 mms-malls
