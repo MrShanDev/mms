@@ -1,7 +1,10 @@
 package com.sxpcwlkj.framework.handler;
 
 
+import com.sxpcwlkj.common.properties.WebThymeleafProperties;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -16,12 +19,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * 跨域请求配置
  */
 @Configuration
+@RequiredArgsConstructor
 public class WebMvcConfigurerHandler implements WebMvcConfigurer {
 
+
+    private final WebThymeleafProperties webThymeleafProperties;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 全局访问性能拦截
-        registry.addInterceptor(new WebHandlerInterceptorHandler());
+        registry.addInterceptor(new WebHandlerInterceptorHandler())
+            // 拦截所有路径
+            .addPathPatterns("/**")
+            .excludePathPatterns(webThymeleafProperties.getExcludes());
+        ;
     }
 
     @Override

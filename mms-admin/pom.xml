@@ -62,6 +62,16 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-ai</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-doc</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sxpcwlkj</groupId>
+                    <artifactId>ms-framework</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>

@@ -1,0 +1,427 @@
+/* 基础变量 */
+:root {
+    --primary: #4a90e2;
+    --primary-dark: #357abd;
+    --secondary: #7c4dff;
+    --background: #f5f7fb;
+    --text: #2c3e50;
+    --border: #e0e0e0;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* 全局基础样式 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fb 0%, #e6e9ff 100%);
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* 容器布局 */
+.container {
+    display: flex;
+    max-width: 100vw;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    height: calc(100vh - 4rem);
+}
+
+.header {
+    padding: 0.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+/* 侧边栏模块 */
+.sidebar {
+    width: 300px;
+    background: white;
+    border-right: 1px solid var(--border);
+    transition: transform 0.3s ease;
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+
+    &.collapsed {
+        transform: translateX(-100%);
+        position: absolute;
+    }
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 主内容区域 */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.chat-container {
+    overflow-y: auto;
+    padding: 2rem;
+    background: rgba(245, 247, 251, 0.5);
+    scroll-behavior: smooth;
+    height: calc(70vh);
+}
+/* 消息相关样式 */
+.message {
+    position: relative;
+    max-width: 80%;
+    padding: 1.5rem 2rem 1.5rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: var(--radius);
+    animation: messageAppear 0.3s ease-out;
+    transition: var(--transition);
+    line-height: 1.6;
+
+    &.bot-message {
+        background: white;
+        color: var(--text);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        padding: 15px 30px;
+    }
+
+    &.user-message {
+        background: var(--primary);
+        color: white;
+        margin-left: auto;
+    }
+
+    &:hover .copy-btn {
+        opacity: 1;
+    }
+}
+
+/* 复制按钮模块 */
+.copy-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+}
+
+/* 输入区域公共样式 */
+.input-section, .upload-area, .file-card {
+    background: rgba(245, 247, 251, 0.5);
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+
+.input-section {
+    padding: 2rem;
+    background: white;
+    border-top: 2px solid var(--border);
+}
+
+.upload-area {
+    border: 2px dashed var(--border);
+    padding: 0 4px;
+    text-align: center;
+    cursor: pointer;
+    line-height: 45px;
+
+
+    &:hover, &.dragover {
+        border-color: var(--primary);
+        background: rgba(74, 144, 226, 0.05);
+    }
+
+    &.dragover {
+        background: rgba(74, 144, 226, 0.1);
+        transform: scale(1.02);
+    }
+}
+
+/* 文件预览相关 */
+.file-preview {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    background: rgba(245, 247, 251, 0.5);
+    border-radius: var(--radius);
+    transition: var(--transition);
+}
+
+.file-card {
+    padding: 1rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.remove-file {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* 表单元素 */
+.input-group {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+.update-tool{
+    position: absolute;
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    bottom: 100px;
+}
+
+#userInput {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    height: 50px;
+    &:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    }
+}
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+.tool-box{
+    display: flex;
+    margin-top: 10px;
+    position: relative;
+}
+.tool-left{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /*gap: 1.5rem;*/
+    align-items: center;
+}
+/* 按钮公共样式 */
+button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    gap: 0.5rem;
+    transition: var(--transition);
+
+    &:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
+    }
+}
+
+#newChatBtn {
+    background: var(--secondary);
+    margin-left: 1rem;
+}
+#stopBtn {
+    background: #ff4757;
+    display: none;
+}
+
+/* 加载动画 */
+.loading {
+    display: none;
+    text-align: center;
+    padding: 1rem;
+    position: fixed;
+    left: 50%;          /* 水平定位到视口中间 */
+    top: 50%;           /* 垂直定位到视口中间 */
+    transform: translate(-50%, -50%); /* 通过自身宽高回退50% */
+}
+
+.loading-wave {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    height: 50px;
+}
+
+.loading-wave div {
+    width: 8px;
+    height: 100%;
+    background: var(--primary);
+    animation: wave 1.2s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(0.4) }
+    50% { transform: scaleY(1) }
+}
+
+/* 历史会话 */
+.history-list {
+    padding: 1rem;
+}
+
+.session-item {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: var(--transition);
+    background: rgba(245, 247, 251, 0.5);
+
+    &:hover, &.active {
+        background: var(--primary);
+        color: white;
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    :root {
+        --radius: 12px;
+    }
+
+    body {
+        padding: 0;
+    }
+
+    .container {
+        height: calc(100vh - 2rem);
+    }
+
+    .sidebar {
+        width: 85%;
+        position: fixed;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+
+    .message {
+        max-width: 90%;
+        padding: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .input-section {
+        padding: 1rem;
+    }
+
+    .input-group {
+        gap: 0.5rem;
+    }
+
+    button span {
+        display: none;
+    }
+
+    #userInput {
+        padding: 0.8rem;
+    }
+
+    .copy-btn {
+        opacity: 1;
+        padding: 5px;
+        .copy-text { display: none; }
+    }
+}
+
+/* 动画定义 */
+@keyframes messageAppear {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes wave {
+    0%, 100% { transform: scaleY(0.4); }
+    50% { transform: scaleY(1); }
+}
+
+/* 辅助类 */
+.copy-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+
+    &.show { opacity: 1; }
+}
+
+.message-content { overflow-wrap: break-word; }
