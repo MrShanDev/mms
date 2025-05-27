@@ -79,6 +79,32 @@ spring:
       # 允许对象忽略json中不存在的属性
       fail_on_unknown_properties: false
 
+  thymeleaf:
+    enabled: true                # 是否启用 Thymeleaf（默认 true）
+    check-template: true         # 是否检查模板是否存在（开发建议开启）
+    check-template-location: true # 是否检查模板路径有效性（默认 true）
+    template-resolver-order: 1   # 模板解析器优先级（数值越小优先级越高）
+    cache: false        # 开发时关闭模板缓存
+    encoding: UTF-8     # 模板文件编码
+    mode: HTML          # 模板模式（默认 HTML）
+    prefix: classpath:/template/html/  # 模板路径（默认值）
+    suffix: .html                      # 模板后缀（默认值）
+    servlet:
+      content-type: text/html     # 设置响应的 Content-Type（默认 text/html）
+    static-resource-url: 'https://cdn.jsdelivr.net'       # 注入静态资源 CDN 前缀（需在配置文件中定义）
+
+  web:
+    # 排除路径
+    excludes:
+    # 放行
+    - /static/**,       # 静态资源目录
+    - /public/**,       # 公共资源目录
+    - /resources/**,    # 默认资源路径
+    - /favicon.ico,     # 网站图标
+    - /error            # 错误页面
+    - /.well-known/**
+
+
 --- # Sa-Token配置
 sa-token:
   # token名称 (同时也是cookie名称)

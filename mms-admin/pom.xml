@@ -64,7 +64,13 @@
         </dependency>
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-demo</artifactId>
+            <artifactId>mms-doc</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sxpcwlkj</groupId>
+                    <artifactId>ms-framework</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
