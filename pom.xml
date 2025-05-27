@@ -32,6 +32,7 @@
         <p6spy.version>3.9.1</p6spy.version>
 
         <satoken.version>1.35.0.RC</satoken.version>
+        <token-redis.version>1.35.0.RC</token-redis.version>
         <redisson.version>3.31.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
         <alibaba-ttl.version>2.14.2</alibaba-ttl.version>
@@ -510,6 +511,14 @@
                 <artifactId>mms-ai</artifactId>
                 <version>${revision}</version>
             </dependency>
+
+            <!-- 模版引擎Thymeleaf模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-thymeleaf</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!--支付-微信-->
             <dependency>
                 <groupId>com.github.javen205</groupId>

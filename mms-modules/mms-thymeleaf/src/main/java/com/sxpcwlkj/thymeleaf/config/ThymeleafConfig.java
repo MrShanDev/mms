@@ -1,4 +1,4 @@
-package com.sxpcwlkj.framework.config;
+package com.sxpcwlkj.thymeleaf.config;
 
 
 import jakarta.servlet.http.HttpServletRequest;
