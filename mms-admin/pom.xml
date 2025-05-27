@@ -62,10 +62,6 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-ai</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-demo</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
