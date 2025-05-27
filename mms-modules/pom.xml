@@ -31,6 +31,7 @@
         <module>mms-datasource</module>
         <module>mms-gen</module>
         <module>mms-ai</module>
+        <module>mms-doc</module>
     </modules>
 
 </project>

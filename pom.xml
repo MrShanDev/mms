@@ -510,6 +510,12 @@
                 <artifactId>mms-ai</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <!-- 文档服务模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-doc</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!--支付-微信-->
             <dependency>
                 <groupId>com.github.javen205</groupId>
