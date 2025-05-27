@@ -91,7 +91,10 @@ spring:
     suffix: .html                      # 模板后缀（默认值）
     servlet:
       content-type: text/html     # 设置响应的 Content-Type（默认 text/html）
-    static-resource-url: 'https://cdn.jsdelivr.net'       # 注入静态资源 CDN 前缀（需在配置文件中定义）
+    static:
+     resource:
+      version: '1.0.0'
+      cdn: 'https://cdn.jsdelivr.net'       # 注入静态资源 CDN 前缀（需在配置文件中定义）
 
   web:
     # 排除路径
