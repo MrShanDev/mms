@@ -53,8 +53,8 @@ public class FrameworkController {
         return "ai/index";
     }
 
-    @PostConstruct
-    public void init() {
-        Console.log("========== Hello" + name + "! V" + version+" ==========");
-    }
+//    @PostConstruct
+//    public void init() {
+//        Console.log("========== Hello" + name + "! V" + version+" ==========");
+//    }
 }

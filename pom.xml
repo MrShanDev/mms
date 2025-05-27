@@ -518,6 +518,24 @@
                 <artifactId>mms-thymeleaf</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <!-- 商户管理端扩展模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-mall-admin</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- 商城商户端扩展模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-mall-merchant</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- 商城移动端API模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-mall-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!--支付-微信-->
             <dependency>
@@ -564,8 +582,9 @@
 
     <modules>
         <module>mms-admin</module>
+        <module>mms-malls</module>
         <module>mms-modules</module>
-        <module>mms-patulous</module>
+        <module>mms-zoom</module>
     </modules>
 
 

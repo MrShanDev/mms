@@ -97,6 +97,7 @@ spring:
       cdn: 'https://cdn.jsdelivr.net'       # 注入静态资源 CDN 前缀（需在配置文件中定义）
 
   web:
+    is-open: true
     # 排除路径
     excludes:
     # 放行
@@ -106,6 +107,7 @@ spring:
     - /favicon.ico,     # 网站图标
     - /error            # 错误页面
     - /.well-known/**
+
 
 
 --- # Sa-Token配置

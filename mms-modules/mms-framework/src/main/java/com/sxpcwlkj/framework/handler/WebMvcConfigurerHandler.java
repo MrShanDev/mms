@@ -25,13 +25,15 @@ public class WebMvcConfigurerHandler implements WebMvcConfigurer {
 
     private final WebThymeleafProperties webThymeleafProperties;
     @Override
-    public void addInterceptors(InterceptorRegistry registry) {
+    public void addInterceptors(@org.jetbrains.annotations.NotNull InterceptorRegistry registry) {
         // 全局访问性能拦截
-        registry.addInterceptor(new WebHandlerInterceptorHandler())
-            // 拦截所有路径
+        if (webThymeleafProperties.getIsOpen()) {
+            registry.addInterceptor(new WebHandlerInterceptorHandler())
             .addPathPatterns("/**")
-            .excludePathPatterns(webThymeleafProperties.getExcludes());
-        ;
+                .addPathPatterns("/**");
+        }else {
+            registry.addInterceptor(new WebHandlerInterceptorHandler());
+        }
     }
 
     @Override
