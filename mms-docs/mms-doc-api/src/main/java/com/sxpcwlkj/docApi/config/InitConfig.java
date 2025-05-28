@@ -1,4 +1,4 @@
-package com.sxpcwlkj.mobile.config;
+package com.sxpcwlkj.docApi.config;
 
 import com.typesafe.config.Config;
 import jakarta.annotation.PostConstruct;
@@ -9,7 +9,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

@@ -1,4 +1,4 @@
-package com.sxpcwlkj.mobile.enums;
+package com.sxpcwlkj.docApi.enums;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
 import lombok.Getter;
