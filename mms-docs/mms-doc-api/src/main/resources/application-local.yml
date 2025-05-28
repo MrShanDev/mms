@@ -1,0 +1,137 @@
+# 项目基础信息
+sxpcwlkj:
+  # 开启验证码： true：开启  false： 关闭
+  isOpenCaptcha: false
+
+--- # powerjob 配置
+powerjob:
+  worker:
+    # 如何开启调度中心请查看文档教程
+    enabled: false
+    # 需要先在 powerjob 登录页执行应用注册后才能使用
+    app-name: mms
+    enable-test-mode: false
+    max-appended-wf-context-length: 4096
+    max-result-length: 4096
+    # 28080 端口 随着主应用端口飘逸 避免集群冲突
+    port: 2${server.port}
+    protocol: http
+    server-address: 127.0.0.1:7700
+    store-strategy: disk
+
+--- # Spring Boot Admin
+spring:
+  boot:
+    admin:
+      client:
+        enabled: false                 #启用/禁用
+        instance:
+          service-host-type: IP
+        # Spring Boot Admin
+        url: http://localhost:9001    #监控服务器端地址
+        username: admin               #账号
+        password: 123456              #密码
+
+--- #配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
+--- # 数据源配置
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    dynamic:
+      # 性能分析插件(有性能损耗 不建议生产环境使用)
+      p6spy: true
+      # 设置默认的数据源或者数据源组,默认值即为 master
+      primary: master
+      # 严格模式 匹配不到数据源则报错
+      strict: true
+      datasource:
+        # 主库数据源
+        master:
+          type: ${spring.datasource.type}
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          username: root
+          password: 123456
+        # 从库数据源
+        slave:
+          lazy: true
+          type: ${spring.datasource.type}
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          username: root
+          password: 123456
+      #        oracle:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: oracle.jdbc.OracleDriver
+      #          url: jdbc:oracle:thin:@//localhost:1521/XE
+      #          username: ROOT
+      #          password: root
+      #          hikari:
+      #            connectionTestQuery: SELECT 1 FROM DUAL
+      #        postgres:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: org.postgresql.Driver
+      #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+      #          username: root
+      #          password: root
+      #        sqlserver:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
+      #          username: SA
+      #          password: root
+      hikari:
+        # 最大连接池数量
+        maxPoolSize: 20
+        # 最小空闲线程数量
+        minIdle: 10
+        # 配置获取连接等待超时的时间
+        connectionTimeout: 30000
+        # 校验超时时间
+        validationTimeout: 5000
+        # 空闲连接存活最大时间，默认10分钟
+        idleTimeout: 600000
+        # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认30分钟
+        maxLifetime: 1800000
+        # 连接测试query（配置检测连接是否有效）
+        connectionTestQuery: SELECT 1
+        # 多久检查一次连接的活性
+        keepaliveTime: 30000
+
+--- # Redis配置
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      password: 123456
+      timeout: 100s
+      ssl:
+        enabled: false
+
+--- # Redis 扩展工具
+redisson:
+  # redis key前缀
+  keyPrefix:
+  # 线程池数量
+  threads: 4
+  # Netty线程池数量
+  nettyThreads: 8
+  # 单节点配置
+  singleServerConfig:
+    # 客户端名称
+    clientName: ${sxpcwlkj.name}
+    # 最小空闲连接数
+    connectionMinimumIdleSize: 8
+    # 连接池大小
+    connectionPoolSize: 32
+    # 连接空闲超时，单位：毫秒
+    idleConnectionTimeout: 10000
+    # 命令等待超时，单位：毫秒
+    timeout: 3000
+    # 发布和订阅连接池大小
+    subscriptionConnectionPoolSize: 50
+
+
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sxpcwlkj.mobile.mapper.StoreAdvertisingMapper">
+
+    <select id="selectVoListXml" resultType="com.sxpcwlkj.mobile.entity.vo.StoreAdvertisingVo">
+        SELECT
+        ad.*
+        FROM
+        `store_advertising` ad
+        LEFT JOIN `store_advertising_position` adp
+        ON ad.`advertising_id` = adp.`id`
+        WHERE adp.`status` = 0
+        AND ad.`status` = 0
+        AND NOW() &gt;= ad.`start_time`
+        AND NOW() &lt;= ad.`end_time`
+        AND adp.`id`=#{adpId}
+        ORDER BY ad.`sort` DESC LIMIT #{size}
+    </select>
+</mapper>

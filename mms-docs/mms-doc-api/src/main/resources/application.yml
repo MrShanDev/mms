@@ -1,0 +1,247 @@
+# 项目基础信息
+sxpcwlkj:
+  #名称
+  name: MMS
+  #描述
+  describe: 一款多模块化管理系统（Modular management system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (十年磨一剑，我们的目标是做最优价值的开源项目)！
+  #版本
+  version: ${version}
+  #文档地址
+  docUrl: https://www.sxpcwlkj.com/htmls/mms/index.html
+  # 年份
+  copyrightYear: 2018
+  # 机构团队
+  organization: 陕西品创网络
+  # 开启验证码： true：开启  false： 关闭
+  isOpenCaptcha: false
+
+
+--- # 环境配置
+server:
+  # 服务端口，默认为8080
+  port: 8090
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  # undertow 高性能java  web容器
+  undertow:
+    # HTTP post内容的最大大小。当值为-1时，默认值为大小是无限的
+    max-http-post-size: -1
+    # 以下的配置会影响buffer,这些buffer会用于服务器连接的IO操作,有点类似netty的池化内存管理
+    # 每块buffer的空间大小,越小的空间被利用越充分
+    buffer-size: 512
+    # 是否分配的直接内存
+    direct-buffers: true
+    threads:
+      # 设置IO线程数, 它主要执行非阻塞的任务,它们会负责多个连接, 默认设置每个CPU核心一个线程
+      io: 8
+      # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
+      worker: 256
+
+--- # Spring配置
+spring:
+  application:
+    name: ${sxpcwlkj.name} Mobile
+  # 资源信息
+  messages:
+    # 国际化资源文件路径
+    basename: i18n/messages
+  profiles:
+    active: @profiles.active@
+  # 文件上传
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 10MB
+      # 设置总上传的文件大小
+      max-request-size: 20MB
+
+  jackson:
+    # 日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      # 格式化输出
+      indent_output: false
+      # 忽略无法转换的对象
+      fail_on_empty_beans: false
+    deserialization:
+      # 允许对象忽略json中不存在的属性
+      fail_on_unknown_properties: false
+
+--- # Sa-Token配置
+sa-token:
+  # token名称 (同时也是cookie名称)
+  token-name: Authorization
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 86400
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: 1800
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: false
+  # 是否尝试从header里读取token
+  is-read-header: true
+  # 是否在header读取不到token时，继续从请求题参数里继续尝试读取
+  is-read-body: true
+  # 是否尝试从cookie里读取token
+  is-read-cookie: false
+  # token前缀
+#  token-prefix: "Token_"
+  # jwt秘钥
+  jwt-secret-key: 01213456789abcdefghijklmnopqrstuvwxyz
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: false
+  # 是否开启有效时间打印
+  info-time-open: true
+
+  # 排除路径
+  excludes:
+    # 游客
+    - /visitor/**
+    # 静态资源
+    - /*.html
+    - /**/*.html
+    - /**/*.css
+    - /**/*.js
+    # swagger 文档配置
+    - /favicon.ico
+    - /*/api-docs
+    - /*/api-docs/**
+    # actuator 监控配置
+    - /actuator
+    - /actuator/**
+    # 代码生成
+    - /maku-generator/**
+
+--- # MyBatisPlus配置
+# https://baomidou.com/pages/981406
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  # 实体扫描，定义所有操作类的别名所在包，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.sxpcwlkj.**.entity
+  # 启动时是否检查 MyBatis XML 文件的存在，默认不检查
+  checkConfigLocation: true
+  configuration:
+    # 自动驼峰命名规则（camel case）映射
+    mapUnderscoreToCamelCase: true
+    # 如果查询结果中包含空值的列，则 MyBatis 在映射的时候，不会映射这个字段
+    callSettersOnNulls: true
+    # MyBatis 自动映射策略
+    # NONE：不启用 PARTIAL：只对非嵌套 resultMap 自动映射 FULL：对所有 resultMap 自动映射
+    autoMappingBehavior: PARTIAL
+    # MyBatis 自动映射时未知列或未知属性处理策
+    # NONE：不做处理 WARNING：打印相关警告 FAILING：抛出异常和详细信息
+    autoMappingUnknownColumnBehavior: NONE
+    # 更详细的日志输出 会有性能损耗 org.apache.ibatis.logging.stdout.StdOutImpl
+    # 关闭日志记录 (可单纯使用 p6spy 分析) org.apache.ibatis.logging.nologging.NoLoggingImpl
+    # 默认日志输出 org.apache.ibatis.logging.slf4j.Slf4jImpl
+    logImpl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    # 是否 mybatis-plus 在控制台输出的logo
+    banner: false
+    dbConfig:
+      # 主键类型 AUTO 数据库ID自增 ，NONE 空 ，INPUT 用户SET对象ID ，ASSIGN_ID 雪花 ，ASSIGN_UUID 全局唯一 UUID
+      idType: ASSIGN_ID
+      # 逻辑已删除值
+      logicDeleteValue: 2
+      # 逻辑未删除值
+      logicNotDeleteValue: 0
+      # 字段验证策略之 insert,在 insert 的时候的字段验证策略
+      # IGNORED 忽略 NOT_NULL 非NULL NOT_EMPTY 非空 DEFAULT 默认 NEVER 不加入 SQL
+      insertStrategy: NOT_NULL
+      # 字段验证策略之 update,在 update 的时候的字段验证策略
+      updateStrategy: NOT_NULL
+      # 字段验证策略之 select,在 select 的时候的字段验证策略既 wrapper 根据内部 entity 生成的 where 条件
+      where-strategy: NOT_NULL
+
+--- # 多租户
+tenant:
+  # 是否开启租户模式
+  enable: false
+  # 需要排除的多租户的表
+  exclusionTable:
+    - "t_sys_district"
+    - "oauth_client_details"
+  # 租户字段名称
+  column: tenant_id
+
+--- # springdoc
+springdoc:
+  api-docs:
+    # 是否开启接口文档
+    enabled: true
+    path: /v3/api-docs  # 自定义路径，默认为 "/v3/api-docs"
+  swagger-ui:
+    enabled: true # 开启swagger界面，依赖OpenApi，需要OpenApi同时开启
+    path: /swagger-ui/index.html # 自定义路径，默认为"/swagger-ui/index.html"
+    #    # 持久化认证数据
+    #    persistAuthorization: true
+  #这里定义了两个分组，可定义多个，也可以不定义
+  group-configs:
+    - group: 1.演示模块
+      packages-to-scan: com.sxpcwlkj.demo
+    - group: 2.系统模块
+      packages-to-scan: com.sxpcwlkj.system
+  info:
+    # 标题
+    title: '标题：${sxpcwlkj.name}多租户管理系统_接口文档'
+    # 描述
+    description: '描述：${sxpcwlkj.describe}'
+    # 版本
+    version: '版本号: ${sxpcwlkj.version}'
+    # 作者信息
+    contact:
+      name: Xi Jue
+      email: sxpcwlkj@163.com
+      url: https://gitee.com/mmsAdmin/mms
+  components:
+    # 鉴权方式配置
+    security-schemes:
+      apiKey:
+        type: APIKEY
+        in: HEADER
+        name: ${sa-token.token-name}
+
+
+
+# 日志配置
+logging:
+  level:
+    com.sxpcwlkj: @logging.level@
+    org.springframework: warn
+  config: classpath:logback.xml
+
+--- # 对象存储 配置教程 https://x-file-storage.xuyanwu.cn/#/快速入门
+dromara:
+  x-file-storage: #文件存储配置
+    default-platform: aliyun-oss-1 #默认使用的存储平台
+    aliyun-oss:
+      - platform: aliyun-oss-1 # 存储平台标识
+        enable-storage: true  # 启用存储
+# 短信
+sms:
+  # 标注从yml读取配置
+  config-type: yaml
+  # 账户上限
+  account-max: 4
+
+--- # Actuator 监控端点的配置项
+management:
+  endpoints:
+    enabled-by-default: true #暴露所有端点信息
+    web:
+      exposure:
+        include: '*' #以web方式暴露
+  endpoint:
+    health:
+      show-details: ALWAYS
+    logfile:
+      external-file: ./logs/mobile-console.log
+
+--- # websocket
+websocket:
+  enable: true
