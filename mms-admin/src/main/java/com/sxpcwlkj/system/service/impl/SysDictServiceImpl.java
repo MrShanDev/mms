@@ -54,6 +54,8 @@ public class SysDictServiceImpl implements SysDictService {
         //Map<String, Object> params = bo.getParams();
         QueryWrapper<SysDict> wrapper = Wrappers.query();
         wrapper.like(ObjectUtil.isNotNull(bo.getName()), "name", bo.getName());
+        wrapper.or(ObjectUtil.isNotNull(bo.getName()));
+        wrapper.like(ObjectUtil.isNotNull(bo.getName()), "field_name", bo.getName());
         wrapper.orderByAsc("created_time");
         wrapper.orderByAsc("sort");
         return wrapper;
