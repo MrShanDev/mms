@@ -4,6 +4,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -111,6 +113,19 @@ public class FileUtil extends cn.hutool.core.io.FileUtil  {
         response.addHeader("Access-Control-Expose-Headers", "Content-Disposition,download-filename");
         response.setHeader("Content-disposition", contentDispositionValue);
         response.setHeader("download-filename", percentEncodedFileName);
+    }
+
+    public static String bufferedImageToBase64(BufferedImage image) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            // 1. 将图像写入字节流
+            ImageIO.write(image, "PNG", baos);
+            baos.flush();
+
+            // 2. 转换为字节数组并Base64编码
+            return "data:image/png;base64," +java.util.Base64.getEncoder().encodeToString(baos.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("转换失败: " + e.getMessage());
+        }
     }
 
 }

@@ -3,8 +3,10 @@ package com.sxpcwlkj.docApi.service;
 import com.sxpcwlkj.docApi.entity.DocOrder;
 import com.sxpcwlkj.docApi.entity.bo.DocOrderBo;
 import com.sxpcwlkj.docApi.entity.vo.DocOrderVo;
+import com.sxpcwlkj.docApi.entity.vo.DocUserVo;
 import com.sxpcwlkj.framework.sercice.BaseService;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,4 +18,9 @@ import java.util.Set;
  */
 public interface DocOrderService extends BaseService<DocOrder, DocOrderVo, DocOrderBo> {
 
+    Boolean create(DocUserVo docUserVo, Map<String, Object> orderInfo);
+
+    String selectPayState(String prodId,String uid);
+
+    Boolean updateByOrderNo(String transactionId);
 }

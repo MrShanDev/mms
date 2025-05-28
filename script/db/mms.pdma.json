@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2023-1-5 23:34:04",
-  "updatedTime": "2025-5-28 09:09:44",
+  "updatedTime": "2025-5-28 16:09:59",
   "dbConns": [],
   "profile": {
     "default": {
@@ -28633,16 +28633,7 @@
       "type": "P",
       "defName": "文档授权用户",
       "notes": {},
-      "correlations": [
-        {
-          "myField": "579A3240-EF64-4FEC-A96D-12900732064A",
-          "refEntity": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
-          "refField": "88AF236C-1FF9-45B4-95C7-81CE0F69ACD7",
-          "myRows": "1",
-          "refRows": "n",
-          "innerType": ""
-        }
-      ]
+      "correlations": []
     },
     {
       "id": "E7F499AF-F67F-4C1B-A7D2-88940DEAD487",
@@ -29164,24 +29155,7 @@
       "type": "P",
       "defName": "文档订单",
       "notes": {},
-      "correlations": [
-        {
-          "myField": "FD3053C8-438F-48A5-9FBC-9C18AFC1A10B",
-          "refEntity": "58867DE0-2E9E-4C21-9259-6A4D56B2BF9A",
-          "refField": "2BF94A00-5FF3-47AE-8878-CB38580443AF",
-          "myRows": "1",
-          "refRows": "n",
-          "innerType": ""
-        },
-        {
-          "myField": "AA8BE20F-B9BD-4322-BA6B-3B02E8A26933",
-          "refEntity": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
-          "refField": "88AF236C-1FF9-45B4-95C7-81CE0F69ACD7",
-          "myRows": "1",
-          "refRows": "n",
-          "innerType": ""
-        }
-      ]
+      "correlations": []
     },
     {
       "id": "58867DE0-2E9E-4C21-9259-6A4D56B2BF9A",
@@ -31585,22 +31559,6 @@
             }
           },
           {
-            "id": "ada6c12b-792c-4060-aa54-439cb20fa65a",
-            "shape": "table",
-            "position": {
-              "x": -420,
-              "y": -100
-            },
-            "count": 0,
-            "originKey": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
-            "fillColor": "rgb(51, 153, 108)",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
-          {
             "id": "d0e36814-226b-4212-ad7e-dc8968e0918d",
             "shape": "table",
             "position": {
@@ -31609,6 +31567,22 @@
             },
             "count": 0,
             "originKey": "3942466A-ED17-4BE0-BDC7-8A2B34C14567",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "348961a6-fef4-4871-917c-be6d1d25e4c2",
+            "shape": "table",
+            "position": {
+              "x": -420,
+              "y": 227
+            },
+            "count": 0,
+            "originKey": "58867DE0-2E9E-4C21-9259-6A4D56B2BF9A",
+            "fillColor": "rgb(249, 186, 80)",
             "type": "P",
             "size": {
               "width": 430,
@@ -31647,15 +31621,15 @@
             }
           },
           {
-            "id": "348961a6-fef4-4871-917c-be6d1d25e4c2",
+            "id": "ada6c12b-792c-4060-aa54-439cb20fa65a",
             "shape": "table",
             "position": {
               "x": -420,
-              "y": 227
+              "y": -100
             },
             "count": 0,
-            "originKey": "58867DE0-2E9E-4C21-9259-6A4D56B2BF9A",
-            "fillColor": "rgb(249, 186, 80)",
+            "originKey": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
+            "fillColor": "rgb(51, 153, 108)",
             "type": "P",
             "size": {
               "width": 430,

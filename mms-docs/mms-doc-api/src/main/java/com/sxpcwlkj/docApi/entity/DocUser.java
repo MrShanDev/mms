@@ -1,5 +1,6 @@
 package com.sxpcwlkj.docApi.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sxpcwlkj.datasource.entity.BaseEntity;
@@ -43,4 +44,9 @@ public class DocUser  extends BaseEntity {
 	* 更新时间
 	*/
 	private Date mtime;
+    /**
+     * 微信ID
+     */
+    private String openId;
+
 }

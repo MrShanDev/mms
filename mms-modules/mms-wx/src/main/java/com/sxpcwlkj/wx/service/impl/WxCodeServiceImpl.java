@@ -151,7 +151,7 @@ public class WxCodeServiceImpl implements WxCodeService {
          */
 
         // 已关注 扫码 SCAN  发生文字 null subscribe unsubscribe  event   voice text image
-        log.info("消息类型:{},消息事件:{},发送者账号:{},接收者微信:{},文本消息:{},二维码参数：{}", messageType, messageEvent, fromUser, toUser, text, eventKey);
+        log.info("消息类型:{},消息事件:{},发送者账号:{},接收者微信:{},文本消息:{},二维码参数：{}", messageType, messageEvent, fromUser, toUser, text, businessParams.toJSONString());
         WxMpUser wxMpUser = null;
         try {
             wxMpUser = wxService.getWxMpService().getUserService().userInfo(fromUser);

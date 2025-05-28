@@ -11,7 +11,7 @@ public enum DefStaticEnum implements IEnum {
     /**
      * 会员默认注册头像
      */
-    MEMBER_DEF_HEADER_IMG("MEMBER_DEF_HEADER_IMG","https://jifugou.oss-cn-zhangjiakou.aliyuncs.com/01_default/defHeadImg.png"),
+    MEMBER_DEF_HEADER_IMG("MEMBER_DEF_HEADER_IMG","https://picsum.photos/30/30"),
 
     ;
 

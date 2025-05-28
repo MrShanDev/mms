@@ -12,8 +12,10 @@ import com.sxpcwlkj.docApi.entity.DocUser;
 import com.sxpcwlkj.docApi.entity.bo.DocUserBo;
 
 import com.sxpcwlkj.docApi.entity.vo.DocUserVo;
+import com.sxpcwlkj.docApi.enums.DefStaticEnum;
 import com.sxpcwlkj.docApi.mapper.DocUserMapper;
 import com.sxpcwlkj.docApi.service.DocUserService;
+import com.sxpcwlkj.docApi.utils.NicknameGenerator;
 import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -107,4 +110,21 @@ public class DocUserServiceImpl extends BaseServiceImpl<DocUser, DocUserVo,DocUs
         return wrapper;
     }
 
+    @Override
+    public DocUser bindingOpenId(String openId) {
+        DocUser docUser= baseMapper.selectOne(new LambdaQueryWrapper<DocUser>().eq(DocUser::getOpenId,openId));
+        if(docUser!=null){
+            return docUser;
+        }else {
+            docUser= new DocUser();
+            docUser.setNickname(NicknameGenerator.generateRandomNickname());
+            docUser.setType("usr");
+            docUser.setAvatar(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
+            docUser.setCtime(new Date());
+            docUser.setMtime(new Date());
+            docUser.setOpenId(openId);
+            baseMapper.insert(docUser);
+        }
+        return docUser;
+    }
 }

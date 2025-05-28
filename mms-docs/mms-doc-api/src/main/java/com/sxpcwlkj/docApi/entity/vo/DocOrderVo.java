@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
 * 文档订单Vo
@@ -67,10 +68,10 @@ public class DocOrderVo  extends BaseEntityVo{
 	/**
 	 * 创建时间
 	 */
-	private String ctime;
+	private Date ctime;
 	/**
 	 * 更新时间
 	 */
-	private String mtime;
+	private Date mtime;
 
 }

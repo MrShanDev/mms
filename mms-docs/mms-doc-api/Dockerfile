@@ -4,15 +4,13 @@ FROM openjdk:17.0.2-oraclelinux8
 MAINTAINER SXPCWLKJ
 
 RUN mkdir -p /sxpcwlkj \
-    /sxpcwlkj/mms-mobile \
-    /sxpcwlkj/mms-mobile/logs \
-    /sxpcwlkj/mms-mobile/files \
-    /sxpcwlkj/mms-mobile/temp \
-    /sxpcwlkj/mms-mobile/skywalking/agent
+    /sxpcwlkj/mms-doc \
+    /sxpcwlkj/mms-doc/logs \
+    /sxpcwlkj/mms-doc/files
 
-WORKDIR /sxpcwlkj/mms-mobile
+WORKDIR /sxpcwlkj/mms-doc
 
-ENV SERVER_PORT=8089 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
+ENV SERVER_PORT=8070 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
 
 EXPOSE ${SERVER_PORT}
 

@@ -33,10 +33,10 @@ public interface WxService {
 
     /**
      * 获取微信支付服务
-     *
+     * TradeType.NATIVE.getTradeType()
      * @return WxOrderService
      */
-    WxPayService getWxPayService();
+    WxPayService getWxPayService(String tradeType);
 
 
 

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 文档订单
@@ -62,9 +63,9 @@ public class DocOrder  extends BaseEntity {
 	/**
 	* 创建时间
 	*/
-	private String ctime;
+	private Date ctime;
 	/**
 	* 更新时间
 	*/
-	private String mtime;
+	private Date mtime;
 }

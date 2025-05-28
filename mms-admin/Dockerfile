@@ -16,7 +16,7 @@ ENV SERVER_PORT=8080 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
 
 EXPOSE ${SERVER_PORT}
 
-ADD ./target/mms-system.jar ./app.jar
+ADD ./target/mms-admin.jar ./app.jar
 
 ENTRYPOINT java -Djava.security.egd=file:/dev/./urandom -Dserver.port=${SERVER_PORT} \
            # 应用名称 如果想区分集群节点监控 改成不同的名称即可

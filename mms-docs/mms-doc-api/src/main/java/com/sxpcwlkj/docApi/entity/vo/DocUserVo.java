@@ -53,9 +53,8 @@ public class DocUserVo  extends BaseEntityVo{
 	@JsonFormat(pattern = DateUtil.DATE_TIME_PATTERN)
 	private Date mtime;
 
-    /**
-     * 用户等级到期时间
-     */
-    private String vip_date;
+    private Date vip_date;
+
+    private String openId;
 
 }

@@ -16,4 +16,10 @@ import java.util.Set;
  */
 public interface DocUserService extends BaseService<DocUser, DocUserVo, DocUserBo> {
 
+    /**
+     * 绑定openId
+     * @param openId openId
+     * @return 用户
+     */
+    DocUser bindingOpenId(String openId);
 }

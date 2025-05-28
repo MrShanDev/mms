@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+
 
 /**
  * 返回结果集
@@ -86,6 +88,17 @@ public class DocR<T> {
         ajaxResult.setHost_time(System.currentTimeMillis()+"");
         return ajaxResult;
     }
+
+    public static <T> DocR<T> error(String errno, String errmsg) {
+        DocR<T> ajaxResult = new DocR<>();
+        ajaxResult.setErrno(errno);
+        ajaxResult.setErrmsg(errmsg);
+        ajaxResult.setHost_time(System.currentTimeMillis()+"");
+        return ajaxResult;
+    }
+
+
+
 
 }
 

@@ -133,7 +133,7 @@ public class WxServiceImpl implements WxService {
     }
 
     @Override
-    public WxPayService getWxPayService() {
+    public WxPayService getWxPayService(String tradeType) {
         WxProperties wxProperties = this.getWxProperties();
         WxPayConfig payConfig = new WxPayConfig();
         payConfig.setAppId(wxProperties.getAppId());
@@ -141,7 +141,7 @@ public class WxServiceImpl implements WxService {
         payConfig.setMchKey(wxProperties.getMchApiKey());
         payConfig.setNotifyUrl(wxProperties.getNotifyUrl());
         payConfig.setKeyPath(wxProperties.getKeyPath());
-        payConfig.setTradeType("JSAPI");
+        payConfig.setTradeType(tradeType);
         payConfig.setSignType("MD5");
         WxPayService wxPayService = new WxPayServiceImpl();
         wxPayService.setConfig(payConfig);

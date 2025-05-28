@@ -51,7 +51,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: mms
-          password: 123456
+          password: ZKKxz8KGmpGfLGf3
         # 从库数据源
         slave:
           lazy: true
@@ -59,7 +59,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: mms
-          password: 123456
+          password: ZKKxz8KGmpGfLGf3
       #        oracle:
       #          type: ${spring.datasource.type}
       #          driverClassName: oracle.jdbc.OracleDriver

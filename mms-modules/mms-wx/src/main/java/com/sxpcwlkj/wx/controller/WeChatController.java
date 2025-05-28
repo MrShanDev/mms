@@ -118,7 +118,7 @@ public class WeChatController {
 
 
     /**
-     * 微信公众号服务器消息回调
+     * 微信公众号扫码后的回调
      *
      * @param request 请求
      * @param requestBody body
@@ -134,7 +134,7 @@ public class WeChatController {
         String openid = request.getParameter("openid");
         String encType = request.getParameter("encType");
         String msgSignature = request.getParameter("msgSignature");
-        log.info("\n接收到来自微信服务器的认证消息：[signature:{}, timestamp:{}, nonce:{}, echostr:{},encType:{},msgSignature:{}]", signature, timestamp, nonce, echostr, encType, msgSignature);
+        log.info("\n接收到来自微信公众号扫码后的回调：[signature:{}, timestamp:{}, nonce:{}, echostr:{},encType:{},msgSignature:{}]", signature, timestamp, nonce, echostr, encType, msgSignature);
         if (!wxService.getWxMpService().checkSignature(timestamp, nonce, signature)) {
             log.error("【无效的请求】");
             throw new MmsException("无效的请求");
@@ -142,12 +142,12 @@ public class WeChatController {
         if (encType == null) {
             // 明文传输的消息
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
-            log.debug("\n消息内容为：\n{} ", inMessage.toString());
+            log.error("\n消息内容为：\n{} ", inMessage.toString());
             return wxCodeService.scanCallBack(inMessage);
         } else if ("aes".equalsIgnoreCase(encType)) {
             // aes加密的消息
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpService().getWxMpConfigStorage(), timestamp, nonce, msgSignature);
-            log.debug("\n消息解密后内容为：\n{} ", inMessage.toString());
+            log.error("\n消息解密后内容为：\n{} ", inMessage.toString());
             return wxCodeService.scanCallBack(inMessage);
         }
         return "";

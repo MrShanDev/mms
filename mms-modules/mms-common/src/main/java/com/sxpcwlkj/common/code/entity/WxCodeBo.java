@@ -22,6 +22,8 @@ public class WxCodeBo {
     public static final String REDIS_KEY_LOGIN = "wx:login:";
     //Redis  key 绑定微信
     public static final String REDIS_KEY_BINDING = "wx:binding:";
+    //Redis  key 绑定微信
+    public static final String REDIS_KEY_DOC_LOGIN = "wx:doc:login:";
 
     private String type;
 
@@ -55,6 +57,15 @@ public class WxCodeBo {
     public WxCodeBo typeBinding() {
         this.type = CODE_TYPE_BINDING;
         this.redisKey = REDIS_KEY_BINDING + uuid;
+        if(this.state==null){
+            this.state= WxCodeStatusEnum.WAITING.getValue();
+        }
+        return this;
+    }
+
+    public WxCodeBo typeDocLogin() {
+        this.type = REDIS_KEY_DOC_LOGIN;
+        this.redisKey = REDIS_KEY_DOC_LOGIN + uuid;
         if(this.state==null){
             this.state= WxCodeStatusEnum.WAITING.getValue();
         }

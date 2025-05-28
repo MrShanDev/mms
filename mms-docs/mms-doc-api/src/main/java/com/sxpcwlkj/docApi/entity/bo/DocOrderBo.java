@@ -11,6 +11,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
 * 文档订单Bo
@@ -79,10 +80,10 @@ public class DocOrderBo  extends BaseEntity {
 	 * 创建时间
 	 */
 	@NotBlank(message = "创建时间不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
-	private String ctime;
+	private Date ctime;
 	/**
 	 * 更新时间
 	 */
 	@NotBlank(message = "更新时间不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
-	private String mtime;
+	private Date mtime;
 }
