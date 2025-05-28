@@ -28,7 +28,7 @@ public class MmsDocApiApplication {
 
         ConfigurableApplicationContext applicationContext = SpringApplication.run(MmsDocApiApplication.class, args);
         Environment env = applicationContext.getEnvironment();
-        System.out.println("移动端: 系统启动成功,当前环境为: " + env.getProperty("spring.profiles.active"));
+        System.out.println("文档API端: 系统启动成功,当前环境为: " + env.getProperty("spring.profiles.active"));
         log.info("\n----------------------------------------------------------\n\t" +
                         "Application '{}' is running!  Access URLs:\n\t" +
                         "Local: \t\thttp://localhost:{}\n\t" +
