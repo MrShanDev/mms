@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2023-1-5 23:34:04",
-  "updatedTime": "2025-5-28 00:22:43",
+  "updatedTime": "2025-5-28 09:09:44",
   "dbConns": [],
   "profile": {
     "default": {
@@ -29320,8 +29320,8 @@
           "type": "",
           "len": "",
           "scale": "",
-          "primaryKey": false,
-          "notNull": false,
+          "primaryKey": true,
+          "notNull": true,
           "autoIncrement": false,
           "defaultValue": "",
           "hideInGraph": false,
@@ -31540,9 +31540,6 @@
             },
             "relation": "1:n",
             "fillColor": "#ACDAFC",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
@@ -31562,9 +31559,6 @@
             },
             "relation": "1:n",
             "fillColor": "#ACDAFC",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
@@ -31584,13 +31578,26 @@
             },
             "relation": "1:n",
             "fillColor": "#ACDAFC",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
               }
+            }
+          },
+          {
+            "id": "ada6c12b-792c-4060-aa54-439cb20fa65a",
+            "shape": "table",
+            "position": {
+              "x": -420,
+              "y": -100
+            },
+            "count": 0,
+            "originKey": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
+            "fillColor": "rgb(51, 153, 108)",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
             }
           },
           {
@@ -31602,6 +31609,22 @@
             },
             "count": 0,
             "originKey": "3942466A-ED17-4BE0-BDC7-8A2B34C14567",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "f27a8f51-283e-4649-a3e0-38c31c34e19c",
+            "shape": "table",
+            "position": {
+              "x": 130,
+              "y": 240
+            },
+            "count": 0,
+            "originKey": "E7F499AF-F67F-4C1B-A7D2-88940DEAD487",
+            "fillColor": "rgb(247, 151, 128)",
             "type": "P",
             "size": {
               "width": 430,
@@ -31633,38 +31656,6 @@
             "count": 0,
             "originKey": "58867DE0-2E9E-4C21-9259-6A4D56B2BF9A",
             "fillColor": "rgb(249, 186, 80)",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
-          {
-            "id": "f27a8f51-283e-4649-a3e0-38c31c34e19c",
-            "shape": "table",
-            "position": {
-              "x": 130,
-              "y": 240
-            },
-            "count": 0,
-            "originKey": "E7F499AF-F67F-4C1B-A7D2-88940DEAD487",
-            "fillColor": "rgb(247, 151, 128)",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
-          {
-            "id": "ada6c12b-792c-4060-aa54-439cb20fa65a",
-            "shape": "table",
-            "position": {
-              "x": -420,
-              "y": -100
-            },
-            "count": 0,
-            "originKey": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
-            "fillColor": "rgb(51, 153, 108)",
             "type": "P",
             "size": {
               "width": 430,

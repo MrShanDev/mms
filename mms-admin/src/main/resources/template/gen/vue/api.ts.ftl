@@ -3,7 +3,7 @@ import {getEnv} from "/@/utils/mms";
 import {AxiosPromise} from "axios";
 import {SysEnum} from "/@/enums/SysEnum";
 import {EncryptTypeEnum} from "/@/enums/EncryptTypeEnum";
-import {${FunctionName}Bo,${FunctionName}Vo,${FunctionName}Table } from '/@/api/${moduleName}/${functionName}/type';
+import {${FunctionName}Bo,${FunctionName}Vo,${FunctionName}Table } from '/@/views/${moduleName}/${functionName}/type';
 /**
 * ${tableComment}-Api
 * ${FunctionName}

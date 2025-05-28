@@ -53,11 +53,11 @@
     },
     {
       "templateName": "vue/api.ts.ftl",
-      "generatorPath": "${frontendPath}/src/api/${moduleName}/${functionName}/index.ts"
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/index.ts"
     },
     {
       "templateName": "vue/type.ts.ftl",
-      "generatorPath": "${frontendPath}/src/api/${moduleName}/${functionName}/type.ts"
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/type.ts"
     },
     {
       "templateName": "vue/index.vue.ftl",

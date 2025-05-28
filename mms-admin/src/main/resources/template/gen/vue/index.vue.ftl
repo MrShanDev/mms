@@ -190,8 +190,8 @@
     import { isEmpty, generateUUID } from "/@/utils/mms";
     import {NextLoading} from "/@/utils/loading";
     import FastSelect from "/@/components/fast-select/src/fast-select.vue";
-    import {${functionName}Api} from '/@/api/${moduleName}/${functionName}';
-    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/api/${moduleName}/${functionName}/type';
+    import {${functionName}Api} from '/@/views/${moduleName}/${functionName}';
+    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/views/${moduleName}/${functionName}/type';
     const baseApi = ${functionName}Api();
     <#list formList as field>
     <#if field.formDict??>

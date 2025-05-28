@@ -135,7 +135,7 @@
 <script setup lang="ts" name="${moduleName}${FunctionName}Dialog">
     import { reactive, ref, nextTick } from "vue";
     import { CURDEnum } from '/@/enums/CURDEnum';
-    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/api/${moduleName}/${functionName}/type';
+    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/views/${moduleName}/${functionName}/type';
     const dialogWidth = ref('50vw');
     <#list fastList as field>
     <#if field == 'editor'>
