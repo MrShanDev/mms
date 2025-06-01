@@ -258,7 +258,7 @@ public class GlobalException {
                                           HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}','{}'.", requestUrl, e.getMessage());
-        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), e.getMessage());
+        return R.fail(e.getCode(), e.getMessage());
     }
 
 

@@ -1,22 +1,21 @@
 package com.sxpcwlkj.docApi.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.result.BaseWxPayResult;
-import com.github.binarywang.wxpay.service.WxPayService;
-import com.ijpay.core.enums.SignType;
 import com.ijpay.core.enums.TradeType;
 import com.ijpay.core.kit.WxPayKit;
-import com.ijpay.wxpay.WxPayApiConfigKit;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.entity.WxCodeBo;
+import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
 import com.sxpcwlkj.common.utils.*;
 import com.sxpcwlkj.docApi.entity.DocOrder;
 import com.sxpcwlkj.docApi.entity.DocProduct;
 import com.sxpcwlkj.docApi.entity.DocUser;
-import com.sxpcwlkj.docApi.entity.bo.DocOrderBo;
 import com.sxpcwlkj.docApi.entity.bo.MyRequest;
 import com.sxpcwlkj.docApi.entity.vo.DocOrderVo;
 import com.sxpcwlkj.docApi.entity.vo.DocUserVo;
@@ -25,10 +24,9 @@ import com.sxpcwlkj.docApi.mapper.DocOrderMapper;
 import com.sxpcwlkj.docApi.mapper.DocProductMapper;
 import com.sxpcwlkj.docApi.service.DocOrderService;
 import com.sxpcwlkj.docApi.service.DocUserService;
-import com.sxpcwlkj.docApi.utils.DocBaseTool;
 import com.sxpcwlkj.docApi.utils.DocR;
-import com.sxpcwlkj.framework.utils.SignUtil;
 import com.sxpcwlkj.redis.RedisUtil;
+import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.wx.service.WxCodeService;
 import com.sxpcwlkj.wx.service.WxOrderService;
 import com.sxpcwlkj.wx.service.WxService;
@@ -39,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -48,8 +47,8 @@ import java.util.*;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/vpapi/meb")
-public class DocUserController extends DocBaseTool {
+@RequestMapping("/doc-api/meb/v1")
+public class DocUserController{
 
     private final DocUserService docUserService;
     private final DocOrderMapper docOrderMapper;
@@ -68,10 +67,10 @@ public class DocUserController extends DocBaseTool {
      */
     @SaIgnore
     @PostMapping("/userinfo")
-    public DocR<DocUserVo> userinfo(HttpServletRequest request, HttpServletResponse response){
-        DocUserVo docUserVo = docUserService.selectVoById(getUserId(request));
+    public R<DocUserVo> userinfo(HttpServletRequest request, HttpServletResponse response){
+        DocUserVo docUserVo = LoginObject.getLoginObject(DocUserVo.class);
         if(docUserVo==null){
-            return DocR.error("99910","会话过期");
+            return R.fail("会话过期");
         }
        docOrderMapper.delete(new LambdaQueryWrapper<DocOrder>().eq(DocOrder::getUid,docUserVo.getUid())
            .eq(DocOrder::getStatus,0)
@@ -103,8 +102,8 @@ public class DocUserController extends DocBaseTool {
             docUserVo.setVip_date(DateUtil.getStrToDate("2025-01-01 00:00:00"));
             docUserVo.setType("usr");
         }
-        CookieUtil.setCookie(response,"mss",getToken(docUserVo.getUid()),1000*60*60*24*7);
-        return DocR.ok(docUserVo);
+
+        return R.success(docUserVo);
     }
 
 
@@ -114,7 +113,7 @@ public class DocUserController extends DocBaseTool {
      */
     @SaIgnore
     @PostMapping("/oauth-authorize")
-    public DocR<Map<String,String>> oauthAuthorize(){
+    public R<Map<String,String>> oauthAuthorize(){
         Map<String,String> data= new HashMap<>();
         String state=RandomUtil.getRandomUUID();
         String codeUrl= wxCodeService.getCode(new WxCodeBo(state)
@@ -123,33 +122,36 @@ public class DocUserController extends DocBaseTool {
             .paramData(state));
         data.put("url",codeUrl);
         data.put("state",state);
-        return DocR.ok(data);
+        return R.success(data);
     }
 
     /**
      * 登录二维码轮询
-     * @param request 请求
+     * @param bo 请求
      * @return 登录状态
      */
     @SaIgnore
     @PostMapping("/oauth-polling")
-    public DocR<Map<String,String>> oauthPolling(@RequestBody MyRequest bo){
+    public R<Map<String,String>> oauthPolling(@RequestBody MyRequest bo,HttpServletRequest request, HttpServletResponse response){
         String state = bo.getState();
 
         Map<String,String> data= new HashMap<>();
         data.put("status","0");
         if(state==null){
-            return DocR.error("50001","state不能为空！");
+            return R.fail("state不能为空！");
         }
         //登录二维码
         WxCodeBo wxCodeBo= wxCodeService.getCodeState(new WxCodeBo(state).typeDocLogin());
         if(Objects.equals(wxCodeBo.getState(), WxCodeStatusEnum.SUCCEED.getValue())){
             log.info(wxCodeBo.getOpenId());
-            DocUser docUser= docUserService.bindingOpenId(wxCodeBo.getOpenId());
+            DocUser vo= docUserService.bindingOpenId(wxCodeBo.getOpenId());
             data.put("status","1");
-            data.put("token",getToken(docUser.getUid()));
+            String token = LoginObject.loginToken(vo.getUid(), DeviceEnum.PC.getType(), 10000000L, "id", vo.getUid());
+            RedisUtil.setCacheObject(RedisConstant.PC_KEY+vo.getUid(),vo, Duration.ofSeconds(10000000L));
+            data.put("token",token);
+            CookieUtil.setCookie(response,"token",token,1000*60*60*24*7);
         }
-        return DocR.ok(data);
+        return R.success(data);
     }
 
 
@@ -158,10 +160,10 @@ public class DocUserController extends DocBaseTool {
      * @param request 请求
      * @return 商品列表
      */
-    @SaIgnore
+    @SaCheckLogin
     @PostMapping("/product-list")
-    public DocR<Map<String,Object>> productList(HttpServletRequest request){
-        String uid= getUserId(request);
+    public R<Map<String,Object>> productList(HttpServletRequest request){
+        String uid= LoginObject.getLoginId();
         List<DocProduct> docProducts= docProductMapper.selectList(new LambdaQueryWrapper<DocProduct>().eq(DocProduct::getStatus,1).orderByAsc(DocProduct::getSort));
         Map<String,Object> endData= new HashMap<>();
         List<Map<String,String>> data= new ArrayList<>();
@@ -175,7 +177,7 @@ public class DocUserController extends DocBaseTool {
 
             DocUserVo docUserVo= docUserService.selectVoById(uid);
             if(docUserVo==null){
-                return DocR.error("99910","会话过期");
+                return R.fail("会话过期");
             }
             Map<String,Object> orderInfo= new HashMap<>();
             orderInfo.put("openId",docUserVo.getOpenId());
@@ -197,7 +199,7 @@ public class DocUserController extends DocBaseTool {
         }
         endData.put("items",data);
 
-        return DocR.ok(endData);
+        return R.success(endData);
     }
 
 
@@ -206,20 +208,39 @@ public class DocUserController extends DocBaseTool {
      * @param request 请求
      * @return 登录状态
      */
-    @SaIgnore
+    @SaCheckLogin
     @PostMapping("/product-buy-qry")
-    public DocR<Map<String,String>> productBuyQry(@RequestBody MyRequest bo,HttpServletRequest request){
+    public R<Map<String,String>> productBuyQry(@RequestBody MyRequest bo,HttpServletRequest request){
         String prodId = bo.getProd_id();
 
         Map<String,String> data= new HashMap<>();
         data.put("status","0");
         if(prodId==null){
-            return DocR.error("50001","prodId不能为空！");
+            return R.fail("prodId不能为空！");
         }
-        data.put("status",docOrderService.selectPayState(prodId,getUserId(request)));
-        return DocR.ok(data);
+        data.put("status",docOrderService.selectPayState(prodId,LoginObject.getLoginId()));
+        return R.success(data);
     }
 
+    /**
+     * 退出登录
+     */
+    @SaCheckLogin
+    @PostMapping("/logout")
+    public R<String> logout(HttpServletResponse response){
+        StpUtil.logout();
+        CookieUtil.setCookie(response,"token","",0);
+        return R.success("退出成功！");
+    }
+
+
+    /**
+     * 支付回调-官方微信
+     * @param req 请求
+     * @param resp 响应
+     * @param body 请求体
+     * @return 响应
+     */
     @SaIgnore
     @PostMapping("/notify")
     public String notify(HttpServletRequest req, HttpServletResponse resp, @RequestBody String body){
@@ -253,6 +274,7 @@ public class DocUserController extends DocBaseTool {
 
 
     /**
+     * 微信支付WxPay
      * 异步通知
      */
     @RequestMapping(value = "/payNotify", method = {RequestMethod.POST, RequestMethod.GET})

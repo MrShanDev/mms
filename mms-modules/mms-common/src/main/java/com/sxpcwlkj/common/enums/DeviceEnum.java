@@ -20,7 +20,11 @@ public enum DeviceEnum {
     /**
      * 移动端
      */
-    MOBILE("MOBILE");
+    MOBILE("MOBILE"),
+    /**
+     * PC端
+     */
+    PC("PC");
 
     private final String type;
 

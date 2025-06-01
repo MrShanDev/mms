@@ -9,6 +9,7 @@ import cn.hutool.core.lang.Console;
 import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.common.enums.ErrorCodeEnum;
 import com.sxpcwlkj.common.exception.LoginException;
+import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -94,6 +95,7 @@ public class LoginObject<T> {
      * @return 当前登录用户
      */
     public static <T> T getLoginObject(Class<T> clazz) {
+
         if (isLogin()) {
             try {
                 if (getLoginId() != null) {
@@ -105,6 +107,9 @@ public class LoginObject<T> {
                     if (DeviceEnum.ADMIN.getType().equals(device)){
                         object = RedisUtil.getCacheObject(RedisConstant.ADMIN_KEY + StpUtil.getLoginIdAsLong());
                     }
+                    if (DeviceEnum.PC.getType().equals(device)){
+                        object = RedisUtil.getCacheObject(RedisConstant.PC_KEY + StpUtil.getLoginIdAsLong());
+                    }
 
                     return MapstructUtil.convert(object, clazz);
                 }
@@ -114,7 +119,8 @@ public class LoginObject<T> {
 
         }
         //请先登录
-        throw new NotLoginException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(), DeviceEnum.MOBILE.getType(), "0");
+          throw new MmsException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(),ErrorCodeEnum.USER_NOT_LOGIN.getKey());
+//        throw new NotLoginException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(), DeviceEnum.MOBILE.getType(), "0");
     }
 
     /**
@@ -122,12 +128,18 @@ public class LoginObject<T> {
      *
      * @param id       标识ID
      * @param device   登录设备
-     * @param timeout  过期时间
+     * @param timeout  过期时间/秒
      * @param jwtKey   JWL key
      * @param jwtValue JWT value
      * @return 登录token
      */
     public static String loginToken(String id, String device, Long timeout, String jwtKey, String jwtValue) {
+        Console.log("当前会话TokenName", StpUtil.getTokenName());
+        if(StpUtil.isLogin()){
+            // 获取当前会话的token值
+            Console.log("当前会话已登录，无需重复登录", StpUtil.getTokenName());
+            return StpUtil.getTokenValue();
+        }
         //根据用户id，进行登录
         SaLoginModel saLoginModel = new SaLoginModel();
         if (StringUtil.isNotEmpty(device)) {

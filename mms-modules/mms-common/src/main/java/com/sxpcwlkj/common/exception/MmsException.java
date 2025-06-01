@@ -3,6 +3,7 @@ package com.sxpcwlkj.common.exception;
 import com.sxpcwlkj.common.enums.ErrorCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.http.HttpStatus;
 
 import java.io.Serial;
 
@@ -37,6 +38,7 @@ public class MmsException extends RuntimeException {
 
     public MmsException(String message) {
         this.message = message;
+        this.code = HttpStatus.INTERNAL_SERVER_ERROR.value();
     }
 
     public MmsException(String message, Integer code) {

@@ -83,13 +83,13 @@ spring:
 --- # Sa-Token配置
 sa-token:
   # token名称 (同时也是cookie名称)
-  token-name: Authorization
+  token-name: docToken
   # token 有效期（单位：秒） 默认30天，-1 代表永久有效
   timeout: 86400
   # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
   active-timeout: 1800
   # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
-  is-concurrent: true
+  is-concurrent: false
   # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
   is-share: false
   # 是否尝试从header里读取token
@@ -97,7 +97,7 @@ sa-token:
   # 是否在header读取不到token时，继续从请求题参数里继续尝试读取
   is-read-body: true
   # 是否尝试从cookie里读取token
-  is-read-cookie: false
+  is-read-cookie: true
   # token前缀
 #  token-prefix: "Token_"
   # jwt秘钥

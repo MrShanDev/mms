@@ -5,6 +5,7 @@ import lombok.Getter;
 
 /**
  * 接口返回错误码枚举
+ * @author shanpengnian
  */
 public enum ErrorCodeEnum implements IEnum {
 

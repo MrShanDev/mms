@@ -4,7 +4,6 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.jwt.JWT;
 import cn.hutool.jwt.JWTHeader;
 import cn.hutool.jwt.JWTUtil;
-import com.sxpcwlkj.common.exception.MmsException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -15,13 +14,16 @@ import java.util.Map;
 
 import static cn.hutool.core.lang.Singleton.put;
 
+/**
+ * @author shanpengnian
+ */
 @Slf4j
-public class DocBaseTool {
+public class JwtUtil {
 
     private final String KEY= "4548912314JKJ85HT==";
 
-    public String getUserId(HttpServletRequest request){
-        String cookie = getCookieValue(request,"mss");
+    public String getId(HttpServletRequest request){
+        String cookie = getCookieValue(request,"token");
         if(cookie!=null){
             if (StrUtil.isBlank(cookie) || cookie.split("\\.").length != 3) {
                 log.error("无效的JWT格式: " + cookie);
@@ -31,18 +33,18 @@ public class DocBaseTool {
             if(verify){
                 final JWT jwt = JWTUtil.parseToken(cookie);
                 jwt.getHeader(JWTHeader.TYPE);
-                return jwt.getPayload("uid").toString();
+                return jwt.getPayload("id").toString();
             }
         }
         return "-1";
     }
 
-    public String getToken(String uid){
+    public String createToken(String id){
         Map<String, Object> map = new HashMap<String, Object>() {
             @Serial
             private static final long serialVersionUID = 1L;
             {
-                put("uid", uid);
+                put("id", id);
                 put("expire_time", System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7);
             }
         };
