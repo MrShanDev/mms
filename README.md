@@ -16,26 +16,23 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 
 > 项目代码、文档 均开源免费可商用 ,活到老写到老 为兴趣而开源 为学习而开源.
 
-系统演示: [传送门](https://demo.mmsadmin.cn)
 
-后端项目地址: [mms](https://gitee.com/mmsAdmin/mms)
+🍃系统演示: [传送门](/index/demo)
 
-前端项目地址: [mms-ui](https://gitee.com/mmsAdmin/mms-ui)
-
-文档地址: [mms-doc](https://mmsadmin.cn/)
-
+🍃MMS文档: [mmsAdmin](https://mmsadmin.cn/)
 
 ## 🧩系统版本
 
 <img src="https://img.shields.io/badge/MMS-V1.X-green"/>
 
-| 名称      | 别名  |                   项目地址                    | 注意事项                                                                                                       |
-|---------|:---:|:-----------------------------------------:|------------------------------------------------------------------------------------------------------------|
-| mms     | 标准版 | - [Gitee](https://gitee.com/mmsAdmin/mms) | 🙋功能齐全的手架系统 <br/> 📢完全具备高效的项目开发<br/> 📢完多租户模式灵活开启<br/>📢支持低代码自动生成模式                                        |
+| 名称     | 别名  |                     项目地址                     | 注意事项                                                                |
+|--------|:---:|:--------------------------------------------:|---------------------------------------------------------------------|
+| mms    | 标准版 |  - [Gitee](https://gitee.com/mmsAdmin/mms)   | 🙋功能齐全的手架系统 <br/> 📢完全具备高效的项目开发<br/> 📢完多租户模式灵活开启<br/>📢支持低代码自动生成模式 |
+| mms-ui | 标准版 | - [Gitee](https://gitee.com/mmsAdmin/mms-ui) | 🙋适配mms后端系统的管理界面项目                                                  |
 
 ## 📦开发语言
 
-<div style="text-align: center;float: left;width: 100%">
+<div style="text-align: center;float: left;width: 100%;">
    <img style="margin: 5px ;float: left;height: 20px" src="https://img.shields.io/badge/language-JAVA-<COLOR>.svg" alt=""/>
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Docker-pink.svg" alt=""/>
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Vue3.2-34495e?logo=vue.j" alt="vue" />
@@ -48,6 +45,8 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Sass-1D365D?logo=Sass&logoColor=white" alt="Sass">
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Wind%20CSS-06B6D4?logo=Tailwind%20CSS&logoColor=white" alt="WindCSS">
 </div>
+
+🙋高效安全、组件解耦、灵活扩展 模块化扩展内置代码生成引擎加速后台系统构建。
 
 ## 🍃部署方式
 <img src="https://img.shields.io/docker/automated/tsund/tianchi_docker_practice.svg" alt=""/>
