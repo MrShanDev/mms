@@ -1,11 +1,14 @@
 package com.sxpcwlkj.wx.entity;
 
+import lombok.Getter;
+
 /**
  * 微信事件枚举
  *
  * @author xijue
  * @Doc mmsadmin.cn
  */
+@Getter
 public enum WechatEventEnum {
     // 消息事件
     MESSAGE("message"),
@@ -18,6 +21,7 @@ public enum WechatEventEnum {
     LOCATION("location"),
     // 自定义菜单事件
     CLICK("CLICK"),
+    TEXT("text"),
     VIEW("VIEW");
     // ... 其他事件类型
 
@@ -25,10 +29,6 @@ public enum WechatEventEnum {
 
     WechatEventEnum(String eventType) {
         this.eventType = eventType;
-    }
-
-    public String getEventType() {
-        return eventType;
     }
 
     // 可以添加一个静态方法，根据事件类型字符串返回对应的枚举值

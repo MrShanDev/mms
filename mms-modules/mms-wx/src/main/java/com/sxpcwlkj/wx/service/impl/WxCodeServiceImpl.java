@@ -5,8 +5,10 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
+import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.redis.RedisUtil;
+import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.wx.config.WxProperties;
 import com.sxpcwlkj.common.code.entity.WxCodeBo;
 import com.sxpcwlkj.wx.entity.WechatEventEnum;
@@ -21,6 +23,7 @@ import me.chanjar.weixin.mp.bean.result.WxMpUser;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
@@ -129,11 +132,8 @@ public class WxCodeServiceImpl implements WxCodeService {
         String toUser = message.getToUser();
         //文本消息  文本内容
         String text = message.getContent();
-        //二维码参数
+        //携带参数
         String eventKey = message.getEventKey();
-        //从二维码参数中获取uuid通过该uuid可通过websocket前端传数据
-        JSONObject businessParams = JSON.parseObject(eventKey);
-
         /**
          * 1. 关注公众号 subscribe     messageType:event
          * 2. 取消关注 unsubscribe     messageType:event
@@ -151,7 +151,7 @@ public class WxCodeServiceImpl implements WxCodeService {
          */
 
         // 已关注 扫码 SCAN  发生文字 null subscribe unsubscribe  event   voice text image
-        log.info("消息类型:{},消息事件:{},发送者账号:{},接收者微信:{},文本消息:{},二维码参数：{}", messageType, messageEvent, fromUser, toUser, text, businessParams.toJSONString());
+        log.info("消息类型:{},消息事件:{},发送者账号:{},接收者微信:{},文本消息:{}", messageType, messageEvent, fromUser, toUser, text);
         WxMpUser wxMpUser = null;
         try {
             wxMpUser = wxService.getWxMpService().getUserService().userInfo(fromUser);
@@ -167,19 +167,60 @@ public class WxCodeServiceImpl implements WxCodeService {
         }
         if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.SUBSCRIBE.getEventType(), messageEvent)) {
             log.info("成功订阅");
-            return this.msgStr(message, "关注成功！");
+            if(eventKey.startsWith("qrscene_")){
+                eventKey=eventKey.substring(8);;
+            }
+            JSONObject businessParams = JSON.parseObject(eventKey);
+            if(businessParams!=null&&businessParams.containsKey("redisKey")){
+                String redisKey = businessParams.getString("redisKey");
+                if (StringUtils.isNotEmpty(redisKey)) {
+                    if (wxMpUser != null) {
+                        //已知关注公众号，扫码登录
+                        String msg= this.succeed(redisKey,wxMpUser.getOpenId());
+                        return this.msgStr(message, msg);
+                    }
+                }
+            }
+            return this.msgStr(message, content);
         }
         if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.SCAN.getEventType(), messageEvent)) {
             log.info("带参数的二维码");
-            String redisKey = businessParams.containsKey("redisKey") ? businessParams.getString("redisKey") : null;
-            if (StringUtils.isNotEmpty(redisKey)) {
-                if (wxMpUser != null) {
-                    //已知关注公众号，扫码登录
-                    String msg= this.succeed(redisKey,wxMpUser.getOpenId());
-                    return this.msgStr(message, msg);
+            //从二维码参数中获取uuid通过该uuid可通过websocket前端传数据
+            JSONObject businessParams = JSON.parseObject(eventKey);
+            if(businessParams!=null&&businessParams.containsKey("redisKey")){
+                String redisKey = businessParams.getString("redisKey");
+                if (StringUtils.isNotEmpty(redisKey)) {
+                    if (wxMpUser != null) {
+                        //已知关注公众号，扫码登录
+                        String msg= this.succeed(redisKey,wxMpUser.getOpenId());
+                        return this.msgStr(message, msg);
+                    }
                 }
             }
             return this.msgStr(message, "操作失败，请重新扫码！");
+        }
+        if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.LOCATION.getEventType(), messageType)) {
+            log.info("上报位置");
+            return this.msgStr(message, "位置上报成功：\n"+message.getLocationX()+" | "+message.getLocationY()+"\n"+message.getLabel());
+        }
+        if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.CLICK.getEventType(), messageType)) {
+            log.info("点击菜单");
+            return this.msgStr(message, "欢迎您的关注，您可以输入关键字来获取相关信息，如：帮助!");
+        }
+        if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.TEXT.getEventType(), messageType)) {
+            log.info("文本消息");
+            if (StringUtils.equalsAnyIgnoreCase("验证码", text)) {
+                log.info("验证码");
+                String code = DataUtil.getRandomSIX();
+                assert wxMpUser != null;
+                RedisUtil.setCacheObject(RedisConstant.WX_OPENID_KEY+wxMpUser.getOpenId(), code, Duration.ofMinutes(5));
+                return this.msgStr(message, "验证码："+code+"\n请在五分钟内输入");
+            }
+            return this.msgStr(message, content);
+        }
+        if (StringUtils.equalsAnyIgnoreCase(WechatEventEnum.VIEW.getEventType(), messageType)) {
+            log.info("文本消息");
+            return this.msgStr(message, "文本消息");
         }
         return this.msgStr(message, "欢迎您的关注，您可以输入关键字来获取相关信息，如：帮助!");
     }

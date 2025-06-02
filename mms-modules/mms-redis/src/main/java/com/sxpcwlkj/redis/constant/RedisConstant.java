@@ -15,4 +15,5 @@ public class RedisConstant {
     public static final String ENCRYPTION_APP_ID="encryption:";
     public static final String COOKIE_APP_ID="cookie:";
     public static final String ADMIN_TENANT_KEY="sys:tenant:";
+    public static final String WX_OPENID_KEY="wx:openid:";
 }

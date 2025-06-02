@@ -50,7 +50,7 @@ public interface WxCodeService {
     String getOpenCode(WxCodeBo wxCodeBo);
 
     /**
-     * 扫码回调
+     * 公众号，事件回调
      *
      * @param message 微信消息
      * @return 响应消息
