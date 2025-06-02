@@ -17,7 +17,7 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 > 项目代码、文档 均开源免费可商用 ,活到老写到老 为兴趣而开源 为学习而开源.
 
 
-🍃系统演示: [传送门](/index/demo)
+🍃系统演示: [传送门](https://mmsadmin.cn/index/demo.html)
 
 🍃MMS文档: [mmsAdmin](https://mmsadmin.cn/)
 
