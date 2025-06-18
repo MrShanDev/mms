@@ -147,7 +147,7 @@ public class SysLoginServiceImpl implements SysLoginService {
     public void updateSysUser(HttpServletRequest request,SysUser sysUser) {
         sysUser.setLoginIp(IPUtil.getIp(request));
         sysUser.setLoginDate(new Date());
-        sysUserMapper.updateById(sysUser);
+        sysUserMapper.updateIpById(sysUser);
 
 
     }

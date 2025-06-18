@@ -61,6 +61,7 @@ public class AuthController extends BaseController {
         SysUserVo sysUser = sysUserService.getUserRoleAnfFunctionInfo(LoginObject.getLoginId());
         RedisUtil.setCacheObject(RedisConstant.ADMIN_TENANT_KEY+sysUser.getUserId(),sysUser.getTenantId(), Duration.ofHours(24));
         RedisUtil.setCacheObject(RedisConstant.ADMIN_KEY+sysUser.getUserId(),sysUser, Duration.ofHours(24));
+        RedisUtil.setCacheObject(RedisConstant.ADMIN_NAME+sysUser.getUserId(),sysUser.getUserName(), Duration.ofHours(24));
         ajax.put(Constants.USERINFO, sysUserService.getUserInfo(sysUser));
         if(LoginObject.isLogin()){
             //给浏览器端设置一个 Cookie 的 clientKey值 3天

@@ -26,5 +26,6 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     @InterceptorIgnore(tenantLine = "true")
     int updateRsa(@Param("tenantId") String tenantId, @Param("userId") String userId, @Param("publicKey") String publicKey,@Param("priverKey") String priverKey);
 
-
+    @InterceptorIgnore(tenantLine = "true")
+    int updateIpById(SysUser sysUser);
 }

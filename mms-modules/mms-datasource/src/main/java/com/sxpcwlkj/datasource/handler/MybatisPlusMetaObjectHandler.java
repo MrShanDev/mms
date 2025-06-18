@@ -55,6 +55,9 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
             throw new MmsException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
         }
     }
+    /**
+     * 获取租户号
+     */
     private String getValidTenantId() {
         String tenantId = LoginObject.getLoginTenant();
         return tenantId != null ? tenantId : "default_tenant";
@@ -76,8 +79,6 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
         }
     }
 
-    /**
-     * 获取登录用户名
-     */
+
 
 }

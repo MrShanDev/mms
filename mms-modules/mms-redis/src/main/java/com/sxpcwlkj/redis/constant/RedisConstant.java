@@ -9,6 +9,7 @@ public class RedisConstant {
 
     // user换成前缀key
     public static final String ADMIN_KEY="admin:";
+    public static final String ADMIN_NAME="admin:name:";
     public static final String MOBILE_KEY="mobile:member:";
     public static final String PC_KEY="pc:member:";
     public static final String ENCRYPTION_SERVER_PORT="encryption:server:";

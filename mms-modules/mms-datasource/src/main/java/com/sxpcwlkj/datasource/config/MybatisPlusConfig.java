@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerIntercept
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.properties.TenantProperties;
+import com.sxpcwlkj.datasource.handler.DemoModeInterceptor;
 import lombok.RequiredArgsConstructor;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
@@ -35,12 +36,14 @@ import java.util.Objects;
 @Configuration
 public class MybatisPlusConfig {
     private final TenantProperties tenantProperties;
-
+    private final DemoModeInterceptor demoModeInterceptor;
 
     //插件
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        // 添加演示模式拦截器
+        interceptor.addInnerInterceptor(demoModeInterceptor);
 
         //多租户插件
         if (tenantProperties.getEnable()) {

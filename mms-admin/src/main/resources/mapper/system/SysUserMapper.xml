@@ -6,6 +6,10 @@
         UPDATE `sys_user` SET `public_key`=#{publicKey} , `private_key`=#{priverKey}  WHERE `tenant_id`=#{tenantId}  AND `user_id`=#{userId}
     </update>
 
+    <update id="updateIpById">
+        UPDATE `sys_user` SET `login_ip`=#{loginIp} , `login_date`=#{loginDate}  WHERE `tenant_id`=#{tenantId}  AND `user_id`=#{userId}
+    </update>
+
     <select id="selectByUserName" resultType="com.sxpcwlkj.system.entity.SysUser">
         SELECT * FROM `sys_user` WHERE `user_name`=#{userName} LIMIT 1
     </select>
