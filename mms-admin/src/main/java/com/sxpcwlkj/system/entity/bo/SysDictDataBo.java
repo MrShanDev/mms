@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 系统字典数据
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

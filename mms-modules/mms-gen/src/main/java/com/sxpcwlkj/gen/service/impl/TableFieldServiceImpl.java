@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * 表字段
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Service

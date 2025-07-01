@@ -10,7 +10,7 @@ import lombok.Getter;
 /**
  * @ClassName CaptchaCategory
  * @Description 验证码类型
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 20:04
  */
 @Getter

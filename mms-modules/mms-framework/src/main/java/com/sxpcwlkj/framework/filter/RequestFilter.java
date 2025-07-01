@@ -17,7 +17,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 /**
  * 请求流转换为多次读取的请求流 过滤器
  *
- * @Author Xi jue
+ * @Author mmsAdmin
  */
 @Slf4j
 @WebFilter(filterName = "requestFilter", urlPatterns = {"/**"})

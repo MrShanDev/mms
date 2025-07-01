@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * 字段类型管理
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Mapper

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName SendMsg
  * @description: 响应对象
  * @date 2024年10月25日

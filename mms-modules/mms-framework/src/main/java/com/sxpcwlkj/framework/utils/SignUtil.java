@@ -45,7 +45,7 @@ import java.util.*;
 
 /**
  * 对参数进行签名
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class SignUtil {

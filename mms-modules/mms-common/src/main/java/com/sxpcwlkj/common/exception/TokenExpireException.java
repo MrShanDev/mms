@@ -7,7 +7,7 @@ import java.io.Serial;
 
 /**
  * 用户登陆信息过期异常
- * @author xijue
+ * @author mmsAdmin
  */
 @Setter
 public class TokenExpireException extends RuntimeException {

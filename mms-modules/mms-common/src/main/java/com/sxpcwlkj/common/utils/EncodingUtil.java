@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
  * 编码工具类
  *
  * @name: EncodingUtil
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 

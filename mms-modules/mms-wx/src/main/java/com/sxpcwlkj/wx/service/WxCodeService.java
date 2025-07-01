@@ -5,7 +5,7 @@ import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 /**
  *
- * @author xijue
+ * @author mmsAdmin
  */
 public interface WxCodeService {
 

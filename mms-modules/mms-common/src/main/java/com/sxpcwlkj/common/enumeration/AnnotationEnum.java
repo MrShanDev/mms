@@ -4,7 +4,7 @@ package com.sxpcwlkj.common.enumeration;
  * 注解枚举
  *
  * @name: AnnotationEnum
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/11/30
  **/
 

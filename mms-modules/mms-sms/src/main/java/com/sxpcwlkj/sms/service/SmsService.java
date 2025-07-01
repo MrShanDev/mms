@@ -5,7 +5,7 @@ import com.sxpcwlkj.common.utils.R;
 import java.util.List;
 
 /**
- * @author: xijue
+ * @author: mmsAdmin
  */
 public interface SmsService {
 

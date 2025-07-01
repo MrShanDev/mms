@@ -6,7 +6,7 @@ import lombok.Data;
 
 /**
  * 重置密码bo
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

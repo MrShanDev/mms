@@ -15,7 +15,7 @@ import lombok.SneakyThrows;
 /**
  * 字典自定序列化类
  *
- * @author xijue
+ * @author mmsAdmin
  */
 public class DictSerializer extends StdSerializer<Object> implements ContextualSerializer {
 

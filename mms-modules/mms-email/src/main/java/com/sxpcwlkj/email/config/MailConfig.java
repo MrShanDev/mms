@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * JavaMail 配置
- * @Author 西决
+ * @Author mmsAdmin
  */
 @Configuration
 @Slf4j

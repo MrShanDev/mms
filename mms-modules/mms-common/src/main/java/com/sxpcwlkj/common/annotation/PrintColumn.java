@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * 数据权限组 属性成员
  *
  * @name: DataPermissionGroup
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 @Target(ElementType.FIELD)

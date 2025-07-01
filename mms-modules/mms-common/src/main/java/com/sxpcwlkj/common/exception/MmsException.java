@@ -9,7 +9,7 @@ import java.io.Serial;
 
 /**
  * 自定义异常
- * @author xijue
+ * @author mmsAdmin
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

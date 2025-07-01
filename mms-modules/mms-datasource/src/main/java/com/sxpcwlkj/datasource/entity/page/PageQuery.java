@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 分页查询实体类
  *
- * @author xijue
+ * @author mmsAdmin
  */
 
 @Data

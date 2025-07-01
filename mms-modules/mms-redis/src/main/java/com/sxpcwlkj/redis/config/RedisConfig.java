@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 /**
  * @ClassName RedisConfig
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 20:40
  */
 @Slf4j

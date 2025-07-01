@@ -1,7 +1,7 @@
 package com.sxpcwlkj.framework.config;
 
 /**
- * @author XIjue
+ * @author mmsAdmin
  */
 public interface ValidatedGroupConfig {
 

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * @ClassName RedissonProperties
  * @Description TODO redisson配置
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 20:43
  */
 @Data

@@ -8,7 +8,7 @@ import lombok.Data;
 
 /**
  * 发生短信bo
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

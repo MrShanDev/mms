@@ -18,7 +18,7 @@ import java.util.Date;
 
 /**
  * 用户导出VO
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

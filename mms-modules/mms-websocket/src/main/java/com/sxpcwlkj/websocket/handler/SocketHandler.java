@@ -15,7 +15,7 @@ import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName SocketHandler
  * @description: websocket消息处理类
  * @date 2024年10月23日

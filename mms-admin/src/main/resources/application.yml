@@ -260,10 +260,13 @@ springdoc:
     #    persistAuthorization: true
   #这里定义了两个分组，可定义多个，也可以不定义
   group-configs:
-    - group: 1.演示模块
-      packages-to-scan: com.sxpcwlkj.demo
-    - group: 2.系统模块
+    # http://localhost:8080/v3/api-docs/1.系统模块
+    - group: 1.系统模块
       packages-to-scan: com.sxpcwlkj.system
+      # http://localhost:8080/v3/api-docs/9.演示模块
+    - group: 9.演示模块
+      packages-to-scan: com.sxpcwlkj.demo
+
   info:
     # 标题
     title: '标题：${sxpcwlkj.name}多租户管理系统_接口文档'
@@ -273,7 +276,7 @@ springdoc:
     version: '版本号: ${sxpcwlkj.version}'
     # 作者信息
     contact:
-      name: Xi Jue
+      name: mmsAdmin
       email: sxpcwlkj@163.com
       url: https://gitee.com/mmsAdmin/mms
   components:

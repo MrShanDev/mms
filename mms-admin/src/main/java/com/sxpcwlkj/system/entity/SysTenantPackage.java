@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 系统租户套餐
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

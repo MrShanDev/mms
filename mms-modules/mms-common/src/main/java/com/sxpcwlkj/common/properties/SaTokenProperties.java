@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * @ClassName SaTokenProperties
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 21:06
  */
 @Data

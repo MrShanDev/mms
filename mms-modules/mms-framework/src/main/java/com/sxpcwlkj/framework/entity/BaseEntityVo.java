@@ -17,7 +17,7 @@ import java.util.Date;
 /**
  * SpringWeb 基础实体类
  *
- * @author xijue
+ * @author mmsAdmin
  **/
 @EqualsAndHashCode(callSuper = false)
 @Data

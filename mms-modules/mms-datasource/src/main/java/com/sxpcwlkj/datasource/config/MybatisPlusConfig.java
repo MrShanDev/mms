@@ -26,7 +26,7 @@ import java.util.Objects;
  * MybatisPlus配置
  *
  * @name: MybatisPlusConfig
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 

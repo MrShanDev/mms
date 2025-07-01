@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName WebSocketService
  * @description: websocket操作相关服务类
  * @date 2024年10月23日

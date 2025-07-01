@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * 数据表
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Slf4j

@@ -9,7 +9,7 @@ import java.math.RoundingMode;
  * BigDecimal的加法运算封装
  *
  * @name: BigDecimalUtil
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 public class BigDecimalUtil {

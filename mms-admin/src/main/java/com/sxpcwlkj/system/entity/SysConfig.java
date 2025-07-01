@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * 系统配置
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper=false)

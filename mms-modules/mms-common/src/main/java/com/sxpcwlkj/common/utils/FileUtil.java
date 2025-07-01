@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * @author: xijue
+ * @author: mmsAdmin
  */
 public class FileUtil extends cn.hutool.core.io.FileUtil  {
     /**

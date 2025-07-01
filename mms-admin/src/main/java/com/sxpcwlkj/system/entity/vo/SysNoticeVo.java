@@ -14,7 +14,7 @@ import java.util.Date;
 /**
 * 系统公告Vo
 *
-* @author 西决
+* @author mmsAdmin
 * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
 */
 

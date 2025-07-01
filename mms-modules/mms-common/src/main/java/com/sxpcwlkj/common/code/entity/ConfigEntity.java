@@ -3,7 +3,7 @@ package com.sxpcwlkj.common.code.entity;
 import lombok.Data;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  */
 @Data
 public class ConfigEntity {

@@ -8,7 +8,7 @@ import com.sxpcwlkj.gen.entity.TableEntity;
 /**
  * 数据表
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public interface TableService extends BaseService<TableEntity> {

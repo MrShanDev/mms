@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 对象存储bo
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

@@ -5,7 +5,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * SQLServer查询
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class SQLServerQuery implements AbstractQuery {

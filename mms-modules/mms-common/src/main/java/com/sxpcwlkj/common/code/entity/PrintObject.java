@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Table 打印对象
  *
- * @author Xijue
+ * @author mmsAdmin
  */
 @Data
 public class PrintObject<T> {

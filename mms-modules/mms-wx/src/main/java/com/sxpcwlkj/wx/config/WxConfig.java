@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 微信 配置
  *
- * @Author 西决
+ * @Author mmsAdmin
  */
 @Configuration
 @Slf4j

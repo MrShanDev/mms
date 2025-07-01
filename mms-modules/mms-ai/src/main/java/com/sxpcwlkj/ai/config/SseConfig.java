@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * SSE配置
- * @author xijue
+ * @author mmsAdmin
  */
 @Configuration
 public class SseConfig {

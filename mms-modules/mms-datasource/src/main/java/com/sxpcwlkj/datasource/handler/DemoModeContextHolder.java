@@ -2,7 +2,7 @@ package com.sxpcwlkj.datasource.handler;
 
 /**
  * 创建上下文持有者
- * @author xijue
+ * @author mmsAdmin
  */
 public class DemoModeContextHolder {
     private static final ThreadLocal<Boolean> DEMO_MODE_DISABLED = new ThreadLocal<>();

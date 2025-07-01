@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * 对象存储
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

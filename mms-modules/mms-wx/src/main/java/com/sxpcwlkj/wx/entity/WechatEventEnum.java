@@ -5,7 +5,7 @@ import lombok.Getter;
 /**
  * 微信事件枚举
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Getter

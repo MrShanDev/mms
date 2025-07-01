@@ -27,8 +27,8 @@ import java.util.Set;
 
 /**
  * 系统部门
- *
- * @author 西决
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Slf4j

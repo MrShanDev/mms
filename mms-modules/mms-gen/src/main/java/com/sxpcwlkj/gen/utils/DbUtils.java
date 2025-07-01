@@ -11,7 +11,7 @@ import java.sql.SQLException;
 /**
  * DB工具类
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class DbUtils {

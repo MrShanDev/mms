@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 系统字典
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

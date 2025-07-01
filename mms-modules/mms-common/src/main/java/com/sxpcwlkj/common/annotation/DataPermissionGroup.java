@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * 数据权限组
  *
  * @name: DataPermissionGroup
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 @Target({ElementType.METHOD, ElementType.TYPE})

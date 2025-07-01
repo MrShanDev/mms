@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * @ClassName SpringUtil
  * @Description spring工具类
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 21:12
  */
 @Component

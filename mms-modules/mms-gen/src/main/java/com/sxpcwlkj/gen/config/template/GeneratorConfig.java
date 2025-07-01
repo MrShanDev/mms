@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * 代码生成配置内容
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Configuration

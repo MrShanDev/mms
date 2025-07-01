@@ -2,7 +2,7 @@ package com.sxpcwlkj.common.exception;
 
 import java.io.Serial;
 /**
- * @author xijue
+ * @author mmsAdmin
  */
 public class TenantException extends RuntimeException{
     @Serial

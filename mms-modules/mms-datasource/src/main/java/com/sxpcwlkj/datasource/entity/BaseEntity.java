@@ -17,7 +17,7 @@ import java.util.Date;
  * 3. 多租户支持（租户ID）
  * 4. 乐观锁控制
  *
- * @author xijue
+ * @author mmsAdmin
  * @since 2023-01-01
  */
 @Data

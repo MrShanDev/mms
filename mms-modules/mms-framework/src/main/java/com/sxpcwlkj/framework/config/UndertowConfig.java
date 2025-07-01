@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 设置 Undertow
  *
- * @Author 西决
+ * @Author mmsAdmin
  */
 @Configuration
 public class UndertowConfig implements WebServerFactoryCustomizer<UndertowServletWebServerFactory> {

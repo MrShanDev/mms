@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 /**
  * 数据库类型 枚举
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public enum DbType {

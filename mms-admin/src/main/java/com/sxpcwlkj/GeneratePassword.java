@@ -4,7 +4,7 @@ import com.baomidou.dynamic.datasource.toolkit.CryptoUtils;
 
 /***
  * 密码加密
- * @author xijue
+ * @author mmsAdmin
  */
 public class GeneratePassword {
 

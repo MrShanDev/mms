@@ -7,7 +7,7 @@ import lombok.Data;
 
 /**
  * 系统租户
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 

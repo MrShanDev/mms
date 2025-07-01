@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * 限流注解
- * @author XIjue
+ * @author mmsAdmin
  *
  */
 

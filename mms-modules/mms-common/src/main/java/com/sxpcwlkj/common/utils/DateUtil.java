@@ -13,7 +13,7 @@ import java.util.*;
  * 日期类型转换 工具类
  *
  * @name: BigDecimalUtil
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 @Slf4j

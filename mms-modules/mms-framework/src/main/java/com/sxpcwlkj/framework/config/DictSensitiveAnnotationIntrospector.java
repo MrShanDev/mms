@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * 字典注解序列化拦截器
  *
- * @author Xijue
+ * @author mmsAdmin
  */
 @Component
 public class DictSensitiveAnnotationIntrospector extends NopAnnotationIntrospector {

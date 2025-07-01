@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 限流切面
- * @author XIjue
+ * @author mmsAdmin
  *
  */
 @Aspect

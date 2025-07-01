@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * 系统部门-接口
  *
- * @author 西决
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  * @describe  支持自定义扩展,已继承接口：{insert、deleteById、updateById、selectById、getByEntityListPage}（更多查看BaseService接口）
  */

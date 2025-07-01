@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 /**
 * 系统公告-Mapper
 *
-* @author 西决
+* @author mmsAdmin
 * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
 */
 @Mapper

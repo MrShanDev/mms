@@ -3,7 +3,7 @@ package com.sxpcwlkj.common.constant;
 /**
  * @ClassName Constants
  * @Description 基础变量
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/25 12:08
  */
 public interface Constants {

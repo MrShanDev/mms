@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * 系统字典bo
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

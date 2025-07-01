@@ -6,7 +6,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * GenQueryBo
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public interface AbstractQuery {

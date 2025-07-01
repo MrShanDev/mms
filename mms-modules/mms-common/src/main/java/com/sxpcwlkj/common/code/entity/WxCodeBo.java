@@ -11,7 +11,7 @@ import java.util.Map;
 
 /**
  * wxCodeBo 微信二维码常量
- * @author xijue
+ * @author mmsAdmin
  */
 @Data
 public class WxCodeBo {

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * @ClassName SxpcwkjProperties
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 20:30
  */
 @Data

@@ -18,7 +18,8 @@ import java.util.List;
 
 /**
  * 系统资源
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @RequestMapping("system/function")

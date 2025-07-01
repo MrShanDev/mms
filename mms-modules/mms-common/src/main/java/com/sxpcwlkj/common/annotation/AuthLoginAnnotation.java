@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * 登陆验证自定义注解
  *
  * @name: AuthLoginAnnotation
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/11/30
  **/
 @Documented //文档生成时，该注解将被包含在javadoc中，可去掉

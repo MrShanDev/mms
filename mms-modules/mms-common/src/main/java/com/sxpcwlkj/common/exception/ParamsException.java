@@ -7,7 +7,7 @@ import java.io.Serial;
 
 /**
  * 参数异常
- * @author xijue
+ * @author mmsAdmin
  */
 @Setter
 public class ParamsException extends RuntimeException {

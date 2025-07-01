@@ -9,7 +9,7 @@ import lombok.Data;
 import java.util.Date;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName Msg
  * @description: 消息对象
  * @date 2024年10月25日

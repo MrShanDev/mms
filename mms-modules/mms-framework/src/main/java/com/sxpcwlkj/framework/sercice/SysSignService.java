@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 系统加签
- * @author: Xi jue
+ * @author: mmsAdmin
  */
 public interface SysSignService {
 

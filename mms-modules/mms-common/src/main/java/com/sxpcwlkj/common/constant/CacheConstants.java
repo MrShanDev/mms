@@ -3,7 +3,7 @@ package com.sxpcwlkj.common.constant;
 /**
  * @ClassName CacheConstants
  * @Description  key常量
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 20:40
  */
 public interface CacheConstants {

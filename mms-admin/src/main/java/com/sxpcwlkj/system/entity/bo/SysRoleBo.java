@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.Length;
 
 /**
  * 系统角色
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

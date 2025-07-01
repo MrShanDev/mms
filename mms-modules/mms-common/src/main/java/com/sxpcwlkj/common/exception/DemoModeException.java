@@ -6,7 +6,7 @@ import java.io.Serial;
 
 /**
  * DemoModeException
- * @Author 西决
+ * @Author mmsAdmin
  */
 @Getter
 public class DemoModeException extends RuntimeException {

@@ -10,7 +10,7 @@ import java.io.Serial;
 
 /**
  * 对象存储配置表
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = false)

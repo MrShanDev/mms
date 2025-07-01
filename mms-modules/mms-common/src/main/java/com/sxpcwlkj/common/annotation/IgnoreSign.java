@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * 请求对象中不需要签名校验的属性（默认都要签名）。
  * <p>
  * <p>
- * @author XIjue
+ * @author mmsAdmin
  */
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

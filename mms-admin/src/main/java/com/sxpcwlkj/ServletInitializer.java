@@ -7,7 +7,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
  * 自定义Web容器配置
  *
  * @name: ServletInitializer
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 

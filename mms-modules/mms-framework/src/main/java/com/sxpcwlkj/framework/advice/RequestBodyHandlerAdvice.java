@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * @author Xi jue
+ * @author mmsAdmin
  * 添加 @MssSafety 接口请求参数解密
  */
 @Slf4j
