@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 /**
 * 系统配置
 *
-* @author 西决 942879858@qq.com
+* @author mmsAdmin 942879858@qq.com
 * @since 1.0.0 2024-06-10
 */
 @Mapper

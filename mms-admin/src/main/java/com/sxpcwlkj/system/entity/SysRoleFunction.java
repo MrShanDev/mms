@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 系统角色功能
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 

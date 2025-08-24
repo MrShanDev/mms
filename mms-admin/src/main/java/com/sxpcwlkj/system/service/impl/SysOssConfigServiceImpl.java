@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * 对象存储配置表
  *
- * @author 西决 942879858@qq.com
+ * @author mmsAdmin 942879858@qq.com
  * @since 1.0.0 2024-07-07
  */
 @Slf4j

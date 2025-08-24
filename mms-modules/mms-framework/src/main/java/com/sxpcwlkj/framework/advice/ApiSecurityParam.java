@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * API 报文对象
- * @author XIjue
+ * @author mmsAdmin
  */
 @Data
 public class ApiSecurityParam  {

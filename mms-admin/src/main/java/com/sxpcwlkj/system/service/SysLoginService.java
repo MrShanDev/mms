@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * @ClassName SysLoginService
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/25 12:04
  */
 public interface SysLoginService {

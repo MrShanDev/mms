@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * @ClassName SaTokenConfig
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 21:05
  */
 @RequiredArgsConstructor

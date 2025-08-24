@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * 系统配置
  *
- * @author 西决 942879858@qq.com
+ * @author mmsAdmin 942879858@qq.com
  * @since 1.0.0 2024-06-10
  */
 public interface SysConfigService extends BaseService<SysConfig, SysConfigVo, SysConfigBo> {

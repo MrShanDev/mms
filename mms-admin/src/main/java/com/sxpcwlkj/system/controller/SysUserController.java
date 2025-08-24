@@ -35,7 +35,8 @@ import java.util.*;
 
 /**
  * 系统用户
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Slf4j

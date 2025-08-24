@@ -8,7 +8,7 @@ import lombok.Getter;
 /**
  * 打印类型
  *
- * @author Xijue
+ * @author mmsAdmin
  */
 @Getter
 public enum PrintTypeEnum implements IEnum {

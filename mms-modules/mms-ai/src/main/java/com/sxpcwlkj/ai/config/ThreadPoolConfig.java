@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 线程池优化配置
- * @author xijue
+ * @author mmsAdmin
  */
 @Configuration
 public class ThreadPoolConfig {

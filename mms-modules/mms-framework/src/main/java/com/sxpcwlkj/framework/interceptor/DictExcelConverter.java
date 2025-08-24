@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author: Xi jue
+ * @author: mmsAdmin
  * Excel 字典转换器
  */
 public class DictExcelConverter implements Converter<Object> {

@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * 基类管理
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Mapper

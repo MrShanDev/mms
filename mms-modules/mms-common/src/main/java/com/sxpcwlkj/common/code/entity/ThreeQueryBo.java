@@ -4,7 +4,7 @@ import lombok.Data;
 
 /**
  * 树结构查询bo
- * @Author: xijue
+ * @Author: mmsAdmin
  */
 @Data
 public class ThreeQueryBo {

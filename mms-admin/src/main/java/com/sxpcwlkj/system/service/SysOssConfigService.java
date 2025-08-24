@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 对象存储配置表
  *
- * @author 西决 942879858@qq.com
+ * @author mmsAdmin 942879858@qq.com
  * @since 1.0.0 2024-07-07
  */
 public interface SysOssConfigService extends BaseService<SysOssConfig, SysOssConfigVo, SysOssConfigBo> {

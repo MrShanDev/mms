@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 /**
  * 字段类型管理
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Service

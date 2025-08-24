@@ -5,7 +5,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * PostgreSql查询
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class PostgreSqlQuery implements AbstractQuery {

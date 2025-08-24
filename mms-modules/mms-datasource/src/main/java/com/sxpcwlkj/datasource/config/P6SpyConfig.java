@@ -7,7 +7,7 @@ import java.util.Date;
 
 /**
  *
- * @author xijue
+ * @author mmsAdmin
  */
 public class P6SpyConfig implements MessageFormattingStrategy {
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");

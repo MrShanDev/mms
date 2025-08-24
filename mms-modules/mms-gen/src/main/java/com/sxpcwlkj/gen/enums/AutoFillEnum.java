@@ -3,7 +3,7 @@ package com.sxpcwlkj.gen.enums;
 /**
  * 字段自动填充 枚举
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public enum AutoFillEnum {

@@ -5,7 +5,7 @@ import com.sxpcwlkj.common.enums.SafetyTypeEnum;
 import java.lang.annotation.*;
 
 /**
- * @author XIjue
+ * @author mmsAdmin
  * MMS安全注解
  */
 @Retention(RetentionPolicy.RUNTIME)

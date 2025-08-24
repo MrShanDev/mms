@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * Table 打印对象表头
- * @author Xijue
+ * @author mmsAdmin
  */
 @Data
 public class PrintHeader{

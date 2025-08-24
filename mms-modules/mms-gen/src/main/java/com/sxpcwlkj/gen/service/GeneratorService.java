@@ -9,7 +9,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * 代码生成
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public interface GeneratorService {

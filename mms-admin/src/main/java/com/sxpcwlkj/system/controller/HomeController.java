@@ -21,7 +21,8 @@ import java.util.Map;
 
 /**
  * 首页控制台
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @RestController

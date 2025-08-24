@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * @ClassName RsaKeyEntity
  * @Description 保存公钥 私钥额一个基础类
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/6/11 22:31
  */
 @Data

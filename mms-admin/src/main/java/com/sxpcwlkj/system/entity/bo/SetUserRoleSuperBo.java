@@ -8,7 +8,7 @@ import java.util.List;
 
 /**
  * 管理员重置用户密码
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

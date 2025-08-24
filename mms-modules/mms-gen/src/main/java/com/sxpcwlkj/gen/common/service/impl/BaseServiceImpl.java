@@ -14,7 +14,7 @@ import com.sxpcwlkj.gen.common.service.BaseService;
 /**
  * 基础服务类，所有Service都要继承
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class BaseServiceImpl<M extends BaseMapper<T>, T> extends ServiceImpl<M, T> implements BaseService<T> {

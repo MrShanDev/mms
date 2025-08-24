@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * 接口返回错误码枚举
- * @author xijue
+ * @author mmsAdmin
  */
 public enum ConfigKeyNum implements IEnum<String> {
 

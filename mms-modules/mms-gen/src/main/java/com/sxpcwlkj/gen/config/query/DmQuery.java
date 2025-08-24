@@ -6,7 +6,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * 达梦8 查询
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class DmQuery implements AbstractQuery {

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * 计算密码强度
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class PasswordStrengthCheckerUtil {

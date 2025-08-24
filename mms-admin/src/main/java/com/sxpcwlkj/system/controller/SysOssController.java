@@ -24,7 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 对象存储
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @RequestMapping("system/oss")

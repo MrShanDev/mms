@@ -29,7 +29,7 @@ import java.util.Collections;
 /**
  * 系统公告-接口实现
  *
-* @author 西决
+* @author mmsAdmin
 * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Slf4j

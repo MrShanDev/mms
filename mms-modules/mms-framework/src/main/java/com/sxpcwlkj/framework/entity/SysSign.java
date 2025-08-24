@@ -12,7 +12,7 @@ import java.util.Date;
 
 /**
  * 系统加签
- * @author: Xi jue
+ * @author: mmsAdmin
  */
 @Data
 @NoArgsConstructor

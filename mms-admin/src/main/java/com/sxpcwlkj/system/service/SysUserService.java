@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author XIjue
+ * @author mmsAdmin
  */
 public interface SysUserService {
 

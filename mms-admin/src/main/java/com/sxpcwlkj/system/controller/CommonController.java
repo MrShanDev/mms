@@ -45,7 +45,8 @@ import java.util.*;
 
 /**
  * mms公共接口
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @RestController
@@ -273,7 +274,7 @@ public class CommonController extends BaseController {
         String code = RandomUtil.randomNumbers(6);
         R<Object> result = smsService.sendSms(phone, code);
 
-        if (result.getStatus()!=0) {
+        if (!result.getStatus()) {
             log.error("验证码短信发送异常 => {}", result.getMsg());
             return result;
         }
@@ -338,7 +339,7 @@ public class CommonController extends BaseController {
         String code = RandomUtil.randomNumbers(6);
         R<Object> result = emailService.sendEmailCode(bo.getEmail(), code);
 
-        if (result.getStatus()!=0) {
+        if (!result.getStatus()) {
             log.error("验证码发送异常 => {}", result.getMsg());
             return result;
         }

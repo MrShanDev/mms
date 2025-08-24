@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 系统资源bo
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @EqualsAndHashCode(callSuper = true)

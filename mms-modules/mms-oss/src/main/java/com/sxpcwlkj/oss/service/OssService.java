@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * OssService
  *
- * @author xijue
+ * @author mmsAdmin
  */
 public interface OssService {
 

@@ -9,7 +9,7 @@ import lombok.Data;
 /**
  * 查询公共参数
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

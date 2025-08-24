@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName WebSocketSessionManager
  * @description: session信息维护类
  * @date 2024年10月23日

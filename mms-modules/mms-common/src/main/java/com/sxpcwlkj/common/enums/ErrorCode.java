@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * 错误编码
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Getter

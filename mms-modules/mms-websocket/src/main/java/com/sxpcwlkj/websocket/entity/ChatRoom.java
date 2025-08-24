@@ -15,7 +15,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName ChatMsg
  * @description: 聊天室
  * @date 2024年10月25日

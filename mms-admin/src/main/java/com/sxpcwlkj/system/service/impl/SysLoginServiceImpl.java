@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * @ClassName SysLoginServiceImpl
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/25 12:06
  */
 @RequiredArgsConstructor
@@ -147,7 +147,7 @@ public class SysLoginServiceImpl implements SysLoginService {
     public void updateSysUser(HttpServletRequest request,SysUser sysUser) {
         sysUser.setLoginIp(IPUtil.getIp(request));
         sysUser.setLoginDate(new Date());
-        sysUserMapper.updateById(sysUser);
+        sysUserMapper.updateIpById(sysUser);
 
 
     }

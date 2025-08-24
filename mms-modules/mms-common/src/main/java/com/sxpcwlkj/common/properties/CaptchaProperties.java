@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * @ClassName CaptchaProperties
  * @Description 验证码配置
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 20:00
  */
 @Data

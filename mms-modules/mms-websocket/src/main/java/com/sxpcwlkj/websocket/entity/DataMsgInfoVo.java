@@ -3,7 +3,7 @@ package com.sxpcwlkj.websocket.entity;
 import lombok.Data;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName SendMsg
  * @description: 客服端报文对象
  * @date 2024年10月25日

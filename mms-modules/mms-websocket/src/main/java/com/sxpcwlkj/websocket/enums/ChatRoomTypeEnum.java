@@ -3,7 +3,7 @@ package com.sxpcwlkj.websocket.enums;
 import com.baomidou.mybatisplus.annotation.IEnum;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  */
 
 public enum ChatRoomTypeEnum implements IEnum {

@@ -9,7 +9,7 @@ import java.util.Map;
 
 /**
  * 系统资源
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

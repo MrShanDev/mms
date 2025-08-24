@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 项目名变更
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @RestController

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * swagger 配置属性
  *
- * @author XIjue
+ * @author mmsAdmin
  */
 @Data
 @Component
@@ -91,6 +91,8 @@ public class SpringDocProperties {
          * 版本
          */
         private String version = null;
+
+
 
     }
 

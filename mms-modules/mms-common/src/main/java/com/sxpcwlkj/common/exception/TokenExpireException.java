@@ -3,13 +3,16 @@ package com.sxpcwlkj.common.exception;
 import com.sxpcwlkj.common.enums.ErrorCodeEnum;
 import lombok.Setter;
 
+import java.io.Serial;
+
 /**
  * 用户登陆信息过期异常
- * @author xijue
+ * @author mmsAdmin
  */
 @Setter
 public class TokenExpireException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String message;

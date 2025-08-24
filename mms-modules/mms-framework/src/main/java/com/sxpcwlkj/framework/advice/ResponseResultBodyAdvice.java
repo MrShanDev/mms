@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Xijue
+ * @author mmsAdmin
  * 添加 @MssSafety 接口响应数据加密
  */
 @RestControllerAdvice

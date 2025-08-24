@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 /**
  * @ClassName SqlUtil
  * @Description TODO
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 20:33
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.Length;
 /**
  * 重置用户密码bo
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

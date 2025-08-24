@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 数据表
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * 项目信息
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

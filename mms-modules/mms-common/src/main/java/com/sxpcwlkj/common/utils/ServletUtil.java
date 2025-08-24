@@ -26,7 +26,7 @@ import java.util.Objects;
 
 /**
  * web服务工具
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

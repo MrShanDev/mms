@@ -9,7 +9,9 @@ import com.sxpcwlkj.common.utils.R;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.exceptions.PersistenceException;
 import org.mybatis.spring.MyBatisSystemException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -34,7 +36,14 @@ import java.util.Objects;
 @Slf4j
 @RestControllerAdvice
 public class GlobalException {
-
+    // 获取异常的根本原因
+    private Throwable getRootCause(Throwable throwable) {
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
+    }
     /**
      * 根据错误码匹配
      */
@@ -44,6 +53,14 @@ public class GlobalException {
         map.put("code", e.getKey());
         map.put("msg", e.getValue());
         return map;
+    }
+
+    // 专门处理演示模式异常
+    @ExceptionHandler(DemoModeException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public R<Void> handleDemoModeException(DemoModeException e) {
+        log.error("演示模式拦截操作: {}", e.getMessage());
+        return R.fail(e.getErrorCode(), e.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -138,14 +155,51 @@ public class GlobalException {
      */
     @ExceptionHandler(MyBatisSystemException.class)
     public R<Void> handleCannotFindDataSourceException(MyBatisSystemException e, HttpServletRequest request) {
+        Throwable rootCause = getRootCause(e);
+        // 2.1 如果是演示模式异常，按演示模式异常处理
+        if (rootCause instanceof DemoModeException) {
+            return handleDemoModeException((DemoModeException) rootCause);
+        }
         String requestUrl = request.getRequestURI();
         String message = e.getMessage();
-        if (message.contains("CannotFindDataSourceException")) {
+        if (message!=null && message.contains("CannotFindDataSourceException")) {
             log.error("请求地址'{}', 未找到数据源", requestUrl);
             return R.fail("未找到数据源，请联系管理员确认");
         }
         log.error("请求地址'{}', Mybatis系统异常", requestUrl, e);
         return R.fail(message);
+    }
+
+    // 3. 处理数据访问异常
+    @ExceptionHandler(DataAccessException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public R<Void> handleDataAccessException(DataAccessException e) {
+        Throwable rootCause = getRootCause(e);
+
+        // 3.1 如果是演示模式异常，按演示模式异常处理
+        if (rootCause instanceof DemoModeException) {
+            return handleDemoModeException((DemoModeException) rootCause);
+        }
+
+        // 3.2 其他数据访问异常
+        log.error("数据访问异常", e);
+        return R.fail(500200, "数据库访问错误");
+    }
+
+    // 4. 处理PersistenceException
+    @ExceptionHandler(PersistenceException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public R<?> handlePersistenceException(PersistenceException e) {
+        Throwable rootCause = getRootCause(e);
+
+        // 4.1 如果是演示模式异常，按演示模式异常处理
+        if (rootCause instanceof DemoModeException) {
+            return handleDemoModeException((DemoModeException) rootCause);
+        }
+
+        // 4.2 其他持久化异常
+        log.error("MyBatis持久化异常", e);
+        return R.fail(500300, "持久化操作失败");
     }
 
 
@@ -209,13 +263,7 @@ public class GlobalException {
     }
 
 
-    /**
-     * 演示模式异常
-     */
-    @ExceptionHandler(DemoModeException.class)
-    public R<Void> handleDemoModeException(DemoModeException e) {
-        return R.fail("演示模式，不允许操作");
-    }
+
 
     /**
      * 错误SQL语句异常

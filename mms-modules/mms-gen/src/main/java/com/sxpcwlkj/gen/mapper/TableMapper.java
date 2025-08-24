@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 /**
  * 数据表
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Mapper

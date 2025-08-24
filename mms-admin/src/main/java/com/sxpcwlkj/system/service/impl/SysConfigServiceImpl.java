@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 /**
  * 系统配置
  *
- * @author XIjue
+ * @author mmsAdmin
  * @since 1.0.0 2024-06-10
  */
 @Slf4j

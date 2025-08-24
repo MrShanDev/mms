@@ -6,7 +6,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * MySQL查询
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class MySqlQuery implements AbstractQuery {

@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 系统字典
- * @author xijue
+ * @module 系统管理模块
+ * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @RequestMapping("system/dict")

@@ -10,7 +10,7 @@ import java.io.InputStream;
 /**
  * 新购 HttpInputMessage 实现
  *
- * @author xijue
+ * @author mmsAdmin
  */
 public class MssHttpInputMessage implements HttpInputMessage {
     HttpHeaders headers;

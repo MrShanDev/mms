@@ -16,7 +16,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName WebSocketConfig
  * @description: 注册 webSocket
  * @date 2024年10月23日

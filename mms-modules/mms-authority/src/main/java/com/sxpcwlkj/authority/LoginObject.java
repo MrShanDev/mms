@@ -170,4 +170,15 @@ public class LoginObject<T> {
     }
 
 
+    public static String getLoginUserName() {
+        try {
+            String id=getLoginId();
+            if(id==null) {
+                return null;
+            }
+            return RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + id);
+        }catch (NotWebContextException e){
+            return null;
+        }
+    }
 }

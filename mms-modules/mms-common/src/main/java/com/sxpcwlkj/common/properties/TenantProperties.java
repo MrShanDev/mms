@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 /**
  * 多租户
- * @author xijue
+ * @author mmsAdmin
  */
 @Data
 @Configuration

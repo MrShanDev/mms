@@ -13,7 +13,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * @author xijue
+ * @author mmsAdmin
  * @ClassName SystemRunner
  * @description: 项目初始化
  * @date 2024年03月29日

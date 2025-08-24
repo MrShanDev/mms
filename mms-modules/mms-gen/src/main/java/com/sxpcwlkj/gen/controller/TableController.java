@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * 数据表管理
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Slf4j

@@ -2,7 +2,7 @@ package com.sxpcwlkj.common.utils;
 
 /**
  * 字节转换
- * @author Xijue
+ * @author mmsAdmin
  */
 public class ByteStringUtil {
 

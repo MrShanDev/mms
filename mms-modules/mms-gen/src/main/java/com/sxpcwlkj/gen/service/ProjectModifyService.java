@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * 项目名变更
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public interface ProjectModifyService extends BaseService<ProjectModifyEntity> {

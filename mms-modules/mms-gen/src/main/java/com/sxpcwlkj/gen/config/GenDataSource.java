@@ -12,7 +12,7 @@ import java.sql.SQLException;
 /**
  * 代码生成器 数据源
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Data

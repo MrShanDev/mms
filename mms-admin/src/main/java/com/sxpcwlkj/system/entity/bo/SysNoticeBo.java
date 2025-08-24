@@ -12,7 +12,7 @@ import com.sxpcwlkj.datasource.entity.BaseEntity;
 /**
 * 系统公告Bo
 *
-* @author 西决
+* @author mmsAdmin
 * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
 */
 

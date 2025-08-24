@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * 项目名变更
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 

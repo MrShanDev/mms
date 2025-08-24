@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Ollama Service
- * @author xijue
+ * @author mmsAdmin
  */
 @Service
 @Slf4j

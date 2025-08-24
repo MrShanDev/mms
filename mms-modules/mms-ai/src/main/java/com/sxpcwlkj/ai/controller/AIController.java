@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * AI问答
- * @author xijue
+ * @author mmsAdmin
  */
 @RestController
 @CrossOrigin(origins = "*") // 允许跨域

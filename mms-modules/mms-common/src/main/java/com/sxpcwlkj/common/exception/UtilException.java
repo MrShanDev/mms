@@ -1,11 +1,12 @@
 package com.sxpcwlkj.common.exception;
 
+import java.io.Serial;
+
 /**
- * @ClassName UtilException
- * @Description TODO
- * @Author 西决
+ * @author mmsAdmin
  */
 public class UtilException extends RuntimeException {
+    @Serial
     private static final long serialVersionUID = 8247610319171014183L;
 
     public UtilException(Throwable e) {

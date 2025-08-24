@@ -6,7 +6,7 @@ import com.sxpcwlkj.gen.config.DbType;
 /**
  * ClickHouse 表数据查询
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 public class ClickHouseQuery implements AbstractQuery {

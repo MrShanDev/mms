@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * 基类管理
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @RestController

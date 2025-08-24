@@ -3,7 +3,7 @@ package com.sxpcwlkj.common.code.service;
 /**
  * @ClassName DictService
  * @Description  字典服务
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2023/1/23 20:27
  */
 public interface DictService {

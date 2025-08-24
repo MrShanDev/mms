@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 系统用户bo
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 

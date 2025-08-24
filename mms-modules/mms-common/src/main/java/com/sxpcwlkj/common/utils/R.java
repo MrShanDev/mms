@@ -24,21 +24,16 @@ public class R<T> {
 
     /**
      * 状态信息
-     * 0:success -1:fail
      */
-
-    private Integer status=0;
+    private Boolean status=false;
 
     /**
      * 返回信息
      */
-
     private String msg;
-
     /**
      * 数据
      */
-
     private T data;
     /**
      * 是否加密
@@ -58,7 +53,7 @@ public class R<T> {
     private static <T> R<T> response(Integer code, Boolean status, String message, T data) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(code);
-        ajaxResult.setStatus(code==200?0:-1);
+        ajaxResult.setStatus(code==200);
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
         return ajaxResult;
@@ -76,23 +71,22 @@ public class R<T> {
     private static <T> R<T> response(Integer code, Boolean status, String message) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(code);
-        ajaxResult.setStatus(code==200?0:-1);
+        ajaxResult.setStatus(code==200);
         ajaxResult.setMsg(message);
         return ajaxResult;
     }
 
     /**
      * 全参数方法
-     *
-     * @param aBoolean
-     * @param data
-     * @param <T>
-     * @return
+     * @param aBoolean 状态
+     * @param data 数据
+     * @return 返回结果
+     * @param <T> 泛型
      */
     protected static <T> R<T> response(Boolean aBoolean, T data) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(aBoolean ? HttpStatusEnum.SUCCESS.getCode() : HttpStatusEnum.ERROR.getCode());
-        ajaxResult.setStatus(aBoolean?0:-1);
+        ajaxResult.setStatus(aBoolean);
         ajaxResult.setMsg(aBoolean ? HttpStatusEnum.SUCCESS.getMessage() : HttpStatusEnum.ERROR.getMessage());
         ajaxResult.setData(data);
         return ajaxResult;
@@ -289,7 +283,7 @@ public class R<T> {
     public static <T> R<T> security(Integer code, String message, T data) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(code);
-        ajaxResult.setStatus(code==200?0:-1);
+        ajaxResult.setStatus(code==200);
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
         ajaxResult.setIsSecurity(true);
@@ -299,7 +293,7 @@ public class R<T> {
     public static <T> R<T> okFail(String message) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(200);
-        ajaxResult.setStatus(-1);
+        ajaxResult.setStatus(false);
         ajaxResult.setMsg(message);
         ajaxResult.setIsSecurity(false);
         return ajaxResult;
@@ -307,7 +301,7 @@ public class R<T> {
     public static <T> R<T> okFail(String message, T data) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(200);
-        ajaxResult.setStatus(0);
+        ajaxResult.setStatus(true);
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
         ajaxResult.setIsSecurity(false);

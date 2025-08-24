@@ -7,7 +7,7 @@ import java.util.UUID;
  * 随机对象工具类
  *
  * @name: RandomUtils
- * @author: 西决
+ * @author: mmsAdmin
  * @date: 2022/12/01
  **/
 

@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @ClassName HttpMethod
  * @Description TODO 请求方式
- * @Author 西决
+ * @Author mmsAdmin
  * @Date 2022/12/4 21:42
  */
 public enum HttpMethod {

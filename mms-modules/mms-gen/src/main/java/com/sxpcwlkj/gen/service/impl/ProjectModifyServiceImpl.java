@@ -24,7 +24,7 @@ import java.util.Map;
 /**
  * 项目名变更
  *
- * @author xijue
+ * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
 @Service
