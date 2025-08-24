@@ -13,16 +13,17 @@ sxpcwlkj:
   # 机构团队
   organization: 陕西品创网络
   # 开启验证码： true：开启  false： 关闭
-  isOpenCaptcha: false
+  isOpenCaptcha: true
 
 # 演示模式配置
 demo:
   mode:
-    enabled: false # 默认开启演示模式
+    enabled: true # 默认开启演示模式
     message-template: "演示模式下禁止{operation}操作 [实体: {entity}, 方法: {method}]"
     allowed-users:   # 白名单用户
       - admin
     allowed-methods:
+      - initSign
       - updateIpById
 
 --- # 验证码配置
