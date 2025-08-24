@@ -92,6 +92,8 @@ public class SpringDocProperties {
          */
         private String version = null;
 
+
+
     }
 
 }
