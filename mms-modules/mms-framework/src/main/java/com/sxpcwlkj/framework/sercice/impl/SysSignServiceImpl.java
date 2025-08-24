@@ -2,6 +2,7 @@ package com.sxpcwlkj.framework.sercice.impl;
 
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.constant.Constants;
@@ -53,11 +54,14 @@ public class SysSignServiceImpl implements SysSignService {
         SysSign sysSign = getSign();
         if(sysSign==null){
             sysSign=new SysSign();
+            sysSign.setId(IdUtil.getSnowflakeNextId());
             sysSign.setAppId(appid);
             sysSign.setSecretKey(Objects.requireNonNull(SignUtil.getAesKey()).getSecretKey());
             sysSign.setTimeOut(DateUtil.offset(new Date(), DateField.SECOND, timeOut));
             sysSign.setUserId(LoginObject.getLoginId());
-            boolean flag = sysSignMapper.insert(sysSign)>0;
+            sysSign.setCreatedBy(LoginObject.isLogin()?Long.parseLong(Objects.requireNonNull(LoginObject.getLoginId())):0);
+            sysSign.setCreatedTime(new Date());
+            boolean flag = sysSignMapper.initSign(sysSign)>0;
             if(flag){
                 RedisUtil.setCacheObject(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), sysSign);
                 RedisUtil.expire(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), Duration.ofSeconds(10));
