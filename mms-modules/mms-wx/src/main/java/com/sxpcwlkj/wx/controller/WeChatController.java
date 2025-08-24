@@ -142,12 +142,12 @@ public class WeChatController {
         if (encType == null) {
             // 明文传输的消息
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
-            log.error("\n消息内容为：\n{} ", inMessage.toString());
+            log.error("\n微信公众号扫码后的回调消息内容为：\n{} ", inMessage.toString());
             return wxCodeService.scanCallBack(inMessage);
         } else if ("aes".equalsIgnoreCase(encType)) {
             // aes加密的消息
             WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpService().getWxMpConfigStorage(), timestamp, nonce, msgSignature);
-            log.error("\n消息解密后内容为：\n{} ", inMessage.toString());
+            log.error("\n微信公众号扫码后的回调消息解密后内容为：\n{} ", inMessage.toString());
             return wxCodeService.scanCallBack(inMessage);
         }
         return "";
