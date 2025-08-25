@@ -1,9 +1,6 @@
 package com.sxpcwlkj.demo.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.dromara.sms4j.api.SmsBlend;
-import org.dromara.sms4j.api.entity.SmsResponse;
-import org.dromara.sms4j.core.factory.SmsFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

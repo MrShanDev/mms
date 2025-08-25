@@ -1,6 +1,5 @@
 package com.sxpcwlkj.ai.type;
 
-import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.common.utils.StringUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

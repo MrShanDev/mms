@@ -1,6 +1,5 @@
 package com.sxpcwlkj.gen.controller;
 
-import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.core.io.IoUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.gen.entity.Preview;
@@ -28,7 +27,7 @@ public class GeneratorController {
     /**
      * 生成代码（zip压缩包）
      */
-    @SaCheckRole("super_admin")
+
     @PostMapping("download")
     public void download(String tableIds, HttpServletResponse response) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -54,7 +53,6 @@ public class GeneratorController {
     /**
      * 生成代码（自定义目录）
      */
-    @SaCheckRole("super_admin")
     @ResponseBody
     @PostMapping("code")
     public R<String> code(@RequestBody Long[] tableIds) throws Exception {
@@ -68,7 +66,6 @@ public class GeneratorController {
     /**
      * 预览代码
      */
-    @SaCheckRole("super_admin")
     @GetMapping("/preview/{tableId}")
     public R<List<Preview>> preview(@PathVariable("tableId") Long tableId) throws Exception {
         List<Preview> results = generatorService.preview(tableId);

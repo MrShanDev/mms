@@ -2,7 +2,6 @@ package com.sxpcwlkj.system.entity.bo;
 
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 

@@ -1,6 +1,5 @@
 package com.sxpcwlkj.gen.controller;
 
-import cn.dev33.satoken.annotation.SaCheckRole;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.R;
@@ -36,7 +35,6 @@ public class TableController extends BaseController {
      *
      * @param query 查询参数
      */
-    @SaCheckRole("super_admin")
     @GetMapping("page")
     public TableDataInfo<TableEntity> page(GenQueryBo query) {
         return baseService.page(query);
@@ -47,7 +45,6 @@ public class TableController extends BaseController {
      *
      * @param id 表ID
      */
-    @SaCheckRole("super_admin")
     @GetMapping("{id}")
     public R<TableEntity> get(@PathVariable("id") Long id) {
         TableEntity table = baseService.selectVoById(id);
@@ -63,7 +60,6 @@ public class TableController extends BaseController {
      *
      * @param table 表信息
      */
-    @SaCheckRole("super_admin")
     @PutMapping
     public R<String> update(@RequestBody TableEntity table) {
         baseService.updateById(table);
@@ -75,7 +71,6 @@ public class TableController extends BaseController {
      *
      * @param ids 表id数组
      */
-    @SaCheckRole("super_admin")
     @DeleteMapping
     public R<String> delete(@RequestBody Long[] ids) {
         baseService.deleteBatchIds(ids);
@@ -87,7 +82,6 @@ public class TableController extends BaseController {
      *
      * @param id 表ID
      */
-    @SaCheckRole("super_admin")
     @PostMapping("sync/{id}")
     public R<String> sync(@PathVariable("id") Long id) {
         baseService.sync(id);
@@ -100,7 +94,6 @@ public class TableController extends BaseController {
      * @param datasourceId  数据源ID
      * @param tableNameList 表名列表
      */
-    @SaCheckRole("super_admin")
     @PostMapping("import/{datasourceId}")
     public R<String> tableImport(@PathVariable("datasourceId") Long datasourceId, @RequestBody List<String> tableNameList) {
         for (String tableName : tableNameList) {
@@ -115,7 +108,6 @@ public class TableController extends BaseController {
      * @param tableId        表ID
      * @param tableFieldList 字段列表
      */
-    @SaCheckRole("super_admin")
     @PutMapping("field/{tableId}")
     public R<String> updateTableField(@PathVariable("tableId") Long tableId, @RequestBody List<TableFieldEntity> tableFieldList) {
         tableFieldService.updateTableField(tableId, tableFieldList);

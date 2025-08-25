@@ -7,17 +7,12 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 import com.sxpcwlkj.common.utils.JsonUtil;
 import com.sxpcwlkj.common.utils.SpringUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
-import com.sxpcwlkj.common.properties.DemoModeProperties;
 import com.sxpcwlkj.datasource.handler.DemoModeContextHolder;
-import com.sxpcwlkj.datasource.handler.DemoModeInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -26,7 +21,6 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.BufferedReader;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author mmsAdmin

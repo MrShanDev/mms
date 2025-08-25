@@ -13,7 +13,6 @@ import com.sxpcwlkj.common.utils.IPUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.framework.utils.SignUtil;
 import com.sxpcwlkj.redis.RedisUtil;
-import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.system.entity.SysTenant;
 import com.sxpcwlkj.system.entity.SysUser;
 import com.sxpcwlkj.system.entity.bo.LoginBodyBo;
@@ -27,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 

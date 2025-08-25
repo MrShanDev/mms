@@ -1,19 +1,6 @@
 package com.sxpcwlkj.wx.config;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
-import cn.binarywang.wx.miniapp.config.WxMaConfig;
-import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
-import com.github.binarywang.wxpay.config.WxPayConfig;
-import com.github.binarywang.wxpay.service.WxPayService;
-import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.Data;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
-import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -52,7 +39,7 @@ public class WxProperties {
     private Integer modelType=1;
     // 支付回调
     private String notifyUrl;
-    
+
     private String token;
 
     private String aesKey;

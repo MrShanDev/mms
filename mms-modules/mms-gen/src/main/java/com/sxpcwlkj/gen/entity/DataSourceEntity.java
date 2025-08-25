@@ -2,7 +2,6 @@ package com.sxpcwlkj.gen.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.sxpcwlkj.gen.common.annotation.EncryptParameter;
 import lombok.Data;
 
 import java.util.Date;

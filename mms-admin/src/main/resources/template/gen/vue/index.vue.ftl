@@ -184,18 +184,16 @@
 </template>
 //ModuleName ${tableComment}
 <script setup lang="ts" name="${moduleName}${FunctionName}">
-    import { defineAsyncComponent, reactive, onMounted, ref } from "vue";
-    import { ElMessageBox, ElMessage } from "element-plus";
-    import { CURDEnum } from "/@/enums/CURDEnum";
-    import { isEmpty, generateUUID } from "/@/utils/mms";
+    import {defineAsyncComponent, onMounted, reactive, ref} from "vue";
+    import {ElMessage, ElMessageBox} from "element-plus";
+    import {CURDEnum} from "/@/enums/CURDEnum";
+    import {generateUUID, isEmpty} from "/@/utils/mms";
     import {NextLoading} from "/@/utils/loading";
-    import FastSelect from "/@/components/fast-select/src/fast-select.vue";
-    import {${functionName}Api} from '/@/views/${moduleName}/${functionName}';
-    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/views/${moduleName}/${functionName}/type';
+    import {${functionName}Api, ${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/';
+
     const baseApi = ${functionName}Api();
     <#list formList as field>
     <#if field.formDict??>
-    import FastTableColumn from "/@/components/fast-table-column";
     <#break>
     </#if>
     </#list>

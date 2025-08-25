@@ -1,7 +1,6 @@
 package com.sxpcwlkj.common.code.entity;
 
 import cn.hutool.json.JSONUtil;
-import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
 import lombok.Data;
 import lombok.Getter;

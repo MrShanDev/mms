@@ -1,24 +1,16 @@
 package com.sxpcwlkj.ai.service;
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sxpcwlkj.ai.type.AIProvider;
 import com.sxpcwlkj.ai.utils.DequeUtil;
 import com.sxpcwlkj.ai.utils.FileParserUtil;
-import com.sxpcwlkj.common.utils.DataUtil;
-import com.sxpcwlkj.common.utils.IPUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSourceListener;
-import okhttp3.sse.EventSources;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

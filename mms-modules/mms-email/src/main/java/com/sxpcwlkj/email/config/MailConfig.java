@@ -6,16 +6,13 @@ import com.sxpcwlkj.common.enums.ConfigKeyNum;
 import com.sxpcwlkj.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.email.jakarta.api.MailClient;
 import org.dromara.email.jakarta.comm.config.MailSmtpConfig;
 import org.dromara.email.jakarta.core.factory.MailFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * JavaMail 配置

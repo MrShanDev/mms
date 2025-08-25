@@ -1,6 +1,8 @@
 package com.sxpcwlkj.datasource.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.Version;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

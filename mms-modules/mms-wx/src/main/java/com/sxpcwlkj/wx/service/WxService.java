@@ -4,7 +4,6 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.sxpcwlkj.wx.config.WxProperties;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 
 /**
  * @author mmsAdmin
