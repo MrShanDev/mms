@@ -97,6 +97,12 @@ public class SysFunctionBo extends BaseEntity {
      * 是否总是显示
      */
     private Integer alwaysShow;
-
+    /**
+     * 级别
+     */
     private Integer level=0;
+    /**
+     * 是否快捷菜单
+     */
+    private Integer isFast;
 }

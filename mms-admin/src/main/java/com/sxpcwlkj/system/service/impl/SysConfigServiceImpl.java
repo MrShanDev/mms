@@ -253,4 +253,12 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
         RedisUtil.expire(ConfigKeyNum.config_wx.getKey(), Duration.ofDays(99999999));
         return true;
     }
+
+    @Override
+    public List<SysConfigVo> selectEventList(int size) {
+        return baseMapper.selectVoList(new LambdaQueryWrapper<SysConfig>()
+            .eq(SysConfig::getConfigType,3)
+            .last("LIMIT "+size)
+        );
+    }
 }
