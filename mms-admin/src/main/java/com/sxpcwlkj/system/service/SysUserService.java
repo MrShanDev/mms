@@ -182,4 +182,6 @@ public interface SysUserService {
      * @return  true：成功 false ：失败
      */
     boolean bindingOpenId(String openId);
+
+    Long selectTool();
 }

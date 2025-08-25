@@ -95,4 +95,9 @@ public class SysNoticeServiceImpl extends BaseServiceImpl<SysNotice, SysNoticeVo
     public Boolean imports(Set<SysNoticeExport> list) {
         return true;
     }
+
+    @Override
+    public Long selectTool() {
+        return baseMapper.selectCount(new LambdaQueryWrapper<SysNotice>().eq(SysNotice::getStatus,0));
+    }
 }

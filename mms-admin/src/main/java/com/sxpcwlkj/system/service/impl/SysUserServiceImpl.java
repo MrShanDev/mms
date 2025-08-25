@@ -446,6 +446,11 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public Long selectTool() {
+        return baseMapper.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getStatus, 0));
+    }
+
+    @Override
     public List<AdminMenuTree> getAdminMenuTree(String userId) {
 
         SysUserVo userVo = this.getUserRoleAnfFunctionInfo(userId);
