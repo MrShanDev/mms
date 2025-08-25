@@ -14,12 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "captcha")
 public class CaptchaProperties {
-
-    /**
-     * 是否开启验证码
-     */
-    private boolean status;
-
     /**
      * 验证码类型
      */

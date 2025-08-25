@@ -33,8 +33,5 @@ public class MsProperties {
      * 机构组织
      */
     private String organization;
-    /**
-     * 是否开启验证码
-     */
-    private Boolean isOpenCaptcha;
+
 }

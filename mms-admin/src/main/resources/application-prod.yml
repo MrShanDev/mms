@@ -1,8 +1,3 @@
---- # 项目基础信息
-sxpcwlkj:
-  # 开启验证码： true：开启  false： 关闭
-  isOpenCaptcha: true
-
 --- # powerjob 配置
 powerjob:
   worker:
@@ -10,7 +5,6 @@ powerjob:
     enabled: false
     # 需要先在 powerjob 登录页执行应用注册后才能使用
     app-name: mms
-    enable-test-mode: false
     max-appended-wf-context-length: 4096
     max-result-length: 4096
     # 28080 端口 随着主应用端口飘逸 避免集群冲突

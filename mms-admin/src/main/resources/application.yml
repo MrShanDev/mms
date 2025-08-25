@@ -12,8 +12,6 @@ sxpcwlkj:
   copyrightYear: 2018
   # 机构团队
   organization: 陕西品创网络
-  # 开启验证码： true：开启  false： 关闭
-  isOpenCaptcha: false
 
 # 演示模式配置
 demo:
@@ -23,12 +21,11 @@ demo:
     allowed-users:   # 白名单用户
       - admin
     allowed-methods:
+      - initSign
       - updateIpById
 
 --- # 验证码配置
 captcha:
-  # 是否开启验证码：  true  开启  false 关闭
-  status: true
   # 页面 <参数设置> 可开启关闭 验证码校验
   # 线段干扰 LINE 圆圈干扰 CIRCLE 扭曲干扰 SHEAR 计算题型 CALCULATE
   type: LINE
