@@ -3,7 +3,7 @@ package com.sxpcwlkj.system.controller;
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.code.entity.CaptchaEntity;
-import com.sxpcwlkj.common.properties.MssAdminProperties;
+import com.sxpcwlkj.common.properties.MmsAdminProperties;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.system.service.CaptchaService;
@@ -35,7 +35,7 @@ import java.util.Map;
 public class CaptchaController extends BaseController {
     private final SysTenantService sysTenantService;
     private final CaptchaService captchaService;
-    private final MssAdminProperties msProperties;
+    private final MmsAdminProperties msProperties;
 
     /**
      * 系统配置
