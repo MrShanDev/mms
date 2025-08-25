@@ -9,6 +9,7 @@ import com.sxpcwlkj.common.code.entity.CaptchaEntity;
 import com.sxpcwlkj.common.code.entity.ConfigEntity;
 import com.sxpcwlkj.common.constant.Constants;
 import com.sxpcwlkj.common.enums.ConfigKeyNum;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.properties.CaptchaProperties;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -22,6 +23,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -45,12 +47,12 @@ public class CaptchaServiceImpl implements CaptchaService {
         }
         convert.forEach(smsConfigEntity -> {
             if("sys_base_captcha_state".equals(smsConfigEntity.getConfigKey())){
-               if(Convert.toInt(smsConfigEntity.getConfigValue()) == 1){
+               if(Objects.equals(Convert.toInt(smsConfigEntity.getConfigValue()), SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())){
                    isOpen.set(true);
                }
             }
         });
-        if (!captchaProperties.isStatus()||!isOpen.get()) {
+        if (!isOpen.get()) {
             data.put(CaptchaEntity.CODE.CAPTCHA_MSG.getValue(), "系统验证码未开启!");
             return data;
         }

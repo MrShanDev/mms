@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2023-1-5 23:34:04",
-  "updatedTime": "2025-6-23 10:04:54",
+  "updatedTime": "2025-6-24 15:08:16",
   "dbConns": [],
   "profile": {
     "default": {
@@ -32288,6 +32288,384 @@
           "innerType": ""
         }
       ]
+    },
+    {
+      "id": "CFAB2617-0FCC-4852-A8E7-33CD8D456F35",
+      "defKey": "website_variable",
+      "headers": [
+        {
+          "refKey": "hideInGraph",
+          "hideInGraph": true
+        },
+        {
+          "refKey": "defKey",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defName",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "defaultValue",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "primaryKey",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "notNull",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "autoIncrement",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "domain",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "type",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "len",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "scale",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "comment",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "refDict",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "isStandard",
+          "freeze": false,
+          "hideInGraph": false
+        },
+        {
+          "refKey": "uiHint",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "extProps",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr1",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr2",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr3",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr4",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr5",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr6",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr7",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr8",
+          "freeze": false,
+          "hideInGraph": true
+        },
+        {
+          "refKey": "attr9",
+          "freeze": false,
+          "hideInGraph": true
+        }
+      ],
+      "fields": [
+        {
+          "defKey": "id",
+          "defName": "ID",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": true,
+          "notNull": true,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "16120F75-6AA7-4483-868D-F07F511BB081",
+          "id": "7EBD7821-99DB-49A0-B9FF-E34CE0FA53EC"
+        },
+        {
+          "defKey": "variable_code",
+          "defName": "变量编码",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "1F44EA6B-8C83-440C-932C-BBEEB46D4212"
+        },
+        {
+          "defKey": "variable_lable",
+          "defName": "变量名",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "593F0E12-2EFB-44DE-A65A-C1E872660E60"
+        },
+        {
+          "defKey": "variable_value",
+          "defName": "变量值",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "3E948CEC-3070-472C-AF92-F3CA11EC9D15",
+          "id": "8FE8B4B7-EF38-4DCC-A41E-639424D0674B"
+        },
+        {
+          "defKey": "status",
+          "defName": "状态",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "0",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
+          "extProps": {},
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "id": "AF4F5406-1B8F-4838-9C69-2C28E92A424A"
+        },
+        {
+          "defKey": "sort",
+          "defName": "排序",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "0",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
+          "extProps": {},
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "id": "4464EB5D-B732-43E7-83ED-6BDE1E761946"
+        },
+        {
+          "defKey": "revision",
+          "defName": "乐观锁",
+          "comment": "",
+          "domain": "16120F75-6AA7-4483-868D-F07F511BB081",
+          "type": "",
+          "len": 32,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "1",
+          "hideInGraph": false,
+          "refDict": "",
+          "uiHint": "",
+          "id": "76995AF9-F974-4DCC-B9D8-7E1F413A527A",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "tenant_id",
+          "defName": "租户号",
+          "comment": "",
+          "type": "",
+          "len": 32,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "000000",
+          "hideInGraph": false,
+          "domain": "16120F75-6AA7-4483-868D-F07F511BB081",
+          "refDict": "",
+          "uiHint": "",
+          "id": "1A8583A6-E3ED-4B7F-9A96-7A321EFFD25D",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "created_by",
+          "defName": "创建人",
+          "comment": "",
+          "domain": "16120F75-6AA7-4483-868D-F07F511BB081",
+          "type": "",
+          "len": 32,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "uiHint": "",
+          "id": "878F4941-FDD6-44FD-AE10-E03B541E1ECB",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "created_time",
+          "defName": "创建时间",
+          "comment": "",
+          "domain": "7CFFA0D3-6A93-4DDC-BC10-DF21211064DC",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "uiHint": "",
+          "id": "5BC1E149-1D98-47A6-94A3-4F9F15F75699",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
+        },
+        {
+          "defKey": "updated_by",
+          "defName": "更新人",
+          "comment": "",
+          "domain": "16120F75-6AA7-4483-868D-F07F511BB081",
+          "type": "",
+          "len": 32,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "uiHint": "",
+          "id": "AFFE3587-80DF-4B18-A2D0-CF6AA0BACC62",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        },
+        {
+          "defKey": "updated_time",
+          "defName": "更新时间",
+          "comment": "",
+          "domain": "7CFFA0D3-6A93-4DDC-BC10-DF21211064DC",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "uiHint": "",
+          "id": "11B80493-D9F7-4CFF-9ECE-EE54CF847D4A",
+          "baseType": "89D69E81-EA34-42EE-9FA2-93B8BD27E098"
+        },
+        {
+          "defKey": "remark",
+          "defName": "备注",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "6C2E5214-E727-46AD-8936-F520AC519CDA",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64"
+        }
+      ],
+      "properties": {
+        "partitioned by": "(date string)",
+        "row format delimited": "",
+        "fields terminated by ','": "",
+        "collection items terminated by '-'": "",
+        "map keys terminated by ':'": "",
+        "store as textfile;": ""
+      },
+      "type": "P",
+      "defName": "网站变量",
+      "notes": {},
+      "correlations": []
     }
   ],
   "views": [],
@@ -33952,6 +34330,51 @@
       "canvasData": {
         "cells": [
           {
+            "id": "dc7a4d54-d06f-422a-9269-795165a716aa",
+            "shape": "table",
+            "position": {
+              "x": -240.00000000000026,
+              "y": 30.000000000000597
+            },
+            "count": 0,
+            "originKey": "04F0CF55-410A-4BF5-AB44-577796AB8232",
+            "type": "P",
+            "size": {
+              "width": 500,
+              "height": 300
+            }
+          },
+          {
+            "id": "9c774cb1-a454-4a18-8208-beb990f472c2",
+            "shape": "table",
+            "position": {
+              "x": 459,
+              "y": 468
+            },
+            "count": 0,
+            "originKey": "4D681ED1-403F-4F8C-AB63-815B15CC8B60",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "b54a583b-48fd-4018-9d41-3eb9d6a55e1a",
+            "shape": "table",
+            "position": {
+              "x": 459,
+              "y": 872.0000000000005
+            },
+            "count": 0,
+            "originKey": "7B4B3386-00F7-4B51-A0EF-6057732AE928",
+            "type": "P",
+            "size": {
+              "width": 440,
+              "height": 280
+            }
+          },
+          {
             "id": "b8d03f45-10ce-45c4-a4aa-e6e0a22ebdd6",
             "shape": "erdRelation",
             "source": {
@@ -33964,9 +34387,6 @@
             },
             "relation": "1:n",
             "fillColor": "#ACDAFC",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
@@ -33986,9 +34406,6 @@
             },
             "relation": "1:n",
             "fillColor": "#ACDAFC",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
@@ -33996,44 +34413,14 @@
             }
           },
           {
-            "id": "dc7a4d54-d06f-422a-9269-795165a716aa",
-            "shape": "table",
-            "position": {
-              "x": -240.00000000000026,
-              "y": 30.000000000000597
-            },
-            "count": 0,
-            "originKey": "04F0CF55-410A-4BF5-AB44-577796AB8232",
-            "type": "P",
-            "size": {
-              "width": 500,
-              "height": 300
-            }
-          },
-          {
-            "id": "5565b918-cec8-460c-88c4-c49de3a674f8",
-            "shape": "table",
-            "position": {
-              "x": -245.00000000000026,
-              "y": 468
-            },
-            "count": 0,
-            "originKey": "920A8E89-75C6-4A98-BD3F-89EAE67C4362",
-            "type": "P",
-            "size": {
-              "width": 510,
-              "height": 300
-            }
-          },
-          {
-            "id": "9c774cb1-a454-4a18-8208-beb990f472c2",
+            "id": "c9399878-56b7-4ebc-a377-d4331666e9f9",
             "shape": "table",
             "position": {
               "x": 459,
-              "y": 468
+              "y": 30
             },
             "count": 0,
-            "originKey": "4D681ED1-403F-4F8C-AB63-815B15CC8B60",
+            "originKey": "CFAB2617-0FCC-4852-A8E7-33CD8D456F35",
             "type": "P",
             "size": {
               "width": 430,
@@ -34056,18 +34443,18 @@
             }
           },
           {
-            "id": "b54a583b-48fd-4018-9d41-3eb9d6a55e1a",
+            "id": "5565b918-cec8-460c-88c4-c49de3a674f8",
             "shape": "table",
             "position": {
-              "x": 459,
-              "y": 872.0000000000005
+              "x": -245.00000000000026,
+              "y": 468
             },
             "count": 0,
-            "originKey": "7B4B3386-00F7-4B51-A0EF-6057732AE928",
+            "originKey": "920A8E89-75C6-4A98-BD3F-89EAE67C4362",
             "type": "P",
             "size": {
-              "width": 440,
-              "height": 280
+              "width": 510,
+              "height": 300
             }
           }
         ]

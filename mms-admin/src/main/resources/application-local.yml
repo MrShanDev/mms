@@ -1,8 +1,3 @@
---- # 项目基础信息
-sxpcwlkj:
-  # 开启验证码： true：开启  false： 关闭
-  isOpenCaptcha: false
-
 --- # powerjob 配置
 powerjob:
   worker:
@@ -43,8 +38,7 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      # 账号加密，公钥
-
+      # 账号密码
       datasource:
         # 主库数据源
         master:
