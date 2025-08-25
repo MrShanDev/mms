@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
+import com.sxpcwlkj.common.properties.MsProperties;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
@@ -35,6 +36,7 @@ public class HomeController extends BaseController {
     private final SysUserService sysUserService;
     private final SysFunctionService functionService;
     private final SysConfigService configService;
+    private final MsProperties msProperties;
 
     /**
      * 控制台默认数据
@@ -51,6 +53,7 @@ public class HomeController extends BaseController {
         map.put("fastList",fastList);
         List<SysConfigVo> eventList = configService.selectEventList(12);
         map.put("eventList",eventList);
+        map.put("systemInfo",msProperties);
         return R.success(map);
     }
 
