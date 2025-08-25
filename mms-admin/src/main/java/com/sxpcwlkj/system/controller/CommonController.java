@@ -14,6 +14,7 @@ import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
 import com.sxpcwlkj.common.exception.MmsException;
+import com.sxpcwlkj.common.properties.DemoModeProperties;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.common.utils.IPUtil;
 import com.sxpcwlkj.common.utils.MapstructUtil;
@@ -62,6 +63,7 @@ public class CommonController extends BaseController {
     private final SysDictService sysDictService;
     private final WxCodeService wxCodeService;
     private  final SysSignService sysSignService;
+    private final DemoModeProperties demoModeProperties;
 
     @Value("${server.port}")
     private String port;
@@ -105,7 +107,9 @@ public class CommonController extends BaseController {
             }
 
         });
-
+        map.put("demoMode",demoModeProperties.isEnabled());
+        map.put("demoAccount",demoModeProperties.isEnabled()?"mms":"");
+        map.put("demoPassword",demoModeProperties.isEnabled()?"123456":"");
         return R.success("base system config.",map);
     }
 
