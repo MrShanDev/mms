@@ -1,7 +1,6 @@
 package com.sxpcwlkj.email.config;
 
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 /**
  * JavaMail 配置属性

@@ -1,7 +1,6 @@
 package com.sxpcwlkj.sms.enums;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
-import lombok.Getter;
 
 /**
  * 短信服务商

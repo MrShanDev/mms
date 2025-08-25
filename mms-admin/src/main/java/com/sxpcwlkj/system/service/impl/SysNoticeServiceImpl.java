@@ -3,9 +3,8 @@ package com.sxpcwlkj.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sxpcwlkj.common.enums.SystemCommonEnum;
-import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.DataUtil;
+import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
@@ -13,19 +12,19 @@ import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
 import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
 import com.sxpcwlkj.system.entity.SysNotice;
 import com.sxpcwlkj.system.entity.bo.SysNoticeBo;
-import com.sxpcwlkj.system.entity.vo.SysNoticeVo;
 import com.sxpcwlkj.system.entity.export.SysNoticeExport;
+import com.sxpcwlkj.system.entity.vo.SysNoticeVo;
 import com.sxpcwlkj.system.mapper.SysNoticeMapper;
 import com.sxpcwlkj.system.service.SysNoticeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
+import java.util.Set;
 /**
  * 系统公告-接口实现
  *

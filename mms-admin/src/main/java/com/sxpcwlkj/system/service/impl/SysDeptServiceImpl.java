@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
-import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.DataUtil;
+import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
@@ -13,19 +13,20 @@ import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
 import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
 import com.sxpcwlkj.system.entity.SysDept;
 import com.sxpcwlkj.system.entity.bo.SysDeptBo;
-import com.sxpcwlkj.system.entity.vo.SysDeptVo;
 import com.sxpcwlkj.system.entity.export.SysDeptExport;
+import com.sxpcwlkj.system.entity.vo.SysDeptVo;
 import com.sxpcwlkj.system.mapper.SysDeptMapper;
 import com.sxpcwlkj.system.service.SysDeptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
-import java.util.Set;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 /**
  * 系统部门-接口实现
  *

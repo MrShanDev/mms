@@ -1,12 +1,11 @@
 package com.sxpcwlkj.system.entity;
 
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.sxpcwlkj.datasource.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import com.baomidou.mybatisplus.annotation.*;
-import com.sxpcwlkj.datasource.entity.BaseEntity;
-import java.util.Date;
 
 
 /**

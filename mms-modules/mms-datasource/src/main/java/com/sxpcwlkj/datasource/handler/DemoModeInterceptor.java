@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.exception.DemoModeException;
 import com.sxpcwlkj.common.properties.DemoModeProperties;
-import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
@@ -16,10 +15,6 @@ import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author mmsAdmin

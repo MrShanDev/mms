@@ -1,12 +1,6 @@
 package com.sxpcwlkj.framework.entity;
 
-import com.alibaba.excel.annotation.ExcelProperty;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.Version;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sxpcwlkj.common.annotation.IgnoreSign;
-import com.sxpcwlkj.common.utils.DateUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

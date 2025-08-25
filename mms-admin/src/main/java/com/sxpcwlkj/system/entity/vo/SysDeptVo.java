@@ -1,15 +1,15 @@
 package com.sxpcwlkj.system.entity.vo;
 
 
-import java.io.Serial;
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.sxpcwlkj.framework.entity.BaseEntityVo;
+import com.sxpcwlkj.system.entity.SysDept;
+import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import io.github.linpeilie.annotations.AutoMapper;
-import com.sxpcwlkj.system.entity.SysDept;
-import com.sxpcwlkj.framework.entity.BaseEntityVo;
-import com.alibaba.excel.annotation.ExcelProperty;
+
+import java.io.Serial;
 import java.util.List;
-import java.util.Date;
 
 /**
 * 系统部门Vo

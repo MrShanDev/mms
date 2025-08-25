@@ -133,24 +133,19 @@
 </template>
 //ModuleName ${tableComment}
 <script setup lang="ts" name="${moduleName}${FunctionName}Dialog">
-    import { reactive, ref, nextTick } from "vue";
-    import { CURDEnum } from '/@/enums/CURDEnum';
-    import {${FunctionName}Bo,${FunctionName}Vo } from '/@/views/${moduleName}/${functionName}/type';
+    import {nextTick, reactive, ref} from "vue";
+    import {CURDEnum} from '/@/enums/CURDEnum';
+    import {${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/';
+
     const dialogWidth = ref('50vw');
     <#list fastList as field>
     <#if field == 'editor'>
     dialogWidth.value = '75vw';
-    import FastEditor from "/@/components/fast-editor/src/fast-editor.vue";
     <#elseif field == 'select'>
-    import FastSelect from "/@/components/fast-select/src/fast-select.vue";
     <#elseif field == 'file'>
-    import FastFile from "/@/components/fast-upload/file.vue";
     <#elseif field == 'image'>
-    import FastImg from "/@/components/fast-upload/img.vue";
     <#elseif field == 'images'>
-    import FastImgs from "/@/components/fast-upload/imgs.vue";
     <#elseif field == 'radio'>
-    import FastSwitch from "/@/components/fast-switch/src/fast-switch.vue";
     </#if>
     </#list>
     // 定义子组件向父组件传值/事件

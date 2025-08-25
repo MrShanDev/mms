@@ -4,13 +4,12 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sxpcwlkj.common.code.entity.WxCodeBo;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
 import com.sxpcwlkj.common.utils.DataUtil;
-import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.wx.config.WxProperties;
-import com.sxpcwlkj.common.code.entity.WxCodeBo;
 import com.sxpcwlkj.wx.entity.WechatEventEnum;
 import com.sxpcwlkj.wx.service.WxCodeService;
 import com.sxpcwlkj.wx.service.WxService;
@@ -25,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Date;
-import java.util.Map;
 
 /**
  *

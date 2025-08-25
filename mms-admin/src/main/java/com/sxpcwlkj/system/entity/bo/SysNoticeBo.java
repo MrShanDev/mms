@@ -1,13 +1,14 @@
 package com.sxpcwlkj.system.entity.bo;
 
-import java.io.Serial;
+import com.sxpcwlkj.datasource.entity.BaseEntity;
+import com.sxpcwlkj.system.entity.SysNotice;
+import io.github.linpeilie.annotations.AutoMapper;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.validation.constraints.*;
-import io.github.linpeilie.annotations.AutoMapper;
-import com.sxpcwlkj.system.entity.SysNotice;
-import java.util.Date;
-import com.sxpcwlkj.datasource.entity.BaseEntity;
+
+import java.io.Serial;
 
 /**
 * 系统公告Bo

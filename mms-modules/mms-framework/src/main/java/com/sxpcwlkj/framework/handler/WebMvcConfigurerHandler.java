@@ -4,7 +4,6 @@ package com.sxpcwlkj.framework.handler;
 import com.sxpcwlkj.common.properties.WebThymeleafProperties;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;

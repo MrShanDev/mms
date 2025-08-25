@@ -3,8 +3,9 @@ package com.sxpcwlkj.system.service;
 import com.sxpcwlkj.framework.sercice.BaseService;
 import com.sxpcwlkj.system.entity.SysDept;
 import com.sxpcwlkj.system.entity.bo.SysDeptBo;
-import com.sxpcwlkj.system.entity.vo.SysDeptVo;
 import com.sxpcwlkj.system.entity.export.SysDeptExport;
+import com.sxpcwlkj.system.entity.vo.SysDeptVo;
+
 import java.util.List;
 import java.util.Set;
 

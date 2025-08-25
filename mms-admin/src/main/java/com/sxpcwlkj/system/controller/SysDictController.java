@@ -4,7 +4,6 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.sxpcwlkj.common.annotation.MssSafety;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.system.entity.bo.SysDictBo;

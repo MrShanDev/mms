@@ -1,7 +1,6 @@
 package com.sxpcwlkj.common.utils;
 
 import com.baomidou.mybatisplus.annotation.IEnum;
-import lombok.Getter;
 
 /**
  * 计算密码强度
