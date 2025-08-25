@@ -138,7 +138,14 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
         LambdaQueryWrapper<SysConfig> wrapper = Wrappers.lambdaQuery();
         wrapper.like(StringUtil.isNotEmpty(query.getConfigName()), SysConfig::getConfigName, query.getConfigName());
         wrapper.eq(StringUtil.isNotEmpty(query.getConfigKey()), SysConfig::getConfigKey, query.getConfigKey());
-        wrapper.eq(StringUtil.isNotEmpty(query.getConfigType()), SysConfig::getConfigType, query.getConfigType());
+        if(StringUtil.isNotEmpty(query.getConfigType())&&query.getConfigType()==2){
+            //查询 configType=2 自定义 or configType=3 项目
+            wrapper.or().eq(SysConfig::getConfigType,2);
+            wrapper.or().eq(SysConfig::getConfigType,3);
+        }else {
+            wrapper.eq(StringUtil.isNotEmpty(query.getConfigType()), SysConfig::getConfigType, query.getConfigType());
+        }
+
         wrapper.eq(StringUtil.isNotEmpty(query.getStatus()), SysConfig::getStatus, query.getStatus());
         return wrapper;
     }
