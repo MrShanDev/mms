@@ -91,7 +91,10 @@ public class SysFunctionVo {
      * 是否总是显示
      */
     private Integer alwaysShow;
-
+    /**
+     * 是否快捷菜单
+     */
+    private Integer isFast;
 
     private String revision;
 

@@ -81,6 +81,7 @@ public class AuthController extends BaseController {
      * @return 退出结果
      */
     @Operation(summary = "退出登录", description = "退出当前登录会话")
+    @SaIgnore
     @PostMapping("/logout")
     public R<String> logout() {
         loginService.logout();

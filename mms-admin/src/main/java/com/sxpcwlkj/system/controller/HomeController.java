@@ -8,16 +8,18 @@ import cn.hutool.core.date.DateUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.system.entity.vo.SysConfigVo;
+import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
+import com.sxpcwlkj.system.service.SysConfigService;
+import com.sxpcwlkj.system.service.SysFunctionService;
+import com.sxpcwlkj.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 首页控制台
@@ -29,6 +31,28 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("system/home")
 public class HomeController extends BaseController {
+
+    private final SysUserService sysUserService;
+    private final SysFunctionService functionService;
+    private final SysConfigService configService;
+
+    /**
+     * 控制台默认数据
+     * @return 数据
+     */
+    @SaCheckLogin
+    @GetMapping("/homeInit")
+    public R<Object> homeInit(){
+        Map<String,Object> map=new HashMap<>();
+        map.put("userName",sysUserService.selectVoById(LoginObject.getLoginId()).getUserName());
+        int week = DateUtil.dayOfWeek(new Date());
+        map.put("week",week==1?"星期日":week==2?"星期一":week==3?"星期二":week==4?"星期三":week==5?"星期四":week==6?"星期五":"星期六");
+        List<SysFunctionVo> fastList= functionService.selectIsFast(9);
+        map.put("fastList",fastList);
+        List<SysConfigVo> eventList = configService.selectEventList(12);
+        map.put("eventList",eventList);
+        return R.success(map);
+    }
 
     /**
      * 会员类别

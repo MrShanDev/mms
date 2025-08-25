@@ -27,4 +27,11 @@ public interface SysConfigService extends BaseService<SysConfig, SysConfigVo, Sy
     Boolean initEmail();
 
     Boolean initWx();
+
+    /**
+     * 查询项目列表
+     * @param size 数量
+     * @return 数据
+     */
+    List<SysConfigVo> selectEventList(int size);
 }

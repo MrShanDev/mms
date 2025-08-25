@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * @Description TODO
- * @Author sxpcwlkj
- * @Version v1.0.0
+ * 系统菜单
  */
 @RequiredArgsConstructor
 @Service("sysFunction")
@@ -84,6 +82,15 @@ public class SysFunctionServiceImpl implements SysFunctionService {
     public List<AdminMenuTree> getAllMenuTree() {
         List<SysFunctionVo> functionVos = baseMapper.selectVoList(new LambdaQueryWrapper<SysFunction>().orderByAsc(SysFunction::getSort));
         return getAdminMenuTree(functionVos, "0");
+    }
+
+    @Override
+    public List<SysFunctionVo> selectIsFast(int size) {
+        return baseMapper.selectVoList(new LambdaQueryWrapper<SysFunction>()
+            .eq(SysFunction::getIsFast, 1)
+            .ne(SysFunction::getComponent,"")
+            .last("LIMIT "+size)
+        );
     }
 
     /**

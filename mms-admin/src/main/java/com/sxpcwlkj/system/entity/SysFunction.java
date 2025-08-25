@@ -94,4 +94,8 @@ public class SysFunction extends BaseEntity {
      * 是否总是显示
      */
     private Integer alwaysShow;
+    /**
+     * 是否快捷菜单
+     */
+    private Integer isFast;
 }

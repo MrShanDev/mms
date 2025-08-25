@@ -45,4 +45,10 @@ public interface SysFunctionService {
 
     List<AdminMenuTree> getAllMenuTree();
 
+    /**
+     * 快捷菜单
+     * @param size 查询数量
+     * @return 数据
+     */
+    List<SysFunctionVo> selectIsFast(int size);
 }
