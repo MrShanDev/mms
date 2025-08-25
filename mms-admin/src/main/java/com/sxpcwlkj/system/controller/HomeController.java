@@ -5,9 +5,9 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.sxpcwlkj.MmsAdminApplication;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
+import com.sxpcwlkj.common.properties.MmsAdminProperties;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
@@ -37,7 +37,7 @@ public class HomeController extends BaseController {
     private final SysUserService sysUserService;
     private final SysFunctionService functionService;
     private final SysConfigService configService;
-    private final MmsAdminApplication mmsAdminApplication;
+    private final MmsAdminProperties mmsAdminProperties;
     private final SysNoticeService sysNoticeService;
 
     /**
@@ -55,7 +55,7 @@ public class HomeController extends BaseController {
         map.put("fastList",fastList);
         List<SysConfigVo> eventList = configService.selectEventList(12);
         map.put("eventList",eventList);
-        map.put("systemInfo",mmsAdminApplication);
+        map.put("systemInfo",mmsAdminProperties);
         map.put("userTool",sysUserService.selectTool());
         map.put("newsTool",sysNoticeService.selectTool());
         map.put("task","0/0");

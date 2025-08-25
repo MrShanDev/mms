@@ -1,7 +1,7 @@
 package com.sxpcwlkj.system.entity.vo;
 
 
-import com.sxpcwlkj.common.properties.MssAdminProperties;
+import com.sxpcwlkj.common.properties.MmsAdminProperties;
 import lombok.Data;
 
 
@@ -23,7 +23,7 @@ public class SysTenantVo {
      */
     private String name;
 
-    private MssAdminProperties properties;
+    private MmsAdminProperties properties;
 
     private String revision;
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "sxpcwlkj")
-public class MssAdminProperties {
+public class MmsAdminProperties {
     /**
      * 名称
      */
