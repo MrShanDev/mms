@@ -5,7 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * mmsadmin配置
+ * @ClassName SxpcwkjProperties
+ * @Description TODO
+ * @Author mmsAdmin
+ * @Date 2022/12/4 20:30
  */
 @Data
 @Component
@@ -38,5 +41,4 @@ public class MssAdminProperties {
      * 描述
      */
     private String describe;
-
 }
