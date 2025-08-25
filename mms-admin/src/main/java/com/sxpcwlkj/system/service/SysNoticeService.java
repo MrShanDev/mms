@@ -22,4 +22,6 @@ public interface SysNoticeService extends BaseService<SysNotice, SysNoticeVo, Sy
     * @return true：成功 false ：失败
     */
     Boolean imports(Set<SysNoticeExport> list);
+
+    Long selectTool();
 }
