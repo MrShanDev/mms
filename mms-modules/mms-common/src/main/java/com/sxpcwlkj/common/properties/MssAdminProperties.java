@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "sxpcwlkj")
-public class MsProperties {
+public class MssAdminProperties {
     /**
      * 名称
      */
@@ -33,5 +33,12 @@ public class MsProperties {
      * 机构组织
      */
     private String organization;
-
+    /**
+     * 版本
+     */
+    private String version;
+    /**
+     * 描述
+     */
+    private String describe;
 }
