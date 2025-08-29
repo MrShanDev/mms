@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2023-1-5 23:34:04",
-  "updatedTime": "2025-8-28 11:35:47",
+  "updatedTime": "2025-8-29 16:20:29",
   "dbConns": [],
   "profile": {
     "default": {
@@ -21,7 +21,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -2440,7 +2440,24 @@
           "hideInGraph": true
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "397BE8C5-93D8-4322-B1F8-A1D4120B8B24",
+          "refEntity": "BFE0590E-ABBD-488B-A987-58D0496F1D15",
+          "refField": "D6F60405-3607-4D1C-A999-47C9846EC756",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "C50B8B56-C2E7-48D8-963D-5CE5B51E2597",
+          "refEntity": "D9B027AC-CDCB-4A4B-A6AA-06281E8D0D74",
+          "refField": "665A2119-5779-4B36-8177-E60C530CAA46",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "type": "P",
       "sysProps": {}
     },
@@ -3596,7 +3613,16 @@
           "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "8D033263-BF89-4319-BBF7-144EC871B89D",
+          "refEntity": "415D3D7F-566D-4C16-AECC-F51586EECB9E",
+          "refField": "68CD00BC-65BC-4178-AAED-749B740559CB",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {}
@@ -4994,7 +5020,16 @@
           "extProps": {}
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "ADC3FE83-EDF9-4827-AB89-A6B7921E6AD8",
+          "refEntity": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
+          "refField": "1E324D8A-A7BF-4D92-A756-7634599C7C8A",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {},
@@ -6363,7 +6398,24 @@
       "properties": {},
       "serialId": null,
       "defName": "用户角色",
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "D7B4E6C2-4E48-4C1C-977C-490B741C27CE",
+          "refEntity": "B4A49451-7222-44FF-B8BE-A2106E17A7E8",
+          "refField": "C6406A5A-FC70-4174-9572-A91FBA248AAE",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "85082C98-9598-4954-AAF6-E45B42E326D0",
+          "refEntity": "23FC8723-F709-4B95-B772-901B7D3393AB",
+          "refField": "C6D581CE-593F-4292-A713-D844153CCA72",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {},
@@ -6781,7 +6833,24 @@
       ],
       "properties": {},
       "serialId": null,
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "9676E817-A68C-41CD-B977-4DC30DA91480",
+          "refEntity": "23FC8723-F709-4B95-B772-901B7D3393AB",
+          "refField": "C6D581CE-593F-4292-A713-D844153CCA72",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "12153A00-27A7-4D94-B5AA-15D9AC833ACB",
+          "refEntity": "F5BDCFD4-2D15-4629-880E-3DA2DC907F95",
+          "refField": "ADC3FE83-EDF9-4827-AB89-A6B7921E6AD8",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "defName": "角色功能",
       "type": "P",
@@ -7387,7 +7456,16 @@
       "properties": {},
       "serialId": null,
       "defName": "系统租户",
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "DD856E39-9E95-4877-911F-CE9C9F351F30",
+          "refEntity": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
+          "refField": "F46A94FF-38D3-4C39-A98B-0765EF610D0A",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {},
@@ -7941,7 +8019,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "",
+          "defaultValue": "1",
           "hideInGraph": false,
           "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
           "refDict": "",
@@ -17402,7 +17480,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -17767,24 +17845,6 @@
           "id": "47CCDA1D-5011-40CB-9AD1-DFEA11519B12"
         },
         {
-          "defKey": "image_url",
-          "defName": "图片地址",
-          "comment": "",
-          "type": "",
-          "len": "",
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
-          "extProps": {},
-          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "53DC11A7-15B6-4BF9-B790-C27BF951897E"
-        },
-        {
           "defKey": "route_parameter",
           "defName": "路由参数",
           "comment": "",
@@ -17803,6 +17863,114 @@
           "id": "45C763E4-86C7-49B7-A7F7-DA799C3663E0"
         },
         {
+          "defKey": "image_url",
+          "defName": "图片地址",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "53DC11A7-15B6-4BF9-B790-C27BF951897E"
+        },
+        {
+          "defKey": "extended_parameter_one",
+          "defName": "扩展参数一",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "DE0957E1-FA63-4968-802C-329E6148495E"
+        },
+        {
+          "defKey": "extended_parameter_two",
+          "defName": "扩展参数二",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "5AF80C8D-550D-4E02-8B08-FE22FA48543B"
+        },
+        {
+          "defKey": "extended_parameter_three",
+          "defName": "扩展参数三",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "99445B24-73AA-4EFC-B605-FDC285AA6933"
+        },
+        {
+          "defKey": "extended_parameter_four",
+          "defName": "扩展参数四",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "844529AC-1070-4388-BADB-2CDD734026A4"
+        },
+        {
+          "defKey": "extended_parameter_five",
+          "defName": "扩展参数五",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "43F6B627-B219-4F75-A743-EFAD5B01FA83"
+        },
+        {
           "defKey": "status",
           "defName": "状态",
           "comment": "",
@@ -17812,7 +17980,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -19904,7 +20072,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -22896,7 +23064,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -27174,7 +27342,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -27669,7 +27837,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -33432,21 +33600,6 @@
             }
           },
           {
-            "id": "ea1bfe60-06e7-4ea4-9806-2cdfd2243e99",
-            "shape": "table",
-            "position": {
-              "x": -2471,
-              "y": -190
-            },
-            "count": 0,
-            "originKey": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
-            "fillColor": "rgb(249, 186, 80)",
-            "size": {
-              "width": 406,
-              "height": 261
-            }
-          },
-          {
             "id": "2d9b2212-c045-4a0a-93df-de2dbc7831d4",
             "shape": "table",
             "position": {
@@ -33474,21 +33627,6 @@
             "size": {
               "width": 370,
               "height": 284
-            }
-          },
-          {
-            "id": "c7c84fa6-f865-405e-96cf-891901511b9e",
-            "shape": "table",
-            "position": {
-              "x": -2471,
-              "y": 630
-            },
-            "count": 0,
-            "originKey": "ACBF0CDB-6D8F-4EA4-8715-F193DE655C3D",
-            "fillColor": "#bb19a4",
-            "size": {
-              "width": 370,
-              "height": 290
             }
           },
           {
@@ -33552,21 +33690,6 @@
             }
           },
           {
-            "id": "9006e469-c7ec-4a02-8490-fa91ca885144",
-            "shape": "table",
-            "position": {
-              "x": -1456,
-              "y": -190
-            },
-            "count": 0,
-            "originKey": "AF982AE1-4589-4004-9C90-53166EFE4E88",
-            "fillColor": "rgb(249, 186, 80)",
-            "size": {
-              "width": 370,
-              "height": 261
-            }
-          },
-          {
             "id": "544f84cd-d373-4d80-a581-cf2b03ce50f3",
             "shape": "table",
             "position": {
@@ -33579,6 +33702,21 @@
             "size": {
               "width": 430,
               "height": 238
+            }
+          },
+          {
+            "id": "bb81d81a-f50a-4694-b328-074318865758",
+            "shape": "table",
+            "position": {
+              "x": -977,
+              "y": 120
+            },
+            "count": 0,
+            "originKey": "23FC8723-F709-4B95-B772-901B7D3393AB",
+            "fillColor": "rgb(214, 74, 67)",
+            "size": {
+              "width": 457,
+              "height": 376
             }
           },
           {
@@ -33743,6 +33881,51 @@
             }
           },
           {
+            "id": "9006e469-c7ec-4a02-8490-fa91ca885144",
+            "shape": "table",
+            "position": {
+              "x": -1456,
+              "y": -190
+            },
+            "count": 0,
+            "originKey": "AF982AE1-4589-4004-9C90-53166EFE4E88",
+            "fillColor": "rgb(249, 186, 80)",
+            "size": {
+              "width": 370,
+              "height": 261
+            }
+          },
+          {
+            "id": "ea1bfe60-06e7-4ea4-9806-2cdfd2243e99",
+            "shape": "table",
+            "position": {
+              "x": -2471,
+              "y": -190
+            },
+            "count": 0,
+            "originKey": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
+            "fillColor": "rgb(249, 186, 80)",
+            "size": {
+              "width": 406,
+              "height": 261
+            }
+          },
+          {
+            "id": "c7c84fa6-f865-405e-96cf-891901511b9e",
+            "shape": "table",
+            "position": {
+              "x": -2471,
+              "y": 630
+            },
+            "count": 0,
+            "originKey": "ACBF0CDB-6D8F-4EA4-8715-F193DE655C3D",
+            "fillColor": "#bb19a4",
+            "size": {
+              "width": 370,
+              "height": 290
+            }
+          },
+          {
             "id": "a5807650-9349-42fd-8808-d775097dbe43",
             "shape": "table",
             "position": {
@@ -33757,21 +33940,6 @@
               "width": 420,
               "height": 410
             }
-          },
-          {
-            "id": "bb81d81a-f50a-4694-b328-074318865758",
-            "shape": "table",
-            "position": {
-              "x": -977,
-              "y": 120
-            },
-            "count": 0,
-            "originKey": "23FC8723-F709-4B95-B772-901B7D3393AB",
-            "fillColor": "rgb(214, 74, 67)",
-            "size": {
-              "width": 457,
-              "height": 376
-            }
           }
         ]
       },
@@ -33784,37 +33952,6 @@
       "relationType": "field",
       "canvasData": {
         "cells": [
-          {
-            "id": "9342cfb1-3fcc-4f91-b407-52f06361b985",
-            "shape": "table",
-            "position": {
-              "x": -130.00000000000068,
-              "y": 36
-            },
-            "count": 0,
-            "originKey": "7023E66C-6118-440F-A59F-D3E1198D3C6A",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
-          {
-            "id": "efa8d7a3-8196-4e08-ae23-b83bd50c0d18",
-            "shape": "table",
-            "position": {
-              "x": -130.00000000000068,
-              "y": -280
-            },
-            "count": 0,
-            "originKey": "C6625631-7232-49D2-B900-4DD085F3E05C",
-            "fillColor": "rgb(90, 213, 198)",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
           {
             "id": "74bc2353-86be-454c-8f98-be9822a8cc54",
             "shape": "erdRelation",
@@ -33873,50 +34010,6 @@
             }
           },
           {
-            "id": "98c7b124-a960-4fcd-bc04-9d40f94f6f15",
-            "shape": "table",
-            "position": {
-              "x": -820,
-              "y": -280
-            },
-            "count": 0,
-            "originKey": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
-            "fillColor": "rgb(214, 74, 67)",
-            "size": {
-              "width": 530,
-              "height": 330
-            }
-          },
-          {
-            "id": "89b89c1f-e6d8-4a98-a9bc-2264a149e029",
-            "shape": "table",
-            "position": {
-              "x": 410,
-              "y": -694.9999999999975
-            },
-            "count": 0,
-            "originKey": "65D51CF1-6969-4256-AA1E-D11DD38DF611",
-            "size": {
-              "width": 400,
-              "height": 290
-            }
-          },
-          {
-            "id": "1dc0e8d3-2fc6-4280-a900-7579054ff85c",
-            "shape": "table",
-            "position": {
-              "x": -130.00000000000068,
-              "y": -694.9999999999975
-            },
-            "count": 0,
-            "originKey": "1C4270A5-9DC1-4C3D-B5ED-FB549809289F",
-            "fillColor": "rgb(117, 190, 250)",
-            "size": {
-              "width": 430,
-              "height": 290
-            }
-          },
-          {
             "id": "856f5c2b-e4f9-41ae-a354-d5127f91f805",
             "shape": "erdRelation",
             "source": {
@@ -33929,13 +34022,57 @@
             },
             "relation": "1:n",
             "fillColor": "rgb(245, 220, 78)",
-            "router": {
-              "name": "manhattan"
-            },
             "attrs": {
               "line": {
                 "strokeDasharray": ""
               }
+            }
+          },
+          {
+            "id": "efa8d7a3-8196-4e08-ae23-b83bd50c0d18",
+            "shape": "table",
+            "position": {
+              "x": -130.00000000000068,
+              "y": -280
+            },
+            "count": 0,
+            "originKey": "C6625631-7232-49D2-B900-4DD085F3E05C",
+            "fillColor": "rgb(90, 213, 198)",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "9342cfb1-3fcc-4f91-b407-52f06361b985",
+            "shape": "table",
+            "position": {
+              "x": -130.00000000000068,
+              "y": 36
+            },
+            "count": 0,
+            "originKey": "7023E66C-6118-440F-A59F-D3E1198D3C6A",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "34db1608-e5b0-4235-bc06-cb54e21677a7",
+            "shape": "table",
+            "position": {
+              "x": -820,
+              "y": -699.9999999999975
+            },
+            "count": 0,
+            "originKey": "01397545-9811-4B87-AE3D-937A143AA6A0",
+            "fillColor": "rgb(245, 220, 78)",
+            "type": "P",
+            "size": {
+              "width": 530,
+              "height": 300
             }
           },
           {
@@ -33954,19 +34091,47 @@
             }
           },
           {
-            "id": "34db1608-e5b0-4235-bc06-cb54e21677a7",
+            "id": "98c7b124-a960-4fcd-bc04-9d40f94f6f15",
             "shape": "table",
             "position": {
               "x": -820,
-              "y": -699.9999999999975
+              "y": -280
             },
             "count": 0,
-            "originKey": "01397545-9811-4B87-AE3D-937A143AA6A0",
-            "fillColor": "rgb(245, 220, 78)",
-            "type": "P",
+            "originKey": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
+            "fillColor": "rgb(214, 74, 67)",
             "size": {
               "width": 530,
-              "height": 300
+              "height": 330
+            }
+          },
+          {
+            "id": "1dc0e8d3-2fc6-4280-a900-7579054ff85c",
+            "shape": "table",
+            "position": {
+              "x": -130.00000000000068,
+              "y": -694.9999999999975
+            },
+            "count": 0,
+            "originKey": "1C4270A5-9DC1-4C3D-B5ED-FB549809289F",
+            "fillColor": "rgb(117, 190, 250)",
+            "size": {
+              "width": 430,
+              "height": 290
+            }
+          },
+          {
+            "id": "89b89c1f-e6d8-4a98-a9bc-2264a149e029",
+            "shape": "table",
+            "position": {
+              "x": 410,
+              "y": -694.9999999999975
+            },
+            "count": 0,
+            "originKey": "65D51CF1-6969-4256-AA1E-D11DD38DF611",
+            "size": {
+              "width": 400,
+              "height": 290
             }
           }
         ]
