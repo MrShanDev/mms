@@ -69,7 +69,7 @@ public class SysDictServiceImpl implements SysDictService {
             vos = new ArrayList<>();
             SysDictDataVo sysDictDataVo = new SysDictDataVo();
             sysDictDataVo.setDictType("0");
-            sysDictDataVo.setStatus("0");
+            sysDictDataVo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
             vos.add(sysDictDataVo);
         }
         sysDictVo.setList(vos);
@@ -124,7 +124,7 @@ public class SysDictServiceImpl implements SysDictService {
 
     @Override
     public Integer initSysDict(String code) {
-        List<SysDict> dicts = baseMapper.selectList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, 0).orderByAsc(SysDict::getSort));
+        List<SysDict> dicts = baseMapper.selectList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysDict::getSort));
         int i = 0;
         for (SysDict d : dicts) {
             List<SysDictData> data = sysDictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
@@ -151,7 +151,9 @@ public class SysDictServiceImpl implements SysDictService {
 
     @Override
     public List<Map<String, Object>> selectAll() {
-        List<SysDictVo> dataVos = baseMapper.selectVoList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, 0).orderByAsc(SysDict::getSort));
+        List<SysDictVo> dataVos = baseMapper.selectVoList(new LambdaQueryWrapper<SysDict>()
+            .eq(SysDict::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .orderByAsc(SysDict::getSort));
         List<Map<String, Object>> end = new ArrayList<>();
 
         for (SysDictVo dict : dataVos) {

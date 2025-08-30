@@ -25,7 +25,7 @@ public class SysDictDataVo {
 
     private Integer sort;
 
-    private String status;
+    private Integer status;
 
     private String colorType;
 
