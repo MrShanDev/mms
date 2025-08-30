@@ -8,6 +8,7 @@ import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.system.service.CaptchaService;
 import com.sxpcwlkj.system.service.SysTenantService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +27,7 @@ import java.util.Map;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-
+@Tag(name = "系统管理模块-验证码处理",description = "系统管理模块-验证码处理")
 @Slf4j
 @Validated
 @RequiredArgsConstructor

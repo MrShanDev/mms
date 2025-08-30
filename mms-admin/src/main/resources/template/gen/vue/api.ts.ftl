@@ -3,14 +3,14 @@ import {getEnv} from "/@/utils/mms";
 import {AxiosPromise} from "axios";
 import {SysEnum} from "/@/enums/SysEnum";
 import {EncryptTypeEnum} from "/@/enums/EncryptTypeEnum";
-import {${FunctionName}Bo,${FunctionName}Vo,${FunctionName}Table } from '/@/views/${moduleName}/${functionName}/type';
+import {${FunctionName}Bo,${FunctionName}Vo} from '/@/views/${moduleName}/${functionName}/type';
 /**
 * ${tableComment}-Api
 * ${FunctionName}
 */
 export function ${functionName}Api() {
     return {
-        list: (params?: object): AxiosPromise<${FunctionName}Vo[]> => {
+        list: (params?: object): AxiosPromise<Array<${FunctionName}Vo>> => {
             return request({
                 url: getEnv()+'/${moduleName}/${functionName}/list',
                 method: 'post',

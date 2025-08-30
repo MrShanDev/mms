@@ -15,6 +15,7 @@ import com.sxpcwlkj.system.service.SysConfigService;
 import com.sxpcwlkj.system.service.SysFunctionService;
 import com.sxpcwlkj.system.service.SysNoticeService;
 import com.sxpcwlkj.system.service.SysUserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +30,7 @@ import java.util.*;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-首页控制台",description = "系统管理模块-首页控制台")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("system/home")

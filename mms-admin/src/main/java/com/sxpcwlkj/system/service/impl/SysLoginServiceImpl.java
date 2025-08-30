@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.entity.CaptchaEntity;
 import com.sxpcwlkj.common.enums.DeviceEnum;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.LoginException;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.exception.TenantException;
@@ -30,8 +31,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * @ClassName SysLoginServiceImpl
- * @Description TODO
+ * 系统登录
  * @Author mmsAdmin
  * @Date 2022/12/25 12:06
  */
@@ -62,7 +62,7 @@ public class SysLoginServiceImpl implements SysLoginService {
             throw new LoginException("账号不存在!");
         }
         // 账号是否禁用
-        if (sysUser.getStatus() != 0) {
+        if (!sysUser.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
             throw new LoginException("账号已禁用!");
         }
         //解密数据库的密码
@@ -121,7 +121,7 @@ public class SysLoginServiceImpl implements SysLoginService {
     /**
      * 验证租户
      *
-     * @param sysUser
+     * @param sysUser 用户
      */
     @Override
     public void verfyTenement(SysUser sysUser) {
@@ -132,7 +132,7 @@ public class SysLoginServiceImpl implements SysLoginService {
                 log.info("登录用户ID：{} 租户不存在.", sysUser.getUserId());
                 throw new TenantException("tenant.not.exists");
             }
-            if (sysTenant.getStatus() != 0) {
+            if (!sysTenant.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
                 log.info("登录用户ID：{} 租户状态为禁用.", sysUser.getUserId());
                 throw new TenantException("tenant off state");
             }

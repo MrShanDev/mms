@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.sxpcwlkj.common.annotation.MssSafety;
 import com.sxpcwlkj.common.code.controller.BaseController;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
@@ -15,6 +16,7 @@ import com.sxpcwlkj.system.entity.vo.SysOssConfigVo;
 import com.sxpcwlkj.system.entity.vo.SysOssVo;
 import com.sxpcwlkj.system.service.SysOssConfigService;
 import com.sxpcwlkj.system.service.SysOssService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.dromara.x.file.storage.core.FileInfo;
 import org.dromara.x.file.storage.core.FileStorageService;
@@ -28,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-对象存储",description = "系统管理模块-对象存储")
 @RequestMapping("system/oss")
 @RestController
 @RequiredArgsConstructor
@@ -87,7 +90,7 @@ public class SysOssController extends BaseController {
         sysOssBo.setPlatform(fileInfo.getPlatform());
         sysOssBo.setContentType(fileInfo.getContentType());
         sysOssBo.setBasePath(fileInfo.getBasePath());
-        sysOssBo.setStatus(0);
+        sysOssBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
         sysOssBo.setSort(0);
         return success(baseService.insert(sysOssBo));
     }

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpcwlkj.common.constant.CacheConstants;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
@@ -128,7 +129,7 @@ public class SysDictServiceImpl implements SysDictService {
         for (SysDict d : dicts) {
             List<SysDictData> data = sysDictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
                     .eq(SysDictData::getFieldName, d.getFieldName())
-                    .eq(SysDictData::getStatus, 0)
+                    .eq(SysDictData::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
                     .orderByAsc(SysDictData::getSort)
             );
             RedisUtil.deleteObject(CacheConstants.SYS_DICT_KEY + d.getFieldName());
@@ -145,7 +146,7 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     public List<SysDictDataVo> getSysDictByCode(String code) {
         return sysDictDataMapper.selectVoList(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, code)
-                .eq(SysDictData::getStatus, 0).orderByAsc(SysDictData::getSort));
+                .eq(SysDictData::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysDictData::getSort));
     }
 
     @Override

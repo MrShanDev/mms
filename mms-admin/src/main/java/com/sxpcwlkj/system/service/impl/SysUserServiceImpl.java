@@ -258,7 +258,7 @@ public class SysUserServiceImpl implements SysUserService {
             //资源集
             userVo.setButCodes(list.toArray(String[]::new));
             //===================超级管理员拥有所有==========================
-            if (userVo.getUserId().toString().equals(SystemCommonEnum.SUPER_ADMIN.getValue().toString())) {
+            if (userVo.getUserId().equals(SystemCommonEnum.SUPER_ADMIN.getValue().toString())) {
                 sysRoles = sysRoleMapper.selectList(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).like(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode()).orderByAsc(SysRole::getSort).last("LIMIT 1"));
                 sysRoleVos = BeanCopyUtil.convert(sysRoles, SysRoleVo.class);
 

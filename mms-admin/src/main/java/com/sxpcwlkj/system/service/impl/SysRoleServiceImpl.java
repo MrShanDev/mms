@@ -103,7 +103,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 SysRoleFunction roleFunction = new SysRoleFunction();
                 roleFunction.setRoleId(bo.getId());
                 roleFunction.setFunctionId(aLong);
-                roleFunction.setStatus(1);
+                roleFunction.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 sysRoleFunctionMapper.insert(roleFunction);
             }
         }
@@ -129,7 +129,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 SysRoleFunction role = new SysRoleFunction();
                 role.setRoleId(roleId);
                 role.setFunctionId(sysRoleFunction.getParentId());
-                role.setStatus(0);
+                role.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 sysRoleFunctionMapper.insert(role);
                 checkFunction(sysRoleFunction.getParentId(), roleId);
             }
