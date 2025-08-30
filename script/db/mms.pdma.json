@@ -4,7 +4,7 @@
   "avatar": "",
   "version": "4.9.4",
   "createdTime": "2023-1-5 23:34:04",
-  "updatedTime": "2025-6-24 15:08:16",
+  "updatedTime": "2025-8-29 16:20:29",
   "dbConns": [],
   "profile": {
     "default": {
@@ -21,7 +21,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -2440,7 +2440,24 @@
           "hideInGraph": true
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "397BE8C5-93D8-4322-B1F8-A1D4120B8B24",
+          "refEntity": "BFE0590E-ABBD-488B-A987-58D0496F1D15",
+          "refField": "D6F60405-3607-4D1C-A999-47C9846EC756",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "C50B8B56-C2E7-48D8-963D-5CE5B51E2597",
+          "refEntity": "D9B027AC-CDCB-4A4B-A6AA-06281E8D0D74",
+          "refField": "665A2119-5779-4B36-8177-E60C530CAA46",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "type": "P",
       "sysProps": {}
     },
@@ -3596,7 +3613,16 @@
           "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "8D033263-BF89-4319-BBF7-144EC871B89D",
+          "refEntity": "415D3D7F-566D-4C16-AECC-F51586EECB9E",
+          "refField": "68CD00BC-65BC-4178-AAED-749B740559CB",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {}
@@ -4612,6 +4638,164 @@
           "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
         },
         {
+          "defKey": "redirect_path",
+          "defName": "重定向路由",
+          "comment": "",
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "type": "VARCHAR",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "7A762FFC-62EB-4334-AB31-65A64CDD1579",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
+        },
+        {
+          "defKey": "language_code",
+          "defName": "i18n编码",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 300,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "C59B6CD4-D51A-4A50-9488-26E39413E925",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
+        },
+        {
+          "defKey": "is_fast",
+          "defName": "是否快捷菜单",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "0",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "32290380-AD16-4B7E-96BA-5A79DADC42BE"
+        },
+        {
+          "defKey": "is_iframe",
+          "defName": "是否内嵌",
+          "comment": "",
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "type": "INT",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "-1",
+          "hideInGraph": false,
+          "refDict": "",
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "F0D66C29-86EA-4BCB-B9F3-C281CCF676E2",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
+          "extProps": {},
+          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
+        },
+        {
+          "defKey": "is_open_link",
+          "defName": "是否外链",
+          "comment": "",
+          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
+          "type": "INT",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "-1",
+          "hideInGraph": false,
+          "refDict": "",
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "E7B5FD0D-9FFD-40A9-8225-5B287292928D",
+          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
+          "extProps": {},
+          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
+        },
+        {
+          "defKey": "is_link",
+          "defName": "外链path/内嵌url",
+          "comment": "",
+          "domain": "",
+          "type": "VARCHAR",
+          "len": 500,
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "attr1": "",
+          "attr2": "",
+          "attr3": "",
+          "attr4": "",
+          "attr5": "",
+          "attr6": "",
+          "attr7": "",
+          "attr8": "",
+          "attr9": "",
+          "id": "CAB49A09-C798-440A-94D9-EAFBD821C321",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
+        },
+        {
           "defKey": "always_show",
           "defName": "是否总是显示",
           "comment": "",
@@ -4834,152 +5018,22 @@
           "attr8": "",
           "attr9": "",
           "extProps": {}
-        },
-        {
-          "defKey": "redirect_path",
-          "defName": "重定向路由",
-          "comment": "",
-          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "type": "VARCHAR",
-          "len": "",
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "attr1": "",
-          "attr2": "",
-          "attr3": "",
-          "attr4": "",
-          "attr5": "",
-          "attr6": "",
-          "attr7": "",
-          "attr8": "",
-          "attr9": "",
-          "id": "7A762FFC-62EB-4334-AB31-65A64CDD1579",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
-          "extProps": {},
-          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
-        },
-        {
-          "defKey": "language_code",
-          "defName": "i18n编码",
-          "comment": "",
-          "domain": "",
-          "type": "VARCHAR",
-          "len": 300,
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "attr1": "",
-          "attr2": "",
-          "attr3": "",
-          "attr4": "",
-          "attr5": "",
-          "attr6": "",
-          "attr7": "",
-          "attr8": "",
-          "attr9": "",
-          "id": "C59B6CD4-D51A-4A50-9488-26E39413E925",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
-          "extProps": {},
-          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
-        },
-        {
-          "defKey": "is_iframe",
-          "defName": "是否内嵌",
-          "comment": "",
-          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
-          "type": "INT",
-          "len": "",
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "-1",
-          "hideInGraph": false,
-          "refDict": "",
-          "attr1": "",
-          "attr2": "",
-          "attr3": "",
-          "attr4": "",
-          "attr5": "",
-          "attr6": "",
-          "attr7": "",
-          "attr8": "",
-          "attr9": "",
-          "id": "F0D66C29-86EA-4BCB-B9F3-C281CCF676E2",
-          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
-          "extProps": {},
-          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
-        },
-        {
-          "defKey": "is_open_link",
-          "defName": "是否外链",
-          "comment": "",
-          "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
-          "type": "INT",
-          "len": "",
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "-1",
-          "hideInGraph": false,
-          "refDict": "",
-          "attr1": "",
-          "attr2": "",
-          "attr3": "",
-          "attr4": "",
-          "attr5": "",
-          "attr6": "",
-          "attr7": "",
-          "attr8": "",
-          "attr9": "",
-          "id": "E7B5FD0D-9FFD-40A9-8225-5B287292928D",
-          "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
-          "extProps": {},
-          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
-        },
-        {
-          "defKey": "is_link",
-          "defName": "外链path/内嵌url",
-          "comment": "",
-          "domain": "",
-          "type": "VARCHAR",
-          "len": 500,
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "attr1": "",
-          "attr2": "",
-          "attr3": "",
-          "attr4": "",
-          "attr5": "",
-          "attr6": "",
-          "attr7": "",
-          "attr8": "",
-          "attr9": "",
-          "id": "CAB49A09-C798-440A-94D9-EAFBD821C321",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
-          "extProps": {},
-          "uiHint": "642D2E0A-8846-4549-BE56-8C0473F26EDE"
         }
       ],
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "ADC3FE83-EDF9-4827-AB89-A6B7921E6AD8",
+          "refEntity": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
+          "refField": "1E324D8A-A7BF-4D92-A756-7634599C7C8A",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
-      "sysProps": {}
+      "sysProps": {},
+      "notes": {}
     },
     {
       "id": "252D8986-CFC6-4F9A-9E1E-C8189A10211B",
@@ -6344,7 +6398,24 @@
       "properties": {},
       "serialId": null,
       "defName": "用户角色",
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "D7B4E6C2-4E48-4C1C-977C-490B741C27CE",
+          "refEntity": "B4A49451-7222-44FF-B8BE-A2106E17A7E8",
+          "refField": "C6406A5A-FC70-4174-9572-A91FBA248AAE",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "85082C98-9598-4954-AAF6-E45B42E326D0",
+          "refEntity": "23FC8723-F709-4B95-B772-901B7D3393AB",
+          "refField": "C6D581CE-593F-4292-A713-D844153CCA72",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {},
@@ -6762,7 +6833,24 @@
       ],
       "properties": {},
       "serialId": null,
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "9676E817-A68C-41CD-B977-4DC30DA91480",
+          "refEntity": "23FC8723-F709-4B95-B772-901B7D3393AB",
+          "refField": "C6D581CE-593F-4292-A713-D844153CCA72",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        },
+        {
+          "myField": "12153A00-27A7-4D94-B5AA-15D9AC833ACB",
+          "refEntity": "F5BDCFD4-2D15-4629-880E-3DA2DC907F95",
+          "refField": "ADC3FE83-EDF9-4827-AB89-A6B7921E6AD8",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "defName": "角色功能",
       "type": "P",
@@ -7368,7 +7456,16 @@
       "properties": {},
       "serialId": null,
       "defName": "系统租户",
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "DD856E39-9E95-4877-911F-CE9C9F351F30",
+          "refEntity": "09ED4AD6-7277-4C33-B1DF-2CEAF99CE6D9",
+          "refField": "F46A94FF-38D3-4C39-A98B-0765EF610D0A",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "indexes": [],
       "type": "P",
       "sysProps": {},
@@ -7922,7 +8019,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "",
+          "defaultValue": "1",
           "hideInGraph": false,
           "domain": "6BC8F04B-6CFA-4995-98D3-318F5CDD774E",
           "refDict": "",
@@ -17383,7 +17480,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -17748,24 +17845,6 @@
           "id": "47CCDA1D-5011-40CB-9AD1-DFEA11519B12"
         },
         {
-          "defKey": "image_url",
-          "defName": "图片地址",
-          "comment": "",
-          "type": "",
-          "len": "",
-          "scale": "",
-          "primaryKey": false,
-          "notNull": false,
-          "autoIncrement": false,
-          "defaultValue": "",
-          "hideInGraph": false,
-          "refDict": "",
-          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
-          "extProps": {},
-          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
-          "id": "53DC11A7-15B6-4BF9-B790-C27BF951897E"
-        },
-        {
           "defKey": "route_parameter",
           "defName": "路由参数",
           "comment": "",
@@ -17784,6 +17863,114 @@
           "id": "45C763E4-86C7-49B7-A7F7-DA799C3663E0"
         },
         {
+          "defKey": "image_url",
+          "defName": "图片地址",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "53DC11A7-15B6-4BF9-B790-C27BF951897E"
+        },
+        {
+          "defKey": "extended_parameter_one",
+          "defName": "扩展参数一",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "DE0957E1-FA63-4968-802C-329E6148495E"
+        },
+        {
+          "defKey": "extended_parameter_two",
+          "defName": "扩展参数二",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "5AF80C8D-550D-4E02-8B08-FE22FA48543B"
+        },
+        {
+          "defKey": "extended_parameter_three",
+          "defName": "扩展参数三",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "99445B24-73AA-4EFC-B605-FDC285AA6933"
+        },
+        {
+          "defKey": "extended_parameter_four",
+          "defName": "扩展参数四",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "844529AC-1070-4388-BADB-2CDD734026A4"
+        },
+        {
+          "defKey": "extended_parameter_five",
+          "defName": "扩展参数五",
+          "comment": "",
+          "type": "",
+          "len": "",
+          "scale": "",
+          "primaryKey": false,
+          "notNull": false,
+          "autoIncrement": false,
+          "defaultValue": "",
+          "hideInGraph": false,
+          "refDict": "",
+          "baseType": "FC9790A7-36B8-4A48-8F9A-BC1042BCFE64",
+          "extProps": {},
+          "domain": "9092C4E0-1A54-4859-ABBB-5B62DBC27573",
+          "id": "43F6B627-B219-4F75-A743-EFAD5B01FA83"
+        },
+        {
           "defKey": "status",
           "defName": "状态",
           "comment": "",
@@ -17793,7 +17980,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -17957,7 +18144,16 @@
       "type": "P",
       "defName": "广告",
       "notes": {},
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "22860669-7A09-4875-8F1F-7EE3B1E39A7C",
+          "refEntity": "1C4270A5-9DC1-4C3D-B5ED-FB549809289F",
+          "refField": "788C0D61-081A-4F38-87FA-C65FA52DC7AA",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "sysProps": {}
     },
     {
@@ -19472,7 +19668,7 @@
         },
         {
           "defKey": "store_type",
-          "defName": "店铺类型",
+          "defName": "店铺性质",
           "comment": "1:企业  2:个人",
           "type": "",
           "len": "",
@@ -19876,7 +20072,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -20041,7 +20237,16 @@
       "defName": "店铺",
       "indexes": [],
       "notes": {},
-      "correlations": [],
+      "correlations": [
+        {
+          "myField": "649D93C7-26EA-4161-9085-2346BCB96895",
+          "refEntity": "E1FACCFF-0040-4F4C-B130-E6B472991198",
+          "refField": "7A77915B-DF91-4930-A785-FF5BF40AE0F2",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ],
       "sysProps": {}
     },
     {
@@ -22859,7 +23064,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -27137,7 +27342,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -27301,7 +27506,16 @@
       "type": "P",
       "defName": "会员认证",
       "notes": {},
-      "correlations": []
+      "correlations": [
+        {
+          "myField": "C54CD40B-5760-4431-AF04-302A8535F7AB",
+          "refEntity": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
+          "refField": "B20F71F4-A4D6-4841-BD8D-CC7711CF7206",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ]
     },
     {
       "id": "7023E66C-6118-440F-A59F-D3E1198D3C6A",
@@ -27623,7 +27837,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoIncrement": false,
-          "defaultValue": "0",
+          "defaultValue": "1",
           "hideInGraph": false,
           "refDict": "",
           "baseType": "1D764C4A-6F9F-421E-B11A-6F3E23B51811",
@@ -27787,7 +28001,16 @@
       "type": "P",
       "defName": "会员收货地址",
       "notes": {},
-      "correlations": []
+      "correlations": [
+        {
+          "myField": "BC97D45C-A302-4D1C-B3CF-AE35348866B4",
+          "refEntity": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
+          "refField": "B20F71F4-A4D6-4841-BD8D-CC7711CF7206",
+          "myRows": "1",
+          "refRows": "n",
+          "innerType": ""
+        }
+      ]
     },
     {
       "id": "D8F9DE2F-D153-4D42-9482-C0D47148DA29",
@@ -31405,16 +31628,7 @@
       "type": "P",
       "defName": "网站文章",
       "notes": {},
-      "correlations": [
-        {
-          "myField": "7AB32D12-5FFF-43E1-80CE-F7EF4CE21C20",
-          "refEntity": "920A8E89-75C6-4A98-BD3F-89EAE67C4362",
-          "refField": "72439DB5-82DC-45C7-8613-FAC7F932E703",
-          "myRows": "1",
-          "refRows": "n",
-          "innerType": ""
-        }
-      ]
+      "correlations": []
     },
     {
       "id": "8EB63405-9A3D-4448-8A07-DE656EA815E4",
@@ -32278,16 +32492,7 @@
       "type": "P",
       "defName": "网站广告",
       "notes": {},
-      "correlations": [
-        {
-          "myField": "966DC2A8-7076-4DDA-B15E-FD8F098DFCAC",
-          "refEntity": "8EB63405-9A3D-4448-8A07-DE656EA815E4",
-          "refField": "BE493953-B186-4944-BA2D-BB6C6E3503C8",
-          "myRows": "1",
-          "refRows": "n",
-          "innerType": ""
-        }
-      ]
+      "correlations": []
     },
     {
       "id": "CFAB2617-0FCC-4852-A8E7-33CD8D456F35",
@@ -33336,6 +33541,185 @@
             }
           },
           {
+            "id": "2c20c76a-6d67-4cdc-8141-8d5401ca7162",
+            "shape": "table",
+            "position": {
+              "x": -420,
+              "y": -190
+            },
+            "count": 0,
+            "originKey": "ABE4FCDE-DCB3-46FD-97BE-BB60F3815304",
+            "fillColor": "rgb(249, 186, 80)",
+            "size": {
+              "width": 370,
+              "height": 261
+            }
+          },
+          {
+            "id": "4ed64ea5-c0b5-4341-9aa6-07f2033913c7",
+            "shape": "table",
+            "position": {
+              "x": 559.9999999999993,
+              "y": -189.99999999999923
+            },
+            "count": 0,
+            "originKey": "BFE0590E-ABBD-488B-A987-58D0496F1D15",
+            "fillColor": "rgb(249, 186, 80)",
+            "size": {
+              "width": 370,
+              "height": 290
+            }
+          },
+          {
+            "id": "87edff33-571b-495f-8126-e62a3c794b4f",
+            "shape": "table",
+            "position": {
+              "x": 1043,
+              "y": 120
+            },
+            "count": 0,
+            "originKey": "D9B027AC-CDCB-4A4B-A6AA-06281E8D0D74",
+            "size": {
+              "width": 370,
+              "height": 307
+            }
+          },
+          {
+            "id": "cd6025ad-92c8-41d5-8fc2-c96a6a3dd2e8",
+            "shape": "table",
+            "position": {
+              "x": 59.99999999999932,
+              "y": 120.00000000000074
+            },
+            "count": 0,
+            "originKey": "B4A49451-7222-44FF-B8BE-A2106E17A7E8",
+            "fillColor": "rgb(214, 74, 67)",
+            "size": {
+              "width": 400,
+              "height": 400
+            }
+          },
+          {
+            "id": "2d9b2212-c045-4a0a-93df-de2dbc7831d4",
+            "shape": "table",
+            "position": {
+              "x": -2480,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "0C9EC6BC-509E-4B0A-ABF9-4B8DA071CE2A",
+            "fillColor": "rgb(247, 151, 128)",
+            "size": {
+              "width": 364,
+              "height": 307
+            }
+          },
+          {
+            "id": "ed7e2304-124a-4543-87de-2b47a30e3c8f",
+            "shape": "table",
+            "position": {
+              "x": -2986.5,
+              "y": 630
+            },
+            "count": 0,
+            "originKey": "415D3D7F-566D-4C16-AECC-F51586EECB9E",
+            "fillColor": "#fc80eb",
+            "size": {
+              "width": 370,
+              "height": 284
+            }
+          },
+          {
+            "id": "e0f93064-1a16-45cc-976f-5045684f8bb8",
+            "shape": "table",
+            "position": {
+              "x": -3076,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "4A6F1C38-CA08-475D-A6BE-89A8735FC8E8",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "2a0e50c0-1533-47fb-9d28-c7546bbf1a48",
+            "shape": "table",
+            "position": {
+              "x": -1937,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "2CFCBED0-DAF1-442E-A2CE-15554ACE8D21",
+            "type": "P",
+            "size": {
+              "width": 398,
+              "height": 307
+            }
+          },
+          {
+            "id": "9b3d4eed-378d-4a4f-9785-7535a4fe8e39",
+            "shape": "table",
+            "position": {
+              "x": -1358,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "95C17F03-D2C3-47E1-9CD1-EF26410A1FCB",
+            "type": "P",
+            "size": {
+              "width": 420,
+              "height": 300
+            }
+          },
+          {
+            "id": "7c9e374f-6301-43e1-b682-bd3a15453096",
+            "shape": "table",
+            "position": {
+              "x": -790,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "252D8986-CFC6-4F9A-9E1E-C8189A10211B",
+            "fillColor": "rgb(154, 72, 199)",
+            "size": {
+              "width": 370,
+              "height": 307
+            }
+          },
+          {
+            "id": "544f84cd-d373-4d80-a581-cf2b03ce50f3",
+            "shape": "table",
+            "position": {
+              "x": -296,
+              "y": -800
+            },
+            "count": 0,
+            "originKey": "43FB37AC-9F6A-47B3-A009-1420362A8C5A",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "bb81d81a-f50a-4694-b328-074318865758",
+            "shape": "table",
+            "position": {
+              "x": -977,
+              "y": 120
+            },
+            "count": 0,
+            "originKey": "23FC8723-F709-4B95-B772-901B7D3393AB",
+            "fillColor": "rgb(214, 74, 67)",
+            "size": {
+              "width": 457,
+              "height": 376
+            }
+          },
+          {
             "id": "6fe6a7d3-ba72-4cd8-8358-4fe727a94fa6",
             "shape": "erdRelation",
             "source": {
@@ -33497,62 +33881,18 @@
             }
           },
           {
-            "id": "2c20c76a-6d67-4cdc-8141-8d5401ca7162",
+            "id": "9006e469-c7ec-4a02-8490-fa91ca885144",
             "shape": "table",
             "position": {
-              "x": -420,
+              "x": -1456,
               "y": -190
             },
             "count": 0,
-            "originKey": "ABE4FCDE-DCB3-46FD-97BE-BB60F3815304",
+            "originKey": "AF982AE1-4589-4004-9C90-53166EFE4E88",
             "fillColor": "rgb(249, 186, 80)",
             "size": {
               "width": 370,
               "height": 261
-            }
-          },
-          {
-            "id": "4ed64ea5-c0b5-4341-9aa6-07f2033913c7",
-            "shape": "table",
-            "position": {
-              "x": 559.9999999999993,
-              "y": -189.99999999999923
-            },
-            "count": 0,
-            "originKey": "BFE0590E-ABBD-488B-A987-58D0496F1D15",
-            "fillColor": "rgb(249, 186, 80)",
-            "size": {
-              "width": 370,
-              "height": 290
-            }
-          },
-          {
-            "id": "87edff33-571b-495f-8126-e62a3c794b4f",
-            "shape": "table",
-            "position": {
-              "x": 1043,
-              "y": 120
-            },
-            "count": 0,
-            "originKey": "D9B027AC-CDCB-4A4B-A6AA-06281E8D0D74",
-            "size": {
-              "width": 370,
-              "height": 307
-            }
-          },
-          {
-            "id": "cd6025ad-92c8-41d5-8fc2-c96a6a3dd2e8",
-            "shape": "table",
-            "position": {
-              "x": 59.99999999999932,
-              "y": 120.00000000000074
-            },
-            "count": 0,
-            "originKey": "B4A49451-7222-44FF-B8BE-A2106E17A7E8",
-            "fillColor": "rgb(214, 74, 67)",
-            "size": {
-              "width": 400,
-              "height": 400
             }
           },
           {
@@ -33571,33 +33911,18 @@
             }
           },
           {
-            "id": "2d9b2212-c045-4a0a-93df-de2dbc7831d4",
+            "id": "c7c84fa6-f865-405e-96cf-891901511b9e",
             "shape": "table",
             "position": {
-              "x": -2480,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "0C9EC6BC-509E-4B0A-ABF9-4B8DA071CE2A",
-            "fillColor": "rgb(247, 151, 128)",
-            "size": {
-              "width": 364,
-              "height": 307
-            }
-          },
-          {
-            "id": "ed7e2304-124a-4543-87de-2b47a30e3c8f",
-            "shape": "table",
-            "position": {
-              "x": -2986.5,
+              "x": -2471,
               "y": 630
             },
             "count": 0,
-            "originKey": "415D3D7F-566D-4C16-AECC-F51586EECB9E",
-            "fillColor": "#fc80eb",
+            "originKey": "ACBF0CDB-6D8F-4EA4-8715-F193DE655C3D",
+            "fillColor": "#bb19a4",
             "size": {
               "width": 370,
-              "height": 284
+              "height": 290
             }
           },
           {
@@ -33614,126 +33939,6 @@
             "size": {
               "width": 420,
               "height": 410
-            }
-          },
-          {
-            "id": "c7c84fa6-f865-405e-96cf-891901511b9e",
-            "shape": "table",
-            "position": {
-              "x": -2471,
-              "y": 630
-            },
-            "count": 0,
-            "originKey": "ACBF0CDB-6D8F-4EA4-8715-F193DE655C3D",
-            "fillColor": "#bb19a4",
-            "size": {
-              "width": 370,
-              "height": 290
-            }
-          },
-          {
-            "id": "e0f93064-1a16-45cc-976f-5045684f8bb8",
-            "shape": "table",
-            "position": {
-              "x": -3076,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "4A6F1C38-CA08-475D-A6BE-89A8735FC8E8",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
-            }
-          },
-          {
-            "id": "2a0e50c0-1533-47fb-9d28-c7546bbf1a48",
-            "shape": "table",
-            "position": {
-              "x": -1937,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "2CFCBED0-DAF1-442E-A2CE-15554ACE8D21",
-            "type": "P",
-            "size": {
-              "width": 398,
-              "height": 307
-            }
-          },
-          {
-            "id": "9b3d4eed-378d-4a4f-9785-7535a4fe8e39",
-            "shape": "table",
-            "position": {
-              "x": -1358,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "95C17F03-D2C3-47E1-9CD1-EF26410A1FCB",
-            "type": "P",
-            "size": {
-              "width": 420,
-              "height": 300
-            }
-          },
-          {
-            "id": "bb81d81a-f50a-4694-b328-074318865758",
-            "shape": "table",
-            "position": {
-              "x": -977,
-              "y": 120
-            },
-            "count": 0,
-            "originKey": "23FC8723-F709-4B95-B772-901B7D3393AB",
-            "fillColor": "rgb(214, 74, 67)",
-            "size": {
-              "width": 457,
-              "height": 376
-            }
-          },
-          {
-            "id": "7c9e374f-6301-43e1-b682-bd3a15453096",
-            "shape": "table",
-            "position": {
-              "x": -790,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "252D8986-CFC6-4F9A-9E1E-C8189A10211B",
-            "fillColor": "rgb(154, 72, 199)",
-            "size": {
-              "width": 370,
-              "height": 307
-            }
-          },
-          {
-            "id": "9006e469-c7ec-4a02-8490-fa91ca885144",
-            "shape": "table",
-            "position": {
-              "x": -1456,
-              "y": -190
-            },
-            "count": 0,
-            "originKey": "AF982AE1-4589-4004-9C90-53166EFE4E88",
-            "fillColor": "rgb(249, 186, 80)",
-            "size": {
-              "width": 370,
-              "height": 261
-            }
-          },
-          {
-            "id": "544f84cd-d373-4d80-a581-cf2b03ce50f3",
-            "shape": "table",
-            "position": {
-              "x": -296,
-              "y": -800
-            },
-            "count": 0,
-            "originKey": "43FB37AC-9F6A-47B3-A009-1420362A8C5A",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
             }
           }
         ]
@@ -33805,63 +34010,22 @@
             }
           },
           {
-            "id": "98c7b124-a960-4fcd-bc04-9d40f94f6f15",
-            "shape": "table",
-            "position": {
-              "x": -820,
-              "y": -280
+            "id": "856f5c2b-e4f9-41ae-a354-d5127f91f805",
+            "shape": "erdRelation",
+            "source": {
+              "cell": "34db1608-e5b0-4235-bc06-cb54e21677a7",
+              "port": "649D93C7-26EA-4161-9085-2346BCB96895%in"
             },
-            "count": 0,
-            "originKey": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
-            "fillColor": "rgb(214, 74, 67)",
-            "size": {
-              "width": 530,
-              "height": 330
-            }
-          },
-          {
-            "id": "34db1608-e5b0-4235-bc06-cb54e21677a7",
-            "shape": "table",
-            "position": {
-              "x": -820,
-              "y": -699.9999999999975
+            "target": {
+              "cell": "eaea197d-8030-4d92-8593-3308076aa8cb",
+              "port": "7A77915B-DF91-4930-A785-FF5BF40AE0F2%out"
             },
-            "count": 0,
-            "originKey": "01397545-9811-4B87-AE3D-937A143AA6A0",
+            "relation": "1:n",
             "fillColor": "rgb(245, 220, 78)",
-            "type": "P",
-            "size": {
-              "width": 530,
-              "height": 300
-            }
-          },
-          {
-            "id": "89b89c1f-e6d8-4a98-a9bc-2264a149e029",
-            "shape": "table",
-            "position": {
-              "x": 410,
-              "y": -694.9999999999975
-            },
-            "count": 0,
-            "originKey": "65D51CF1-6969-4256-AA1E-D11DD38DF611",
-            "size": {
-              "width": 400,
-              "height": 290
-            }
-          },
-          {
-            "id": "9342cfb1-3fcc-4f91-b407-52f06361b985",
-            "shape": "table",
-            "position": {
-              "x": -130.00000000000068,
-              "y": 36
-            },
-            "count": 0,
-            "originKey": "7023E66C-6118-440F-A59F-D3E1198D3C6A",
-            "type": "P",
-            "size": {
-              "width": 430,
-              "height": 238
+            "attrs": {
+              "line": {
+                "strokeDasharray": ""
+              }
             }
           },
           {
@@ -33881,6 +34045,67 @@
             }
           },
           {
+            "id": "9342cfb1-3fcc-4f91-b407-52f06361b985",
+            "shape": "table",
+            "position": {
+              "x": -130.00000000000068,
+              "y": 36
+            },
+            "count": 0,
+            "originKey": "7023E66C-6118-440F-A59F-D3E1198D3C6A",
+            "type": "P",
+            "size": {
+              "width": 430,
+              "height": 238
+            }
+          },
+          {
+            "id": "34db1608-e5b0-4235-bc06-cb54e21677a7",
+            "shape": "table",
+            "position": {
+              "x": -820,
+              "y": -699.9999999999975
+            },
+            "count": 0,
+            "originKey": "01397545-9811-4B87-AE3D-937A143AA6A0",
+            "fillColor": "rgb(245, 220, 78)",
+            "type": "P",
+            "size": {
+              "width": 530,
+              "height": 300
+            }
+          },
+          {
+            "id": "eaea197d-8030-4d92-8593-3308076aa8cb",
+            "shape": "table",
+            "position": {
+              "x": -1375,
+              "y": -700
+            },
+            "count": 0,
+            "originKey": "E1FACCFF-0040-4F4C-B130-E6B472991198",
+            "type": "P",
+            "size": {
+              "width": 413,
+              "height": 330
+            }
+          },
+          {
+            "id": "98c7b124-a960-4fcd-bc04-9d40f94f6f15",
+            "shape": "table",
+            "position": {
+              "x": -820,
+              "y": -280
+            },
+            "count": 0,
+            "originKey": "99A289AA-C2BB-4F7B-B4FA-5F975A246269",
+            "fillColor": "rgb(214, 74, 67)",
+            "size": {
+              "width": 530,
+              "height": 330
+            }
+          },
+          {
             "id": "1dc0e8d3-2fc6-4280-a900-7579054ff85c",
             "shape": "table",
             "position": {
@@ -33892,6 +34117,20 @@
             "fillColor": "rgb(117, 190, 250)",
             "size": {
               "width": 430,
+              "height": 290
+            }
+          },
+          {
+            "id": "89b89c1f-e6d8-4a98-a9bc-2264a149e029",
+            "shape": "table",
+            "position": {
+              "x": 410,
+              "y": -694.9999999999975
+            },
+            "count": 0,
+            "originKey": "65D51CF1-6969-4256-AA1E-D11DD38DF611",
+            "size": {
+              "width": 400,
               "height": 290
             }
           }

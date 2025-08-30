@@ -13,6 +13,7 @@ import com.sxpcwlkj.system.entity.bo.SysNoticeBo;
 import com.sxpcwlkj.system.entity.export.SysNoticeExport;
 import com.sxpcwlkj.system.entity.vo.SysNoticeVo;
 import com.sxpcwlkj.system.service.SysNoticeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import java.util.Set;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统公告",description = "系统管理模块-系统公告")
 @Slf4j
 @Validated
 @RequiredArgsConstructor

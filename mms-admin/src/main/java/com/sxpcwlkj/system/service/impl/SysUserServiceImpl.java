@@ -195,7 +195,7 @@ public class SysUserServiceImpl implements SysUserService {
             // 账号查询
             .like(StringUtil.isNotEmpty(bo.getUserName()), "u.user_name", bo.getUserName())
             // 账号状态
-            .eq(StringUtil.isNotEmpty(bo.getStatus()), "u.status", bo.getStatus())
+//            .eq(StringUtil.isNotEmpty(bo.getStatus()), "u.status", bo.getStatus())
             // 手机号
             .like(StringUtil.isNotEmpty(bo.getPhoneNumber()), "u.phonenumber", bo.getPhoneNumber())
             .and(ObjectUtil.isNotNull(bo.getDeptId()), w -> {
@@ -258,8 +258,11 @@ public class SysUserServiceImpl implements SysUserService {
             //资源集
             userVo.setButCodes(list.toArray(String[]::new));
             //===================超级管理员拥有所有==========================
-            if (userVo.getUserId().toString().equals(SystemCommonEnum.SUPER_ADMIN.getValue().toString())) {
-                sysRoles = sysRoleMapper.selectList(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).like(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode()).orderByAsc(SysRole::getSort).last("LIMIT 1"));
+            if (userVo.getUserId().equals(SystemCommonEnum.SUPER_ADMIN.getValue().toString())) {
+                sysRoles = sysRoleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+                    .eq(SysRole::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+                    .like(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode())
+                    .orderByAsc(SysRole::getSort).last("LIMIT 1"));
                 sysRoleVos = BeanCopyUtil.convert(sysRoles, SysRoleVo.class);
 
                 List<SysFunction> functionList = sysFunctionMapper.selectList(new LambdaQueryWrapper<SysFunction>().eq(SysFunction::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysFunction::getSort));

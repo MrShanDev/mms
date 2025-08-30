@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpStatus;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.sxpcwlkj.authority.LoginObject;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.datasource.entity.BaseEntity;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
                 baseEntity.setCreatedTime(current);
                 baseEntity.setUpdatedTime(current);
                 if(baseEntity.getStatus()==null){
-                    baseEntity.setStatus(0);
+                    baseEntity.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 }
                 if(baseEntity.getSort()==null){
                     baseEntity.setSort(0);

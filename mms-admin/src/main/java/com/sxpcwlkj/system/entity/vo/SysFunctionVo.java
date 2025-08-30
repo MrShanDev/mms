@@ -63,7 +63,7 @@ public class SysFunctionVo {
      */
     private String componentName;
     /**
-     * 状态;0正常 1停用
+     * 状态;1正常 0停用
      */
     private Integer status;
     /**

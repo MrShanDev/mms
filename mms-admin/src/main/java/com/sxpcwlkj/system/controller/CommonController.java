@@ -33,6 +33,7 @@ import com.sxpcwlkj.system.service.SysDictService;
 import com.sxpcwlkj.system.service.SysLoginService;
 import com.sxpcwlkj.system.service.SysUserService;
 import com.sxpcwlkj.wx.service.WxCodeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ import java.util.*;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-公共接口",description = "系统管理模块-公共接口")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -97,7 +99,7 @@ public class CommonController extends BaseController {
                 map.put("loginType", DataUtil.getStringToList(smsConfigEntity.getConfigValue()));
             }
             if("sys_base_tenant_state".equals(smsConfigEntity.getConfigKey())){
-                map.put("tenantState", Convert.toInt(smsConfigEntity.getConfigValue()) == 1);
+                map.put("tenantState", Convert.toInt(smsConfigEntity.getConfigValue()).equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()));
             }
             if("sys_base_login_bg".equals(smsConfigEntity.getConfigKey())){
                 map.put("loginBg",smsConfigEntity.getConfigValue());

@@ -9,6 +9,7 @@ import com.sxpcwlkj.system.entity.AdminMenuTree;
 import com.sxpcwlkj.system.entity.bo.SysFunctionBo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
 import com.sxpcwlkj.system.service.SysFunctionService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -22,6 +23,7 @@ import java.util.List;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统资源",description = "系统管理模块-系统资源")
 @RequestMapping("system/function")
 @RestController
 @RequiredArgsConstructor

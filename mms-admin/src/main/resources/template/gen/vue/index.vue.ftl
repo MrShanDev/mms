@@ -189,9 +189,11 @@
     import {CURDEnum} from "/@/enums/CURDEnum";
     import {generateUUID, isEmpty} from "/@/utils/mms";
     import {NextLoading} from "/@/utils/loading";
-    import {${functionName}Api, ${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/';
 
+    import {${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/${moduleName}/${functionName}/type';
+    import {${functionName}Api} from '/@/views/${moduleName}/${functionName}';
     const baseApi = ${functionName}Api();
+
     <#list formList as field>
     <#if field.formDict??>
     <#break>

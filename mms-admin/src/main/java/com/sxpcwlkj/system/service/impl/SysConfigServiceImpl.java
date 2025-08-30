@@ -179,7 +179,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
                 if (bo.getConfigKey() == null || bo.getConfigKey().isEmpty()) {
                     continue;
                 }
-                bo.setStatus(0);
+                bo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 bo.setConfigType(1);
                 this.insert(bo);
             } else {

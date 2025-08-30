@@ -12,6 +12,7 @@ import com.sxpcwlkj.sms.service.SmsService;
 import com.sxpcwlkj.system.entity.bo.SysConfigBo;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;
 import com.sxpcwlkj.system.service.SysConfigService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +27,7 @@ import java.util.List;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统配置",description = "系统管理模块-系统配置")
 @Slf4j
 @Validated
 @RequiredArgsConstructor

@@ -35,7 +35,7 @@ import java.util.Map;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统登录",description = "系统登录,鉴权")
+@Tag(name = "系统管理模块-登录,鉴权",description = "系统管理模块-登录,鉴权")
 @Slf4j
 @Validated
 @RequiredArgsConstructor

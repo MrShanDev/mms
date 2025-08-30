@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.entity.CaptchaEntity;
 import com.sxpcwlkj.common.enums.DeviceEnum;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.LoginException;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.exception.TenantException;
@@ -30,8 +31,7 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * @ClassName SysLoginServiceImpl
- * @Description TODO
+ * 系统登录
  * @Author mmsAdmin
  * @Date 2022/12/25 12:06
  */
@@ -62,7 +62,7 @@ public class SysLoginServiceImpl implements SysLoginService {
             throw new LoginException("账号不存在!");
         }
         // 账号是否禁用
-        if (sysUser.getStatus() != 0) {
+        if (!sysUser.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
             throw new LoginException("账号已禁用!");
         }
         //解密数据库的密码
@@ -99,20 +99,20 @@ public class SysLoginServiceImpl implements SysLoginService {
 
         if(sysConfigService.getIsOpenCaptcha()){
             if(StringUtil.isEmpty(code)){
-                throw new MmsException("The verification code cannot be empty");
+                throw new MmsException("验证码不能为空");
             }
             Map<String, Object> data = RedisUtil.getCacheObject(uuid);
             if (ObjectUtils.isEmpty(data)) {
                 log.info("登录：验证码失效！");
-                throw new LoginException("Verification code failure");
+                throw new LoginException("验证码失效");
             }
             if (!codeKey.equals(data.get(CaptchaEntity.CODE.CAPTCHA_KEY.getValue()))) {
                 log.info("登录：验证码与验证对象不匹配！");
-                throw new LoginException("Verification code does not match the verification object");
+                throw new LoginException("验证码与验证对象不匹配");
             }
             if (!code.equalsIgnoreCase((String) data.get(CaptchaEntity.CODE.CAPTCHA_VALUE.getValue()))) {
                 log.info("登录：验证码不匹配！");
-                throw new LoginException("Verification code does not match");
+                throw new LoginException("验证码不匹配");
             }
         }
         return;
@@ -121,7 +121,7 @@ public class SysLoginServiceImpl implements SysLoginService {
     /**
      * 验证租户
      *
-     * @param sysUser
+     * @param sysUser 用户
      */
     @Override
     public void verfyTenement(SysUser sysUser) {
@@ -130,11 +130,11 @@ public class SysLoginServiceImpl implements SysLoginService {
             SysTenant sysTenant = sysTenantService.selectById(sysUser.getTenantId());
             if (ObjectUtils.isEmpty(sysTenant)) {
                 log.info("登录用户ID：{} 租户不存在.", sysUser.getUserId());
-                throw new TenantException("tenant.not.exists");
+                throw new TenantException("租户不存在");
             }
-            if (sysTenant.getStatus() != 0) {
+            if (!sysTenant.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
                 log.info("登录用户ID：{} 租户状态为禁用.", sysUser.getUserId());
-                throw new TenantException("tenant off state");
+                throw new TenantException("租户状态为禁用");
             }
 
         }

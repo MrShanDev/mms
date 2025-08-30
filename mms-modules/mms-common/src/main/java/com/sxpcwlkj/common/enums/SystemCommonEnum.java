@@ -20,12 +20,12 @@ public enum SystemCommonEnum implements IEnum<Integer> {
     /**
      * 系统状态：启用
      */
-    SYS_COMMON_STATE_OPEN(0, "common_state","系统状态-启用/有效"),
+    SYS_COMMON_STATE_OPEN(1, "common_state","系统状态-启用/有效"),
 
     /**
      * 系统状态：禁用
      */
-    SYS_COMMON_STATE_CLOSE(1, "common_state","系统状态-关闭/失效"),
+    SYS_COMMON_STATE_CLOSE(0, "common_state","系统状态-关闭/失效"),
 
     /**
      * 系统默认头像

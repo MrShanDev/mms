@@ -15,7 +15,7 @@ export declare interface ${FunctionName}Vo extends BaseEntity {
     ||field.attrName == 'createdTime'
     ||field.attrName == 'updatedBy'
     ||field.attrName == 'updatedTime')>
-      ${field.attrName}: string|number<#sep>; </#sep>
+      ${field.attrName}: <#if field.attrType=='Integer'>number</#if><#if field.attrType!='Integer'>string</#if><#sep>; </#sep>
     </#if>
 </#list>
 <#if formLayout==2 >
@@ -39,7 +39,7 @@ export declare interface ${FunctionName}Bo extends BaseEntity {
     ||field.attrName == 'createdTime'
     ||field.attrName == 'updatedBy'
     ||field.attrName == 'updatedTime')>
-        ${field.attrName}: string|number<#sep>; </#sep>
+        ${field.attrName}: <#if field.attrType=='Integer'>number</#if><#if field.attrType!='Integer'>string</#if><#sep>; </#sep>
     </#if>
 </#list>
 <#if formLayout==2 >

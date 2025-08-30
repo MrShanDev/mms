@@ -21,6 +21,7 @@ import com.sxpcwlkj.system.entity.export.SysUserExportVo;
 import com.sxpcwlkj.system.entity.vo.SysUserVo;
 import com.sxpcwlkj.system.service.SysUserService;
 import com.sxpcwlkj.wx.service.WxCodeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ import java.util.Set;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统用户",description = "系统管理模块-系统用户")
 @Slf4j
 @Validated
 @RequiredArgsConstructor

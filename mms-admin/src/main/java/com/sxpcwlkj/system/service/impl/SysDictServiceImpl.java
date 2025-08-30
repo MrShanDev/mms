@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpcwlkj.common.constant.CacheConstants;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
@@ -68,7 +69,7 @@ public class SysDictServiceImpl implements SysDictService {
             vos = new ArrayList<>();
             SysDictDataVo sysDictDataVo = new SysDictDataVo();
             sysDictDataVo.setDictType("0");
-            sysDictDataVo.setStatus("0");
+            sysDictDataVo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
             vos.add(sysDictDataVo);
         }
         sysDictVo.setList(vos);
@@ -123,12 +124,12 @@ public class SysDictServiceImpl implements SysDictService {
 
     @Override
     public Integer initSysDict(String code) {
-        List<SysDict> dicts = baseMapper.selectList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, 0).orderByAsc(SysDict::getSort));
+        List<SysDict> dicts = baseMapper.selectList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysDict::getSort));
         int i = 0;
         for (SysDict d : dicts) {
             List<SysDictData> data = sysDictDataMapper.selectList(new LambdaQueryWrapper<SysDictData>()
                     .eq(SysDictData::getFieldName, d.getFieldName())
-                    .eq(SysDictData::getStatus, 0)
+                    .eq(SysDictData::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
                     .orderByAsc(SysDictData::getSort)
             );
             RedisUtil.deleteObject(CacheConstants.SYS_DICT_KEY + d.getFieldName());
@@ -145,12 +146,14 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     public List<SysDictDataVo> getSysDictByCode(String code) {
         return sysDictDataMapper.selectVoList(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, code)
-                .eq(SysDictData::getStatus, 0).orderByAsc(SysDictData::getSort));
+                .eq(SysDictData::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysDictData::getSort));
     }
 
     @Override
     public List<Map<String, Object>> selectAll() {
-        List<SysDictVo> dataVos = baseMapper.selectVoList(new LambdaQueryWrapper<SysDict>().eq(SysDict::getStatus, 0).orderByAsc(SysDict::getSort));
+        List<SysDictVo> dataVos = baseMapper.selectVoList(new LambdaQueryWrapper<SysDict>()
+            .eq(SysDict::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .orderByAsc(SysDict::getSort));
         List<Map<String, Object>> end = new ArrayList<>();
 
         for (SysDictVo dict : dataVos) {

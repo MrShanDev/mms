@@ -41,7 +41,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         // msg：验证码未开启
         List<ConfigEntity> convert = RedisUtil.getCacheList(ConfigKeyNum.config_base.getKey());
         AtomicBoolean isOpen= new AtomicBoolean(false);
-        Map<String, Object> map = new HashMap<>();
+
         if(convert.isEmpty()){
             return data;
         }
@@ -72,7 +72,7 @@ public class CaptchaServiceImpl implements CaptchaService {
 
 
         //初始化验证码背景
-        if (!code.equals("000000")) {
+        if (!"000000".equals(code)) {
 
             switch (captchaProperties.getType()) {
                 case "LINE":

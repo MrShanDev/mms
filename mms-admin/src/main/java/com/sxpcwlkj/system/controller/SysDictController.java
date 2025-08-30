@@ -9,6 +9,7 @@ import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.system.entity.bo.SysDictBo;
 import com.sxpcwlkj.system.entity.vo.SysDictVo;
 import com.sxpcwlkj.system.service.SysDictService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统字典",description = "系统管理模块-系统字典")
 @RequestMapping("system/dict")
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +32,6 @@ public class SysDictController extends BaseController {
      * 分页查询字典列表
      *
      * @param bo 查询条件
-     * @param pageQuery 分页条件
      * @return 分页结果
      */
     @MssSafety

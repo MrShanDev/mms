@@ -9,6 +9,7 @@ import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.system.entity.bo.SysRoleBo;
 import com.sxpcwlkj.system.entity.vo.SysRoleVo;
 import com.sxpcwlkj.system.service.SysRoleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+@Tag(name = "系统管理模块-系统角色",description = "系统管理模块-系统角色")
 @RequestMapping("system/role")
 @RestController
 @RequiredArgsConstructor
