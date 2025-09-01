@@ -11,9 +11,7 @@ import com.sxpcwlkj.gen.entity.TableEntity;
 import com.sxpcwlkj.gen.entity.TableFieldEntity;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -184,5 +182,131 @@ public class GenUtils {
         } else {
             return NamingCase.toCamelCase(className);
         }
+    }
+
+
+    /**
+     * 执行更新SQL（INSERT/UPDATE/DELETE）
+     * @param datasource 数据源
+     * @param sql SQL语句
+     * @param params SQL参数
+     * @return 受影响的行数
+     */
+
+    // 示例：增加 编辑 删除
+    //    int affectedRows = executeUpdate(datasource,
+    //        "UPDATE users SET name = ? WHERE id = ?",
+    //        new Object[]{"张三", 1});
+    public static int executeUpdate(GenDataSource datasource, String sql, Object[] params) {
+        try (Connection conn = datasource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 设置参数
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    pstmt.setObject(i + 1, params[i]);
+                }
+            }
+
+            return pstmt.executeUpdate();
+        } catch (Exception e) {
+            log.error("执行更新失败: {}", sql, e);
+            throw new MmsException("执行更新操作失败", e);
+        }
+    }
+
+    /**
+     * 批量执行SQL
+     * @param datasource 数据源
+     * @param sql SQL语句
+     * @param batchParams 批量参数列表
+     * @return 每个操作的受影响行数数组
+     */
+
+    // 示例：批量插入
+    //    List<Object[]> batchParams = new ArrayList<>();
+    //    batchParams.add(new Object[]{"user1", "user1@example.com"});
+    //    batchParams.add(new Object[]{"user2", "user2@example.com"});
+    //        int[] batchResult = executeBatch(datasource,
+    //            "INSERT INTO users (name, email) VALUES (?, ?)",
+    //            batchParams);
+    public static int[] executeBatch(GenDataSource datasource, String sql, List<Object[]> batchParams) {
+        try (Connection conn = datasource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 禁用自动提交，开启事务
+            conn.setAutoCommit(false);
+
+            for (Object[] params : batchParams) {
+                if (params != null) {
+                    for (int i = 0; i < params.length; i++) {
+                        pstmt.setObject(i + 1, params[i]);
+                    }
+                }
+                pstmt.addBatch();
+            }
+
+            int[] result = pstmt.executeBatch();
+            // 提交事务
+            conn.commit();
+            // 恢复自动提交
+            conn.setAutoCommit(true);
+
+            return result;
+        } catch (Exception e) {
+            log.error("批量执行失败: {}", sql, e);
+            throw new MmsException("批量执行操作失败", e);
+        }
+    }
+
+    /**
+     * 执行查询SQL并返回对象列表
+     * @param datasource 数据源
+     * @param sql SQL语句
+     * @param params SQL参数
+     * @param mapper 结果映射器
+     * @param <T> 返回类型
+     * @return 查询结果列表
+     */
+
+    //示例：查询
+    //    List<User> users = queryForList(datasource,
+    //        "SELECT * FROM users WHERE status = ?",
+    //        new Object[]{"active"},
+    //        rs -> {
+    //            User u = new User();
+    //            u.setId(rs.getInt("id"));
+    //            u.setName(rs.getString("name"));
+    //            return u;
+    //        });
+    public static <T> List<T> queryForList(GenDataSource datasource, String sql, Object[] params,
+                                           ResultSetMapper<T> mapper) {
+        List<T> resultList = new ArrayList<>();
+
+        try (Connection conn = datasource.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // 设置参数
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    pstmt.setObject(i + 1, params[i]);
+                }
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    resultList.add(mapper.mapRow(rs));
+                }
+            }
+            return resultList;
+        } catch (Exception e) {
+            log.error("执行查询失败: {}", sql, e);
+            throw new MmsException("查询数据失败", e);
+        }
+    }
+
+    // 结果映射器接口
+    public interface ResultSetMapper<T> {
+        T mapRow(ResultSet rs) throws SQLException;
     }
 }
