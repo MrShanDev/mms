@@ -123,6 +123,7 @@ public class SysOssConfigServiceImpl extends BaseServiceImpl<SysOssConfig, SysOs
                 baseMapper.update(null, new LambdaUpdateWrapper<SysOssConfig>().set(SysOssConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_CLOSE.getValue()).eq(SysOssConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()));
             }
             bo.setId(configVo.getId());
+            bo.setRevision(configVo.getRevision());
             row = baseMapper.updateById(MapstructUtil.convert(bo, SysOssConfig.class));
         } else {
             if (bo.getStatus().toString().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue().toString()) ) {
@@ -141,7 +142,7 @@ public class SysOssConfigServiceImpl extends BaseServiceImpl<SysOssConfig, SysOs
     @Override
     public List<FileStorageConfig> getOss() {
         //
-        List<SysOssConfigVo> vos = baseMapper.selectVoList(new LambdaQueryWrapper<SysOssConfig>().orderByAsc(SysOssConfig::getStatus));
+        List<SysOssConfigVo> vos = baseMapper.selectVoList(new LambdaQueryWrapper<SysOssConfig>().orderByDesc(SysOssConfig::getStatus));
         List<FileStorageConfig> list = new ArrayList<>();
         for (SysOssConfigVo configVo : vos) {
             if (configVo != null) {

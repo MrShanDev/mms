@@ -135,7 +135,12 @@
 <script setup lang="ts" name="${moduleName}${FunctionName}Dialog">
     import {nextTick, reactive, ref} from "vue";
     import {CURDEnum} from '/@/enums/CURDEnum';
+    import {ElMessage} from "element-plus";
     import {${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/${moduleName}/${functionName}/type';
+    <#if formLayout==2 >
+    import {${functionName}Api} from '/@/views/${moduleName}/${functionName}';
+    const baseApi = ${functionName}Api();
+    </#if>
 
     const dialogWidth = ref('50vw');
     <#list fastList as field>
@@ -154,6 +159,9 @@
     import FastSwitch from "/@/components/fast-switch/src/fast-switch.vue";
     </#if>
     </#list>
+
+
+
     // 定义子组件向父组件传值/事件
     const emit = defineEmits(['refresh']);
     const dialogFormRef = ref();
@@ -176,7 +184,9 @@
         <#list fieldList as field>
             <#if !field.baseField||field.attrName =='status'||field.attrName =='sort'||field.attrName =='remark'>
             <#if field.fieldType == 'int'>
-                <#if field.attrName =='sort'>
+                <#if field.attrName =='status'>
+            ${field.attrName}: 1<#sep>,
+                <#elseif field.attrName =='sort'>
             ${field.attrName}: 1<#sep>,
                 <#else>
             ${field.attrName}: 0<#sep>,
@@ -237,7 +247,7 @@
     }
     <#if formLayout==2 >
     // 选择监听
-    const change = (arr: number[]) => {
+    const change = (arr: string[]) => {
         state.ruleForm.${tableParentId} = arr[arr.length - 1];
     };
     </#if>

@@ -99,20 +99,20 @@ public class SysLoginServiceImpl implements SysLoginService {
 
         if(sysConfigService.getIsOpenCaptcha()){
             if(StringUtil.isEmpty(code)){
-                throw new MmsException("验证码不能为空");
+                throw new MmsException("The verification code cannot be empty");
             }
             Map<String, Object> data = RedisUtil.getCacheObject(uuid);
             if (ObjectUtils.isEmpty(data)) {
                 log.info("登录：验证码失效！");
-                throw new LoginException("验证码失效");
+                throw new LoginException("Verification code failure");
             }
             if (!codeKey.equals(data.get(CaptchaEntity.CODE.CAPTCHA_KEY.getValue()))) {
                 log.info("登录：验证码与验证对象不匹配！");
-                throw new LoginException("验证码与验证对象不匹配");
+                throw new LoginException("Verification code does not match the verification object");
             }
             if (!code.equalsIgnoreCase((String) data.get(CaptchaEntity.CODE.CAPTCHA_VALUE.getValue()))) {
                 log.info("登录：验证码不匹配！");
-                throw new LoginException("验证码不匹配");
+                throw new LoginException("Verification code does not match");
             }
         }
         return;
@@ -130,11 +130,11 @@ public class SysLoginServiceImpl implements SysLoginService {
             SysTenant sysTenant = sysTenantService.selectById(sysUser.getTenantId());
             if (ObjectUtils.isEmpty(sysTenant)) {
                 log.info("登录用户ID：{} 租户不存在.", sysUser.getUserId());
-                throw new TenantException("租户不存在");
+                throw new TenantException("tenant.not.exists");
             }
             if (!sysTenant.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
                 log.info("登录用户ID：{} 租户状态为禁用.", sysUser.getUserId());
-                throw new TenantException("租户状态为禁用");
+                throw new TenantException("tenant off state");
             }
 
         }

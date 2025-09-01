@@ -53,7 +53,7 @@ public class SysUserBo extends BaseEntity {
      * 用户账号
      */
     @NotBlank(message = "账号不能为空", groups = {ValidatedGroupConfig.insert.class, ValidatedGroupConfig.update.class})
-    @Size(min = 3, max = 20, message = "账号长度在3到20之间", groups = {ValidatedGroupConfig.insert.class, ValidatedGroupConfig.update.class})
+    @Size(min = 4, max = 20, message = "账号长度在5到20之间", groups = {ValidatedGroupConfig.insert.class, ValidatedGroupConfig.update.class})
     private String userName;
 
     /**

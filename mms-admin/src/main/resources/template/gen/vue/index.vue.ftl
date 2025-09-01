@@ -227,7 +227,7 @@
             </#if>
             </#list>
             <#if formLayout==2 >
-            ,isAll:true,
+                isAll:true,
             </#if>
             }
         }
