@@ -450,7 +450,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Long selectTool() {
-        return baseMapper.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getStatus, 0));
+        return baseMapper.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()));
     }
 
     @Override

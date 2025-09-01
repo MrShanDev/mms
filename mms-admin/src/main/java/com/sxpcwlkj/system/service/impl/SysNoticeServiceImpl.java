@@ -3,6 +3,7 @@ package com.sxpcwlkj.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
@@ -98,6 +99,6 @@ public class SysNoticeServiceImpl extends BaseServiceImpl<SysNotice, SysNoticeVo
 
     @Override
     public Long selectTool() {
-        return baseMapper.selectCount(new LambdaQueryWrapper<SysNotice>().eq(SysNotice::getStatus,0));
+        return baseMapper.selectCount(new LambdaQueryWrapper<SysNotice>().eq(SysNotice::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()));
     }
 }
