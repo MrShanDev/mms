@@ -67,12 +67,6 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-thymeleaf</artifactId>
         </dependency>
-        <!-- 文档Admin管理模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-doc-admin</artifactId>
-            <version>${revision}</version>
-        </dependency>
     </dependencies>
 
     <build>

@@ -575,7 +575,6 @@
         <module>mms-admin</module>
         <module>mms-modules</module>
         <module>mms-zoom</module>
-        <module>mms-docs</module>
     </modules>
 
 
