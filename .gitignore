@@ -103,4 +103,3 @@ pnpm-debug.log*
 *.sw?
 # 忽略mall模块
 
-mms-docs
