@@ -38,6 +38,7 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
+      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALORmsT62knWOVzHfMuL0zKr3fa+6X2IshTc2C7K9wgR/ywtm/UyNIhlfSeUBYKO+3Y0kMTNHuTLp/pF+0YCtpcCAwEAAQ==
       datasource:
         # 主库数据源
         master:
@@ -45,7 +46,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: mms
-          password: ZKKxz8KGmpGfLGf3
+          password: ENC(c6FYwkk1dtKxfAcOED4g4mAgzCoK6XTr6+VTXVfQYly9I02yiND8aK5vTeYJ+oJCGH4beQyZLl9H2kt1ZCXqJg==)
         # 从库数据源
         slave:
           lazy: true
@@ -53,7 +54,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: mms
-          password: ZKKxz8KGmpGfLGf3
+          password: ENC(c6FYwkk1dtKxfAcOED4g4mAgzCoK6XTr6+VTXVfQYly9I02yiND8aK5vTeYJ+oJCGH4beQyZLl9H2kt1ZCXqJg==)
       #        oracle:
       #          type: ${spring.datasource.type}
       #          driverClassName: oracle.jdbc.OracleDriver
