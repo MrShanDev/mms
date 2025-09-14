@@ -4012,11 +4012,6 @@
             "enable": 1,
             "orderValue": 16
           },
-          "dictFrom": {
-            "columnWidth": 120,
-            "enable": 1,
-            "orderValue": 17
-          },
           "attr1": {
             "columnWidth": 100,
             "enable": 0,
@@ -4116,8 +4111,68 @@
             "columnWidth": 100,
             "enable": 0,
             "orderValue": 37
+          },
+          "fieldTier": {
+            "enable": 1,
+            "columnWidth": 100,
+            "orderValue": 17
           }
-        }
+        },
+        "fieldTier": [
+          {
+            "defKey": "1",
+            "sortValue": 0,
+            "defName": "核心级",
+            "intro": "业务流程运转关键字段，缺失导致系统功能中断",
+            "frequency": "90%+ (极高)",
+            "illustrate": "order_id（主键）、user_id（外键）、amount（金额）、status（状态值）",
+            "id": "3EA3739C-F9DE-49E6-B5C2-9613A8DAE6E6"
+          },
+          {
+            "defKey": "2",
+            "sortValue": 1,
+            "defName": "描述级",
+            "intro": "实体静态特征描述，支撑业务语义理解与可视化",
+            "frequency": "60%-80% (高)",
+            "illustrate": "product_name（名称）、category（分类）、delivery_address（地址）、color_code（颜色编码）",
+            "id": "66239424-08A3-4694-A6F4-716732C163A4"
+          },
+          {
+            "defKey": "3",
+            "sortValue": 2,
+            "defName": "扩展级",
+            "intro": "低频业务扩展属性，避免核心表频繁变更",
+            "frequency": "20%-50% (中)",
+            "illustrate": "config_options（JSON配置）、discounted_price（冗余计算值）",
+            "id": "6ADB75DA-2F61-4BA8-887F-CA5B29F15EC8"
+          },
+          {
+            "defKey": "4",
+            "sortValue": 3,
+            "defName": "技术级",
+            "intro": "系统运维元数据，与业务逻辑解耦",
+            "frequency": "<10% (低)",
+            "illustrate": "created_by（创建人）、created_at（创建时间）、etl_batch_id（ETL批次号）、source_system（数据源编码）、debug_flag（调试标记）",
+            "id": "1D88F91D-CACB-49B6-BB29-86011AFCE845"
+          },
+          {
+            "defKey": "5",
+            "sortValue": 4,
+            "defName": "冗余级",
+            "intro": "容错与灾备设计，提升系统可靠性",
+            "frequency": "<5% (极低)",
+            "illustrate": " data_hash（校验哈希）、is_deleted（软删除标记）、backup_shard_id（灾备分片ID）",
+            "id": "6BCEB5EB-D85D-4E0B-B037-108FE1B62C0D"
+          }
+        ],
+        "dictExportTpl": [
+          {
+            "defKey": "SQL-INSERT",
+            "defName": "SQL-INSERT",
+            "type": "SQL",
+            "content": "{{~ it.stndDict:dict}}\n--代码对象：{{=dict.defKey}}-{{=dict.defName}}\nINSERT INTO sys_dict(dict_key,dict_name) values('{{=dict.defKey}}','{{=dict.defName}}');\n{{~ dict.dictItems:item}}\nINSERT INTO sys_dict_item(dict_key,item_key,item_name,sort,parent_key,intro) values('{{=dict.defKey}}','{{=item.itemKey}}','{{=item.itemName}}','{{=item.sort||\"\"}}','{{=item.parentKey||\"\"}}','{{=item.intro||\"\"}}');\n{{~}}\n{{~}}"
+          }
+        ]
       }
     },
     "team": {
@@ -5008,7 +5063,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "903A79DA-A1BA-4E69-B31C-904FCF42A603",
@@ -5659,7 +5715,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "dept_id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_user",
+            "refFieldKey": "dept_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "9E99BDA6-72B6-45E3-A06E-EA08D0A96FD1",
@@ -6750,7 +6819,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "user_id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_user_role",
+            "refFieldKey": "user_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "4E05FD55-8ABB-467B-BAE9-D26159116AB0",
@@ -7401,7 +7483,31 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_role_function",
+            "refFieldKey": "role_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_user_role",
+            "refFieldKey": "role_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "EB8BE042-DFB1-4679-BD8A-9E9682609022",
@@ -8052,7 +8158,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "6EE2DB21-E041-4487-84F0-78EE90321181",
@@ -8583,7 +8690,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "type",
+            "refSchemaName": "",
+            "refEntityKey": "sys_dict_data",
+            "refFieldKey": "dict_type",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "9C0591A1-32F7-43DC-9D4D-6D4528CF9F2D",
@@ -9674,7 +9794,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_role_function",
+            "refFieldKey": "function_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "A4ED22F9-9636-4ACA-ADFF-718B4D04B484",
@@ -10165,7 +10298,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "6D131B6A-3167-4F8A-9B3D-54C3EC46EB7C",
@@ -10656,7 +10790,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_user",
+            "refFieldKey": "post_ids",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "4B72852E-CF74-4C0C-A3FD-79705600CC76",
@@ -11067,7 +11214,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "51E498EB-3EC6-4533-A693-6873D3CDAF54",
@@ -11478,7 +11626,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "9C9541D3-F85F-4746-AF4A-131B9EA89244",
@@ -12169,7 +12318,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "B989B6DE-6439-4713-83B3-7C6923C211F8",
@@ -12580,7 +12730,31 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "function_ids",
+            "refSchemaName": "",
+            "refEntityKey": "sys_function",
+            "refFieldKey": "id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "sys_tenant",
+            "refFieldKey": "package_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "216412BE-3D86-4CB5-B848-C65E95F68498",
@@ -13111,7 +13285,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store",
+            "refFieldKey": "store_type_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "A70FF01A-692E-48E4-981D-0671E13B3C36",
@@ -13682,7 +13869,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "E90FEF7C-6622-4523-BEDE-6991DFF37217",
@@ -14195,7 +14383,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "FF0251B1-9A1C-4B2B-9326-14C24B6C1021",
@@ -14855,7 +15044,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "C8919904-A0E0-4122-935D-03E42055647C",
@@ -15500,7 +15690,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "C864DA8A-FE66-464C-B4DF-1AF253942BC2",
@@ -15902,7 +16093,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "B20A49FB-17F6-47CD-955A-ADD55579260D",
@@ -16104,7 +16296,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "1F3BD3C5-49F3-4FF7-B786-84C8E7AF1D01",
@@ -16371,7 +16564,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "6D7C6DEE-E851-4D5F-919A-B9049E2E08B8",
@@ -17656,7 +17850,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "0A097370-DCA7-4122-8C04-E106A88F15EA",
@@ -18451,7 +18646,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "290BC84F-1264-4406-AE54-30159FBC9752",
@@ -18878,7 +19074,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "7E27F941-1CB6-4EBC-825D-A4FA0D7A17E5",
@@ -19145,7 +19342,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "2F1F2905-BCA8-4F3A-BF49-A4F32BDDD599",
@@ -19596,7 +19794,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "19CF3A68-AFFC-432E-BF62-FF5AC3ED5910",
@@ -20487,7 +20686,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "AE9ECF49-F336-45BF-A67C-CB8244094121",
@@ -21194,7 +21394,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "C8711858-E6C9-43C0-AAD2-FC5BF7BB9591",
@@ -21685,7 +21886,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "916AB621-A7B0-48FA-A4FA-CFEBCA84963A",
@@ -21912,7 +22114,8 @@
               }
             ]
           }
-        ]
+        ],
+        "refers": []
       },
       {
         "id": "065AA18A-585B-4A36-B62D-ACE036F35F75",
@@ -22203,7 +22406,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "8479EA0D-1079-4185-9166-CF2EB97A8824",
@@ -22454,7 +22658,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "51BE817B-ACA0-4F72-9B7F-1D490FE5C63E",
@@ -23064,7 +23269,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_advertising",
+            "refFieldKey": "advertising_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "62D250E1-B762-4ED8-8300-4449205AABEC",
@@ -23914,7 +24132,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "E94A511B-60B8-45A1-826C-3580513EF57D",
@@ -24605,7 +24824,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "232E16FD-BF17-4D07-9797-A7456EE7C9BF",
@@ -25255,7 +25475,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "ACCEC77E-FA41-4CD1-9EC8-E77DE5F909F0",
@@ -26146,7 +26367,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "ADEE16B5-3975-40BD-ACBA-80B075A8DB3A",
@@ -26716,7 +26938,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "DC876885-EDAB-48E4-A1BE-B30E677E5782",
@@ -28086,7 +28309,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "store_type_id",
+            "refSchemaName": "",
+            "refEntityKey": "store_product_spu",
+            "refFieldKey": "store_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "70228F65-008A-4A76-9C39-64B51F6FE867",
@@ -28736,7 +28972,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_product_spu",
+            "refFieldKey": "cate_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "90AAAB67-55B1-44CC-A93B-16615607D366",
@@ -28984,6 +29233,52 @@
             "attr19": "",
             "attr20": "",
             "origin": "IMPORT"
+          },
+          {
+            "id": "19E2EF75-E2CE-44B7-94F1-C45A991E97D2",
+            "defKey": "market_price",
+            "defName": "市场价格",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 10,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndFieldId": "",
+            "stndDictKey": "",
+            "stndFieldKey": "",
+            "stndComplianceLevel": "",
+            "stndComplianceType": "",
+            "dictFrom": "",
+            "dictItems": null,
+            "fieldTier": "",
+            "mark": null,
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "",
+            "attr19": "",
+            "attr20": "",
+            "origin": "UI"
           },
           {
             "id": "4827007E-D4EA-433F-BEAE-F45879CA1CF6",
@@ -29706,7 +30001,53 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_shopping_cart",
+            "refFieldKey": "porduct_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_key_spu",
+            "refFieldKey": "spu_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_value_spu",
+            "refFieldKey": "spu_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_product_sku",
+            "refFieldKey": "spu_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "8D1D68BE-5DEF-426F-9F48-CC6E0F700DD6",
@@ -30356,7 +30697,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "0D6990E7-71B8-42EC-B54A-1341774BFA89",
@@ -31126,7 +31468,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "462FB998-4E2B-47A2-BA3A-C83CC9DA251E",
@@ -31736,7 +32079,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "5CCC04BB-01B7-4EF1-9909-00E67C61D710",
@@ -32786,7 +33130,53 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_member_authentication",
+            "refFieldKey": "member_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_member_address",
+            "refFieldKey": "member_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "member_distribution",
+            "refFieldKey": "member_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_search_res",
+            "refFieldKey": "member_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "DB6927BC-F133-4A3B-A27F-A865074B3C5A",
@@ -33396,7 +33786,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "A040F4DB-E141-4D14-A35B-8A9F486919B6",
@@ -34206,7 +34597,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "049021AE-6A3E-4551-B5B3-251AE5DAA003",
@@ -34936,7 +35328,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "7EEC54AC-1901-471A-9632-35BF43A28256",
@@ -35466,7 +35859,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "5F45565D-5ECC-4B0E-B18C-17103F4EF890",
@@ -35956,7 +36350,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "9232DF8F-B795-4A15-ACD8-C4E605E345E2",
@@ -36766,7 +37161,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "442DEC57-D56A-4F1C-9FF7-FBF5ED0F7D8D",
@@ -37536,7 +37932,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "A6FE78E6-1D21-4856-B342-1EA94784D7C0",
@@ -38146,7 +38543,31 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "uid",
+            "refSchemaName": "",
+            "refEntityKey": "doc_authorize_user",
+            "refFieldKey": "uid",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "uid",
+            "refSchemaName": "",
+            "refEntityKey": "doc_order",
+            "refFieldKey": "uid",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "A67F1A52-91EB-4581-B88C-5AA5BBEEEE78",
@@ -38796,7 +39217,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "B96EBC6F-F791-483C-A1DE-2EEDEEB172CB",
@@ -39646,7 +40068,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "ECDC2F13-FD8B-493B-BE26-DA7AB8EE446A",
@@ -40296,7 +40719,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "prod_id",
+            "refSchemaName": "",
+            "refEntityKey": "doc_order",
+            "refFieldKey": "order_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "A8E8AFAD-7642-4965-A63C-4B999F7E7990",
@@ -40866,7 +41302,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "9312AC95-1A5B-4FA3-AEEA-3FA4FE8C04E1",
@@ -41396,7 +41833,20 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_product_spu",
+            "refFieldKey": "brand_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "F77FCAA3-E220-4068-8E70-81D2F2F691FA",
@@ -41446,49 +41896,9 @@
             "origin": "IMPORT"
           },
           {
-            "id": "6D9A4A77-8499-48CB-B84E-F80256B044C5",
-            "defKey": "spu_id",
-            "defName": "商品ID",
-            "intro": "",
-            "baseDataType": "VARCHAR",
-            "bizDomainType": "",
-            "dbDataType": "VARCHAR",
-            "dataLen": 32,
-            "numScale": "",
-            "primaryKey": 0,
-            "notNull": 0,
-            "autoIncrement": 0,
-            "defaultValue": "",
-            "stndDictId": "",
-            "stndDictKey": "",
-            "stndFieldId": "",
-            "stndFieldKey": "",
-            "attr1": "",
-            "attr2": "",
-            "attr3": "",
-            "attr4": "",
-            "attr5": "",
-            "attr6": "",
-            "attr7": "",
-            "attr8": "",
-            "attr9": "",
-            "attr10": "",
-            "attr11": "",
-            "attr12": "",
-            "attr13": "",
-            "attr14": "",
-            "attr15": "",
-            "attr16": "",
-            "attr17": "",
-            "attr18": "PDManer",
-            "attr19": "",
-            "attr20": "",
-            "origin": "IMPORT"
-          },
-          {
             "id": "487EBFB7-4D5D-410E-B9DB-E15946264BFB",
             "defKey": "sku_code",
-            "defName": "KU编码，唯一",
+            "defName": "KU编码，唯一（多个ID拼接）",
             "intro": "",
             "baseDataType": "VARCHAR",
             "bizDomainType": "",
@@ -41528,12 +41938,52 @@
           {
             "id": "D417692E-EB9D-4F10-83B1-160D48B4AA63",
             "defKey": "sku_name",
-            "defName": "SKU名称(SPU名称+规格值)",
+            "defName": "SKU名称(多个规格值)",
             "intro": "",
             "baseDataType": "VARCHAR",
             "bizDomainType": "",
             "dbDataType": "VARCHAR",
             "dataLen": 255,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndDictKey": "",
+            "stndFieldId": "",
+            "stndFieldKey": "",
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "PDManer",
+            "attr19": "",
+            "attr20": "",
+            "origin": "IMPORT"
+          },
+          {
+            "id": "6D9A4A77-8499-48CB-B84E-F80256B044C5",
+            "defKey": "spu_id",
+            "defName": "商品ID",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 32,
             "numScale": "",
             "primaryKey": 0,
             "notNull": 0,
@@ -41764,6 +42214,98 @@
             "attr19": "",
             "attr20": "",
             "origin": "IMPORT"
+          },
+          {
+            "id": "2326BC36-DAB4-4838-BB0D-6FDE4FB741A7",
+            "defKey": "code",
+            "defName": "货号",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 200,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndFieldId": "",
+            "stndDictKey": "",
+            "stndFieldKey": "",
+            "stndComplianceLevel": "",
+            "stndComplianceType": "",
+            "dictFrom": "",
+            "dictItems": null,
+            "fieldTier": "",
+            "mark": null,
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "",
+            "attr19": "",
+            "attr20": "",
+            "origin": "UI"
+          },
+          {
+            "id": "B7F83CA7-E0EA-4AA6-B294-F5C754F55525",
+            "defKey": "weight",
+            "defName": "重量",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 100,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndFieldId": "",
+            "stndDictKey": "",
+            "stndFieldKey": "",
+            "stndComplianceLevel": "",
+            "stndComplianceType": "",
+            "dictFrom": "",
+            "dictItems": null,
+            "fieldTier": "",
+            "mark": null,
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "",
+            "attr19": "",
+            "attr20": "",
+            "origin": "UI"
           },
           {
             "id": "501365A0-47AD-4D5D-B109-2AF4B32AA695",
@@ -42126,14 +42668,27 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "sku_code",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_value_spu",
+            "refFieldKey": "attr_value_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "A26C9CE9-941C-4A34-AC92-6EC2A53C120E",
         "type": "P",
         "schemaName": "",
         "defKey": "store_attr_key",
-        "defName": "属性键表",
+        "defName": "规格项表",
         "fields": [
           {
             "id": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375",
@@ -42218,7 +42773,7 @@
           {
             "id": "70A8959C-FA28-4A13-8099-7A0B7B2AFFF4",
             "defKey": "is_sale",
-            "defName": "是否是销售属性",
+            "defName": "是否系统规格项",
             "intro": "0-否,1-是",
             "baseDataType": "VARCHAR",
             "bizDomainType": "",
@@ -42696,7 +43251,31 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_key_spu",
+            "refFieldKey": "attr_key_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_value",
+            "refFieldKey": "attr_key_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "C181AA9D-B4D2-4565-985E-9906BD2BCB06",
@@ -43226,14 +43805,38 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": [
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_value_spu",
+            "refFieldKey": "attr_value_id",
+            "orderValue": 1
+          },
+          {
+            "type": "many-to-one",
+            "defKey": "",
+            "defName": "",
+            "intro": "",
+            "myFieldKey": "attr_key_id",
+            "refSchemaName": "",
+            "refEntityKey": "store_attr_value_spu",
+            "refFieldKey": "attr_key_id",
+            "orderValue": 1
+          }
+        ]
       },
       {
         "id": "8EDC0220-5D77-426B-B091-5EEBAE84B162",
         "type": "P",
         "schemaName": "",
-        "defKey": "store_spu_attr_key",
-        "defName": "商品属性关系表",
+        "defKey": "store_attr_key_spu",
+        "defName": "商品规格项关系表",
         "fields": [
           {
             "id": "A74D0CCD-243A-4D52-B717-7B1B3A5FE8D9",
@@ -43716,14 +44319,15 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       },
       {
         "id": "31A053EA-9656-4190-99E2-87B5B7B8D1E6",
         "type": "P",
         "schemaName": "",
-        "defKey": "store_sku_attr_value",
-        "defName": "商品属性值关系表",
+        "defKey": "store_attr_value_spu",
+        "defName": "商品规格值关系表",
         "fields": [
           {
             "id": "82AB6D42-74E7-4E86-BBE8-388B64BB77A3",
@@ -43767,48 +44371,8 @@
           },
           {
             "id": "E0A630FA-9FAE-444A-9150-C6B0F9A31EC8",
-            "defKey": "sku_id",
-            "defName": "商品SKUID",
-            "intro": "",
-            "baseDataType": "VARCHAR",
-            "bizDomainType": "",
-            "dbDataType": "VARCHAR",
-            "dataLen": 32,
-            "numScale": "",
-            "primaryKey": 0,
-            "notNull": 0,
-            "autoIncrement": 0,
-            "defaultValue": "",
-            "stndDictId": "",
-            "stndDictKey": "",
-            "stndFieldId": "",
-            "stndFieldKey": "",
-            "attr1": "",
-            "attr2": "",
-            "attr3": "",
-            "attr4": "",
-            "attr5": "",
-            "attr6": "",
-            "attr7": "",
-            "attr8": "",
-            "attr9": "",
-            "attr10": "",
-            "attr11": "",
-            "attr12": "",
-            "attr13": "",
-            "attr14": "",
-            "attr15": "",
-            "attr16": "",
-            "attr17": "",
-            "attr18": "PDManer",
-            "attr19": "",
-            "attr20": "",
-            "origin": "IMPORT"
-          },
-          {
-            "id": "2A2B9681-4825-4B86-BBF2-709E3EAC964B",
-            "defKey": "attr_key_id",
-            "defName": "属性键ID",
+            "defKey": "spu_id",
+            "defName": "商品ID",
             "intro": "",
             "baseDataType": "VARCHAR",
             "bizDomainType": "",
@@ -43886,6 +44450,46 @@
             "origin": "IMPORT"
           },
           {
+            "id": "2A2B9681-4825-4B86-BBF2-709E3EAC964B",
+            "defKey": "attr_key_id",
+            "defName": "规格项ID",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 32,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndDictKey": "",
+            "stndFieldId": "",
+            "stndFieldKey": "",
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "PDManer",
+            "attr19": "",
+            "attr20": "",
+            "origin": "IMPORT"
+          },
+          {
             "id": "70FFE289-08CE-4088-84AC-3CDFFA5EA73C",
             "defKey": "attr_value_text",
             "defName": "自定义属性值",
@@ -43924,6 +44528,52 @@
             "attr19": "",
             "attr20": "",
             "origin": "IMPORT"
+          },
+          {
+            "id": "CD278231-5184-4CF7-BC5B-FD6656DAE629",
+            "defKey": "attr_image",
+            "defName": "属性值图片",
+            "intro": "",
+            "baseDataType": "VARCHAR",
+            "bizDomainType": "",
+            "dbDataType": "VARCHAR",
+            "dataLen": 500,
+            "numScale": "",
+            "primaryKey": 0,
+            "notNull": 0,
+            "autoIncrement": 0,
+            "defaultValue": "",
+            "stndDictId": "",
+            "stndFieldId": "",
+            "stndDictKey": "",
+            "stndFieldKey": "",
+            "stndComplianceLevel": "",
+            "stndComplianceType": "",
+            "dictFrom": "",
+            "dictItems": null,
+            "fieldTier": "",
+            "mark": null,
+            "attr1": "",
+            "attr2": "",
+            "attr3": "",
+            "attr4": "",
+            "attr5": "",
+            "attr6": "",
+            "attr7": "",
+            "attr8": "",
+            "attr9": "",
+            "attr10": "",
+            "attr11": "",
+            "attr12": "",
+            "attr13": "",
+            "attr14": "",
+            "attr15": "",
+            "attr16": "",
+            "attr17": "",
+            "attr18": "",
+            "attr19": "",
+            "attr20": "",
+            "origin": "UI"
           },
           {
             "id": "961FF4F1-A669-4F2C-9196-80BA4A4C1C11",
@@ -44286,7 +44936,8 @@
             "origin": "IMPORT"
           }
         ],
-        "indexes": []
+        "indexes": [],
+        "refers": []
       }
     ],
     "diagrams": [
@@ -49332,8 +49983,8 @@
               "link-node"
             ],
             "position": {
-              "x": 977.5,
-              "y": 848
+              "x": 399.5,
+              "y": 1221.0000000000005
             },
             "autoSize": false,
             "entityDisplay": {
@@ -49354,7 +50005,7 @@
               },
               "titleStyle": {
                 "body": {
-                  "fill": "rgb(159, 193, 255)",
+                  "fill": "rgb(254, 227, 162)",
                   "fill-opacity": 1
                 },
                 "text": {
@@ -49529,7 +50180,7 @@
               },
               "titleStyle": {
                 "body": {
-                  "fill": "rgb(159, 193, 255)",
+                  "fill": "rgb(254, 227, 162)",
                   "fill-opacity": 1
                 },
                 "text": {
@@ -50109,241 +50760,6 @@
             "target": {
               "cell": "c892c674-7002-4505-9ae9-c42a3e702895",
               "port": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375_in"
-            },
-            "attrs": {
-              "text": {
-                "textAnchor": "middle",
-                "textVerticalAnchor": "middle",
-                "fill": "#000000",
-                "fontSize": 14,
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-decoration": "none"
-              },
-              "line": {
-                "stroke-dasharray": "0",
-                "stroke": "#8f8f8f",
-                "stroke-width": 1,
-                "stroke-opacity": 1,
-                "fill": "none",
-                "fill-opacity": 1,
-                "rx": 5,
-                "sourceMarker": {
-                  "name": "er-1"
-                },
-                "targetMarker": {
-                  "name": "er-n"
-                }
-              }
-            },
-            "labels": [],
-            "connector": "rounded",
-            "router": {
-              "name": "manhattan",
-              "padding": 30
-            },
-            "shape": "edge",
-            "cellType": "edge",
-            "tools": [],
-            "zIndex": 0
-          },
-          {
-            "id": "6910096e-cc5a-47ad-8dd8-c0a415ebdad2",
-            "source": {
-              "cell": "5ee89fc7-64d2-43fb-aee0-a99dc2c4255c",
-              "port": "22CA2BB6-420D-477A-AE48-7A3AD59C3ECA_in"
-            },
-            "target": {
-              "cell": "c892c674-7002-4505-9ae9-c42a3e702895",
-              "port": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375_out"
-            },
-            "attrs": {
-              "text": {
-                "textAnchor": "middle",
-                "textVerticalAnchor": "middle",
-                "fill": "#000000",
-                "fontSize": 14,
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-decoration": "none"
-              },
-              "line": {
-                "stroke-dasharray": "0",
-                "stroke": "#8f8f8f",
-                "stroke-width": 1,
-                "stroke-opacity": 1,
-                "fill": "none",
-                "fill-opacity": 1,
-                "rx": 5,
-                "sourceMarker": {
-                  "name": "er-1"
-                },
-                "targetMarker": {
-                  "name": "er-n"
-                }
-              }
-            },
-            "labels": [],
-            "connector": "rounded",
-            "router": {
-              "name": "manhattan",
-              "padding": 30
-            },
-            "shape": "edge",
-            "cellType": "edge",
-            "tools": [],
-            "zIndex": 0
-          },
-          {
-            "id": "ec44cce6-e05b-45d5-b40f-1fa5615fddcb",
-            "source": {
-              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
-              "port": "E0A630FA-9FAE-444A-9150-C6B0F9A31EC8_in"
-            },
-            "target": {
-              "cell": "8ddc30fa-16a6-425d-9833-d1f42fc4f806",
-              "port": "EE4106CD-57BB-45FF-BC61-F2D8483E175B_out"
-            },
-            "attrs": {
-              "text": {
-                "textAnchor": "middle",
-                "textVerticalAnchor": "middle",
-                "fill": "#000000",
-                "fontSize": 14,
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-decoration": "none"
-              },
-              "line": {
-                "stroke-dasharray": "0",
-                "stroke": "#8f8f8f",
-                "stroke-width": 1,
-                "stroke-opacity": 1,
-                "fill": "none",
-                "fill-opacity": 1,
-                "rx": 5,
-                "sourceMarker": {
-                  "name": "er-1"
-                },
-                "targetMarker": {
-                  "name": "er-n"
-                }
-              }
-            },
-            "labels": [],
-            "connector": "rounded",
-            "router": {
-              "name": "manhattan",
-              "padding": 30
-            },
-            "shape": "edge",
-            "cellType": "edge",
-            "tools": [],
-            "zIndex": 0
-          },
-          {
-            "id": "ddb1c1c6-c9ed-4e0c-9306-465333e0009c",
-            "source": {
-              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
-              "port": "2A2B9681-4825-4B86-BBF2-709E3EAC964B_out"
-            },
-            "target": {
-              "cell": "c892c674-7002-4505-9ae9-c42a3e702895",
-              "port": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375_in"
-            },
-            "attrs": {
-              "text": {
-                "textAnchor": "middle",
-                "textVerticalAnchor": "middle",
-                "fill": "#000000",
-                "fontSize": 14,
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-decoration": "none"
-              },
-              "line": {
-                "stroke-dasharray": "0",
-                "stroke": "#8f8f8f",
-                "stroke-width": 1,
-                "stroke-opacity": 1,
-                "fill": "none",
-                "fill-opacity": 1,
-                "rx": 5,
-                "sourceMarker": {
-                  "name": "er-1"
-                },
-                "targetMarker": {
-                  "name": "er-n"
-                }
-              }
-            },
-            "labels": [],
-            "connector": "rounded",
-            "router": {
-              "name": "manhattan",
-              "padding": 30
-            },
-            "shape": "edge",
-            "cellType": "edge",
-            "tools": [],
-            "zIndex": 0
-          },
-          {
-            "id": "a87d149f-84bc-445a-9b8e-48d534391fca",
-            "source": {
-              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
-              "port": "0759D88F-93B0-4C30-B952-382DF7B80E0A_out"
-            },
-            "target": {
-              "cell": "5ee89fc7-64d2-43fb-aee0-a99dc2c4255c",
-              "port": "E22B88C2-2D7B-4B6F-9A04-A3DC786286D1_in"
-            },
-            "attrs": {
-              "text": {
-                "textAnchor": "middle",
-                "textVerticalAnchor": "middle",
-                "fill": "#000000",
-                "fontSize": 14,
-                "font-weight": "normal",
-                "font-style": "normal",
-                "text-decoration": "none"
-              },
-              "line": {
-                "stroke-dasharray": "0",
-                "stroke": "#8f8f8f",
-                "stroke-width": 1,
-                "stroke-opacity": 1,
-                "fill": "none",
-                "fill-opacity": 1,
-                "rx": 5,
-                "sourceMarker": {
-                  "name": "er-1"
-                },
-                "targetMarker": {
-                  "name": "er-n"
-                }
-              }
-            },
-            "labels": [],
-            "connector": "rounded",
-            "router": {
-              "name": "manhattan",
-              "padding": 30
-            },
-            "shape": "edge",
-            "cellType": "edge",
-            "tools": [],
-            "zIndex": 0
-          },
-          {
-            "id": "a7ef26f6-10fb-4eb4-a473-63b69ead81c1",
-            "source": {
-              "cell": "8ddc30fa-16a6-425d-9833-d1f42fc4f806",
-              "port": "6D9A4A77-8499-48CB-B84E-F80256B044C5_out"
-            },
-            "target": {
-              "cell": "77ea86fd-321d-4599-8596-196423de2635",
-              "port": "FAFBEA96-92E2-4CFF-9A45-F9C35A831102_out"
             },
             "attrs": {
               "text": {
@@ -51834,8 +52250,8 @@
               "link-node"
             ],
             "position": {
-              "x": -133.00000000000068,
-              "y": 1201
+              "x": -127.00000000000068,
+              "y": 1222.0000000000005
             },
             "autoSize": false,
             "entityDisplay": {
@@ -51965,7 +52381,7 @@
             },
             "size": {
               "width": 430,
-              "height": 240
+              "height": 250
             },
             "shape": "physical-entity-node",
             "entityRelationRank": "F",
@@ -52009,8 +52425,8 @@
               "link-node"
             ],
             "position": {
-              "x": -800,
-              "y": 961
+              "x": -849.9999999999993,
+              "y": 1262.0000000000005
             },
             "autoSize": false,
             "entityDisplay": {
@@ -52702,6 +53118,356 @@
                   "stroke-dasharray": "0"
                 }
               }
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "A4046D33-F0DA-4FE1-BDEF-9E5AA62800E9",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "862c03e7-e88d-4ae6-8879-86d2b9fd36bd",
+              "port": "FD1A2BC9-C6EF-41C4-B534-D6F227D869D9_out"
+            },
+            "target": {
+              "cell": "c892c674-7002-4505-9ae9-c42a3e702895",
+              "port": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375_in"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "6C107B2A-4CDB-42BF-917D-EE086A3D45B5",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
+              "port": "0759D88F-93B0-4C30-B952-382DF7B80E0A_out"
+            },
+            "target": {
+              "cell": "5ee89fc7-64d2-43fb-aee0-a99dc2c4255c",
+              "port": "E22B88C2-2D7B-4B6F-9A04-A3DC786286D1_in"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "B6F8BC17-AE82-4CF1-8FC6-B2FD8BA423D5",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
+              "port": "2A2B9681-4825-4B86-BBF2-709E3EAC964B_out"
+            },
+            "target": {
+              "cell": "5ee89fc7-64d2-43fb-aee0-a99dc2c4255c",
+              "port": "22CA2BB6-420D-477A-AE48-7A3AD59C3ECA_in"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "26A87AD0-0160-4047-86C2-5EA3593AEE6F",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "5ee89fc7-64d2-43fb-aee0-a99dc2c4255c",
+              "port": "22CA2BB6-420D-477A-AE48-7A3AD59C3ECA_out"
+            },
+            "target": {
+              "cell": "c892c674-7002-4505-9ae9-c42a3e702895",
+              "port": "CB7BE4A8-A43F-46DC-BDCE-BBDF70B78375_out"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "606831E8-C41F-4AF0-B4B6-9B4DF7247772",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
+              "port": "0759D88F-93B0-4C30-B952-382DF7B80E0A_in"
+            },
+            "target": {
+              "cell": "8ddc30fa-16a6-425d-9833-d1f42fc4f806",
+              "port": "487EBFB7-4D5D-410E-B9DB-E15946264BFB_out"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "BD0CCFCC-3850-464F-B15E-0689958B6E6C",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "d98cf37e-59c2-43e3-a5ec-e36e368148b2",
+              "port": "E0A630FA-9FAE-444A-9150-C6B0F9A31EC8_in"
+            },
+            "target": {
+              "cell": "77ea86fd-321d-4599-8596-196423de2635",
+              "port": "FAFBEA96-92E2-4CFF-9A45-F9C35A831102_out"
+            }
+          },
+          {
+            "shape": "edge",
+            "attrs": {
+              "line": {
+                "stroke": "rgb(122, 167, 250)",
+                "targetMarker": {
+                  "name": "er-n",
+                  "strokeWidth": 1
+                },
+                "fill-opacity": 1,
+                "stroke-width": 1,
+                "stroke-opacity": 0.78695652173913,
+                "stroke-dasharray": "0",
+                "sourceMarker": {
+                  "name": "er-1",
+                  "strokeWidth": 1
+                }
+              },
+              "text": {
+                "textAnchor": "middle",
+                "textVerticalAnchor": "middle",
+                "fill": "#000000",
+                "fontSize": 14,
+                "font-weight": "normal",
+                "font-style": "normal",
+                "text-decoration": "none"
+              }
+            },
+            "id": "934BF64A-8A01-44AE-82A3-218CB84B594F",
+            "connector": {
+              "name": "rounded"
+            },
+            "router": {
+              "name": "manhattan",
+              "padding": 30
+            },
+            "cellType": "edge",
+            "zIndex": 0,
+            "tools": {
+              "items": []
+            },
+            "source": {
+              "cell": "8ddc30fa-16a6-425d-9833-d1f42fc4f806",
+              "port": "6D9A4A77-8499-48CB-B84E-F80256B044C5_out"
+            },
+            "target": {
+              "cell": "77ea86fd-321d-4599-8596-196423de2635",
+              "port": "FAFBEA96-92E2-4CFF-9A45-F9C35A831102_out"
             }
           }
         ],
@@ -57432,6 +58198,6 @@
     "readonly": false,
     "allowWs": false
   },
-  "updateTime": 1756737629193,
-  "signature": "ac835039e7d40954e0c90682dfc5e262"
+  "updateTime": 1757856153086,
+  "signature": "1b3743d36b0a4633d2913d567c3e9b10"
 }

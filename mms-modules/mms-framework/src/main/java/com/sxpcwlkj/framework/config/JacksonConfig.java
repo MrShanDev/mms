@@ -1,5 +1,7 @@
 package com.sxpcwlkj.framework.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.TimeZone;
 
 /**
@@ -34,13 +38,26 @@ public class JacksonConfig {
             javaTimeModule.addSerializer(Long.TYPE, BigNumberSerializer.INSTANCE);
             javaTimeModule.addSerializer(BigInteger.class, BigNumberSerializer.INSTANCE);
             javaTimeModule.addSerializer(BigDecimal.class, ToStringSerializer.instance);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            // 创建支持多种格式的 DateTimeFormatter
+            DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd[['T'][ ]HH:mm:ss[.SSS]][XXX]")
+                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+                .toFormatter();
+
             javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
             javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+
             builder.modules(javaTimeModule);
             builder.timeZone(TimeZone.getDefault());
+
+            // 配置日期相关特性
+            builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+            builder.featuresToEnable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+
             log.info("初始化 jackson 配置已加载！");
         };
     }
-
 }
