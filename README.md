@@ -9,17 +9,65 @@
 
 ## ⚡️系统介绍
 
-🔥🔥🔥模块化管理系统（Modular management
-system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (
-十年磨一剑，做最有价值的开源项目)！
+🔥🔥🔥mmsAdmin（模块化管理系统，Modular Management System）是一款面向企业级应用开发的全方位开源解决方案。作为一款十年磨一剑的精品工程，mmsAdmin致力于为开发者提供高效、稳定、可扩展的开发脚手架，助力各类项目快速落地。
 
+**命名由来**：MMS代表Modular Management System（模块化管理系统），Admin代表管理系统核心功能，体现了我们打造模块化、可管理、易扩展的企业级应用开发平台的初心。
 
-> 项目代码、文档 均开源免费可商用 ,活到老写到老 为兴趣而开源 为学习而开源.
+系统基于Spring Boot 3.x构建，采用前后端分离的现代化架构设计，集成了用户管理、商品管理、支付系统、订单处理、分销体系、日志监控、定时任务、通信服务、直播支持、广告管理、内容发布等丰富功能模块。无论是初创企业还是大型组织，都能通过mmsAdmin快速搭建符合业务需求的应用系统。
 
+作为持续更新迭代的开源项目，我们定期发布功能更新、Bug修复和技术栈升级，确保系统始终处于技术前沿。我们的目标是打造最有价值的开源项目，为开发者社区贡献力量。
+
+> 项目代码和文档完全开源免费，支持商业使用。我们秉承"活到老，写到老"的开源精神，为兴趣而开源，为学习而开源。
 
 🍃系统演示: [传送门](https://mmsadmin.cn/index/demo.html)
 
 🍃MMS文档: [mmsAdmin](https://mmsadmin.cn/)
+
+### 核心特性
+1. **模块化设计**：采用 Maven 多模块架构，各功能模块独立开发、部署和维护
+2. **多租户支持**：灵活的多租户架构，支持数据隔离和资源共享
+3. **权限管理**：基于 Sa-Token 的 RBAC 权限控制，支持菜单、按钮级别权限
+4. **代码生成**：内置低代码生成引擎，支持前后端代码一键生成
+5. **多数据源**：支持 MySQL、Oracle、PostgreSQL、SQL Server 等多种数据库
+6. **对象存储**：集成 x-file-storage，支持阿里云、腾讯云、华为云等主流云存储
+7. **消息队列**：支持 RabbitMQ、RocketMQ、Kafka 等消息中间件
+8. **定时任务**：集成 PowerJob，支持分布式定时任务调度
+9. **监控管理**：集成 Spring Boot Admin，提供应用健康监控
+10. **安全防护**：支持 XSS、SQL 注入防护，接口加签验签等安全机制
+11. **国际化支持**：支持多语言切换
+12. **数据字典**：统一数据字典管理，支持动态配置
+13. **操作日志**：完善的操作日志记录和查询功能
+14. **通知公告**：系统公告和消息通知功能
+15. **个人中心**：用户个人信息管理、密码修改、头像设置等
+
+### 功能模块
+1. **系统管理**
+   - 用户管理：用户增删改查、导入导出、密码重置
+   - 角色管理：角色权限分配、角色用户管理
+   - 菜单管理：菜单配置、权限标识设置
+   - 部门管理：组织架构管理
+   - 岗位管理：岗位信息维护
+   - 字典管理：数据字典配置
+   - 配置管理：系统参数配置
+   - 通知公告：系统消息发布
+
+2. **系统监控**
+   - 操作日志：用户操作记录查询
+   - 登录日志：用户登录信息查询
+   - 服务监控：服务器状态监控
+   - 缓存监控：Redis 缓存信息查看
+
+3. **工具箱**
+   - 代码生成：数据库表结构自动生成前后端代码
+   - 系统接口：Swagger API 文档
+   - 定时任务：任务调度管理
+   - 对象存储：文件上传和管理
+
+4. **扩展功能**
+   - 短信服务：短信发送和配置
+   - 邮件服务：邮件发送和配置
+   - 微信集成：微信公众号、小程序接入
+   - 阿里云服务：阿里云相关服务集成
 
 ## 🧩系统版本
 
@@ -30,7 +78,7 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 | mms    | 标准版 |  - [Gitee](https://gitee.com/mmsAdmin/mms)   | 🙋功能齐全的手架系统 <br/> 📢完全具备高效的项目开发<br/> 📢完多租户模式灵活开启<br/>📢支持低代码自动生成模式 |
 | mms-ui | 标准版 | - [Gitee](https://gitee.com/mmsAdmin/mms-ui) | 🙋适配mms后端系统的管理界面项目                                                  |
 
-## 📦开发语言
+## 📦开发语言与技术栈
 
 <div style="text-align: center;float: left;width: 100%;">
    <img style="margin: 5px ;float: left;height: 20px" src="https://img.shields.io/badge/language-JAVA-<COLOR>.svg" alt=""/>
@@ -50,6 +98,49 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 
 ## 🍃部署方式
 <img src="https://img.shields.io/docker/automated/tsund/tianchi_docker_practice.svg" alt=""/>
+
+### 环境要求
+- JDK 17+
+- MySQL 8.0+
+- Redis 6.x+
+- Node.js 16+ (前端项目)
+- Docker (可选，用于容器化部署)
+
+### 部署步骤
+1. **数据库初始化**
+   - 执行 `script/db/mms.sql` 脚本创建数据库表结构和初始数据
+   - 根据实际环境修改数据库连接配置
+
+2. **后端服务部署**
+   - 修改 `mms-admin/src/main/resources/application.yml` 配置文件
+   - 根据不同环境激活对应的 profile (local/dev/prod)
+   - 执行 Maven 命令打包：`mvn clean package -DskipTests`
+   - 运行 jar 包：`java -jar mms-admin.jar`
+
+3. **前端服务部署**
+   - 进入前端项目目录
+   - 安装依赖：`pnpm install`
+   - 构建生产环境：`pnpm build`
+   - 部署构建产物到 Web 服务器
+
+4. **Docker 部署**
+   - 使用 `script/docker/docker-compose.yml` 文件一键部署
+   - 根据实际环境修改配置文件中的参数
+   - 执行 `docker-compose up -d` 启动所有服务
+
+### 配置文件说明
+项目支持多种环境配置：
+- `application-local.yml`：本地开发环境
+- `application-dev.yml`：开发环境
+- `application-prod.yml`：生产环境
+
+配置主要包括：
+- 数据源配置（MySQL、Oracle、PostgreSQL等）
+- Redis 配置
+- Sa-Token 权限配置
+- MyBatis-Plus 配置
+- 多租户配置
+- 对象存储配置
 
 ## 🤝模块介绍
 
@@ -86,19 +177,18 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 | 11 | ｜________   | mms-powerjob      | 定时任务                             | 已完成   |
 | 12 | script      |                   | 项目配置文件                           | 已完成   |
 
-
-## 📄软件架构
+## 📄软件架构与核心技术栈
 
 软件架构说明
 
 | 框架                                                                   | 说明                    | 版本            | 说明    |
 |----------------------------------------------------------------------|-----------------------|---------------|-------|
-| [SpringBoot](https://spring.io/projects/spring-boot/#learn)          | 后端主框架                 | 3.X           | 3.1.5 |
+| [SpringBoot](https://spring.io/projects/spring-boot/#learn)          | 后端主框架                 | 3.X           | 3.2.6 |
 | [Undertow](https://undertow.io/)                                     | 基于 XNIO 的高性能容器        | 2.7.6         |       |
-| [Sa-Token](https://sa-token.dev33.cn/)                               | Sa-Token、Jwt(强解耦、强扩展) | 1.33.0        |       |
+| [Sa-Token](https://sa-token.dev33.cn/)                               | Sa-Token、Jwt(强解耦、强扩展) | 1.35.0.RC     |       |
 | [MySQL](https://dev.mysql.com/)                                      | 关系数据库                 | 适配 8.X 最低 5.7 |       |
 | [Redis](https://redis.io/)                                           | 缓存数据库                 | 适配 6.X 最低 4.X |       |
-| [Mybatis-Plus](https://baomidou.com/guide/)                          | 快速 CRUD 增加开发效率        | 3.5.4         |       |
+| [Mybatis-Plus](https://baomidou.com/guide/)                          | 快速 CRUD 增加开发效率        | 3.5.7         |       |
 | [Vue](https://staging-cn.vuejs.org/)                                 | vue 框架                | 3.2.45        |       |
 | [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具               | 4.0.4         |       |
 | [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus          | 2.2.28        |       |
@@ -111,6 +201,106 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 | [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架       | 3.5.6         |       |
 | [iconify](https://icon-sets.iconify.design/)                         | 在线图标库                 | 3.0.1         |       |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器                | 5.1.23        |       |
+
+## 🏗️项目架构说明
+
+### 整体架构
+MMS（模块化管理系统）采用前后端分离的架构设计，后端基于 Spring Boot 3.x 构建，前端使用 Vue 3.x 技术栈。
+
+### 后端架构特点
+1. **多模块 Maven 项目结构**：项目采用 Maven 多模块结构，便于模块化开发和维护
+2. **Spring Boot 3.x**：基于最新稳定版本的 Spring Boot 框架
+3. **多数据源支持**：集成 dynamic-datasource-spring-boot-starter，支持多数据源切换
+4. **权限认证**：使用 Sa-Token 进行权限控制，支持 JWT
+5. **ORM 框架**：集成 MyBatis-Plus，提供强大的 CRUD 操作能力
+6. **缓存支持**：集成 Redis，支持分布式缓存
+7. **多租户架构**：支持多租户模式，可灵活开启或关闭
+8. **代码生成**：内置低代码生成引擎，加速后台系统构建
+9. **对象存储**：集成 x-file-storage，支持多种云存储平台
+10. **消息队列**：支持多种消息队列中间件
+11. **定时任务**：集成 PowerJob，支持分布式定时任务
+12. **监控管理**：集成 Spring Boot Admin，提供应用监控能力
+
+### 核心模块说明
+1. **mms-admin**：系统管理启动模块，整合各业务模块
+2. **mms-modules**：核心业务模块集合
+   - mms-common：公共模块，包含通用工具类和枚举
+   - mms-framework：核心框架模块，包含基础配置和工具
+   - mms-datasource：数据源模块，包含基础实体类和分页工具
+   - mms-authority：安全认证模块，基于 Sa-Token 实现
+   - mms-gen：代码生成模块，支持低代码开发
+   - mms-oss：对象存储模块，支持多种云存储
+   - mms-redis：Redis 缓存模块
+   - mms-sms：短信服务模块
+   - mms-email：邮件服务模块
+3. **mms-zoom**：扩展模块集合
+   - mms-monitor：系统监控模块
+   - mms-powerjob：分布式定时任务模块
+
+## 👨‍💻开发指南
+
+### 开发环境搭建
+1. 安装 JDK 17+ 并配置环境变量
+2. 安装 Maven 3.6+ 并配置环境变量
+3. 安装 MySQL 8.0+ 并创建数据库
+4. 安装 Redis 6.x+ 并启动服务
+5. 导入 IDE (推荐 IntelliJ IDEA)
+
+### 项目结构说明
+```
+mms
+├── mms-admin          # 系统管理启动模块
+├── mms-modules        # 核心业务模块集合
+│   ├── mms-common     # 公共模块
+│   ├── mms-framework  # 核心框架模块
+│   ├── mms-datasource # 数据源模块
+│   ├── mms-authority  # 安全认证模块
+│   ├── mms-gen        # 代码生成模块
+│   └── ...            # 其他业务模块
+├── mms-zoom           # 扩展模块集合
+│   ├── mms-monitor    # 系统监控模块
+│   └── mms-powerjob   # 定时任务模块
+└── script             # 脚本文件
+    ├── db             # 数据库脚本
+    └── docker         # Docker 部署文件
+```
+
+### 代码规范
+1. 遵循阿里巴巴 Java 开发手册
+2. 使用 Lombok 简化代码
+3. 统一使用 MapStruct 进行对象转换
+4. 控制器层统一返回 R<T> 格式
+5. 服务层统一处理业务逻辑
+6. 数据访问层使用 MyBatis-Plus
+
+### 新增业务模块步骤
+1. 在 `mms-modules` 目录下创建新模块
+2. 在模块中创建对应的 entity、mapper、service、controller 层
+3. 在 `mms-admin` 的 pom.xml 中添加模块依赖
+4. 在数据库中创建对应的表结构
+5. 在菜单管理中添加对应的菜单和权限
+
+## 🤝如何贡献
+
+我们欢迎任何形式的贡献，包括但不限于：
+
+1. **提交 Issue**：报告 bug 或提出新功能建议
+2. **提交 Pull Request**：修复 bug、添加新功能或改进文档
+3. **完善文档**：补充使用说明、开发指南等文档
+4. **代码优化**：优化现有代码结构和性能
+
+### 贡献流程
+1. Fork 项目到自己的 GitHub 账户
+2. Clone 到本地开发环境
+3. 创建新的分支进行开发
+4. 提交代码并推送至 GitHub
+5. 发起 Pull Request
+
+### 代码规范
+- 遵循项目现有的代码风格
+- 添加必要的单元测试
+- 确保代码通过所有测试
+- 编写清晰的提交信息
 
 ## 🎳演示图例
 
@@ -216,3 +406,186 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 ## 🧪学习 & 商用
 
 &emsp;&emsp;[mms](https://gitee.com/mmsAdmin/mms),[mms-ui](https://gitee.com/mmsAdmin/mms-ui) 是免费和开源的，可免费用于 `学习`、`商业使用` 。
+
+## 🔧 技术架构与核心组件
+
+### 核心技术栈
+
+MMS基于Spring Boot 3.x构建，采用Maven多模块架构，整合了众多优秀的开源技术框架：
+
+| 技术框架 | 说明 | 版本 |
+|---------|------|------|
+| Spring Boot | 后端主框架 | 3.2.6 |
+| MyBatis-Plus | ORM框架 | 3.5.7 |
+| Sa-Token | 权限认证框架 | 1.35.0.RC |
+| Redisson | Redis客户端 | 3.31.0 |
+| Dynamic-Datasource | 多数据源支持 | 4.3.1 |
+| MapStruct Plus | 对象映射工具 | 1.4.3 |
+| Hutool | Java工具库 | 5.8.32 |
+| Lombok | Java简化工具 | 1.8.32 |
+| EasyExcel | Excel处理 | 4.0.3 |
+| SpringDoc | API文档 | 2.5.0 |
+| X-File-Storage | 对象存储 | 2.1.0 |
+| PowerJob | 分布式任务调度 | 4.3.9 |
+| SMS4J | 短信服务 | 3.2.0 |
+
+### 数据库支持
+
+系统支持多种主流数据库：
+- MySQL 8.0+
+- Oracle
+- PostgreSQL
+- SQL Server
+- 达梦数据库
+- 人大金仓
+
+### 消息队列支持
+
+系统支持多种消息队列中间件：
+- RabbitMQ
+- RocketMQ
+- Kafka
+
+### 对象存储支持
+
+系统集成了X-File-Storage，支持多种云存储平台：
+- 阿里云OSS
+- 腾讯云COS
+- 华为云OBS
+- 七牛云Kodo
+- 百度云BOS
+- Amazon S3
+- MinIO
+
+## 📦 项目模块结构
+
+```
+mms
+├── mms-admin          # 系统管理启动模块
+├── mms-modules        # 核心业务模块集合
+│   ├── mms-common     # 公共模块
+│   ├── mms-framework  # 核心框架模块
+│   ├── mms-datasource # 数据源模块
+│   ├── mms-authority  # 安全认证模块
+│   ├── mms-gen        # 代码生成模块
+│   └── ...            # 其他业务模块
+├── mms-zoom           # 扩展模块集合
+│   ├── mms-monitor    # 系统监控模块
+│   └── mms-powerjob   # 定时任务模块
+└── script             # 脚本文件
+    ├── db             # 数据库脚本
+    └── docker         # Docker 部署文件
+```
+
+## 🔐 安全特性
+
+1. **权限控制**：基于Sa-Token实现RBAC权限模型，支持菜单、按钮级别权限控制
+2. **数据加密**：支持AES/RSA加密算法，对敏感数据进行加密存储
+3. **密码安全**：MD5加盐加密，支持密码强度检测
+4. **接口安全**：支持接口签名验证，防止数据篡改
+5. **XSS防护**：内置XSS攻击防护机制
+6. **SQL注入防护**：通过MyBatis-Plus和参数绑定防止SQL注入
+7. **CSRF防护**：支持CSRF攻击防护
+
+## 🌐 多租户架构
+
+系统采用多租户架构设计，支持以下特性：
+1. **数据隔离**：不同租户数据完全隔离
+2. **资源共享**：可灵活配置租户间资源共享策略
+3. **租户管理**：支持租户创建、配置、停用等管理功能
+4. **套餐管理**：支持租户套餐配置，限制功能权限
+
+## 📊 系统监控
+
+1. **健康检查**：集成Spring Boot Actuator，提供应用健康监控
+2. **性能监控**：支持接口调用统计、响应时间分析
+3. **日志管理**：完善的操作日志和登录日志记录
+4. **服务监控**：集成Spring Boot Admin，提供可视化监控界面
+
+## 🛠️ 开发工具
+
+1. **代码生成**：内置低代码生成引擎，支持前后端代码一键生成
+2. **API文档**：集成SpringDoc，自动生成Swagger API文档
+3. **数据字典**：统一数据字典管理，支持动态配置
+4. **定时任务**：集成PowerJob，支持分布式定时任务调度
+5. **消息队列**：支持多种消息队列中间件
+6. **缓存管理**：集成Redis，支持分布式缓存
+
+## 📱 前端技术栈
+
+| 技术框架 | 说明 | 版本 |
+|---------|------|------|
+| Vue | 前端框架 | 3.2.45 |
+| Vite | 构建工具 | 4.0.4 |
+| Element Plus | UI组件库 | 2.2.28 |
+| TypeScript | 编程语言 | 4.9.4 |
+| Pinia | 状态管理 | 2.0.28 |
+| Vue Router | 路由管理 | 4.1.6 |
+| Windi CSS | CSS框架 | 3.5.6 |
+
+## 🚀 部署架构
+
+系统支持多种部署方式：
+1. **传统部署**：直接运行jar包
+2. **Docker部署**：使用Docker容器化部署
+3. **Kubernetes部署**：支持K8s集群部署
+4. **微服务部署**：支持拆分为微服务架构
+
+## 📈 性能优化
+
+1. **数据库优化**：支持读写分离、分库分表
+2. **缓存优化**：多级缓存设计，提升系统响应速度
+3. **连接池优化**：使用HikariCP高性能连接池
+4. **异步处理**：支持异步任务处理，提升系统吞吐量
+5. **压缩传输**：支持GZIP压缩，减少网络传输数据量
+
+## 📞 技术支持
+
+如有问题可以通过以下方式联系技术支持：
+- 官方网站：[https://www.mmsadmin.cn](https://www.mmsadmin.cn)
+- Gitee仓库：[https://gitee.com/mmsAdmin/mms](https://gitee.com/mmsAdmin/mms)
+- 邮箱：sxpcwlkj@163.com
+- QQ群：待定
+
+## 📄 更新日志
+
+### v1.0.6 (2025-02-03)
+- [新增] 微信二维码扫描登录
+- [新增] 个人中心手机号绑定
+- [新增] 个人中心邮箱绑定
+- [修复] 个人中心微信号绑定
+- [预告] 修复已知BUG
+
+### v1.0.5 (2024-11-14)
+- [新增] mms-admin整合easyexcel支持数据的导入/导出（支持字典的自动翻译和导入的逆翻译）
+- [新增] mms-ui对Table列表页面进行工具栏的封装（表格数据的导出，导入，打印）等功能
+- [优化] 系统整体的架构布局优化
+- [预告] 接口加密，接口防抖，接口限流等技术
+
+### v1.0.4 (2024-10-20)
+- [更新] mms-ui sass文件的引入方式，由`@import`换为`@use`
+- [注意] （Dart Sass originally used an API based on the one used by Node Sass, but replaced it with a new, modern API in Dart Sass 1.45.0. The legacy JS API is now deprecated and will be removed in Dart Sass 2.0.0.）
+
+### v1.0.3 (2024-08-02)
+- [升级] mms-generator代码生产模块
+- [新增] mms-power job分布式定时任务模块
+- [新增] mms-mq消息队列模块
+- [新增] mms-monitor健康检测扩展模块
+- [优化] mms-ui优化适配
+
+### v1.0.2 (2024-05-10)
+- [新增] mms-aliyun阿里云生态模块
+- [新增] mms-wx微信生态模块
+- [新增] mms-demo Demo模块
+
+### v1.0.1 (2024-02-10)
+- [新增] mms-system管理系统模块
+- [新增] mms-common公共模块抽取
+- [新增] mms-redis独立redis模块
+- [新增] mms-framework系统核心模块
+- [新增] mms-sms短信模块
+- [新增] mms-email邮件模块
+- [新增] mms-oss对象存储模块
+
+### v1.0.0 (2023-12-01)
+- [发布] MMS模块化管理系统正式开源发布
