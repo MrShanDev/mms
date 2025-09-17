@@ -27,7 +27,7 @@ import com.sxpcwlkj.sms.service.SmsService;
 import com.sxpcwlkj.system.entity.AdminMenuTree;
 import com.sxpcwlkj.system.entity.SysUser;
 import com.sxpcwlkj.system.entity.bo.EmailBo;
-import com.sxpcwlkj.system.entity.bo.SmsBo;
+import com.sxpcwlkj.system.entity.bo.SysSmsBo;
 import com.sxpcwlkj.system.entity.vo.SysUserVo;
 import com.sxpcwlkj.system.service.SysDictService;
 import com.sxpcwlkj.system.service.SysLoginService;
@@ -192,7 +192,7 @@ public class CommonController extends BaseController {
      */
     @SaIgnore
     @PostMapping("/smsCode")
-    public R<Object> smsCode(@RequestBody SmsBo bo, HttpServletRequest request) {
+    public R<Object> smsCode(@RequestBody SysSmsBo bo, HttpServletRequest request) {
 
         Integer type = bo.getType();
         String phone = bo.getPhone();
