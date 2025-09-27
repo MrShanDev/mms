@@ -58,7 +58,6 @@ public class DocUserController{
     private final WxCodeService wxCodeService;
     private final DocProductMapper  docProductMapper;
     private final WxOrderService wxOrderService;
-    private final WxService wxService;
     private final DocOrderService docOrderService;
 
 
