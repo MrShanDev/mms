@@ -10,6 +10,7 @@ import com.sxpcwlkj.wx.utils.WeChatBotMessageUtil;
 import com.sxpcwlkj.mq.utils.MessageTraceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Value;
@@ -357,8 +358,8 @@ public class MqServiceImpl implements MqService {
     /**
      * 自动消费监听器 - 主队列
      */
-    //@RabbitListener(queues = "${spring.rabbitmq.config.queue:distribution.queue}")
-    //@Transactional(rollbackFor = Exception.class)
+    @RabbitListener(queues = "${spring.rabbitmq.config.queue:distribution.queue}")
+    @Transactional(rollbackFor = Exception.class)
     public void onMessage(Message message, Channel channel,
                           @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
         String orderId = null;

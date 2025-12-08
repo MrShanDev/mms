@@ -52,21 +52,6 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-wx</artifactId>
         </dependency>
-        <!--阿里云模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-aliyun</artifactId>
-        </dependency>
-        <!--AI模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-ai</artifactId>
-        </dependency>
-        <!--Thymeleaf模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-thymeleaf</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
