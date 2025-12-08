@@ -43,13 +43,14 @@ import java.time.Duration;
 import java.util.*;
 
 /**
- * @author shanpengnian
+ * MMS-DOC 付费阅读接口
+ * @author xijue
  */
 @Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/doc-api/meb/v1")
+@RequestMapping("/doc/v1")
 public class DocUserController{
 
     private final DocUserService docUserService;
@@ -59,6 +60,12 @@ public class DocUserController{
     private final DocProductMapper  docProductMapper;
     private final WxOrderService wxOrderService;
     private final DocOrderService docOrderService;
+
+    @SaIgnore
+    @GetMapping()
+    public R<String> index(HttpServletRequest request){
+         return R.success("欢迎使用MMS-DOC");
+    }
 
 
     /**
@@ -106,7 +113,7 @@ public class DocUserController{
             docUserVo.setVip_date(expireTime);
         }else {
             docUserVo.setVip_date(DateUtil.getStrToDate("2025-01-01 00:00:00"));
-            docUserVo.setType("usr");
+            docUserVo.setType("user");
         }
 
         return R.success(docUserVo);
@@ -201,7 +208,7 @@ public class DocUserController{
             //获取当前请求域名
             String url=request.getHeader("Host");
             System.out.println("回调:"+url);
-            orderInfo.put("notifyUrl","https://mmsadmin.cn/doc-api/meb/v1/payNotify");
+            orderInfo.put("notifyUrl","https://mmsadmin.cn/doc-api/doc/v1/payNotify");
             R<Object> r= wxOrderService.createPay(orderInfo);
             map.put("orderNo",orderInfo.get("orderNo").toString());
             map.put("buy_url",r.getData().toString());
