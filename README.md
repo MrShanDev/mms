@@ -250,9 +250,7 @@ MMS采用Wings模块化架构设计理念，通过高度解耦的模块化设计
 
 # 😎 LICENSE
 
-::: tip MIT License
 [https://gitee.com/mmsAdmin/mms/blob/master/LICENSE](https://gitee.com/mmsAdmin/mms/blob/master/LICENSE)
-:::
 
 ## ❌免责条款
 
