@@ -9,21 +9,29 @@
 
 ## ⚡️系统介绍
 
-🔥🔥🔥模块化管理系统（Modular management
-system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (
-十年磨一剑，做最有价值的开源项目)！
-
+🔥🔥🔥模块化管理系统（Modular management system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (十年磨一剑，做最有价值的开源项目)！
 
 > 项目代码、文档 均开源免费可商用 ,活到老写到老 为兴趣而开源 为学习而开源.
-
 
 🍃系统演示: [传送门](https://mmsadmin.cn/index/demo.html)
 
 🍃MMS文档: [mmsAdmin](https://mmsadmin.cn/)
 
+## 🧩 Wings模块化架构
+
+MMS采用Wings模块化架构设计理念，通过高度解耦的模块化设计，实现系统的灵活性和可扩展性。每个模块都是独立的功能单元，可以单独开发、测试和部署，同时又能无缝集成到整个系统中。
+
+### 架构优势
+
+- **高内聚低耦合**：每个模块专注于特定功能领域，职责清晰
+- **灵活扩展**：可根据业务需求选择性启用或禁用模块
+- **易于维护**：模块独立性使得系统维护更加简单
+- **团队协作**：不同团队可以并行开发不同模块
+- **技术多样性**：不同模块可以采用最适合的技术栈
+
 ## 🧩系统版本
 
-<img src="https://img.shields.io/badge/MMS-V1.X-green"/>
+<img src="https://img.shields.io/badge/MMS-V1.0.6--Beta-green"/>
 
 | 名称     | 别名  |                     项目地址                     | 注意事项                                                                |
 |--------|:---:|:--------------------------------------------:|---------------------------------------------------------------------|
@@ -86,31 +94,74 @@ system），简称：MMS，是一款基于多应用模块用户、商品、支�
 | 11 | ｜________   | mms-powerjob      | 定时任务                             | 已完成   |
 | 12 | script      |                   | 项目配置文件                           | 已完成   |
 
+## 🔧 Wings架构核心模块
+
+###  foundation层 (基础模块)
+| 模块名称        | 功能描述                                   |
+|-------------|----------------------------------------|
+| mms-common  | 提供公共工具类、常量、枚举等基础组件                  |
+| mms-framework | 核心框架模块，包含统一异常处理、拦截器、基础控制器等       |
+
+### 🔐 认证授权层
+| 模块名称           | 功能描述                          |
+|----------------|-------------------------------|
+| mms-authority  | 安全认证模块，基于Sa-Token实现权限控制      |
+| mms-redis      | Redis缓存模块，支持分布式缓存和会话管理    |
+
+### 💾 数据访问层
+| 模块名称            | 功能描述                                |
+|-----------------|-------------------------------------|
+| mms-datasource  | 数据源模块，集成MyBatis-Plus和动态数据源    |
+| mms-mq          | 消息队列模块，集成RabbitMQ等消息中间件        |
+
+### ☁️ 云服务层
+| 模块名称         | 功能描述                       |
+|--------------|----------------------------|
+| mms-aliyun   | 阿里云服务集成模块                |
+| mms-oss      | 对象存储模块，支持多种云存储服务       |
+| mms-sms      | 短信服务模块，集成多家短信服务商        |
+| mms-email    | 邮件服务模块，支持多种邮件发送方式       |
+| mms-wx       | 微信服务模块，集成微信公众号和小程序API  |
+
+### 🛠 功能扩展层
+| 模块名称          | 功能描述                          |
+|---------------|-------------------------------|
+| mms-gen       | 代码生成模块，支持低代码开发            |
+| mms-ai        | AI大模型集成模块                   |
+| mms-demo      | 演示模块，提供各种功能示例              |
+| mms-websocket | WebSocket长连接通信模块             |
+| mms-thymeleaf | Thymeleaf模板引擎模块              |
+
+### 📊 监控运维层
+| 模块名称           | 功能描述                    |
+|----------------|-------------------------|
+| mms-monitor    | 系统监控模块，集成Spring Boot Admin |
+| mms-powerjob   | 分布式定时任务模块               |
 
 ## 📄软件架构
 
 软件架构说明
 
-| 框架                                                                   | 说明                    | 版本            | 说明    |
-|----------------------------------------------------------------------|-----------------------|---------------|-------|
-| [SpringBoot](https://spring.io/projects/spring-boot/#learn)          | 后端主框架                 | 3.X           | 3.1.5 |
-| [Undertow](https://undertow.io/)                                     | 基于 XNIO 的高性能容器        | 2.7.6         |       |
-| [Sa-Token](https://sa-token.dev33.cn/)                               | Sa-Token、Jwt(强解耦、强扩展) | 1.33.0        |       |
-| [MySQL](https://dev.mysql.com/)                                      | 关系数据库                 | 适配 8.X 最低 5.7 |       |
-| [Redis](https://redis.io/)                                           | 缓存数据库                 | 适配 6.X 最低 4.X |       |
-| [Mybatis-Plus](https://baomidou.com/guide/)                          | 快速 CRUD 增加开发效率        | 3.5.4         |       |
-| [Vue](https://staging-cn.vuejs.org/)                                 | vue 框架                | 3.2.45        |       |
-| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具               | 4.0.4         |       |
-| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus          | 2.2.28        |       |
-| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集        | 4.9.4         |       |
-| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5      | 2.0.28        |       |
-| [vueuse](https://vueuse.org/)                                        | 常用工具集                 | 9.10.0        |       |
-| [vxe-table](https://vxetable.cn/)                                    | vue 最强表单              | 4.3.7         |       |
-| [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化                   | 9.2.2         |       |
-| [vue-router](https://router.vuejs.org/)                              | vue 路由                | 4.1.6         |       |
-| [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架       | 3.5.6         |       |
-| [iconify](https://icon-sets.iconify.design/)                         | 在线图标库                 | 3.0.1         |       |
-| [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器                | 5.1.23        |       |
+| 框架                                                                   | 说明                    | 版本            | 说明       |
+|----------------------------------------------------------------------|-----------------------|---------------|----------|
+| [SpringBoot](https://spring.io/projects/spring-boot/#learn)          | 后端主框架                 | 3.2.6         | 后端主框架    |
+| [Undertow](https://undertow.io/)                                     | 基于 XNIO 的高性能容器        | 2.7.6         | Web服务器   |
+| [Sa-Token](https://sa-token.dev33.cn/)                               | Sa-Token、Jwt(强解耦、强扩展) | 1.35.0.RC     | 权限认证框架   |
+| [MySQL](https://dev.mysql.com/)                                      | 关系数据库                 | 8.2.0         | 数据库      |
+| [Redis](https://redis.io/)                                           | 缓存数据库                 | 6.X+          | 缓存数据库    |
+| [Mybatis-Plus](https://baomidou.com/guide/)                          | 快速 CRUD 增加开发效率        | 3.5.7         | ORM框架    |
+| [Vue](https://staging-cn.vuejs.org/)                                 | vue 框架                | 3.2.45        | 前端框架     |
+| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具               | 4.0.4         | 构建工具     |
+| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus          | 2.2.28        | UI组件库    |
+| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集        | 4.9.4         | 编程语言     |
+| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5      | 2.0.28        | 状态管理     |
+| [vueuse](https://vueuse.org/)                                        | 常用工具集                 | 9.10.0        | 工具库      |
+| [vxe-table](https://vxetable.cn/)                                    | vue 最强表单              | 4.3.7         | 表格组件     |
+| [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化                   | 9.2.2         | 国际化      |
+| [vue-router](https://router.vuejs.org/)                              | vue 路由                | 4.1.6         | 路由管理     |
+| [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架       | 3.5.6         | CSS框架    |
+| [iconify](https://icon-sets.iconify.design/)                         | 在线图标库                 | 3.0.1         | 图标库      |
+| [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器                | 5.1.23        | 富文本编辑器   |
 
 ## 🎳演示图例
 
