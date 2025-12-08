@@ -24,21 +24,6 @@
         </dependency>
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-oss</artifactId>
-            <exclusions>
-                <!-- 解决slf4j冲突  -->
-                <exclusion>
-                    <artifactId>slf4j-reload4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-sms</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-redis</artifactId>
         </dependency>
         <dependency>

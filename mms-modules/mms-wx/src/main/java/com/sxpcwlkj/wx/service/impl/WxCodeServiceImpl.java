@@ -9,7 +9,7 @@ import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
-import com.sxpcwlkj.wx.config.WxProperties;
+import com.sxpcwlkj.common.properties.WxPayProperties;
 import com.sxpcwlkj.wx.entity.WechatEventEnum;
 import com.sxpcwlkj.wx.service.WxCodeService;
 import com.sxpcwlkj.wx.service.WxService;
@@ -36,15 +36,15 @@ public class WxCodeServiceImpl implements WxCodeService {
     private final WxService wxService;
     @Override
     public String getCode(WxCodeBo wxCodeBo) {
-        WxProperties wxProperties = wxService.getWxProperties();
+        WxPayProperties wxPayProperties = wxService.getWxProperties();
         String codeUrl="";
-        if (wxProperties.getModelType() == 1) {
+        if (wxPayProperties.getModelType() == 1) {
             codeUrl=  getMpCode(wxCodeBo);
         }
-        if (wxProperties.getModelType() == 2) {
+        if (wxPayProperties.getModelType() == 2) {
             codeUrl= getMaCode(wxCodeBo);
         }
-        if (wxProperties.getModelType() == 3) {
+        if (wxPayProperties.getModelType() == 3) {
             codeUrl= getOpenCode(wxCodeBo);
         }
         //保存二维码

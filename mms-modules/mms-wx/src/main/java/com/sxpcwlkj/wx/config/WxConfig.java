@@ -6,8 +6,9 @@ import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
+import com.sxpcwlkj.common.properties.WxPayProperties;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 import me.chanjar.weixin.mp.config.impl.WxMpDefaultConfigImpl;
@@ -19,19 +20,19 @@ import org.springframework.context.annotation.Configuration;
  *
  * @Author mmsAdmin
  */
+@Data
 @Configuration
-@Slf4j
 @RequiredArgsConstructor
 public class WxConfig {
 
-    private final WxProperties wxProperties;
+    private final WxPayProperties wxPayProperties;
 
 
     @Bean
     public WxMpService wxMpService() {
         WxMpDefaultConfigImpl config = new WxMpDefaultConfigImpl();
-        config.setAppId(wxProperties.getAppId());
-        config.setSecret(wxProperties.getAppSecret());
+        config.setAppId(wxPayProperties.getAppId());
+        config.setSecret(wxPayProperties.getAppSecret());
 
         WxMpService service = new WxMpServiceImpl();
         service.setWxMpConfigStorage(config);
@@ -41,8 +42,8 @@ public class WxConfig {
     @Bean
     public WxMaService wxMaService() {
         WxMaDefaultConfigImpl config = new WxMaDefaultConfigImpl();
-        config.setAppid(wxProperties.getAppId());
-        config.setSecret(wxProperties.getAppSecret());
+        config.setAppid(wxPayProperties.getAppId());
+        config.setSecret(wxPayProperties.getAppSecret());
         WxMaService service = new WxMaServiceImpl();
         service.setWxMaConfig(config);
         return service;
@@ -52,11 +53,11 @@ public class WxConfig {
     @Bean
     public WxPayService wxPayService() {
         WxPayConfig payConfig = new WxPayConfig();
-        payConfig.setAppId(wxProperties.getAppId());
-        payConfig.setMchId(wxProperties.getMchId());
-        payConfig.setMchKey(wxProperties.getMchApiKey());
-        payConfig.setNotifyUrl(wxProperties.getNotifyUrl());
-        payConfig.setKeyPath(wxProperties.getKeyPath());
+        payConfig.setAppId(wxPayProperties.getAppId());
+        payConfig.setMchId(wxPayProperties.getMchId());
+        payConfig.setMchKey(wxPayProperties.getMchApiKey());
+        payConfig.setNotifyUrl(wxPayProperties.getNotifyUrl());
+        payConfig.setKeyPath(wxPayProperties.getKeyPath());
         payConfig.setTradeType("JSAPI");
         payConfig.setSignType("MD5");
         WxPayService wxPayService = new WxPayServiceImpl();

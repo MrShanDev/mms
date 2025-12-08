@@ -2,7 +2,6 @@ package com.sxpcwlkj;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.x.file.storage.spring.EnableFileStorage;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,8 +20,6 @@ import java.net.UnknownHostException;
 @Slf4j
 @EnableAspectJAutoProxy(exposeProxy = true)
 @MapperScan(basePackages = {"com.sxpcwlkj.**.mapper"})
-
-@EnableFileStorage
 public class MmsDocApiApplication {
     public static void main(String[] args) throws UnknownHostException {
 

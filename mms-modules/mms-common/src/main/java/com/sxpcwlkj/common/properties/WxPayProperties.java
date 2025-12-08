@@ -1,6 +1,8 @@
-package com.sxpcwlkj.wx.config;
+package com.sxpcwlkj.common.properties;
 
 import lombok.Data;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -8,23 +10,23 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-//@ConfigurationProperties(prefix = "pay.wx")
-public class WxProperties {
+@ConfigurationProperties(prefix = "wx.pay")
+public class WxPayProperties {
 
-    private Boolean enabled=false;
+    private Boolean enabled = false;
 
     //appId  公众号
     private String appId="you appid";
     //appSecret  公众号
     private String appSecret="you appSecret";
     //appId  小程序
-    private String appIdMa;
+    private String appIdMa="you appIdMa";
     //appSecret  小程序
-    private String appSecretMa;
+    private String appSecretMa="you appSecretMa";
     //appId  开放平台
-    private String appIdOpen;
+    private String appIdOpen="you appIdOpen";
     //appSecret  开放平台
-    private String appSecretOpen;
+    private String appSecretOpen="you appSecretOpen";
     //mchId 微信商户号和appid有签约关系
     private String mchId="you mchId";
     //mchKey 微信商户秘钥

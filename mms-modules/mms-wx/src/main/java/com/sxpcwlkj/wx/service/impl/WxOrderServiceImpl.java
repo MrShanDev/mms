@@ -10,7 +10,7 @@ import com.ijpay.wxpay.model.UnifiedOrderModel;
 import com.sxpcwlkj.common.utils.FileUtil;
 import com.sxpcwlkj.common.utils.JsonUtil;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.wx.config.WxProperties;
+import com.sxpcwlkj.common.properties.WxPayProperties;
 import com.sxpcwlkj.wx.service.WxOrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,6 @@ import java.util.Map;
 @Service
 public class WxOrderServiceImpl implements WxOrderService {
 
-    private final com.github.binarywang.wxpay.service.WxPayService wxPayService;
-    private final WxProperties wxProperties;
     private final WxServiceImpl wxService;
     @Override
     public R<Object> createPay(Map<String, Object> orderInfo) {
@@ -65,18 +63,18 @@ public class WxOrderServiceImpl implements WxOrderService {
             System.out.println("payPrice = " + payPrice);
             String notifyUrl=orderInfo.get("notifyUrl").toString();
 
-            WxProperties wxProperties = wxService.getWxProperties();
-            if(wxProperties.getNotifyUrl()!=null){
-                wxProperties.setNotifyUrl(notifyUrl);
+            WxPayProperties wxPayProperties = wxService.getWxProperties();
+            if(wxPayProperties.getNotifyUrl()!=null){
+                wxPayProperties.setNotifyUrl(notifyUrl);
             }
 
             WxPayApiConfig wxPayApiConfig =null;
             try {
                 wxPayApiConfig = WxPayApiConfig.builder()
-                        .appId(wxProperties.getAppId())
-                        .mchId(wxProperties.getMchId())
-                        .partnerKey(wxProperties.getMchApiKey())
-                        .certPath(wxProperties.getMchApiKey())
+                        .appId(wxPayProperties.getAppId())
+                        .mchId(wxPayProperties.getMchId())
+                        .partnerKey(wxPayProperties.getMchApiKey())
+                        .certPath(wxPayProperties.getMchApiKey())
                         .build();
             } catch (Exception e) {
 
@@ -93,7 +91,7 @@ public class WxOrderServiceImpl implements WxOrderService {
                     .out_trade_no(orderNo)
                     .total_fee(payPrice)
                     .spbill_create_ip(ip.toString())
-                    .notify_url(wxProperties.getNotifyUrl())
+                    .notify_url(wxPayProperties.getNotifyUrl())
                     .trade_type(tradeType.toString())
                     .openid(openId.toString())
                     .build()
@@ -137,14 +135,14 @@ public class WxOrderServiceImpl implements WxOrderService {
 
     @Override
     public Boolean verifyNotify(Map<String, String> params) {
-        WxProperties wxProperties = wxService.getWxProperties();
+        WxPayProperties wxPayProperties = wxService.getWxProperties();
         WxPayApiConfig wxPayApiConfig =null;
         try {
             wxPayApiConfig = WxPayApiConfig.builder()
-                .appId(wxProperties.getAppId())
-                .mchId(wxProperties.getMchId())
-                .partnerKey(wxProperties.getMchApiKey())
-                .certPath(wxProperties.getMchApiKey())
+                .appId(wxPayProperties.getAppId())
+                .mchId(wxPayProperties.getMchId())
+                .partnerKey(wxPayProperties.getMchApiKey())
+                .certPath(wxPayProperties.getMchApiKey())
                 .build();
         } catch (Exception e) {
             return false;

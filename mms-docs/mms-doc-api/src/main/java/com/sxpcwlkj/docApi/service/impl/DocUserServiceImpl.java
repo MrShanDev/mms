@@ -118,7 +118,7 @@ public class DocUserServiceImpl extends BaseServiceImpl<DocUser, DocUserVo,DocUs
         }else {
             docUser= new DocUser();
             docUser.setNickname(NicknameGenerator.generateRandomNickname());
-            docUser.setType("usr");
+            docUser.setType("user");
             docUser.setAvatar(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
             docUser.setCtime(new Date());
             docUser.setMtime(new Date());

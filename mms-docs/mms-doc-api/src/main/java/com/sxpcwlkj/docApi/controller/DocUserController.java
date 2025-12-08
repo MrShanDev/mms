@@ -99,6 +99,10 @@ public class DocUserController{
 
         if(!new Date().after(expireTime)){
             docUserVo.setType("vip");
+            //如果大于10年
+            if(DateUtil.getYear(expireTime)-DateUtil.getYear(new Date())>=10){
+                docUserVo.setType("super");
+            }
             docUserVo.setVip_date(expireTime);
         }else {
             docUserVo.setVip_date(DateUtil.getStrToDate("2025-01-01 00:00:00"));
