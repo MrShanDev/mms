@@ -21,7 +21,7 @@ public class GeneratePassword {
         //加密内容
         System.out.println("url:  " + CryptoUtils.encrypt(arr[0], "jdbc:mysql://localhost:3306/mms"));
         System.out.println("username:  " + CryptoUtils.encrypt(arr[0], "root"));
-        System.out.println("password:  " + CryptoUtils.encrypt(arr[0], "ieHsBpEdmKcDfMtm"));
+        System.out.println("password:  " + CryptoUtils.encrypt(arr[0], "PSWmc55NmYAi7jcN"));
 
         //备注: 生成的密文 要和 publicKey 一起更新到配置文件中，否则会造成解密失败。
     }

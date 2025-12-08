@@ -22,6 +22,10 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-wx</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
