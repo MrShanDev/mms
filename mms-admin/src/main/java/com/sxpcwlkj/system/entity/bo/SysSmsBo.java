@@ -11,7 +11,7 @@ import lombok.Data;
  * @Doc mmsadmin.cn
  */
 @Data
-public class SmsBo {
+public class SysSmsBo {
 
     @NotBlank(message = "手机号不能为空",groups = {ValidatedGroupConfig.query.class,ValidatedGroupConfig.del.class})
     private String phone;

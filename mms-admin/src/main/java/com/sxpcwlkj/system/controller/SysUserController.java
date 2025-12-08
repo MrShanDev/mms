@@ -143,13 +143,15 @@ public class SysUserController extends BaseController {
      * 导出系统用户
      */
     @MssSafety
-    @Transactional
+    //@Transactional
     @SaCheckPermission("system:user:export")
     @PostMapping("/export")
-    public void export(SysUserBo user, PageQuery pageQuery,HttpServletResponse response) throws IOException {
-        List<SysUserVo> list= baseService.selectPageUserList(user, pageQuery).getRows();
-        List<SysUserExportVo> data= MapstructUtil.convert(list,SysUserExportVo.class);
-        ExcelUtil.export(response, SysUserExportVo.class, "系统用户",data);
+    public void export(SysUserBo user, PageQuery pageQuery, HttpServletResponse response) throws IOException {
+        List<SysUserVo> list = baseService.selectPageUserList(user, pageQuery).getRows();
+        List<SysUserExportVo> data = MapstructUtil.convert(list, SysUserExportVo.class);
+
+        // 使用封装后的安全导出方法
+        ExcelUtil.safeExport(response, SysUserExportVo.class, "系统用户", data, pageQuery);
     }
 
     /**
@@ -235,7 +237,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckLogin
     @PostMapping("/bindingPhone")
-    public R<Boolean> bindingPhone(@Validated({ValidatedGroupConfig.update.class}) @RequestBody SmsBo bo) {
+    public R<Boolean> bindingPhone(@Validated({ValidatedGroupConfig.update.class}) @RequestBody SysSmsBo bo) {
         String keyType = "updatePhone:";
         String phone = bo.getPhone();
         String key = RedisUtil.PHONE_CODES_KEY + keyType + phone;
