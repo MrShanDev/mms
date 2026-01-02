@@ -12,8 +12,6 @@ import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cn.hutool.core.lang.Singleton.put;
-
 /**
  * @author shanpengnian
  */

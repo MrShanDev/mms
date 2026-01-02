@@ -9,6 +9,8 @@ import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.framework.utils.ExcelUtil;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.system.entity.bo.SysDeptBo;
 import com.sxpcwlkj.system.entity.export.SysDeptExport;
 import com.sxpcwlkj.system.entity.vo.SysDeptVo;
@@ -68,6 +70,11 @@ public class SysDeptController extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "部门管理",
+        operType = OperationType.UPDATE,
+        description = "修改部门信息"
+    )
     @SaCheckPermission("system:dept:edit")
     @PutMapping
     public R<Boolean> edit(@RequestBody @Validated(ValidatedGroupConfig.update.class) SysDeptBo bo) {
@@ -79,6 +86,11 @@ public class SysDeptController extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "部门管理",
+        operType = OperationType.INSERT,
+        description = "新增部门"
+    )
     @SaCheckPermission("system:dept:insert")
     @PostMapping
     public R<Boolean> insert(@RequestBody @Validated(ValidatedGroupConfig.insert.class) SysDeptBo bo) {
@@ -90,6 +102,11 @@ public class SysDeptController extends BaseController{
     * @param ids ID
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "部门管理",
+        operType = OperationType.DELETE,
+        description = "删除部门"
+    )
     @SaCheckPermission("system:dept:delete")
     @DeleteMapping("/{ids}")
     public R<Boolean> delete(@PathVariable String ids) {

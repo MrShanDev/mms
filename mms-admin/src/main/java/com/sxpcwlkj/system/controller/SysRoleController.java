@@ -6,6 +6,8 @@ import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.system.entity.bo.SysRoleBo;
 import com.sxpcwlkj.system.entity.vo.SysRoleVo;
 import com.sxpcwlkj.system.service.SysRoleService;
@@ -52,6 +54,11 @@ public class SysRoleController extends BaseController {
     /**
      * 编辑
      */
+    @MmsLog(
+        module = "角色管理",
+        operType = OperationType.UPDATE,
+        description = "修改角色信息"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:role:edit")
@@ -65,6 +72,11 @@ public class SysRoleController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "角色管理",
+        operType = OperationType.INSERT,
+        description = "新增角色"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:role:insert")
@@ -78,6 +90,11 @@ public class SysRoleController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "角色管理",
+        operType = OperationType.DELETE,
+        description = "删除角色"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:role:delete")

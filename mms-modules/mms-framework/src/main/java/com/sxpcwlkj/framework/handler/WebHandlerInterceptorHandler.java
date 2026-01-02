@@ -1,6 +1,5 @@
 package com.sxpcwlkj.framework.handler;
 
-import cn.dev33.satoken.strategy.SaStrategy;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.map.MapUtil;
 import com.alibaba.ttl.TransmittableThreadLocal;
@@ -19,7 +18,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.BufferedReader;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -75,10 +73,9 @@ public class WebHandlerInterceptorHandler implements HandlerInterceptor {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
-        Method method = ((HandlerMethod) handler).getMethod();
-        //进行验证
-        // 首先被注解拦截器进行拦截，如果验证通过，则拦截器放行
-        SaStrategy.me.checkMethodAnnotation.accept(method);
+        // Sa-Token 1.43.0+ 注解检查已集成到框架,无需手动调用
+        // Method method = ((HandlerMethod) handler).getMethod();
+        // SaStrategy.me.checkMethodAnnotation.accept(method);
 
         return true;
     }

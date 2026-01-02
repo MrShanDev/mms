@@ -10,7 +10,6 @@ import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
 import com.sxpcwlkj.docApi.entity.DocUser;
 import com.sxpcwlkj.docApi.entity.bo.DocUserBo;
-
 import com.sxpcwlkj.docApi.entity.vo.DocUserVo;
 import com.sxpcwlkj.docApi.enums.DefStaticEnum;
 import com.sxpcwlkj.docApi.mapper.DocUserMapper;
@@ -26,7 +25,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 文档用户-接口实现

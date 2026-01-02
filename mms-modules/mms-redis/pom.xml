@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-redis</artifactId>
+            <artifactId>sa-token-redis-jackson</artifactId>
         </dependency>
         <!-- 提供Redis连接池 -->
         <dependency>

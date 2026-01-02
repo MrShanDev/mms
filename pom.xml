@@ -16,24 +16,24 @@
     <!--  版本控制  -->
     <properties>
         <!--    Alpha（α）:内测、Beta（β）：公测版 Gamma（γ）：正式版    -->
-        <revision>1.0.6-Beta</revision>
-        <spring-boot.version>3.2.6</spring-boot.version>
-        <spring-boot-admin.version>3.2.3</spring-boot-admin.version>
+        <revision>21</revision>
+        <spring-boot.version>3.5.8</spring-boot.version>
+        <spring-boot-admin.version>3.5.6</spring-boot-admin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
 
         <mybatis.version>3.5.16</mybatis.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <mybatis-plus.version>3.5.14</mybatis-plus.version>
         <mybatis-plus-join-core.version>1.4.7</mybatis-plus-join-core.version>
         <dynamic-dsb3.version>4.3.1</dynamic-dsb3.version>
         <mysql.version>8.2.0</mysql.version>
         <postgresql.version>42.7.3</postgresql.version>
         <p6spy.version>3.9.1</p6spy.version>
 
-        <satoken.version>1.35.0.RC</satoken.version>
-        <token-redis.version>1.35.0.RC</token-redis.version>
-        <redisson.version>3.31.0</redisson.version>
+        <satoken.version>1.43.0</satoken.version>
+        <token-redis.version>1.43.0</token-redis.version>
+        <redisson.version>3.52.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
         <alibaba-ttl.version>2.14.2</alibaba-ttl.version>
         <powerjob.version>4.3.9</powerjob.version>
@@ -70,7 +70,7 @@
         <IJPay.version>2.9.10</IJPay.version>
         <!-- WxJava -->
         <weixin.version>4.6.0</weixin.version>
-        <freemarker.version>2.3.31</freemarker.version>
+        <freemarker.version>2.3.33</freemarker.version>
         <oracle.version>19.3.0.0</oracle.version>
         <dameng.version>8.1.2.141</dameng.version>
         <clickhouse.version>0.3.2</clickhouse.version>
@@ -204,6 +204,12 @@
                 <artifactId>mybatis-plus-annotation</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+            <!-- MyBatis-Plus JSQLParser 支持租户等插件 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-jsqlparser</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
             <dependency>
                 <groupId>ru.yandex.clickhouse</groupId>
                 <artifactId>clickhouse-jdbc</artifactId>
@@ -235,10 +241,10 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- Sa-Token 整合 Redis （使用 jdk 默认序列化方式） -->
+            <!-- Sa-Token 整合 Redis (使用 Jackson 序列化) -->
             <dependency>
                 <groupId>cn.dev33</groupId>
-                <artifactId>sa-token-redis</artifactId>
+                <artifactId>sa-token-redis-jackson</artifactId>
                 <version>${satoken.version}</version>
             </dependency>
             <!-- 提供Redis连接池 -->
@@ -541,6 +547,12 @@
             <dependency>
                 <groupId>com.sxpcwlkj</groupId>
                 <artifactId>mms-thymeleaf</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- 操作日志模块-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-log</artifactId>
                 <version>${revision}</version>
             </dependency>
             <!--支付-微信-->

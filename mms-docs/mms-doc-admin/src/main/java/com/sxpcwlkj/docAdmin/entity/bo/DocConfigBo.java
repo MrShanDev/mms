@@ -1,16 +1,16 @@
 package com.sxpcwlkj.docAdmin.entity.bo;
 
-import com.sxpcwlkj.common.utils.DateUtil;
+import com.sxpcwlkj.datasource.entity.BaseEntity;
+import com.sxpcwlkj.docAdmin.entity.DocConfig;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
-import java.io.Serial;
+import io.github.linpeilie.annotations.AutoMapper;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import jakarta.validation.constraints.*;
-import io.github.linpeilie.annotations.AutoMapper;
-import org.springframework.format.annotation.DateTimeFormat;
-import com.sxpcwlkj.docAdmin.entity.DocConfig;
+
+import java.io.Serial;
 import java.util.Date;
-import com.sxpcwlkj.datasource.entity.BaseEntity;
 
 /**
 * 文档配置Bo

@@ -1,32 +1,29 @@
 package com.sxpcwlkj.docAdmin.service.impl;
 
-import cn.hutool.core.util.ArrayUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sxpcwlkj.common.enums.SystemCommonEnum;
-import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.DataUtil;
-import com.sxpcwlkj.common.utils.StringUtil;
+import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
 import com.sxpcwlkj.docAdmin.entity.DocOrder;
 import com.sxpcwlkj.docAdmin.entity.bo.DocOrderBo;
-import com.sxpcwlkj.docAdmin.entity.vo.DocOrderVo;
 import com.sxpcwlkj.docAdmin.entity.export.DocOrderExport;
+import com.sxpcwlkj.docAdmin.entity.vo.DocOrderVo;
 import com.sxpcwlkj.docAdmin.mapper.DocOrderMapper;
 import com.sxpcwlkj.docAdmin.service.DocOrderService;
+import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.io.Serializable;
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
+import java.util.Set;
 /**
  * 文档订单-接口实现
  *

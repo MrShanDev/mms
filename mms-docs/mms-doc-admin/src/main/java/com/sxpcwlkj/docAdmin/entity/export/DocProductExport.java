@@ -1,18 +1,15 @@
 package com.sxpcwlkj.docAdmin.entity.export;
 
-import com.sxpcwlkj.common.annotation.Dict;
-import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.sxpcwlkj.common.annotation.PrintColumn;
 import com.sxpcwlkj.common.enums.PrintTypeEnum;
-import java.io.Serial;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import io.github.linpeilie.annotations.AutoMapper;
 import com.sxpcwlkj.docAdmin.entity.vo.DocProductVo;
 import com.sxpcwlkj.framework.entity.BaseEntityVo;
-import com.sxpcwlkj.framework.interceptor.DictExcelConverter;
-import com.alibaba.excel.annotation.ExcelProperty;
-import java.util.Date;
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
 
 /**
 * 文档商品Export

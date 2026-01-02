@@ -2,8 +2,8 @@ package com.sxpcwlkj.authority.listener;
 
 
 import cn.dev33.satoken.listener.SaTokenListener;
-import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
@@ -23,7 +23,7 @@ public class MySaTokenListener implements SaTokenListener {
      * 每次登录时触发
      */
     @Override
-    public void doLogin(String s, Object o, String s1, SaLoginModel saLoginModel) {
+    public void doLogin(String s, Object o, String s1, SaLoginParameter saLoginParameter) {
         log.info("doLogin");
     }
 
@@ -85,10 +85,14 @@ public class MySaTokenListener implements SaTokenListener {
 
     }
 
+    /**
+     * 每次Token续期时触发
+     */
     @Override
-    public void doRenewTimeout(String s, Object o, long l) {
-
+    public void doRenewTimeout(String loginType, Object loginId, String tokenValue, long timeout) {
+        // Token 续期逻辑
     }
+
 }
 
 

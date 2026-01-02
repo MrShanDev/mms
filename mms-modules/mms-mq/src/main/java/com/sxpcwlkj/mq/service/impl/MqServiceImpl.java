@@ -1,13 +1,13 @@
 package com.sxpcwlkj.mq.service.impl;
 
 import com.rabbitmq.client.Channel;
-import com.sxpcwlkj.mq.entity.QueueStatus;
 import com.sxpcwlkj.mq.entity.DistributionMessage;
+import com.sxpcwlkj.mq.entity.QueueStatus;
 import com.sxpcwlkj.mq.hander.MqHandler;
 import com.sxpcwlkj.mq.service.MqService;
+import com.sxpcwlkj.mq.utils.MessageTraceUtil;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.wx.utils.WeChatBotMessageUtil;
-import com.sxpcwlkj.mq.utils.MessageTraceUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -175,7 +175,8 @@ public class MqServiceImpl implements MqService {
 
             final int finalDelayTime = actualDelayTime;
             rabbitTemplate.convertAndSend(delayExchange, delayRoutingKey, message, msg -> {
-                msg.getMessageProperties().setDelay(finalDelayTime);
+                // Spring AMQP 3.x+ 使用 x-delay 消息头设置延迟时间
+                msg.getMessageProperties().setHeader("x-delay", finalDelayTime);
                 msg.getMessageProperties().setExpiration(String.valueOf(finalDelayTime));
                 return msg;
             });

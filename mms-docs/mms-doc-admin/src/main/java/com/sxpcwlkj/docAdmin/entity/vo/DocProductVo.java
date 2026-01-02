@@ -1,17 +1,13 @@
 package com.sxpcwlkj.docAdmin.entity.vo;
 
 
-import java.io.Serial;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sxpcwlkj.common.utils.DateUtil;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import io.github.linpeilie.annotations.AutoMapper;
 import com.sxpcwlkj.docAdmin.entity.DocProduct;
 import com.sxpcwlkj.framework.entity.BaseEntityVo;
-import com.alibaba.excel.annotation.ExcelProperty;
-import java.util.List;
-import java.util.Date;
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
 
 /**
 * 文档商品Vo

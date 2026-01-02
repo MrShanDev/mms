@@ -6,6 +6,8 @@ import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.constant.Constants;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.framework.sercice.SysSignService;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.system.entity.bo.LoginBodyBo;
@@ -54,6 +56,11 @@ public class AuthController extends BaseController {
      * @param loginBodyBo 登录参数
      * @return 登录结果
      */
+    @MmsLog(
+        module = "系统登录",
+        operType = OperationType.LOGIN,
+        description = "用户登录系统"
+    )
     @Operation(summary = "登录方法", description = "登录方法,账号、密码、验证码验证登录")
     @SaIgnore
     @PostMapping("/login")
@@ -80,6 +87,11 @@ public class AuthController extends BaseController {
      *
      * @return 退出结果
      */
+    @MmsLog(
+        module = "系统登录",
+        operType = OperationType.LOGOUT,
+        description = "用户退出系统"
+    )
     @Operation(summary = "退出登录", description = "退出当前登录会话")
     @SaIgnore
     @PostMapping("/logout")

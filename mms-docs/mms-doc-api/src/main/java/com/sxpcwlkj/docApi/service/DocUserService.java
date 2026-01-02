@@ -5,8 +5,6 @@ import com.sxpcwlkj.docApi.entity.bo.DocUserBo;
 import com.sxpcwlkj.docApi.entity.vo.DocUserVo;
 import com.sxpcwlkj.framework.sercice.BaseService;
 
-import java.util.Set;
-
 /**
  * 文档用户-接口
  *

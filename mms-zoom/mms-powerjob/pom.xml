@@ -11,22 +11,6 @@
     <packaging>jar</packaging>
     <artifactId>mms-powerjob</artifactId>
 
-    <properties>
-        <spring-boot.version>2.7.18</spring-boot.version>
-        <spring-boot-admin.version>2.7.11</spring-boot-admin.version>
-    </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-parent</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
 
         <!-- PowerJob server-->
@@ -61,7 +45,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
                 <executions>
                     <execution>
                         <goals>

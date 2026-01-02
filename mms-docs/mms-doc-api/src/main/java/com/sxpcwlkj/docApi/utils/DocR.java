@@ -1,13 +1,9 @@
 package com.sxpcwlkj.docApi.utils;
 
 
-import com.sxpcwlkj.common.enums.HttpStatusEnum;
-import com.sxpcwlkj.common.utils.R;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.HashMap;
 
 
 /**

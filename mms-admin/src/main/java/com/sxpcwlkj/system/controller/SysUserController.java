@@ -15,6 +15,8 @@ import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.framework.utils.ExcelUtil;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.system.entity.bo.*;
 import com.sxpcwlkj.system.entity.export.SysUserExportVo;
@@ -81,6 +83,11 @@ public class SysUserController extends BaseController {
      *
      * @return true/false
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "修改用户信息"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:user:edit")
@@ -94,6 +101,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.INSERT,
+        description = "新增用户"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:user:insert")
@@ -107,6 +119,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.DELETE,
+        description = "删除用户"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:user:delete")
@@ -129,6 +146,11 @@ public class SysUserController extends BaseController {
      * 导入系统用户
      * @param file 模版文件
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.IMPORT,
+        description = "导入用户数据"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:user:import")
@@ -142,6 +164,11 @@ public class SysUserController extends BaseController {
     /**
      * 导出系统用户
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.EXPORT,
+        description = "导出用户数据"
+    )
     @MssSafety
     //@Transactional
     @SaCheckPermission("system:user:export")

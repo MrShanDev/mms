@@ -53,6 +53,12 @@
             <artifactId>mms-wx</artifactId>
         </dependency>
 
+        <!--操作日志模块-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-log</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-doc-admin</artifactId>

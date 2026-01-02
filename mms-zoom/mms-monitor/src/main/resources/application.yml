@@ -6,6 +6,10 @@ server:
 spring:
   application:
     name: MMS Monitor
+  # 启用虚拟线程（Virtual Threads）
+  threads:
+    virtual:
+      enabled: true
 
 --- # Spring Boot Admin
 spring:

@@ -1,8 +1,8 @@
 package com.sxpcwlkj.docAdmin.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.sxpcwlkj.datasource.entity.BaseEntity;
-import java.util.Date;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

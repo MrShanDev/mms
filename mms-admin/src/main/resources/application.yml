@@ -73,6 +73,10 @@ spring:
       max-file-size: 10MB
       # 设置总上传的文件大小
       max-request-size: 20MB
+  # 启用虚拟线程（Virtual Threads）
+  threads:
+    virtual:
+      enabled: true
 
   jackson:
     # 日期格式化

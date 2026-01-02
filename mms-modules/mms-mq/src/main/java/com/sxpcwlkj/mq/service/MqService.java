@@ -1,7 +1,7 @@
 package com.sxpcwlkj.mq.service;
 
-import com.sxpcwlkj.mq.entity.QueueStatus;
 import com.sxpcwlkj.mq.entity.DistributionMessage;
+import com.sxpcwlkj.mq.entity.QueueStatus;
 import com.sxpcwlkj.mq.hander.MqHandler;
 
 import java.util.List;

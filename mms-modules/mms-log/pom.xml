@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.sxpcwlkj</groupId>
+        <artifactId>mms-modules</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>mms-log</artifactId>
+    <version>${revision}</version>
+    <name>mms-log</name>
+    <description>操作日志模块</description>
+
+    <dependencies>
+        <!-- mms-common 公共模块 -->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-common</artifactId>
+        </dependency>
+
+        <!-- mms-framework 核心框架模块 -->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-framework</artifactId>
+        </dependency>
+
+        <!-- mms-datasource 数据源模块 -->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-datasource</artifactId>
+        </dependency>
+
+        <!-- mms-redis 缓存模块 -->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-redis</artifactId>
+        </dependency>
+
+        <!-- mms-authority 权限模块 -->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-authority</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Boot AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <!-- MyBatis-Plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
