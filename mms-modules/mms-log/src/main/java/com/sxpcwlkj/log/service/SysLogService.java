@@ -1,6 +1,6 @@
 package com.sxpcwlkj.log.service;
 
-import com.sxpcwlkj.log.entity.SysOperLog;
+import com.sxpcwlkj.log.entity.SysLog;
 
 /**
  * 操作日志服务接口
@@ -14,19 +14,19 @@ public interface SysLogService {
      *
      * @param operLog 操作日志对象
      */
-    void saveLog(SysOperLog operLog);
+    void saveLog(SysLog operLog);
 
     /**
      * 保存操作日志到数据库
      *
      * @param operLog 操作日志对象
      */
-    void saveToDatabase(SysOperLog operLog);
+    void saveToDatabase(SysLog operLog);
 
     /**
      * 保存操作日志到本地文件
      *
      * @param operLog 操作日志对象
      */
-    void saveToFile(SysOperLog operLog);
+    void saveToFile(SysLog operLog);
 }

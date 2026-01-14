@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #722ed1; }
+        .content { color: #333333; line-height: 1.6; }
+        .change-box { background-color: #f9f0ff; border-left: 4px solid #722ed1; padding: 20px; margin: 20px 0; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999999; font-size: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">{appName}</div>
+        </div>
+        <div class="content">
+            <p>尊敬的 <strong>{username}</strong>，您好！</p>
+            <p>您的账户发生了以下变动：</p>
+            <div class="change-box">
+                <strong>变动类型：</strong>{changeType}<br>
+                <strong>变动时间：</strong>{changeTime}<br>
+                <strong>变动内容：</strong>{changeContent}
+            </div>
+            <p>如非本人操作，请立即联系客服处理。</p>
+        </div>
+        <div class="footer">
+            此邮件由系统自动发送，请勿直接回复<br>
+            客服邮箱：{supportEmail}<br>
+            © {year} {appName}. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

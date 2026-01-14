@@ -38,7 +38,7 @@ public @interface MmsLog {
     /**
      * 是否保存响应数据
      */
-    boolean saveResponseData() default false;
+    boolean saveResponseData() default true;
 
     /**
      * 日志保存策略(默认保存到数据库)
@@ -48,7 +48,7 @@ public @interface MmsLog {
     /**
      * 是否记录操作前的数据(用于对比修改前后)
      */
-    boolean saveBeforeData() default false;
+    boolean saveBeforeData() default true;
 
     /**
      * 是否自动识别 (module、operType、description 都为空时自动为 true)

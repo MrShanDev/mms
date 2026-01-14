@@ -86,7 +86,9 @@ public class SysUserController extends BaseController {
     @MmsLog(
         module = "用户管理",
         operType = OperationType.UPDATE,
-        description = "修改用户信息"
+        description = "修改用户信息",
+        saveBeforeData = true,
+        saveResponseData = true  // 开启响应数据记录
     )
     @MssSafety
     @Transactional

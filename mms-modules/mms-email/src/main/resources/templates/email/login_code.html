@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #52c41a; }
+        .content { color: #333333; line-height: 1.6; }
+        .code-box { background-color: #f6ffed; border: 2px dashed #52c41a; border-radius: 6px; padding: 20px; margin: 20px 0; text-align: center; }
+        .code { font-size: 32px; font-weight: bold; color: #52c41a; letter-spacing: 5px; }
+        .info-box { background-color: #fafafa; padding: 15px; border-radius: 6px; margin: 20px 0; }
+        .tips { color: #999999; font-size: 14px; margin-top: 20px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999999; font-size: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">{appName}</div>
+        </div>
+        <div class="content">
+            <p>尊敬的用户，您好！</p>
+            <p>您正在进行登录操作，您的验证码为：</p>
+            <div class="code-box">
+                <div class="code">{code}</div>
+            </div>
+            <div class="info-box">
+                <strong>登录信息：</strong><br>
+                登录时间：{loginTime}<br>
+                登录IP：{loginIp}<br>
+                登录设备：{deviceInfo}
+            </div>
+            <p class="tips">
+                • 验证码有效期为 <strong>{expireMinutes} 分钟</strong><br>
+                • 如非本人操作，请立即修改密码
+            </p>
+        </div>
+        <div class="footer">
+            此邮件由系统自动发送，请勿直接回复<br>
+            © {year} {appName}. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

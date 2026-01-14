@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSON;
 import cn.dev33.satoken.stp.StpUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.log.annotation.MmsLog;
-import com.sxpcwlkj.log.entity.SysOperLog;
+import com.sxpcwlkj.log.entity.SysLog;
 import com.sxpcwlkj.log.enums.LogSavePolicy;
 import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.log.service.SysLogService;
@@ -63,7 +63,7 @@ public class SysLogAspect {
     /**
      * ThreadLocal 存储日志信息
      */
-    private static final ThreadLocal<SysOperLog> LOG_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<SysLog> LOG_THREAD_LOCAL = new ThreadLocal<>();
 
     /**
      * ThreadLocal 存储响应数据配置
@@ -92,7 +92,7 @@ public class SysLogAspect {
             HttpServletRequest request = attributes.getRequest();
 
             // 构建日志对象
-            SysOperLog sysOperLog = new SysOperLog();
+            SysLog sysLog = new SysLog();
 
             // 获取方法信息用于智能识别
             Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
@@ -121,67 +121,99 @@ public class SysLogAspect {
             }
 
             // 设置基本信息
-            sysOperLog.setOperTime(LocalDateTime.now());
-            sysOperLog.setModule(module);
-            sysOperLog.setOperType(operType.getCode());
-            sysOperLog.setDescription(description);
-            sysOperLog.setRequestMethod(request.getMethod());
-            sysOperLog.setOperUrl(request.getRequestURI());
+            sysLog.setOperTime(LocalDateTime.now());
+            sysLog.setModule(module);
+            sysLog.setOperType(operType.getCode());
+            sysLog.setDescription(description);
+            sysLog.setRequestMethod(request.getMethod());
+            sysLog.setOperUrl(request.getRequestURI());
 
             // 获取方法信息
             String className = joinPoint.getTarget().getClass().getName();
             String methodName = joinPoint.getSignature().getName();
-            sysOperLog.setMethod(className + "." + methodName);
+            sysLog.setMethod(className + "." + methodName);
 
             // 获取用户信息
             try {
                 if (LoginObject.isLogin()) {
-                    String userId = LoginObject.getLoginId();
-                    sysOperLog.setUserId(userId);
+                    String userIdStr = LoginObject.getLoginId();
+                    // 将String转换为Long
+                    try {
+                        sysLog.setUserId(Long.parseLong(userIdStr));
+                    } catch (NumberFormatException e) {
+                        log.warn("用户ID格式错误: {}", userIdStr);
+                        sysLog.setUserId(null);
+                    }
 
                     // 从 Redis 获取用户信息
-                    String userName = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + userId);
-                    sysOperLog.setUserName(userName != null ? userName : "未知");
+                    String userName = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + userIdStr);
+                    sysLog.setUserName(userName != null ? userName : "未知");
 
-                    Long tenantId = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userId);
-                    sysOperLog.setTenantId(tenantId != null ? tenantId : 0L);
+                    // 安全获取租户ID，处理可能的类型转换
+                    Object tenantIdObj = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userIdStr);
+                    Long tenantId = 0L;
+                    if (tenantIdObj != null) {
+                        if (tenantIdObj instanceof Long) {
+                            tenantId = (Long) tenantIdObj;
+                        } else if (tenantIdObj instanceof String) {
+                            try {
+                                tenantId = Long.parseLong((String) tenantIdObj);
+                            } catch (NumberFormatException ex) {
+                                log.warn("租户ID格式错误: {}", tenantIdObj);
+                            }
+                        } else if (tenantIdObj instanceof Number) {
+                            tenantId = ((Number) tenantIdObj).longValue();
+                        }
+                    }
+                    sysLog.setTenantId(tenantId);
 
                     // 获取角色信息
                     try {
                         List<String> roleList = StpUtil.getRoleList();
-                        sysOperLog.setUserRoles(roleList != null ? String.join(",", roleList) : "");
+                        sysLog.setUserRoles(roleList != null ? String.join(",", roleList) : "");
                     } catch (Exception e) {
                         log.warn("获取用户角色失败", e);
-                        sysOperLog.setUserRoles("");
+                        sysLog.setUserRoles("");
                     }
+                } else {
+                    // 未登录时设置为null
+                    sysLog.setUserId(null);
+                    sysLog.setUserName("匿名");
+                    sysLog.setTenantId(0L);
                 }
             } catch (Exception e) {
                 log.warn("获取用户信息失败", e);
-                sysOperLog.setUserId("");
-                sysOperLog.setUserName("匿名");
-                sysOperLog.setTenantId(0L);
+                sysLog.setUserId(null);
+                sysLog.setUserName("匿名");
+                sysLog.setTenantId(0L);
             }
 
             // 获取IP和地理位置
             String ip = IpUtils.getIpAddr(request);
-            sysOperLog.setOperIp(ip);
-            sysOperLog.setOperLocation(AddressUtil.getCityInfo(ip));
+            sysLog.setOperIp(ip);
+            sysLog.setOperLocation(AddressUtil.getCityInfo(ip));
 
             // 获取浏览器和操作系统信息
-            sysOperLog.setUserAgent(request.getHeader("User-Agent"));
-            sysOperLog.setBrowser(IpUtils.getBrowser(request));
-            sysOperLog.setOs(IpUtils.getOs(request));
+            sysLog.setUserAgent(request.getHeader("User-Agent"));
+            sysLog.setBrowser(IpUtils.getBrowser(request));
+            sysLog.setOs(IpUtils.getOs(request));
 
             // 保存请求参数
             if (mmsLog.saveRequestData()) {
                 String params = getRequestParams(joinPoint, mmsLog.excludeParams());
-                sysOperLog.setOperParam(StrUtil.sub(params, 0, 2000)); // 限制长度
+                sysLog.setOperParam(StrUtil.sub(params, 0, 2000)); // 限制长度
             }
 
-            // 保存操作前数据
-            if (mmsLog.saveBeforeData()) {
-                // 这里可以根据业务需求实现,例如查询修改前的数据
-                sysOperLog.setBeforeData("");
+            // 保存操作前数据（仅针对更新操作）
+            if (mmsLog.saveBeforeData() && operType == OperationType.UPDATE) {
+                try {
+                    String beforeData = getBeforeData(joinPoint);
+                    if (StrUtil.isNotBlank(beforeData)) {
+                        sysLog.setBeforeData(StrUtil.sub(beforeData, 0, 2000)); // 限制长度
+                    }
+                } catch (Exception e) {
+                    log.error("获取操作前数据失败: {}", e.getMessage());
+                }
             }
 
             // 存储配置到 ThreadLocal
@@ -189,7 +221,7 @@ public class SysLogAspect {
             SAVE_POLICY.set(mmsLog.savePolicy());
 
             // 存储到 ThreadLocal
-            LOG_THREAD_LOCAL.set(sysOperLog);
+            LOG_THREAD_LOCAL.set(sysLog);
         } catch (Exception e) {
             log.error("操作日志前置处理失败", e);
         }
@@ -216,30 +248,30 @@ public class SysLogAspect {
      */
     private void handleLog(Object result, Exception e) {
         try {
-            SysOperLog sysOperLog = LOG_THREAD_LOCAL.get();
-            if (sysOperLog == null) {
+            SysLog sysLog = LOG_THREAD_LOCAL.get();
+            if (sysLog == null) {
                 return;
             }
 
             // 计算消耗时间
             Long startTime = TIME_THREAD_LOCAL.get();
             if (startTime != null) {
-                sysOperLog.setCostTime(System.currentTimeMillis() - startTime);
+                sysLog.setCostTime(System.currentTimeMillis() - startTime);
             }
 
             // 设置操作状态
             if (e != null) {
-                sysOperLog.setStatus(1); // 失败
-                sysOperLog.setErrorMsg(StrUtil.sub(ExceptionUtil.stacktraceToString(e), 0, 2000));
+                sysLog.setStatus(1); // 失败
+                sysLog.setErrorMsg(StrUtil.sub(ExceptionUtil.stacktraceToString(e), 0, 2000));
             } else {
-                sysOperLog.setStatus(0); // 成功
+                sysLog.setStatus(0); // 成功
             }
 
             // 保存响应数据
             Boolean saveResponseData = SAVE_RESPONSE_DATA.get();
             if (saveResponseData != null && saveResponseData && result != null) {
                 String jsonResult = JSON.toJSONString(result);
-                sysOperLog.setJsonResult(StrUtil.sub(jsonResult, 0, 2000)); // 限制长度
+                sysLog.setJsonResult(StrUtil.sub(jsonResult, 0, 2000)); // 限制长度
             }
 
             // 根据保存策略保存日志
@@ -249,14 +281,14 @@ public class SysLogAspect {
             }
             switch (savePolicy) {
                 case DATABASE:
-                    sysLogService.saveToDatabase(sysOperLog);
+                    sysLogService.saveToDatabase(sysLog);
                     break;
                 case FILE:
-                    sysLogService.saveToFile(sysOperLog);
+                    sysLogService.saveToFile(sysLog);
                     break;
                 case BOTH:
-                    sysLogService.saveToDatabase(sysOperLog);
-                    sysLogService.saveToFile(sysOperLog);
+                    sysLogService.saveToDatabase(sysLog);
+                    sysLogService.saveToFile(sysLog);
                     break;
             }
         } catch (Exception ex) {
@@ -287,11 +319,9 @@ public class SysLogAspect {
                 }
             }
 
-            // 排除敏感参数
+            // 过滤敏感参数
             if (excludeParams != null && excludeParams.length > 0) {
-                for (String key : excludeParams) {
-                    params.remove(key);
-                }
+                params = filterSensitiveData(params, excludeParams);
             }
 
             return JSONUtil.toJsonStr(params);
@@ -299,6 +329,295 @@ public class SysLogAspect {
             log.warn("获取请求参数失败", e);
             return "";
         }
+    }
+
+    /**
+     * 递归过滤敏感数据
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> filterSensitiveData(Map<String, Object> params, String[] excludeParams) {
+        if (params == null || excludeParams == null || excludeParams.length == 0) {
+            return params;
+        }
+
+        Map<String, Object> filtered = new HashMap<>();
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            // 检查键名是否是敏感字段
+            if (isSensitiveField(key, excludeParams)) {
+                filtered.put(key, "******");
+                continue;
+            }
+
+            // 处理值
+            if (value == null) {
+                filtered.put(key, null);
+            } else if (value instanceof Map) {
+                // 递归处理 Map
+                filtered.put(key, filterSensitiveData((Map<String, Object>) value, excludeParams));
+            } else if (value instanceof String || value instanceof Number || value instanceof Boolean) {
+                // 基础类型直接放入
+                filtered.put(key, value);
+            } else {
+                // 其他对象类型，转换为 Map 再过滤
+                try {
+                    String json = JSONUtil.toJsonStr(value);
+                    Map<String, Object> objMap = JSONUtil.toBean(json, Map.class);
+                    filtered.put(key, filterSensitiveData(objMap, excludeParams));
+                } catch (Exception e) {
+                    // 转换失败，直接使用原值
+                    filtered.put(key, value);
+                }
+            }
+        }
+        return filtered;
+    }
+
+    /**
+     * 判断是否是敏感字段
+     */
+    private boolean isSensitiveField(String fieldName, String[] excludeParams) {
+        if (fieldName == null || excludeParams == null) {
+            return false;
+        }
+        for (String excludeParam : excludeParams) {
+            if (fieldName.equalsIgnoreCase(excludeParam)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取修改前的数据
+     * 适用于更新操作，通过反射获取ID字段并查询数据库
+     */
+    private String getBeforeData(JoinPoint joinPoint) {
+        try {
+            Object[] args = joinPoint.getArgs();
+            if (args == null || args.length == 0) {
+                return "";
+            }
+
+            // 遍历参数，查找BO对象
+            for (Object arg : args) {
+                if (arg == null || isFilterObject(arg)) {
+                    continue;
+                }
+
+                // 查找带有 "Id" 后缀的字段（如 userId, deptId, roleId 等）
+                Object entityId = extractIdFromObject(arg);
+                if (entityId == null) {
+                    continue;
+                }
+
+                // 获取目标方法所在的Controller
+                Object controller = joinPoint.getTarget();
+                if (controller == null) {
+                    continue;
+                }
+                
+                // 从Controller中提取Service对象
+                Object service = extractServiceFromController(controller);
+                if (service == null) {
+                    continue;
+                }
+                
+                // 尝试调用 selectById 或 selectVoById 方法
+                Object beforeEntity = queryBeforeData(service, entityId);
+                if (beforeEntity != null) {
+                    // 序列化为JSON并过滤敏感字段
+                    String json = JSONUtil.toJsonStr(beforeEntity);
+                    Map<String, Object> dataMap = JSONUtil.toBean(json, Map.class);
+                    // 使用默认的敏感参数列表
+                    String[] excludeParams = {"password", "oldPassword", "newPassword", "confirmPassword"};
+                    Map<String, Object> filtered = filterSensitiveData(dataMap, excludeParams);
+                    return JSONUtil.toJsonStr(filtered);
+                }
+            }
+        } catch (Exception e) {
+            log.error("获取修改前数据异常: {}", e.getMessage());
+        }
+        return "";
+    }
+
+    /**
+     * 从对象中提取ID字段
+     * 优先级：@TableId > id字段 > 以"Id"结尾的字段
+     */
+    private Object extractIdFromObject(Object obj) {
+        try {
+            Class<?> clazz = obj.getClass();
+            
+            // 1. 优先：查找带有 @TableId 注解的字段（MyBatis-Plus 主键注解）
+            for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(com.baomidou.mybatisplus.annotation.TableId.class)) {
+                    field.setAccessible(true);
+                    Object value = field.get(obj);
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+            
+            // 2. 查找父类中的 @TableId 注解（BO/VO可能继承自 Entity）
+            Class<?> superClass = clazz.getSuperclass();
+            if (superClass != null && superClass != Object.class) {
+                for (java.lang.reflect.Field field : superClass.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(com.baomidou.mybatisplus.annotation.TableId.class)) {
+                        field.setAccessible(true);
+                        Object value = field.get(obj);
+                        if (value != null) {
+                            return value;
+                        }
+                    }
+                }
+            }
+            
+            // 3. 兜底：查找以 "Id" 结尾的字段（优先级：单独的"id" > userId > 其他*Id）
+            // 3.1 查找 "id" 字段
+            try {
+                java.lang.reflect.Field field = clazz.getDeclaredField("id");
+                field.setAccessible(true);
+                Object value = field.get(obj);
+                if (value != null) {
+                    return value;
+                }
+            } catch (NoSuchFieldException ignored) {}
+            
+            // 3.2 查找父类的 "id" 字段
+            if (superClass != null && superClass != Object.class) {
+                try {
+                    java.lang.reflect.Field field = superClass.getDeclaredField("id");
+                    field.setAccessible(true);
+                    Object value = field.get(obj);
+                    if (value != null) {
+                        return value;
+                    }
+                } catch (NoSuchFieldException ignored) {}
+            }
+            
+            // 3.3 查找以 "Id" 结尾的字段（当前类）
+            for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+                String fieldName = field.getName();
+                if (fieldName.endsWith("Id") && !fieldName.equals("tenantId") && !fieldName.equals("createdBy") && !fieldName.equals("updatedBy")) {
+                    field.setAccessible(true);
+                    Object value = field.get(obj);
+                    if (value != null) {
+                        return value;
+                    }
+                }
+            }
+            
+            // 3.4 查找父类的 "*Id" 字段
+            if (superClass != null && superClass != Object.class) {
+                for (java.lang.reflect.Field field : superClass.getDeclaredFields()) {
+                    String fieldName = field.getName();
+                    if (fieldName.endsWith("Id") && !fieldName.equals("tenantId") && !fieldName.equals("createdBy") && !fieldName.equals("updatedBy")) {
+                        field.setAccessible(true);
+                        Object value = field.get(obj);
+                        if (value != null) {
+                            return value;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("提取ID字段失败: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 从Controller中提取Service对象
+     * 尝试查找名为 baseService 或 *Service 的字段
+     */
+    private Object extractServiceFromController(Object controller) {
+        try {
+            Class<?> clazz = controller.getClass();
+            
+            // 1. 优先查找 baseService 字段（最常见）
+            try {
+                java.lang.reflect.Field field = clazz.getDeclaredField("baseService");
+                field.setAccessible(true);
+                Object service = field.get(controller);
+                if (service != null) {
+                    return service;
+                }
+            } catch (NoSuchFieldException ignored) {}
+            
+            // 2. 兜底：查找以 "Service" 结尾的字段
+            for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+                if (field.getName().endsWith("Service")) {
+                    field.setAccessible(true);
+                    Object service = field.get(controller);
+                    if (service != null) {
+                        return service;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("从Controller提取Service失败: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * 查询修改前的数据
+     * 尝试调用 Service 的 selectById 或 selectVoById 方法
+     */
+    private Object queryBeforeData(Object service, Object entityId) {
+        try {
+            Class<?> serviceClass = service.getClass();
+            java.lang.reflect.Method[] methods = serviceClass.getMethods();
+            
+            // 1. 尝试调用 selectVoById 方法
+            for (java.lang.reflect.Method method : methods) {
+                if ("selectVoById".equals(method.getName())) {
+                    try {
+                        Object result = method.invoke(service, entityId);
+                        if (result != null) {
+                            return result;
+                        }
+                    } catch (Exception e) {
+                        log.error("selectVoById 调用失败: {}", e.getMessage());
+                    }
+                }
+            }
+
+            // 2. 尝试调用 selectById 方法
+            for (java.lang.reflect.Method method : methods) {
+                if ("selectById".equals(method.getName())) {
+                    try {
+                        Object result = method.invoke(service, entityId);
+                        if (result != null) {
+                            return result;
+                        }
+                    } catch (Exception e) {
+                        log.error("selectById 调用失败: {}", e.getMessage());
+                    }
+                }
+            }
+
+            // 3. 尝试调用 getById 方法（MyBatis-Plus 标准方法）
+            for (java.lang.reflect.Method method : methods) {
+                if ("getById".equals(method.getName())) {
+                    try {
+                        Object result = method.invoke(service, entityId);
+                        if (result != null) {
+                            return result;
+                        }
+                    } catch (Exception e) {
+                        log.error("getById 调用失败: {}", e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("查询修改前数据异常: {}", e.getMessage());
+        }
+        return null;
     }
 
     /**

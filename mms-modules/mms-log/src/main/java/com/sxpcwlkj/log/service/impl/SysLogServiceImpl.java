@@ -2,7 +2,7 @@ package com.sxpcwlkj.log.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import com.sxpcwlkj.log.entity.SysOperLog;
+import com.sxpcwlkj.log.entity.SysLog;
 import com.sxpcwlkj.log.mapper.SysLogMapper;
 import com.sxpcwlkj.log.service.SysLogService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class SysLogServiceImpl implements SysLogService {
      */
     @Async("operLogExecutor")
     @Override
-    public void saveLog(SysOperLog operLog) {
+    public void saveLog(SysLog operLog) {
         try {
             // 这里不需要任何处理,由切面决定保存策略
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class SysLogServiceImpl implements SysLogService {
      * 保存到数据库
      */
     @Override
-    public void saveToDatabase(SysOperLog operLog) {
+    public void saveToDatabase(SysLog operLog) {
         try {
             operLogMapper.insert(operLog);
             log.debug("操作日志已保存到数据库: {}", operLog.getDescription());
@@ -62,7 +62,7 @@ public class SysLogServiceImpl implements SysLogService {
      * 保存到本地文件
      */
     @Override
-    public void saveToFile(SysOperLog operLog) {
+    public void saveToFile(SysLog operLog) {
         try {
             // 确保目录存在
             FileUtil.mkdir(LOG_FILE_PATH);

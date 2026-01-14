@@ -54,20 +54,26 @@ public class DemoModeInterceptor implements InnerInterceptor {
             return true;
         }
 
-        // 4. 检查是否是修改操作
+        // 4. 特殊处理：忽略日志表的操作（日志应该在演示模式下也能正常记录）
+        String entityName = getEntityName(ms.getId());
+        if ("SysLog".equals(entityName) || "SysOperLog".equals(entityName)) {
+            return true;
+        }
+
+        // 5. 检查是否是修改操作
         if (!isModifyOperation(ms)) {
             return true;
         }
 
-        // 5. 生成详细错误信息
+        // 6. 生成详细错误信息
         String errorMessage = generateErrorMessage(ms);
 
-        // 6. 记录拦截日志
+        // 7. 记录拦截日志
         logger.warn("拦截演示模式下的修改操作: [{}] {}",
             ms.getSqlCommandType(),
             ms.getId());
 
-        // 7. 抛出自定义异常
+        // 8. 抛出自定义异常
         throw new DemoModeException(403100, errorMessage);
     }
 

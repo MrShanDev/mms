@@ -73,7 +73,8 @@ public class SysDeptController extends BaseController{
     @MmsLog(
         module = "部门管理",
         operType = OperationType.UPDATE,
-        description = "修改部门信息"
+        description = "修改部门信息",
+        saveBeforeData = true  // 开启修改前数据记录
     )
     @SaCheckPermission("system:dept:edit")
     @PutMapping

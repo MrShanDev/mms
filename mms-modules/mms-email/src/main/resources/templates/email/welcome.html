@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { font-size: 28px; font-weight: bold; color: #1890ff; margin-bottom: 10px; }
+        .welcome { font-size: 20px; color: #52c41a; }
+        .content { color: #333333; line-height: 1.8; }
+        .feature-box { background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin: 20px 0; }
+        .feature-item { margin: 10px 0; }
+        .btn { display: inline-block; background-color: #1890ff; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999999; font-size: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">{appName}</div>
+            <div class="welcome">🎉 欢迎加入！</div>
+        </div>
+        <div class="content">
+            <p>尊敬的 <strong>{username}</strong>，您好！</p>
+            <p>欢迎加入 {appName}！我们很高兴您成为我们的一员。</p>
+            <div class="feature-box">
+                <h3>您可以开始：</h3>
+                <div class="feature-item">✓ {feature1}</div>
+                <div class="feature-item">✓ {feature2}</div>
+                <div class="feature-item">✓ {feature3}</div>
+            </div>
+            <p style="text-align: center;">
+                <a href="{loginUrl}" class="btn">立即登录</a>
+            </p>
+            <p>如有任何问题，请随时联系我们的客服团队。</p>
+        </div>
+        <div class="footer">
+            此邮件由系统自动发送，请勿直接回复<br>
+            客服邮箱：{supportEmail}<br>
+            © {year} {appName}. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

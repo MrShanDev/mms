@@ -3,13 +3,12 @@ package com.sxpcwlkj.log.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.framework.utils.AddressUtil;
-import com.sxpcwlkj.log.entity.SysOperLog;
+import com.sxpcwlkj.log.entity.SysLog;
 import com.sxpcwlkj.log.enums.OperationType;
-import com.sxpcwlkj.log.mapper.SysOperLogMapper;
+import com.sxpcwlkj.log.mapper.SysLogMapper;
 import com.sxpcwlkj.log.service.OperLogService;
 import com.sxpcwlkj.log.utils.IpUtils;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -37,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OperLogServiceImpl implements OperLogService {
 
-    private final SysOperLogMapper operLogMapper;
+    private final SysLogMapper operLogMapper;
 
     /**
      * 日志文件存储路径
@@ -49,7 +48,7 @@ public class OperLogServiceImpl implements OperLogService {
      */
     @Async("operLogExecutor")
     @Override
-    public void saveLog(SysOperLog operLog) {
+    public void saveLog(SysLog operLog) {
         try {
             // 这里不需要任何处理,由切面决定保存策略
         } catch (Exception e) {
@@ -61,7 +60,7 @@ public class OperLogServiceImpl implements OperLogService {
      * 保存到数据库
      */
     @Override
-    public void saveToDatabase(SysOperLog operLog) {
+    public void saveToDatabase(SysLog operLog) {
         try {
             operLogMapper.insert(operLog);
             log.debug("操作日志已保存到数据库: {}", operLog.getDescription());
@@ -76,7 +75,7 @@ public class OperLogServiceImpl implements OperLogService {
      * 保存到本地文件
      */
     @Override
-    public void saveToFile(SysOperLog operLog) {
+    public void saveToFile(SysLog operLog) {
         try {
             // 确保目录存在
             FileUtil.mkdir(LOG_FILE_PATH);
@@ -121,6 +120,7 @@ public class OperLogServiceImpl implements OperLogService {
         } catch (Exception e) {
             log.error("保存操作日志到文件失败", e);
         }
+    }
     /**
      * 快速记录日志 - 简化版
      */
@@ -137,7 +137,7 @@ public class OperLogServiceImpl implements OperLogService {
     @Override
     public void log(String module, OperationType operType, String description, Object result) {
         try {
-            SysOperLog operLog = buildQuickLog(module, operType, description);
+            SysLog operLog = buildQuickLog(module, operType, description);
             operLog.setStatus(0);
             if (result != null) {
                 operLog.setJsonResult(JSON.toJSONString(result));
@@ -155,7 +155,7 @@ public class OperLogServiceImpl implements OperLogService {
     @Override
     public void logError(String module, OperationType operType, String description, Exception e) {
         try {
-            SysOperLog operLog = buildQuickLog(module, operType, description);
+            SysLog operLog = buildQuickLog(module, operType, description);
             operLog.setStatus(1);
             operLog.setErrorMsg(e != null ? e.getMessage() : "");
             saveToDatabase(operLog);
@@ -167,8 +167,8 @@ public class OperLogServiceImpl implements OperLogService {
     /**
      * 构建快速日志对象
      */
-    private SysOperLog buildQuickLog(String module, OperationType operType, String description) {
-        SysOperLog operLog = new SysOperLog();
+    private SysLog buildQuickLog(String module, OperationType operType, String description) {
+        SysLog operLog = new SysLog();
         operLog.setModule(module);
         operLog.setOperType(operType.getCode());
         operLog.setDescription(description);
@@ -177,24 +177,50 @@ public class OperLogServiceImpl implements OperLogService {
         // 获取用户信息
         try {
             if (LoginObject.isLogin()) {
-                String userId = LoginObject.getLoginId();
-                operLog.setUserId(userId);
-                
-                String userName = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + userId);
+                String userIdStr = LoginObject.getLoginId();
+                // 将String转换为Long
+                try {
+                    operLog.setUserId(Long.parseLong(userIdStr));
+                } catch (NumberFormatException e) {
+                    log.warn("用户ID格式错误: {}", userIdStr);
+                    operLog.setUserId(null);
+                }
+
+                String userName = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + userIdStr);
                 operLog.setUserName(userName != null ? userName : "未知");
-                
-                Long tenantId = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userId);
-                operLog.setTenantId(tenantId != null ? tenantId : 0L);
-                
+
+                // 安全获取租户ID，处理可能的类型转换
+                Object tenantIdObj = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userIdStr);
+                Long tenantId = 0L;
+                if (tenantIdObj != null) {
+                    if (tenantIdObj instanceof Long) {
+                        tenantId = (Long) tenantIdObj;
+                    } else if (tenantIdObj instanceof String) {
+                        try {
+                            tenantId = Long.parseLong((String) tenantIdObj);
+                        } catch (NumberFormatException ex) {
+                            log.warn("租户ID格式错误: {}", tenantIdObj);
+                        }
+                    } else if (tenantIdObj instanceof Number) {
+                        tenantId = ((Number) tenantIdObj).longValue();
+                    }
+                }
+                operLog.setTenantId(tenantId);
+
                 try {
                     List<String> roleList = StpUtil.getRoleList();
                     operLog.setUserRoles(roleList != null ? String.join(",", roleList) : "");
                 } catch (Exception e) {
                     operLog.setUserRoles("");
                 }
+            } else {
+                // 未登录时设置为null
+                operLog.setUserId(null);
+                operLog.setUserName("匿名");
+                operLog.setTenantId(0L);
             }
         } catch (Exception e) {
-            operLog.setUserId("");
+            operLog.setUserId(null);
             operLog.setUserName("匿名");
             operLog.setTenantId(0L);
         }
@@ -206,11 +232,11 @@ public class OperLogServiceImpl implements OperLogService {
                 HttpServletRequest request = attributes.getRequest();
                 operLog.setRequestMethod(request.getMethod());
                 operLog.setOperUrl(request.getRequestURI());
-                
+
                 String ip = IpUtils.getIpAddr(request);
                 operLog.setOperIp(ip);
                 operLog.setOperLocation(AddressUtil.getCityInfo(ip));
-                
+
                 operLog.setUserAgent(request.getHeader("User-Agent"));
                 operLog.setBrowser(IpUtils.getBrowser(request));
                 operLog.setOs(IpUtils.getOs(request));
