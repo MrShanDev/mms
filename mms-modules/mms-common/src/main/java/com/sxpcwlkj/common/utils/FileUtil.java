@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,7 @@ public class FileUtil extends cn.hutool.core.io.FileUtil  {
     }
     public static String fileUrlToBase64(String fileUrl){
         try {
-            URL url = new URL(fileUrl);
+            URL url = URI.create(fileUrl).toURL();
             InputStream inputStream = url.openStream();
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];

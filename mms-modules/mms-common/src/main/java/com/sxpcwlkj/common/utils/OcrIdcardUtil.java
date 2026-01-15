@@ -68,15 +68,15 @@ public class OcrIdcardUtil {
 
         //configure配置
         JSONObject configObj = new JSONObject();
-        configObj.put("side", "face");
+        configObj.set("side", "face");
 
         String config_str = configObj.toString();
 
         // 拼装请求body的json字符串
         JSONObject requestObj = new JSONObject();
-        requestObj.put("image", imgBase64);
+        requestObj.set("image", imgBase64);
         if (configObj.size() > 0) {
-            requestObj.put("configure", config_str);
+            requestObj.set("configure", config_str);
         }
         String bodys = requestObj.toString();
 

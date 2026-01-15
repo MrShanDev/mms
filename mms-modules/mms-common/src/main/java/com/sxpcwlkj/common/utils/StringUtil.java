@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
  * @date: 2022/12/01
  **/
 
-public class StringUtil extends org.apache.commons.lang3.StringUtils {
+public class StringUtil {
     public static final String SEPARATOR = ",";
+    public static final String EMPTY = "";
     /**
      * 获取Long
      *
@@ -47,7 +48,7 @@ public class StringUtil extends org.apache.commons.lang3.StringUtils {
     public static int getInt(Object obj) {
         try {
             Double d = Double.parseDouble(obj.toString()); // 先转换成double类型
-            Integer i = d.intValue(); // 再转换成int类型（会损失精度）
+            int i = d.intValue(); // 再转换成int类型（会损失精度）
             return i;
         } catch (Exception ex) {
             return 0;
@@ -280,6 +281,26 @@ public class StringUtil extends org.apache.commons.lang3.StringUtils {
     }
 
     /**
+     * * 判断一个字符串是否为空白
+     *
+     * @param str CharSequence
+     * @return true：为空白 false：非空白
+     */
+    public static boolean isBlank(CharSequence str) {
+        return StrUtil.isBlank(str);
+    }
+
+    /**
+     * * 判断一个字符串是否为非空白
+     *
+     * @param str CharSequence
+     * @return true：非空白 false：空白
+     */
+    public static boolean isNotBlank(CharSequence str) {
+        return StrUtil.isNotBlank(str);
+    }
+
+    /**
      * 是否是英文
      *
      * @param
@@ -356,7 +377,118 @@ public class StringUtil extends org.apache.commons.lang3.StringUtils {
      * @return 包含返回true
      */
     public static boolean inStringIgnoreCase(String str, String... strs) {
-        return StrUtil.equalsAnyIgnoreCase(str, strs);
+        return StrUtil.equalsAnyIgnoreCase(str, (CharSequence[]) strs);
+    }
+
+    /**
+     * 判断字符串是否相等（忽略大小写）
+     *
+     * @param str      字符串
+     * @param testStrs 字符串组
+     * @return 结果
+     */
+    public static boolean equalsAnyIgnoreCase(CharSequence str, CharSequence... testStrs) {
+        return StrUtil.equalsAnyIgnoreCase(str, testStrs);
+    }
+
+    /**
+     * 拼接数组
+     *
+     * @param array     数组
+     * @param separator 分隔符
+     * @return 结果
+     */
+    public static String join(Object[] array, String separator) {
+        return StrUtil.join(separator, array);
+    }
+
+    /**
+     * 拼接集合
+     *
+     * @param collection 集合
+     * @param separator  分隔符
+     * @return 结果
+     */
+    public static String join(Collection<?> collection, String separator) {
+        return StrUtil.join(separator, collection);
+    }
+
+    /**
+     * 替换字符串中所有匹配的字符
+     *
+     * @param text            文本
+     * @param searchList      查找列表
+     * @param replacementList 替换列表
+     * @return 结果
+     */
+    public static String replaceEach(String text, String[] searchList, String[] replacementList) {
+        return org.apache.commons.lang3.StringUtils.replaceEach(text, searchList, replacementList);
+    }
+
+    /**
+     * 切分字符串
+     *
+     * @param str       字符串
+     * @param separator 分隔符
+     * @return 结果
+     */
+    public static String[] split(String str, String separator) {
+        return StrUtil.splitToArray(str, separator);
+    }
+
+    /**
+     * 查找子字符串位置（忽略大小写）
+     *
+     * @param str       字符串
+     * @param searchStr 子字符串
+     * @return 位置
+     */
+    public static int indexOfIgnoreCase(CharSequence str, CharSequence searchStr) {
+        return StrUtil.indexOfIgnoreCase(str, searchStr);
+    }
+
+    /**
+     * 首字母大写
+     *
+     * @param str 字符串
+     * @return 结果
+     */
+    public static String capitalize(String str) {
+        return StrUtil.upperFirst(str);
+    }
+
+    /**
+     * 右填充
+     *
+     * @param str     字符串
+     * @param size    总长度
+     * @param padChar 填充字符
+     * @return 结果
+     */
+    public static String rightPad(String str, int size, char padChar) {
+        return StrUtil.padAfter(str, size, padChar);
+    }
+
+    /**
+     * 重复字符
+     *
+     * @param c      字符
+     * @param repeat 重复次数
+     * @return 结果
+     */
+    public static String repeat(char c, int repeat) {
+        return StrUtil.repeat(c, repeat);
+    }
+
+    /**
+     * 是否以指定前缀开头（忽略大小写）
+     *
+     * @param str    字符串
+     * @param prefix 前缀
+     * @return 结果
+     */
+    public static boolean startsWithIgnoreCase(CharSequence str, CharSequence prefix) {
+        return StrUtil.startWithIgnoreCase(str, prefix);
     }
 
     /**
@@ -551,8 +683,9 @@ public class StringUtil extends org.apache.commons.lang3.StringUtils {
      * @param list 需要转换的list
      * @return 转换的结果
      */
+    @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> converterForMapList(List<Object> list) {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (Object tempObj : list) {
             result.add((HashMap<String, Object>) tempObj);
         }

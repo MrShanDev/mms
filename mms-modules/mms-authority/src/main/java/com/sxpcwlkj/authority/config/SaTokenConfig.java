@@ -1,11 +1,15 @@
 package com.sxpcwlkj.authority.config;
 
+import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.interceptor.SaInterceptor;
+import cn.dev33.satoken.json.SaJsonTemplateForJackson;
 import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpLogic;
 import cn.dev33.satoken.stp.StpUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sxpcwlkj.common.properties.SaTokenProperties;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +29,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SaTokenConfig implements WebMvcConfigurer {
 
     private final SaTokenProperties saTokenProperties;
+    private final ObjectMapper objectMapper;
+
+    /**
+     * 统一 Sa-Token 的 JSON 解析器
+     */
+    @PostConstruct
+    public void setSaTokenJson() {
+        SaJsonTemplateForJackson template = new SaJsonTemplateForJackson();
+        template.objectMapper = objectMapper;
+        SaManager.setSaJsonTemplate(template);
+    }
     /**
      * 注册sa-token的拦截器
      */

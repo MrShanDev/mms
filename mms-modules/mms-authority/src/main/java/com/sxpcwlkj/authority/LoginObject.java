@@ -36,6 +36,8 @@ public class LoginObject<T> {
 
     private Class<T> clazz;
 
+    public final static String SUPER_ID = "1";
+
     /**
      * 是否登录
      *
@@ -99,7 +101,7 @@ public class LoginObject<T> {
             try {
                 if (getLoginId() != null) {
                     Object object=null;
-                    String device = StpUtil.getLoginDevice();
+                    String device = StpUtil.getLoginDeviceTypeByToken(StpUtil.getTokenValue());
                     if(DeviceEnum.MOBILE.getType().equals(device)){
                         object = RedisUtil.getCacheObject(RedisConstant.MOBILE_KEY + StpUtil.getLoginIdAsLong());
                     }
@@ -142,7 +144,7 @@ public class LoginObject<T> {
         //根据用户id，进行登录
         SaLoginModel saLoginModel = new SaLoginModel();
         if (StringUtil.isNotEmpty(device)) {
-            saLoginModel.setDevice(device);
+            saLoginModel.setDeviceType(device);
         }
         if (StringUtil.isNotEmpty(timeout) && timeout > 0) {
             saLoginModel.setTimeout(timeout);

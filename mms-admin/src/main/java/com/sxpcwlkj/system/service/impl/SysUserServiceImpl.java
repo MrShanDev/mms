@@ -115,6 +115,23 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public SysUserVo selectVoById(String userId) {
+        // 等级过滤：等级低的用户，不能查看比他等级高的用户
+        if (!LoginObject.getLoginSuper()) {
+            // 1. 禁止非超级管理员查看超级管理员(ID=1)详情
+            if (LoginObject.SUPER_ID.equals(userId)) {
+                return null;
+            }
+            
+            Integer minLevel = getCurrentUserMinLevel();
+            List<SysRoleVo> targetRoles = sysRoleMapper.selectByUserIdList(userId);
+            // 2. 如果目标用户拥有任何职级高于当前用户(level更小)的角色，则禁止查看
+            boolean hasHigherLevel = targetRoles.stream()
+                .anyMatch(r -> r.getLevel() != null && r.getLevel() < minLevel);
+            if (hasHigherLevel) {
+                return null; 
+            }
+        }
+
         SysUserVo userVo = baseMapper.selectVoById(userId);
         if (userVo != null) {
             // 部门
@@ -173,6 +190,10 @@ public class SysUserServiceImpl implements SysUserService {
         String[] array = DataUtil.getCatStr(ids, ",");
         int rows = 0;
         for (String id:array){
+            //超级管理员不能删除
+            if (id.equals(LoginObject.SUPER_ID)) {
+                throw new MmsException("超级管理员不能删除!");
+            }
             SysUser sysUser = baseMapper.selectById(id);
             if (sysUser != null) {
                 //删除角色
@@ -206,7 +227,36 @@ public class SysUserServiceImpl implements SysUserService {
                 ids.add(bo.getDeptId());
                 w.in("u.dept_id", ids);
             });
+
+        // 等级过滤：等级低的用户，看不到比他等级高的用户 (等级值越小，职级越高)
+        if (!LoginObject.getLoginSuper()) {
+            Integer minLevel = getCurrentUserMinLevel();
+            // 1. 显式排除超级管理员 (ID='1')
+            wrapper.ne("u.user_id", LoginObject.SUPER_ID);
+            // 2. 排除掉 拥有 “比当前用户最高职级(minLevel) 还要高(level < minLevel)” 的角色的用户
+            wrapper.apply("NOT EXISTS (SELECT 1 FROM sys_user_role sur JOIN sys_role sr ON sur.role_id = sr.id WHERE sur.user_id = u.user_id AND sr.level < {0})", minLevel);
+        }
+
         return wrapper;
+    }
+
+    /**
+     * 获取当前登录用户的最高职级 (level越小职级越高)
+     */
+    private Integer getCurrentUserMinLevel() {
+        String loginId = LoginObject.getLoginId();
+        if (StringUtil.isEmpty(loginId)) {
+            return 999999;
+        }
+        List<SysRoleVo> roles = sysRoleMapper.selectByUserIdList(loginId);
+        if (roles == null || roles.isEmpty()) {
+            return 999999; // 无角色的用户等级设为极低
+        }
+        return roles.stream()
+            .map(SysRoleVo::getLevel)
+            .filter(Objects::nonNull)
+            .min(Integer::compare)
+            .orElse(999999);
     }
 
     @Override
@@ -310,7 +360,8 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public List<SysUserVo> selectAll() {
-        return baseMapper.selectVoList();
+        Page<SysUserVo> page = baseMapper.selectPageUserList(null, this.buildQueryWrapper(new SysUserBo()));
+        return page != null ? page.getRecords() : new ArrayList<>();
     }
 
     @Override

@@ -69,7 +69,7 @@ public class MyEmailServiceImpl implements EmailService {
             }
 
             // 构建邮件消息
-            MailMessage.Builder messageBuilder = MailMessage.Builder()
+            MailMessage.MailsBuilder messageBuilder = MailMessage.Builder()
                 .mailAddress(emailMessage.getTo())
                 .title(emailMessage.getSubject());
 

@@ -98,14 +98,14 @@ public class BigDecimalUtil {
      * 精确乘法  * 四舍五入
      */
     public static BigDecimal multiply(BigDecimal value1, BigDecimal value2){
-        //BigDecimal.ROUND_DOWN:直接省略多余的小数，比如1.28如果保留1位小数，得到的就是1.2
+        //RoundingMode.DOWN:直接省略多余的小数，比如1.28如果保留1位小数，得到的就是1.2
         //
-        //BigDecimal.ROUND_UP:直接进位，比如1.21如果保留1位小数，得到的就是1.3
+        //RoundingMode.UP:直接进位，比如1.21如果保留1位小数，得到的就是1.3
         //
-        //BigDecimal.ROUND_HALF_UP:四舍五入，2.35保留1位，变成2.4
+        //RoundingMode.HALF_UP:四舍五入，2.35保留1位，变成2.4
         //
-        //BigDecimal.ROUND_HALF_DOWN:四舍五入，2.35保留1位，变成2.3
-        return value1.multiply(value2).setScale(2,BigDecimal.ROUND_HALF_UP);
+        //RoundingMode.HALF_DOWN:四舍五入，2.35保留1位，变成2.3
+        return value1.multiply(value2).setScale(2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -134,7 +134,7 @@ public class BigDecimalUtil {
         }
         BigDecimal b1 = BigDecimal.valueOf(value1);
         BigDecimal b2 = BigDecimal.valueOf(value2);
-        return b1.divide(b2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -149,7 +149,7 @@ public class BigDecimalUtil {
         }
         BigDecimal b1 = new BigDecimal(value1);
         BigDecimal b2 = new BigDecimal(value2);
-        return b1.divide(b2, scale, BigDecimal.ROUND_HALF_UP).doubleValue();
+        return b1.divide(b2, scale, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
@@ -205,7 +205,7 @@ public class BigDecimalUtil {
          返回：
          一个 BigDecimal，其标度为指定值，其非标度值可以通过此 BigDecimal 的非标度值乘以或除以十的适当次幂来确定。
          */
-        double f1 = bg.setScale(n, BigDecimal.ROUND_HALF_UP).doubleValue();
+        double f1 = bg.setScale(n, RoundingMode.HALF_UP).doubleValue();
         return f1;
     }
 

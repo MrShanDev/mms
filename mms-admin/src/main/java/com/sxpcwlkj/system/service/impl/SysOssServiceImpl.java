@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +90,7 @@ public class SysOssServiceImpl implements SysOssService {
                         base64String = base64Encoder.encodeToString(fileContent);
                     }
                 } else {
-                    URL url = new URL(vo.getUrl());
+                    URL url = URI.create(vo.getUrl()).toURL();
                     InputStream inputStream = url.openConnection().getInputStream();
                     BufferedImage bufferedImage = ImageIO.read(inputStream);
                     if(bufferedImage != null){

@@ -1,7 +1,6 @@
-package com.sxpcwlkj.common.utils;
+ package com.sxpcwlkj.common.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -17,7 +16,7 @@ import java.util.*;
  * @date: 2022/12/01
  **/
 @Slf4j
-public class DateUtil extends DateUtils {
+public class DateUtil {
     public static void main(String[] args) {
         try {
 
@@ -403,7 +402,7 @@ public class DateUtil extends DateUtils {
         }
 
         Date date = null;
-        List<String> list = new ArrayList<String>(0);
+        List<String> list = new ArrayList<>();
 
         list.add(DATE_TIME_FORMAT_YYYY_MM_DD_HH_MI_SS);
         list.add(DATE_TIME_FORMAT_YYYYMMDDHHMISSSSS);
@@ -418,7 +417,7 @@ public class DateUtil extends DateUtils {
         list.add(DATE_FORMAT_YYYY);
 
 
-        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+        for (Iterator<String> iter = list.iterator(); iter.hasNext(); ) {
             String format = (String) iter.next();
             if (strTime.indexOf("-") > 0 && format.indexOf("-") < 0) {
                 continue;
@@ -788,7 +787,7 @@ public class DateUtil extends DateUtils {
         }
 
         Date date = null;
-        List<String> list = new ArrayList<String>(0);
+        List<String> list = new ArrayList<>();
 
         list.add(DATE_TIME_FORMAT_YYYY_MM_DD_HH_MI_SS);
         list.add(DATE_TIME_FORMAT_YYYYMMDDHHMISSSSS);
@@ -802,7 +801,7 @@ public class DateUtil extends DateUtils {
         //list.add(DATE_FORMAT_YYYYMM);
         //list.add(DATE_FORMAT_YYYY);
 
-        for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+        for (Iterator<String> iter = list.iterator(); iter.hasNext(); ) {
             String format = (String) iter.next();
             if (strTime.indexOf("-") > 0 && format.indexOf("-") < 0) {
                 continue;
@@ -1047,7 +1046,7 @@ public class DateUtil extends DateUtils {
      * @throws ParseException
      */
     public static List<String> getDayListOfMonth() throws ParseException {
-        List list = new ArrayList();
+        List<String> list = new ArrayList<>();
         Calendar aCalendar = Calendar.getInstance(Locale.CHINA);
         int year = aCalendar.get(Calendar.YEAR);//年份
         int month = aCalendar.get(Calendar.MONTH) + 1;//月份
@@ -1081,7 +1080,7 @@ public class DateUtil extends DateUtils {
      * @throws ParseException
      */
     public static List<String> getDayListOfMonthDay() throws ParseException {
-        List list = new ArrayList();
+        List<String> list = new ArrayList<>();
         Calendar aCalendar = Calendar.getInstance(Locale.CHINA);
         int year = aCalendar.get(Calendar.YEAR);//年份
         int month = aCalendar.get(Calendar.MONTH) + 1;//月份

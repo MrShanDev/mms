@@ -31,13 +31,13 @@ public class MySaTokenListener implements SaTokenListener {
      * 每次注销时触发
      */
     @Override
-    public void doLogout(String s, Object o, String s1) {
-        String device = StpUtil.getLoginDevice();
+    public void doLogout(String loginType, Object loginId, String tokenValue) {
+        String device = StpUtil.getLoginDeviceTypeByToken(tokenValue);
         if(DeviceEnum.MOBILE.getType().equals(device)){
-            RedisUtil.deleteObject(RedisConstant.MOBILE_KEY+o.toString());
+            RedisUtil.deleteObject(RedisConstant.MOBILE_KEY+loginId.toString());
         }
         if (DeviceEnum.ADMIN.getType().equals(device)){
-            RedisUtil.deleteObject(RedisConstant.ADMIN_KEY+o.toString());
+            RedisUtil.deleteObject(RedisConstant.ADMIN_KEY+loginId.toString());
         }
 
     }

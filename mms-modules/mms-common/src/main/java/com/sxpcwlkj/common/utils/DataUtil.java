@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
@@ -241,7 +242,7 @@ public class DataUtil<T> {
     public static int getStrDoubleToInt(Object obj) {
         try {
             Double d = Double.parseDouble(obj.toString()); // 先转换成double类型
-            Integer i = d.intValue(); // 再转换成int类型（会损失精度）
+            int i = d.intValue(); // 再转换成int类型（会损失精度）
             return i;
         } catch (Exception ex) {
             return 0;
@@ -534,8 +535,9 @@ public class DataUtil<T> {
      * @param list 需要转换的list
      * @return 转换的结果
      */
+    @SuppressWarnings("unchecked")
     public static List<Map<String, Object>> converterForMapList(List<Object> list) {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
         for (Object tempObj : list) {
             result.add((HashMap<String, Object>) tempObj);
         }
@@ -941,19 +943,23 @@ public class DataUtil<T> {
      * @throws IOException
      */
     public static boolean isImagesTrue(String posturl) throws IOException {
-        URL url = new URL(posturl);
+        URL url = URI.create(posturl).toURL();
         HttpURLConnection urlcon = (HttpURLConnection) url.openConnection();
-        urlcon.setRequestMethod("POST");
-        urlcon.setRequestProperty("Content-type",
-                "application/x-www-form-urlencoded");
-        if (urlcon.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            System.out.println(HttpURLConnection.HTTP_OK + posturl
-                    + ":posted ok!");
-            return true;
-        } else {
-            System.out.println(urlcon.getResponseCode() + posturl
-                    + ":Bad post...");
-            return false;
+        try {
+            urlcon.setRequestMethod("POST");
+            urlcon.setRequestProperty("Content-type",
+                    "application/x-www-form-urlencoded");
+            if (urlcon.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                System.out.println(HttpURLConnection.HTTP_OK + posturl
+                        + ":posted ok!");
+                return true;
+            } else {
+                System.out.println(urlcon.getResponseCode() + posturl
+                        + ":Bad post...");
+                return false;
+            }
+        } finally {
+            urlcon.disconnect();
         }
     }
 

@@ -82,8 +82,8 @@ public class WeChatController {
 
 
             JSONObject msg=new JSONObject();
-            msg.put("touser",openId);
-            msg.put("id","1");
+            msg.set("touser",openId);
+            msg.set("id","1");
             WxMpQrCodeTicket ticket = wxService.getWxMpService().getQrcodeService().qrCodeCreateTmpTicket(JSONUtil.toJsonStr(msg), 2592000);
             File file = wxService.getWxMpService().getQrcodeService().qrCodePicture(ticket);
             log.info(file.getPath());

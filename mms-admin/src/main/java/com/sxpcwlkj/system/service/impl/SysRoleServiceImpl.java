@@ -58,8 +58,37 @@ public class SysRoleServiceImpl implements SysRoleService {
         wrapper.eq(StringUtil.isNotEmpty(bo.getStatus()), "status", SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
         wrapper.like(StringUtil.isNotEmpty(bo.getName()), "name", bo.getName());
         wrapper.like(StringUtil.isNotEmpty(bo.getCode()), "code", bo.getCode());
+        
+        // 等级过滤：只能看到职级不高于自己的角色 (level 越大职级越低)
+        if (!LoginObject.getLoginSuper()) {
+            Integer minLevel = getCurrentUserMinLevel();
+            // 1. 只能看到 level >= 自己职级的角色
+            wrapper.ge("level", minLevel);
+            // 2. 显式排除超级管理员角色编码
+            wrapper.ne("code", SystemCommonEnum.SUPER_ADMIN.getCode());
+        }
+
         wrapper.orderByAsc("level");
         return wrapper;
+    }
+
+    /**
+     * 获取当前登录用户的最高职级 (level越小职级越高)
+     */
+    private Integer getCurrentUserMinLevel() {
+        String loginId = LoginObject.getLoginId();
+        if (StringUtil.isEmpty(loginId)) {
+            return 999999;
+        }
+        List<SysRoleVo> roles = baseMapper.selectByUserIdList(loginId);
+        if (roles == null || roles.isEmpty()) {
+            return 999999; 
+        }
+        return roles.stream()
+            .map(SysRoleVo::getLevel)
+            .filter(java.util.Objects::nonNull)
+            .min(Integer::compare)
+            .orElse(999999);
     }
 
     @Override
