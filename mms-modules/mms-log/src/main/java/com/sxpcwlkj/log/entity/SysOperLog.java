@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("sys_log")
-public class SysLog implements Serializable {
+public class SysOperLog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

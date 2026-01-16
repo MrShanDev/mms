@@ -2,9 +2,9 @@ package com.sxpcwlkj.log.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import com.sxpcwlkj.log.entity.SysLog;
-import com.sxpcwlkj.log.mapper.SysLogMapper;
-import com.sxpcwlkj.log.service.SysLogService;
+import com.sxpcwlkj.log.entity.SysOperLog;
+import com.sxpcwlkj.log.mapper.SysOperLogMapper;
+import com.sxpcwlkj.log.service.SysOperLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -21,9 +21,9 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysLogServiceImpl implements SysLogService {
+public class SysOperLogServiceImpl implements SysOperLogService {
 
-    private final SysLogMapper operLogMapper;
+    private final SysOperLogMapper operLogMapper;
 
     /**
      * 日志文件存储路径
@@ -35,7 +35,7 @@ public class SysLogServiceImpl implements SysLogService {
      */
     @Async("operLogExecutor")
     @Override
-    public void saveLog(SysLog operLog) {
+    public void saveLog(SysOperLog operLog) {
         try {
             // 这里不需要任何处理,由切面决定保存策略
         } catch (Exception e) {
@@ -47,7 +47,7 @@ public class SysLogServiceImpl implements SysLogService {
      * 保存到数据库
      */
     @Override
-    public void saveToDatabase(SysLog operLog) {
+    public void saveToDatabase(SysOperLog operLog) {
         try {
             operLogMapper.insert(operLog);
             log.debug("操作日志已保存到数据库: {}", operLog.getDescription());
@@ -62,7 +62,7 @@ public class SysLogServiceImpl implements SysLogService {
      * 保存到本地文件
      */
     @Override
-    public void saveToFile(SysLog operLog) {
+    public void saveToFile(SysOperLog operLog) {
         try {
             // 确保目录存在
             FileUtil.mkdir(LOG_FILE_PATH);

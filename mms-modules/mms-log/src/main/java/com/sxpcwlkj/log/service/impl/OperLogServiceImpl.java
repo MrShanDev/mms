@@ -6,9 +6,9 @@ import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.framework.utils.AddressUtil;
-import com.sxpcwlkj.log.entity.SysLog;
+import com.sxpcwlkj.log.entity.SysOperLog;
 import com.sxpcwlkj.log.enums.OperationType;
-import com.sxpcwlkj.log.mapper.SysLogMapper;
+import com.sxpcwlkj.log.mapper.SysOperLogMapper;
 import com.sxpcwlkj.log.service.OperLogService;
 import com.sxpcwlkj.log.utils.IpUtils;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -36,7 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OperLogServiceImpl implements OperLogService {
 
-    private final SysLogMapper operLogMapper;
+    private final SysOperLogMapper operLogMapper;
 
     /**
      * 日志文件存储路径
@@ -48,7 +48,7 @@ public class OperLogServiceImpl implements OperLogService {
      */
     @Async("operLogExecutor")
     @Override
-    public void saveLog(SysLog operLog) {
+    public void saveLog(SysOperLog operLog) {
         try {
             // 这里不需要任何处理,由切面决定保存策略
         } catch (Exception e) {
@@ -60,7 +60,7 @@ public class OperLogServiceImpl implements OperLogService {
      * 保存到数据库
      */
     @Override
-    public void saveToDatabase(SysLog operLog) {
+    public void saveToDatabase(SysOperLog operLog) {
         try {
             operLogMapper.insert(operLog);
             log.debug("操作日志已保存到数据库: {}", operLog.getDescription());
@@ -75,7 +75,7 @@ public class OperLogServiceImpl implements OperLogService {
      * 保存到本地文件
      */
     @Override
-    public void saveToFile(SysLog operLog) {
+    public void saveToFile(SysOperLog operLog) {
         try {
             // 确保目录存在
             FileUtil.mkdir(LOG_FILE_PATH);
@@ -137,7 +137,7 @@ public class OperLogServiceImpl implements OperLogService {
     @Override
     public void log(String module, OperationType operType, String description, Object result) {
         try {
-            SysLog operLog = buildQuickLog(module, operType, description);
+            SysOperLog operLog = buildQuickLog(module, operType, description);
             operLog.setStatus(0);
             if (result != null) {
                 operLog.setJsonResult(JSON.toJSONString(result));
@@ -155,7 +155,7 @@ public class OperLogServiceImpl implements OperLogService {
     @Override
     public void logError(String module, OperationType operType, String description, Exception e) {
         try {
-            SysLog operLog = buildQuickLog(module, operType, description);
+            SysOperLog operLog = buildQuickLog(module, operType, description);
             operLog.setStatus(1);
             operLog.setErrorMsg(e != null ? e.getMessage() : "");
             saveToDatabase(operLog);
@@ -167,8 +167,8 @@ public class OperLogServiceImpl implements OperLogService {
     /**
      * 构建快速日志对象
      */
-    private SysLog buildQuickLog(String module, OperationType operType, String description) {
-        SysLog operLog = new SysLog();
+    private SysOperLog buildQuickLog(String module, OperationType operType, String description) {
+        SysOperLog operLog = new SysOperLog();
         operLog.setModule(module);
         operLog.setOperType(operType.getCode());
         operLog.setDescription(description);

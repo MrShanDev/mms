@@ -11,6 +11,7 @@ import com.sxpcwlkj.common.utils.DateUtil;
 import com.sxpcwlkj.gen.config.template.GeneratorConfig;
 import com.sxpcwlkj.gen.config.template.GeneratorInfo;
 import com.sxpcwlkj.gen.config.template.TemplateInfo;
+import com.sxpcwlkj.gen.config.GenDataSource;
 import com.sxpcwlkj.gen.entity.BaseClassEntity;
 import com.sxpcwlkj.gen.entity.Preview;
 import com.sxpcwlkj.gen.entity.TableEntity;
@@ -265,5 +266,66 @@ public class GeneratorServiceImpl implements GeneratorService {
             fileName = TemplateUtils.getContent(fileName, dataModel);
             return new Preview(fileName, content);
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object executeSql(Long tableId, Long datasourceId, String sql) {
+        if (StrUtil.isBlank(sql)) {
+            throw new MmsException("SQL内容不能为空");
+        }
+
+        // 安全检查
+        String upperSql = sql.trim().toUpperCase();
+        if (upperSql.contains("DROP ") || upperSql.contains("TRUNCATE ") || upperSql.contains("GRANT ")) {
+            throw new MmsException("检测到非法SQL操作，禁止执行 DDL/DCL 语句");
+        }
+
+        Long targetDsId = datasourceId;
+        if (targetDsId == null) {
+            TableEntity table = tableService.selectVoById(tableId);
+            if (table == null) {
+                throw new MmsException("无法确定目标数据源");
+            }
+            targetDsId = table.getDatasourceId();
+        }
+
+        GenDataSource dataSource = datasourceService.get(targetDsId);
+        List<Object> results = new ArrayList<>();
+        String[] sqls = sql.split(";");
+
+        // 统一获取连接，确保多条 SQL 共用一个会话
+        try (java.sql.Connection conn = dataSource.getConnection()) {
+            for (String singleSql : sqls) {
+                String cleanSql = singleSql.trim();
+                if (StrUtil.isBlank(cleanSql)) continue;
+
+                String effectiveSql = cleanSql.replaceAll("(?ms)^(\\s*(#|--|/\\*).*?(\\n|$))", "").trim();
+                if (StrUtil.isBlank(effectiveSql)) continue;
+
+                try (java.sql.PreparedStatement pstmt = conn.prepareStatement(cleanSql)) {
+                    if (effectiveSql.toUpperCase().startsWith("SELECT")) {
+                        try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                            List<Map<String, Object>> list = new ArrayList<>();
+                            int count = rs.getMetaData().getColumnCount();
+                            while (rs.next()) {
+                                Map<String, Object> map = new HashMap<>();
+                                for (int i = 1; i <= count; i++) {
+                                    map.put(rs.getMetaData().getColumnLabel(i), rs.getObject(i));
+                                }
+                                list.add(map);
+                            }
+                            results.add(list);
+                        }
+                    } else {
+                        results.add("受影响行数: " + pstmt.executeUpdate());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("SQL脚本执行失败", e);
+            throw new MmsException("SQL脚本执行中途失败：" + e.getMessage());
+        }
+
+        return results;
     }
 }

@@ -19,4 +19,13 @@ public interface GeneratorService {
     void generatorCode(Long tableId);
 
     List<Preview> preview(Long tableId);
+
+    /**
+     * 执行生成的SQL
+     * @param tableId 表ID（可选）
+     * @param datasourceId 数据源ID（可选，与tableId二选一）
+     * @param sql SQL内容
+     * @return 执行结果或数据列表
+     */
+    Object executeSql(Long tableId, Long datasourceId, String sql);
 }

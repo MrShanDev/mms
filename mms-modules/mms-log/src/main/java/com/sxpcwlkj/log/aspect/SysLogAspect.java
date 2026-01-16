@@ -7,10 +7,10 @@ import com.alibaba.fastjson.JSON;
 import cn.dev33.satoken.stp.StpUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.log.annotation.MmsLog;
-import com.sxpcwlkj.log.entity.SysLog;
+import com.sxpcwlkj.log.entity.SysOperLog;
 import com.sxpcwlkj.log.enums.LogSavePolicy;
 import com.sxpcwlkj.log.enums.OperationType;
-import com.sxpcwlkj.log.service.SysLogService;
+import com.sxpcwlkj.log.service.SysOperLogService;
 import com.sxpcwlkj.framework.utils.AddressUtil;
 import com.sxpcwlkj.log.utils.IpUtils;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -53,7 +53,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SysLogAspect {
 
-    private final SysLogService sysLogService;
+    private final SysOperLogService sysLogService;
 
     /**
      * ThreadLocal 存储开始时间
@@ -63,7 +63,7 @@ public class SysLogAspect {
     /**
      * ThreadLocal 存储日志信息
      */
-    private static final ThreadLocal<SysLog> LOG_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<SysOperLog> LOG_THREAD_LOCAL = new ThreadLocal<>();
 
     /**
      * ThreadLocal 存储响应数据配置
@@ -92,7 +92,7 @@ public class SysLogAspect {
             HttpServletRequest request = attributes.getRequest();
 
             // 构建日志对象
-            SysLog sysLog = new SysLog();
+            SysOperLog sysOperLog = new SysOperLog();
 
             // 获取方法信息用于智能识别
             Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
@@ -121,17 +121,17 @@ public class SysLogAspect {
             }
 
             // 设置基本信息
-            sysLog.setOperTime(LocalDateTime.now());
-            sysLog.setModule(module);
-            sysLog.setOperType(operType.getCode());
-            sysLog.setDescription(description);
-            sysLog.setRequestMethod(request.getMethod());
-            sysLog.setOperUrl(request.getRequestURI());
+            sysOperLog.setOperTime(LocalDateTime.now());
+            sysOperLog.setModule(module);
+            sysOperLog.setOperType(operType.getCode());
+            sysOperLog.setDescription(description);
+            sysOperLog.setRequestMethod(request.getMethod());
+            sysOperLog.setOperUrl(request.getRequestURI());
 
             // 获取方法信息
             String className = joinPoint.getTarget().getClass().getName();
             String methodName = joinPoint.getSignature().getName();
-            sysLog.setMethod(className + "." + methodName);
+            sysOperLog.setMethod(className + "." + methodName);
 
             // 获取用户信息
             try {
@@ -139,15 +139,15 @@ public class SysLogAspect {
                     String userIdStr = LoginObject.getLoginId();
                     // 将String转换为Long
                     try {
-                        sysLog.setUserId(Long.parseLong(userIdStr));
+                        sysOperLog.setUserId(Long.parseLong(userIdStr));
                     } catch (NumberFormatException e) {
                         log.warn("用户ID格式错误: {}", userIdStr);
-                        sysLog.setUserId(null);
+                        sysOperLog.setUserId(null);
                     }
 
                     // 从 Redis 获取用户信息
                     String userName = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + userIdStr);
-                    sysLog.setUserName(userName != null ? userName : "未知");
+                    sysOperLog.setUserName(userName != null ? userName : "未知");
 
                     // 安全获取租户ID，处理可能的类型转换
                     Object tenantIdObj = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userIdStr);
@@ -165,43 +165,43 @@ public class SysLogAspect {
                             tenantId = ((Number) tenantIdObj).longValue();
                         }
                     }
-                    sysLog.setTenantId(tenantId);
+                    sysOperLog.setTenantId(tenantId);
 
                     // 获取角色信息
                     try {
                         List<String> roleList = StpUtil.getRoleList();
-                        sysLog.setUserRoles(roleList != null ? String.join(",", roleList) : "");
+                        sysOperLog.setUserRoles(roleList != null ? String.join(",", roleList) : "");
                     } catch (Exception e) {
                         log.warn("获取用户角色失败", e);
-                        sysLog.setUserRoles("");
+                        sysOperLog.setUserRoles("");
                     }
                 } else {
                     // 未登录时设置为null
-                    sysLog.setUserId(null);
-                    sysLog.setUserName("匿名");
-                    sysLog.setTenantId(0L);
+                    sysOperLog.setUserId(null);
+                    sysOperLog.setUserName("匿名");
+                    sysOperLog.setTenantId(0L);
                 }
             } catch (Exception e) {
                 log.warn("获取用户信息失败", e);
-                sysLog.setUserId(null);
-                sysLog.setUserName("匿名");
-                sysLog.setTenantId(0L);
+                sysOperLog.setUserId(null);
+                sysOperLog.setUserName("匿名");
+                sysOperLog.setTenantId(0L);
             }
 
             // 获取IP和地理位置
             String ip = IpUtils.getIpAddr(request);
-            sysLog.setOperIp(ip);
-            sysLog.setOperLocation(AddressUtil.getCityInfo(ip));
+            sysOperLog.setOperIp(ip);
+            sysOperLog.setOperLocation(AddressUtil.getCityInfo(ip));
 
             // 获取浏览器和操作系统信息
-            sysLog.setUserAgent(request.getHeader("User-Agent"));
-            sysLog.setBrowser(IpUtils.getBrowser(request));
-            sysLog.setOs(IpUtils.getOs(request));
+            sysOperLog.setUserAgent(request.getHeader("User-Agent"));
+            sysOperLog.setBrowser(IpUtils.getBrowser(request));
+            sysOperLog.setOs(IpUtils.getOs(request));
 
             // 保存请求参数
             if (mmsLog.saveRequestData()) {
                 String params = getRequestParams(joinPoint, mmsLog.excludeParams());
-                sysLog.setOperParam(StrUtil.sub(params, 0, 2000)); // 限制长度
+                sysOperLog.setOperParam(StrUtil.sub(params, 0, 2000)); // 限制长度
             }
 
             // 保存操作前数据（仅针对更新操作）
@@ -209,7 +209,7 @@ public class SysLogAspect {
                 try {
                     String beforeData = getBeforeData(joinPoint);
                     if (StrUtil.isNotBlank(beforeData)) {
-                        sysLog.setBeforeData(StrUtil.sub(beforeData, 0, 2000)); // 限制长度
+                        sysOperLog.setBeforeData(StrUtil.sub(beforeData, 0, 2000)); // 限制长度
                     }
                 } catch (Exception e) {
                     log.error("获取操作前数据失败: {}", e.getMessage());
@@ -221,7 +221,7 @@ public class SysLogAspect {
             SAVE_POLICY.set(mmsLog.savePolicy());
 
             // 存储到 ThreadLocal
-            LOG_THREAD_LOCAL.set(sysLog);
+            LOG_THREAD_LOCAL.set(sysOperLog);
         } catch (Exception e) {
             log.error("操作日志前置处理失败", e);
         }
@@ -248,30 +248,30 @@ public class SysLogAspect {
      */
     private void handleLog(Object result, Exception e) {
         try {
-            SysLog sysLog = LOG_THREAD_LOCAL.get();
-            if (sysLog == null) {
+            SysOperLog sysOperLog = LOG_THREAD_LOCAL.get();
+            if (sysOperLog == null) {
                 return;
             }
 
             // 计算消耗时间
             Long startTime = TIME_THREAD_LOCAL.get();
             if (startTime != null) {
-                sysLog.setCostTime(System.currentTimeMillis() - startTime);
+                sysOperLog.setCostTime(System.currentTimeMillis() - startTime);
             }
 
             // 设置操作状态
             if (e != null) {
-                sysLog.setStatus(1); // 失败
-                sysLog.setErrorMsg(StrUtil.sub(ExceptionUtil.stacktraceToString(e), 0, 2000));
+                sysOperLog.setStatus(1); // 失败
+                sysOperLog.setErrorMsg(StrUtil.sub(ExceptionUtil.stacktraceToString(e), 0, 2000));
             } else {
-                sysLog.setStatus(0); // 成功
+                sysOperLog.setStatus(0); // 成功
             }
 
             // 保存响应数据
             Boolean saveResponseData = SAVE_RESPONSE_DATA.get();
             if (saveResponseData != null && saveResponseData && result != null) {
                 String jsonResult = JSON.toJSONString(result);
-                sysLog.setJsonResult(StrUtil.sub(jsonResult, 0, 2000)); // 限制长度
+                sysOperLog.setJsonResult(StrUtil.sub(jsonResult, 0, 2000)); // 限制长度
             }
 
             // 根据保存策略保存日志
@@ -281,14 +281,14 @@ public class SysLogAspect {
             }
             switch (savePolicy) {
                 case DATABASE:
-                    sysLogService.saveToDatabase(sysLog);
+                    sysLogService.saveToDatabase(sysOperLog);
                     break;
                 case FILE:
-                    sysLogService.saveToFile(sysLog);
+                    sysLogService.saveToFile(sysOperLog);
                     break;
                 case BOTH:
-                    sysLogService.saveToDatabase(sysLog);
-                    sysLogService.saveToFile(sysLog);
+                    sysLogService.saveToDatabase(sysOperLog);
+                    sysLogService.saveToFile(sysOperLog);
                     break;
             }
         } catch (Exception ex) {
@@ -418,13 +418,13 @@ public class SysLogAspect {
                 if (controller == null) {
                     continue;
                 }
-                
+
                 // 从Controller中提取Service对象
                 Object service = extractServiceFromController(controller);
                 if (service == null) {
                     continue;
                 }
-                
+
                 // 尝试调用 selectById 或 selectVoById 方法
                 Object beforeEntity = queryBeforeData(service, entityId);
                 if (beforeEntity != null) {
@@ -450,7 +450,7 @@ public class SysLogAspect {
     private Object extractIdFromObject(Object obj) {
         try {
             Class<?> clazz = obj.getClass();
-            
+
             // 1. 优先：查找带有 @TableId 注解的字段（MyBatis-Plus 主键注解）
             for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
                 if (field.isAnnotationPresent(com.baomidou.mybatisplus.annotation.TableId.class)) {
@@ -461,7 +461,7 @@ public class SysLogAspect {
                     }
                 }
             }
-            
+
             // 2. 查找父类中的 @TableId 注解（BO/VO可能继承自 Entity）
             Class<?> superClass = clazz.getSuperclass();
             if (superClass != null && superClass != Object.class) {
@@ -475,7 +475,7 @@ public class SysLogAspect {
                     }
                 }
             }
-            
+
             // 3. 兜底：查找以 "Id" 结尾的字段（优先级：单独的"id" > userId > 其他*Id）
             // 3.1 查找 "id" 字段
             try {
@@ -486,7 +486,7 @@ public class SysLogAspect {
                     return value;
                 }
             } catch (NoSuchFieldException ignored) {}
-            
+
             // 3.2 查找父类的 "id" 字段
             if (superClass != null && superClass != Object.class) {
                 try {
@@ -498,7 +498,7 @@ public class SysLogAspect {
                     }
                 } catch (NoSuchFieldException ignored) {}
             }
-            
+
             // 3.3 查找以 "Id" 结尾的字段（当前类）
             for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
                 String fieldName = field.getName();
@@ -510,7 +510,7 @@ public class SysLogAspect {
                     }
                 }
             }
-            
+
             // 3.4 查找父类的 "*Id" 字段
             if (superClass != null && superClass != Object.class) {
                 for (java.lang.reflect.Field field : superClass.getDeclaredFields()) {
@@ -537,7 +537,7 @@ public class SysLogAspect {
     private Object extractServiceFromController(Object controller) {
         try {
             Class<?> clazz = controller.getClass();
-            
+
             // 1. 优先查找 baseService 字段（最常见）
             try {
                 java.lang.reflect.Field field = clazz.getDeclaredField("baseService");
@@ -547,7 +547,7 @@ public class SysLogAspect {
                     return service;
                 }
             } catch (NoSuchFieldException ignored) {}
-            
+
             // 2. 兜底：查找以 "Service" 结尾的字段
             for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
                 if (field.getName().endsWith("Service")) {
@@ -572,7 +572,7 @@ public class SysLogAspect {
         try {
             Class<?> serviceClass = service.getClass();
             java.lang.reflect.Method[] methods = serviceClass.getMethods();
-            
+
             // 1. 尝试调用 selectVoById 方法
             for (java.lang.reflect.Method method : methods) {
                 if ("selectVoById".equals(method.getName())) {

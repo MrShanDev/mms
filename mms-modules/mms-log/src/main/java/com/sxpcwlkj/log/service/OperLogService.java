@@ -1,6 +1,6 @@
 package com.sxpcwlkj.log.service;
 
-import com.sxpcwlkj.log.entity.SysLog;
+import com.sxpcwlkj.log.entity.SysOperLog;
 import com.sxpcwlkj.log.enums.OperationType;
 
 /**
@@ -13,17 +13,17 @@ public interface OperLogService {
     /**
      * 保存操作日志(异步)
      */
-    void saveLog(SysLog operLog);
+    void saveLog(SysOperLog operLog);
 
     /**
      * 保存操作日志到数据库
      */
-    void saveToDatabase(SysLog operLog);
+    void saveToDatabase(SysOperLog operLog);
 
     /**
      * 保存操作日志到本地文件
      */
-    void saveToFile(SysLog operLog);
+    void saveToFile(SysOperLog operLog);
 
     /**
      * 快速记录日志 - 简化版

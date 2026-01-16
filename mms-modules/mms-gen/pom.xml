@@ -18,6 +18,10 @@
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-log</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
