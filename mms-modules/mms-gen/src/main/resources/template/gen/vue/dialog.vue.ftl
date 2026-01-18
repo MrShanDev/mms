@@ -25,21 +25,16 @@
                         </div>
                     </el-form-item>
                     <#elseif field.formType == 'radio'>
-                        <#if field.formDict??>
-                            <#if field.attrName == 'status'>
+                        <#if field.attrName == 'status'>
+                    <el-col class="mt-5" :span="${span}">
+                    <el-form-item label="${field.fieldComment!'字典状态'}" prop="${field.attrName}">
+                        <fast-switch v-model="state.ruleForm.status" dict-type="SYS_STATE" placeholder="字典状态"></fast-switch>
+                    </el-form-item>
+                        <#elseif field.formDict??>
                     <el-col class="mt-5" :span="${span}">
                     <el-form-item label="${field.fieldComment!}" prop="${field.attrName}">
-                        <fast-switch v-model="state.ruleForm.status" dict-type="SYS_STATE" placeholder="状态"></fast-switch>
+                        <fast-select v-model="state.ruleForm.${field.attrName}" dict-type="${field.formDict}" placeholder="${field.fieldComment!}"></fast-select>
                     </el-form-item>
-                            <#else>
-                    <el-col class="mt-5" :span="${span}">
-                    <el-form-item label="${field.fieldComment!}" prop="${field.attrName}">
-                        <el-radio-group v-model="state.ruleForm.${field.attrName}">
-                            <el-radio :label="0">启用</el-radio>
-                            <el-radio :label="1">禁用</el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                            </#if>
                         <#else>
                     <el-col class="mt-5" :span="${span}">
                     <el-form-item label="${field.fieldComment!}" prop="${field.attrName}">
@@ -248,7 +243,7 @@
     <#if formLayout==2 >
     // 选择监听
     const change = (arr: string[]) => {
-        state.ruleForm.${tableParentId} = arr[arr.length - 1];
+        state.ruleForm.${tableParentId} = arr.length > 0 ? arr[arr.length - 1] : undefined;
     };
     </#if>
     // 暴露变量

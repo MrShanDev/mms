@@ -98,7 +98,19 @@
                             <el-table-column  type="selection" header-align="center" align="center" width="50"></el-table-column>
                             </#if>
                             <#list gridList as field>
-                            <#if field.formDict??>
+                            <#if field.attrName == 'status'>
+                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" show-overflow-tooltip>
+                                <template #default="scope">
+                                  <fast-switch
+                                    v-model="scope.row.status"
+                                    dict-type="SYS_STATE"
+                                    placeholder="${field.fieldComment!}"
+                                    size="small"
+                                    @change="updateStatus(scope.row, scope.row.status)"
+                                  ></fast-switch>
+                                </template>
+                              </el-table-column>
+                            <#elseif field.formDict??>
                             <fast-table-column prop="${field.attrName}" label="${field.fieldComment!}" dict-type="${field.formDict}"></fast-table-column>
                             <#elseif field.primaryPk>
                             <el-table-column v-if="false" prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center"></el-table-column>
@@ -334,6 +346,20 @@
             })
         }
     }
+    // 更新状态
+    const updateStatus = (row: ${FunctionName}Vo, status: number) => {
+      row.status = status;
+      baseApi
+        .edit(row)
+        .then((res) => {
+          ElMessage.success('更新状态成功');
+          getTableData(); // 直接刷新数据，不需要延迟
+        })
+        .catch(async (err) => {
+          ElMessage.warning(err);
+          getTableData(); // 即使失败也刷新数据以恢复原始状态
+        });
+    };
     <#if formLayout==1 >
     // 分页改变
     const onHandleSizeChange = (val: number) => {

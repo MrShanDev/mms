@@ -20,7 +20,7 @@ export declare interface ${FunctionName}Vo extends BaseEntity {
 </#list>
 <#if formLayout==2 >
       ${tableId}s:string;
-      children: ${FunctionName}Entity[];
+      children: ${FunctionName}Vo[];
 </#if>
 }
 
@@ -44,6 +44,6 @@ export declare interface ${FunctionName}Bo extends BaseEntity {
 </#list>
 <#if formLayout==2 >
     ${tableId}s:string;
-    children: ${FunctionName}Entity[];
+    children: ${FunctionName}Vo[];
 </#if>
 }
