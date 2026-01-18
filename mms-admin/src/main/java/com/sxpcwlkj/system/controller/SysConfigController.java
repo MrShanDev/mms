@@ -8,6 +8,8 @@ import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.sms.service.SmsService;
 import com.sxpcwlkj.system.entity.bo.SysConfigBo;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;
@@ -68,6 +70,12 @@ public class SysConfigController extends BaseController{
      * @param bo 更新实体
      * @return 更新结果
      */
+    @MmsLog(
+        module = "参数管理",
+        operType = OperationType.UPDATE,
+        description = "修改系统配置",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @SaCheckPermission("system:config:edit")
     @PutMapping
     public R<Boolean> edit(@Validated @RequestBody SysConfigBo bo) {
@@ -80,6 +88,11 @@ public class SysConfigController extends BaseController{
      * @param bo 新增实体
      * @return 新增结果
      */
+    @MmsLog(
+        module = "参数管理",
+        operType = OperationType.INSERT,
+        description = "新增系统配置"
+    )
     @SaCheckPermission("system:config:insert")
     @PostMapping
     public R<Boolean> insert(@Validated @RequestBody SysConfigBo bo) {
@@ -92,6 +105,11 @@ public class SysConfigController extends BaseController{
      * @param ids 主键id
      * @return 删除结果
      */
+    @MmsLog(
+        module = "参数管理",
+        operType = OperationType.DELETE,
+        description = "删除系统配置"
+    )
     @SaCheckPermission("system:config:delete")
     @DeleteMapping("/{ids}")
     public R<Boolean> delete(@PathVariable String ids) {

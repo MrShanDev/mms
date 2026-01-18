@@ -302,7 +302,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            
+
             <!-- 明确指定POI版本，确保兼容性 -->
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -593,7 +593,7 @@
                 <artifactId>weixin-java-cp</artifactId>
                 <version>${weixin.version}</version>
             </dependency>
-            
+
             <!-- BouncyCastle 加密库 -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -601,18 +601,6 @@
                 <version>${bouncycastle.version}</version>
             </dependency>
 
-            <!-- 文档管理模块-->
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-doc-admin</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <!-- 文档API模块-->
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-doc-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -620,7 +608,6 @@
         <module>mms-admin</module>
         <module>mms-modules</module>
         <module>mms-zoom</module>
-        <module>mms-docs</module>
     </modules>
 
 

@@ -6,6 +6,8 @@ import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.system.entity.bo.SysDictBo;
 import com.sxpcwlkj.system.entity.vo.SysDictVo;
 import com.sxpcwlkj.system.service.SysDictService;
@@ -58,6 +60,12 @@ public class SysDictController extends BaseController {
      * @param bo 字典信息
      * @return 成功、失败
      */
+    @MmsLog(
+        module = "字典管理",
+        operType = OperationType.UPDATE,
+        description = "修改字典信息",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @SaCheckPermission("system:dict:edit")
     @PutMapping
     public R<Boolean> edit(@Validated @RequestBody(required = false) SysDictBo bo) {
@@ -69,6 +77,11 @@ public class SysDictController extends BaseController {
      * @param bo 字典信息
      * @return 成功、失败
      */
+    @MmsLog(
+        module = "字典管理",
+        operType = OperationType.INSERT,
+        description = "新增字典"
+    )
     @SaCheckPermission("system:dict:insert")
     @PostMapping
     public R<Boolean> insert(@Validated @RequestBody(required = false) SysDictBo bo) {
@@ -80,6 +93,11 @@ public class SysDictController extends BaseController {
      * @param id 字典ID
      * @return vo
      */
+    @MmsLog(
+        module = "字典管理",
+        operType = OperationType.DELETE,
+        description = "删除字典"
+    )
     @SaCheckPermission("system:dict:delete")
     @DeleteMapping("/{id}")
     public R<Boolean> delete(@PathVariable Long id) {

@@ -5,6 +5,8 @@ import com.sxpcwlkj.common.annotation.MssSafety;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.system.entity.AdminMenuTree;
 import com.sxpcwlkj.system.entity.bo.SysFunctionBo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
@@ -69,6 +71,12 @@ public class SysFunctionController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "菜单管理",
+        operType = OperationType.UPDATE,
+        description = "修改菜单信息",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:function:edit")
@@ -82,6 +90,11 @@ public class SysFunctionController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "菜单管理",
+        operType = OperationType.INSERT,
+        description = "新增菜单"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:function:insert")
@@ -95,6 +108,11 @@ public class SysFunctionController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "菜单管理",
+        operType = OperationType.DELETE,
+        description = "删除菜单"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:function:delete")

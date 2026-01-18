@@ -208,6 +208,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "重置密码"
+    )
     @SaCheckLogin
     @PostMapping("/resetPwd")
     public R<Boolean> resetPwd(@Validated @RequestBody(required = false)ResetPwdBo bo) {
@@ -220,6 +225,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "管理员重置密码"
+    )
     @SaCheckLogin
     @PostMapping("/resetPwdSuper")
     public R<Boolean> resetPwdSuper(@Validated @RequestBody  ResetPwdSuperBo bo) {
@@ -232,6 +242,11 @@ public class SysUserController extends BaseController {
      * @param avatar 图片
      * @return true/false
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "修改用户头像"
+    )
     @SaCheckLogin
     @GetMapping(value = "/editHeaderImg")
     public R<Boolean> editHeaderImg(@Validated @NotBlank(message = "头像不能为空")  String avatar) {
@@ -243,6 +258,11 @@ public class SysUserController extends BaseController {
      * @param bo bo
      * @return true/false
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "设置用户角色"
+    )
     @PostMapping("/setUserRole")
     public R<Boolean> setUserRole(@Validated @RequestBody SetUserRoleSuperBo bo) {
         return success("设置用户角色成功",baseService.setUserRoleSuper(bo));
@@ -253,6 +273,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "解绑手机号邮箱微信"
+    )
     @SaCheckLogin
     @GetMapping("/unbind")
     public R<Boolean> unbind(int type) {
@@ -264,6 +289,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "绑定手机号"
+    )
     @SaCheckLogin
     @PostMapping("/bindingPhone")
     public R<Boolean> bindingPhone(@Validated({ValidatedGroupConfig.update.class}) @RequestBody SysSmsBo bo) {
@@ -287,6 +317,11 @@ public class SysUserController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "用户管理",
+        operType = OperationType.UPDATE,
+        description = "绑定邮箱"
+    )
     @SaCheckLogin
     @PostMapping("/bindingEmail")
     public R<Boolean> bindingEmail(@Validated({ValidatedGroupConfig.update.class}) @RequestBody EmailBo bo) {

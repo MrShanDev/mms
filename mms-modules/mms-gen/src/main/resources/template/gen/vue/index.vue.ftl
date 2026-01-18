@@ -69,7 +69,7 @@
                                 size="small"
                                 type="success"
                                 class="ml10"
-                                v-auth="'system:dept:insert'"
+                                v-auth="'${moduleName}:${functionName}:insert'"
                                 @click="onCURD({ type: curdEnum.EDIT, ids: '1' })"
                             >
                                 <el-icon>

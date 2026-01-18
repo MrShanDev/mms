@@ -10,6 +10,8 @@ import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.framework.utils.ExcelUtil;
 import com.sxpcwlkj.common.code.entity.ThreeQueryBo;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import ${package}.${moduleName}.entity.bo.${ClassName}Bo;
 import ${package}.${moduleName}.entity.vo.${ClassName}Vo;
 import ${package}.${moduleName}.entity.export.${ClassName}Export;
@@ -79,6 +81,12 @@ public class ${ClassName}Controller extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "${tableComment?replace('管理', '')}管理",
+        operType = OperationType.UPDATE,
+        description = "修改${tableComment?replace('管理', '')}信息",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @SaCheckPermission("${moduleName}:${functionName}:edit")
     @PutMapping
     public R<Boolean> edit(@RequestBody @Validated(ValidatedGroupConfig.update.class) ${ClassName}Bo bo) {
@@ -90,6 +98,11 @@ public class ${ClassName}Controller extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "${tableComment?replace('管理', '')}管理",
+        operType = OperationType.INSERT,
+        description = "新增${tableComment?replace('管理', '')}"
+    )
     @SaCheckPermission("${moduleName}:${functionName}:insert")
     @PostMapping
     public R<Boolean> insert(@RequestBody @Validated(ValidatedGroupConfig.insert.class) ${ClassName}Bo bo) {
@@ -101,6 +114,11 @@ public class ${ClassName}Controller extends BaseController{
     * @param ids ID
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "${tableComment?replace('管理', '')}管理",
+        operType = OperationType.DELETE,
+        description = "删除${tableComment?replace('管理', '')}"
+    )
     @SaCheckPermission("${moduleName}:${functionName}:delete")
     @DeleteMapping("/{ids}")
     public R<Boolean> delete(@PathVariable String ids) {
@@ -120,6 +138,11 @@ public class ${ClassName}Controller extends BaseController{
     * 导入-${tableComment}
     * @param file 模版文件
     */
+    @MmsLog(
+        module = "${tableComment?replace('管理', '')}管理",
+        operType = OperationType.IMPORT,
+        description = "导入${tableComment?replace('管理', '')}数据"
+    )
     @MssSafety
     @SaCheckPermission("${moduleName}:${functionName}:import")
     @PostMapping("/import")
@@ -132,6 +155,11 @@ public class ${ClassName}Controller extends BaseController{
     /**
     * 导出-${tableComment}
     */
+    @MmsLog(
+        module = "${tableComment?replace('管理', '')}管理",
+        operType = OperationType.EXPORT,
+        description = "导出${tableComment?replace('管理', '')}数据"
+    )
     @MssSafety
     @SaCheckPermission("${moduleName}:${functionName}:export")
     @PostMapping("/export")

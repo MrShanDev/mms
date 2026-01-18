@@ -9,6 +9,8 @@ import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.oss.service.OssService;
 import com.sxpcwlkj.system.entity.bo.SysOssBo;
 import com.sxpcwlkj.system.entity.bo.SysOssConfigBo;
@@ -67,6 +69,12 @@ public class SysOssController extends BaseController {
      *
      * @return
      */
+    @MmsLog(
+        module = "对象存储",
+        operType = OperationType.UPDATE,
+        description = "修改对象存储信息",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @SaCheckPermission("system:oss:edit")
     @PutMapping
     public R<Boolean> edit(@Validated @RequestBody SysOssBo bo) {
@@ -78,6 +86,11 @@ public class SysOssController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "对象存储",
+        operType = OperationType.INSERT,
+        description = "新增对象存储文件"
+    )
     @SaCheckPermission("system:oss:insert")
     @PostMapping
     public R<Boolean> insert(MultipartFile file) {
@@ -100,6 +113,11 @@ public class SysOssController extends BaseController {
      *
      * @return vo
      */
+    @MmsLog(
+        module = "对象存储",
+        operType = OperationType.DELETE,
+        description = "删除对象存储文件"
+    )
     @SaCheckPermission("system:oss:delete")
     @DeleteMapping("/{id}")
     public R<Boolean> delete(@PathVariable Long id) {

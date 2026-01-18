@@ -9,6 +9,8 @@ import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.framework.utils.ExcelUtil;
+import com.sxpcwlkj.log.annotation.MmsLog;
+import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.system.entity.bo.SysNoticeBo;
 import com.sxpcwlkj.system.entity.export.SysNoticeExport;
 import com.sxpcwlkj.system.entity.vo.SysNoticeVo;
@@ -68,6 +70,12 @@ public class SysNoticeController extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "通知管理",
+        operType = OperationType.UPDATE,
+        description = "修改通知信息",
+        saveBeforeData = true  // 开启修改前数据记录
+    )
     @SaCheckPermission("system:notice:edit")
     @PutMapping
     public R<Boolean> edit(@RequestBody @Validated(ValidatedGroupConfig.update.class) SysNoticeBo bo) {
@@ -79,6 +87,11 @@ public class SysNoticeController extends BaseController{
     * @param bo 对象
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "通知管理",
+        operType = OperationType.INSERT,
+        description = "新增通知"
+    )
     @SaCheckPermission("system:notice:insert")
     @PostMapping
     public R<Boolean> insert(@RequestBody @Validated(ValidatedGroupConfig.insert.class) SysNoticeBo bo) {
@@ -90,6 +103,11 @@ public class SysNoticeController extends BaseController{
     * @param ids ID
     * @return true:成功 false:失败
     */
+    @MmsLog(
+        module = "通知管理",
+        operType = OperationType.DELETE,
+        description = "删除通知"
+    )
     @SaCheckPermission("system:notice:delete")
     @DeleteMapping("/{ids}")
     public R<Boolean> delete(@PathVariable String ids) {
@@ -109,6 +127,11 @@ public class SysNoticeController extends BaseController{
     * 导入系统用户
     * @param file 模版文件
     */
+    @MmsLog(
+        module = "通知管理",
+        operType = OperationType.IMPORT,
+        description = "导入通知数据"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:notice:import")
@@ -122,6 +145,11 @@ public class SysNoticeController extends BaseController{
     /**
     * 导出系统用户
     */
+    @MmsLog(
+        module = "通知管理",
+        operType = OperationType.EXPORT,
+        description = "导出通知数据"
+    )
     @MssSafety
     @Transactional
     @SaCheckPermission("system:notice:export")
