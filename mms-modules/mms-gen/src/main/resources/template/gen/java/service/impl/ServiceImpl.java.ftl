@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 /**
  * ${tableComment}-接口实现
  *
@@ -64,17 +66,35 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         }
     }
     private List<${ClassName}Vo> formatTree(List<${ClassName}Vo> vos, String fid, int level,int currentLevel) {
-        List<${ClassName}Vo> endList = new ArrayList<>();
-        for (${ClassName}Vo s : vos) {
-            if (fid.equals(s.getParentId())) {
-                if(level > currentLevel||level==0) {
-                    List<${ClassName}Vo> vo = formatTree(vos, s.get${TableId}(),level,currentLevel+1);
-                        s.setChildren(vo);
-                        endList.add(s);
-                    }
-                }
+        // 构建parentId到子节点列表的映射，提高查找效率
+        java.util.Map<String, List<${ClassName}Vo>> parentChildMap = new java.util.HashMap<>();
+        for (${ClassName}Vo vo : vos) {
+            String parentId = vo.getParentId();
+            parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
         }
-        return endList;
+        
+        return buildTreeWithMap(parentChildMap, fid, level, currentLevel);
+    }
+    
+    private List<${ClassName}Vo> buildTreeWithMap(java.util.Map<String, List<${ClassName}Vo>> parentChildMap, String parentId, int maxLevel, int currentLevel) {
+        List<${ClassName}Vo> result = new ArrayList<>();
+        List<${ClassName}Vo> children = parentChildMap.get(parentId);
+        
+        if (children == null || children.isEmpty()) {
+            return result;
+        }
+        
+        for (${ClassName}Vo child : children) {
+            // 检查层级限制
+            if (maxLevel > currentLevel || maxLevel == 0) {
+                // 递归构建子树
+                List<${ClassName}Vo> grandchildren = buildTreeWithMap(parentChildMap, child.get${TableId}(), maxLevel, currentLevel + 1);
+                child.setChildren(grandchildren);
+                result.add(child);
+            }
+        }
+        
+        return result;
     }
     </#if>
 
@@ -136,10 +156,26 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
     }
     <#if formLayout==2 >
     private void getIds(List<String> end, String id) {
-        ${ClassName}Vo vo = baseMapper.selectVoById(id);
-        if (vo != null) {
-            end.add(vo.get${TableId}());
-            getIds(end, vo.get${TableParentId}());
+        // 获取所有可能需要的节点，避免递归查询
+        List<${ClassName}Vo> allNodes = baseMapper.selectVoList(new LambdaQueryWrapper<${ClassName}>()
+                .orderByAsc(${ClassName}::getSort));
+        
+        // 构建ID到节点的映射
+        java.util.Map<String, ${ClassName}Vo> idNodeMap = new java.util.HashMap<>();
+        for (${ClassName}Vo node : allNodes) {
+            idNodeMap.put(node.get${TableId}(), node);
+        }
+        
+        // 通过循环而不是递归获取上级节点
+        String currentId = id;
+        while (currentId != null && !"0".equals(currentId)) {
+            ${ClassName}Vo currentNode = idNodeMap.get(currentId);
+            if (currentNode != null) {
+                end.add(currentNode.get${TableId}());
+                currentId = currentNode.get${TableParentId}();
+            } else {
+                break; // 节点不存在，跳出循环
+            }
         }
     }
     </#if>

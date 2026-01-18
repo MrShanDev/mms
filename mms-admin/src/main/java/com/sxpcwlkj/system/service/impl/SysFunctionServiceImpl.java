@@ -101,19 +101,35 @@ public class SysFunctionServiceImpl implements SysFunctionService {
      * @return AdminMenuTree
      */
     private List<SysFunctionVo> getSysFunctionVo(List<SysFunctionVo> functionVos, String funId, int level,int currentLevel) {
-        List<SysFunctionVo> endList = new ArrayList<>();
-        for (SysFunctionVo f : functionVos) {
-            //是否是属于funId
-            if (f.getParentId() != null && funId.equals(f.getParentId())) {
-                if(level > currentLevel||level==0) {
-                    List<SysFunctionVo> children = getSysFunctionVo(functionVos, f.getId(), level, currentLevel + 1);
-                    f.setChildren(children);
-                    endList.add(f);
-                }
+        // 构建parentId到子节点列表的映射，提高查找效率
+        Map<String, List<SysFunctionVo>> parentChildMap = new HashMap<>();
+        for (SysFunctionVo vo : functionVos) {
+            String parentId = vo.getParentId();
+            parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
+        }
+        
+        return buildFunctionTreeWithMap(parentChildMap, funId, level, currentLevel);
+    }
+    
+    private List<SysFunctionVo> buildFunctionTreeWithMap(Map<String, List<SysFunctionVo>> parentChildMap, String parentId, int maxLevel, int currentLevel) {
+        List<SysFunctionVo> result = new ArrayList<>();
+        List<SysFunctionVo> children = parentChildMap.get(parentId);
+        
+        if (children == null || children.isEmpty()) {
+            return result;
+        }
+        
+        for (SysFunctionVo child : children) {
+            // 检查层级限制
+            if (maxLevel > currentLevel || maxLevel == 0) {
+                // 递归构建子树
+                List<SysFunctionVo> grandchildren = buildFunctionTreeWithMap(parentChildMap, child.getId(), maxLevel, currentLevel + 1);
+                child.setChildren(grandchildren);
+                result.add(child);
             }
         }
-        return endList;
-
+        
+        return result;
     }
 
     /**
@@ -124,19 +140,33 @@ public class SysFunctionServiceImpl implements SysFunctionService {
      * @return AdminMenuTree
      */
     private List<AdminMenuTree> getAdminMenuTree(List<SysFunctionVo> functionVos, String funId) {
+        // 构建parentId到子节点列表的映射，提高查找效率
+        Map<String, List<SysFunctionVo>> parentChildMap = new HashMap<>();
+        for (SysFunctionVo vo : functionVos) {
+            String parentId = vo.getParentId();
+            parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
+        }
+        
+        return buildAdminMenuTreeWithMap(parentChildMap, funId);
+    }
+    
+    private List<AdminMenuTree> buildAdminMenuTreeWithMap(Map<String, List<SysFunctionVo>> parentChildMap, String parentId) {
+        List<AdminMenuTree> result = new ArrayList<>();
+        List<SysFunctionVo> children = parentChildMap.get(parentId);
+        
+        if (children == null || children.isEmpty()) {
+            return result;
+        }
+        
+        for (SysFunctionVo child : children) {
+            AdminMenuTree menu = new AdminMenuTree();
+            menu.setId(child.getId());
+            menu.setPath(child.getPath());
+            menu.setName(child.getName());
+            menu.setComponent(child.getComponent());
+            menu.setRedirect(child.getComponentName());
 
-        List<AdminMenuTree> endList = new ArrayList<>();
-        for (SysFunctionVo f : functionVos) {
-            //是否是属于funId
-            if (f.getParentId() != null && funId.equals(f.getParentId())) {
-                AdminMenuTree menu = new AdminMenuTree();
-                menu.setId(f.getId());
-                menu.setPath(f.getPath());
-                menu.setName(f.getName());
-                menu.setComponent(f.getComponent());
-                menu.setRedirect(f.getComponentName());
-
-                // 菜单名称
+            // 菜单名称
 //                private String title;
 //                // 外链/内嵌时链接地址（http:xxx.com），开启外链条件，`1、isLink: 链接地址不为空`
 //                private String isLink;
@@ -153,31 +183,29 @@ public class SysFunctionServiceImpl implements SysFunctionService {
 //                // 菜单图标
 //                private String icon;
 
-                Map<String, Object> meta = new HashMap<>();
+            Map<String, Object> meta = new HashMap<>();
 
-                meta.put("title", f.getLanguageCode());
-                meta.put("isLink", f.getIsLink());
-                meta.put("isHide", f.getVisible().equals("true"));
-                meta.put("isKeepAlive", f.getKeepAlive().equals("true"));
-                meta.put("isAffix", f.getAlwaysShow().equals("true"));
-                meta.put("isIframe", f.getIsIframe().equals("true"));
-                if (!StringUtil.isEmpty(f.getPermission())) {
-                    meta.put("roles", f.getPermission().split(","));
-                }
-
-                meta.put("icon", f.getIcon());
-                menu.setMeta(meta);
-
-                List<AdminMenuTree> children = getAdminMenuTree(functionVos, f.getId());
-                menu.setChildren(children);
-
-                endList.add(menu);
-
+            meta.put("title", child.getLanguageCode());
+            meta.put("isLink", child.getIsLink());
+            meta.put("isHide", child.getVisible().equals("true"));
+            meta.put("isKeepAlive", child.getKeepAlive().equals("true"));
+            meta.put("isAffix", child.getAlwaysShow().equals("true"));
+            meta.put("isIframe", child.getIsIframe().equals("true"));
+            if (!StringUtil.isEmpty(child.getPermission())) {
+                meta.put("roles", child.getPermission().split(","));
             }
+
+            meta.put("icon", child.getIcon());
+            menu.setMeta(meta);
+
+            // 递归构建子树
+            List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
+            menu.setChildren(grandchildren);
+
+            result.add(menu);
         }
-
-        return endList;
-
+        
+        return result;
     }
 
 }

@@ -520,40 +520,56 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     private List<AdminMenuTree> getAdminMenuTree(List<SysFunctionVo> functionVos, String funId) {
-
-        List<AdminMenuTree> endList = new ArrayList<>();
-        for (SysFunctionVo f : functionVos) {
-            //是否是属于funId
-            if (f.getParentId() != null && funId.equals(f.getParentId())) {
-                if (f.getType() != 1) continue;
-                AdminMenuTree menu = new AdminMenuTree();
-                menu.setId(f.getId());
-                menu.setPath(f.getPath());
-                menu.setName(f.getName());
-                menu.setComponent(f.getComponent());
-                menu.setRedirect(f.getComponentName());
-
-                Map<String, Object> meta = new HashMap<>();
-
-                meta.put("title", f.getLanguageCode());
-                meta.put("isLink", f.getIsLink());
-                meta.put("isHide", f.getVisible() == 1);
-                meta.put("isKeepAlive", f.getKeepAlive() == 1);
-                meta.put("isAffix", f.getAlwaysShow() == 1);
-                meta.put("isIframe", f.getIsIframe() == 1);
-                if (!StringUtil.isEmpty(f.getPermission())) {
-                    meta.put("roles", f.getPermission().split(","));
-                }
-                meta.put("icon", f.getIcon());
-                menu.setMeta(meta);
-                List<AdminMenuTree> children = getAdminMenuTree(functionVos, f.getId());
-                menu.setChildren(children);
-                endList.add(menu);
+        // 构建parentId到子节点列表的映射，只包含类型为1的菜单项，提高查找效率
+        Map<String, List<SysFunctionVo>> parentChildMap = new HashMap<>();
+        for (SysFunctionVo vo : functionVos) {
+            // 只处理类型为1的菜单项
+            if (vo.getType() == 1) {
+                String parentId = vo.getParentId();
+                parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
             }
         }
+        
+        return buildAdminMenuTreeWithMap(parentChildMap, funId);
+    }
+    
+    private List<AdminMenuTree> buildAdminMenuTreeWithMap(Map<String, List<SysFunctionVo>> parentChildMap, String parentId) {
+        List<AdminMenuTree> result = new ArrayList<>();
+        List<SysFunctionVo> children = parentChildMap.get(parentId);
+        
+        if (children == null || children.isEmpty()) {
+            return result;
+        }
+        
+        for (SysFunctionVo child : children) {
+            AdminMenuTree menu = new AdminMenuTree();
+            menu.setId(child.getId());
+            menu.setPath(child.getPath());
+            menu.setName(child.getName());
+            menu.setComponent(child.getComponent());
+            menu.setRedirect(child.getComponentName());
 
-        return endList;
+            Map<String, Object> meta = new HashMap<>();
 
+            meta.put("title", child.getLanguageCode());
+            meta.put("isLink", child.getIsLink());
+            meta.put("isHide", child.getVisible() == 1);
+            meta.put("isKeepAlive", child.getKeepAlive() == 1);
+            meta.put("isAffix", child.getAlwaysShow() == 1);
+            meta.put("isIframe", child.getIsIframe() == 1);
+            if (!StringUtil.isEmpty(child.getPermission())) {
+                meta.put("roles", child.getPermission().split(","));
+            }
+            meta.put("icon", child.getIcon());
+            menu.setMeta(meta);
+
+            // 递归构建子树
+            List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
+            menu.setChildren(grandchildren);
+            result.add(menu);
+        }
+        
+        return result;
     }
 
 

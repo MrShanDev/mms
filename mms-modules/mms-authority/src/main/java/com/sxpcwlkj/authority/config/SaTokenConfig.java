@@ -32,14 +32,56 @@ public class SaTokenConfig implements WebMvcConfigurer {
     private final ObjectMapper objectMapper;
 
     /**
-     * 统一 Sa-Token 的 JSON 解析器
+     * 统一 Sa-Token 的 JSON 解析器 - 增强版
      */
     @PostConstruct
     public void setSaTokenJson() {
-        SaJsonTemplateForJackson template = new SaJsonTemplateForJackson();
+        // 创建自定义的JSON模板，增加容错处理
+        SaJsonTemplateForJackson template = new SaJsonTemplateForJackson() {
+            @Override
+            public <T> T jsonToObject(String jsonString, Class<T> clazz) {
+                try {
+                    return super.jsonToObject(jsonString, clazz);
+                } catch (Exception e) {
+                    log.warn("JSON反序列化失败，返回null值。原始JSON: {}",
+                        jsonString != null ? jsonString.substring(0, Math.min(100, jsonString.length())) : "null");
+
+                    // 如果是Session对象，返回null让Sa-Token创建新的
+                    if (cn.dev33.satoken.session.SaSession.class.isAssignableFrom(clazz)) {
+                        return null;
+                    }
+
+                    // 尝试清理可能损坏的数据
+                    if (jsonString != null && jsonString.contains("�")) {
+                        log.warn("检测到损坏字符，尝试修复JSON");
+                        String cleaned = jsonString.replaceAll("[^\\x20-\\x7E\\x0A\\x0D]", "");
+                        try {
+                            return super.jsonToObject(cleaned, clazz);
+                        } catch (Exception ex) {
+                            // 修复失败，返回null
+                            return null;
+                        }
+                    }
+
+                    return null;
+                }
+            }
+        };
+
+        // 配置Jackson以处理更多异常情况
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.IGNORE_UNDEFINED, true);
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+
         template.objectMapper = objectMapper;
         SaManager.setSaJsonTemplate(template);
+
+        log.info("Sa-Token JSON解析器已配置增强容错");
     }
+
     /**
      * 注册sa-token的拦截器
      */

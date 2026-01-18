@@ -106,6 +106,7 @@ public class SysLogServiceImpl extends BaseServiceImpl<SysLog, SysLogVo,SysLogBo
             query=new SysLogBo();
         }
         LambdaQueryWrapper<SysLog> wrapper = Wrappers.lambdaQuery();
+        wrapper.orderByDesc(SysLog::getOperTime);
         return wrapper;
     }
 

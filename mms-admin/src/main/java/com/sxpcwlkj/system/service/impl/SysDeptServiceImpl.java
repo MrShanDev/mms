@@ -23,10 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+
 /**
  * 系统部门-接口实现
  *
@@ -62,17 +60,35 @@ public class SysDeptServiceImpl extends BaseServiceImpl<SysDept, SysDeptVo,SysDe
         }
     }
     private List<SysDeptVo> formatTree(List<SysDeptVo> vos, String fid, int level,int currentLevel) {
-        List<SysDeptVo> endList = new ArrayList<>();
-        for (SysDeptVo s : vos) {
-            if (fid.equals(s.getParentId())) {
-                if(level > currentLevel||level==0) {
-                    List<SysDeptVo> vo = formatTree(vos, s.getDeptId(),level,currentLevel+1);
-                        s.setChildren(vo);
-                        endList.add(s);
-                    }
-                }
+        // 构建parentId到子节点列表的映射，提高查找效率
+        Map<String, List<SysDeptVo>> parentChildMap = new HashMap<>();
+        for (SysDeptVo vo : vos) {
+            String parentId = vo.getParentId();
+            parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
         }
-        return endList;
+
+        return buildTreeWithMap(parentChildMap, fid, level, currentLevel);
+    }
+
+    private List<SysDeptVo> buildTreeWithMap(Map<String, List<SysDeptVo>> parentChildMap, String parentId, int maxLevel, int currentLevel) {
+        List<SysDeptVo> result = new ArrayList<>();
+        List<SysDeptVo> children = parentChildMap.get(parentId);
+
+        if (children == null || children.isEmpty()) {
+            return result;
+        }
+
+        for (SysDeptVo child : children) {
+            // 检查层级限制
+            if (maxLevel > currentLevel || maxLevel == 0) {
+                // 递归构建子树
+                List<SysDeptVo> grandchildren = buildTreeWithMap(parentChildMap, child.getDeptId(), maxLevel, currentLevel + 1);
+                child.setChildren(grandchildren);
+                result.add(child);
+            }
+        }
+
+        return result;
     }
 
     @Override

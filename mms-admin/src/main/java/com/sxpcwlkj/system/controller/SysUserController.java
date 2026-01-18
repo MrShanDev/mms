@@ -172,7 +172,6 @@ public class SysUserController extends BaseController {
         description = "导出用户数据"
     )
     @MssSafety
-    //@Transactional
     @SaCheckPermission("system:user:export")
     @PostMapping("/export")
     public void export(SysUserBo user, PageQuery pageQuery, HttpServletResponse response) throws IOException {
