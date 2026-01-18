@@ -22,10 +22,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
-        <!-- 公共模块-->
+        <!-- 核销共模块-->
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-common</artifactId>
+            <artifactId>mms-framework</artifactId>
         </dependency>
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
@@ -35,7 +35,12 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-authority</artifactId>
         </dependency>
-
+        <!-- 为了支持JSR-305注解-->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
     </dependencies>
 
 </project>

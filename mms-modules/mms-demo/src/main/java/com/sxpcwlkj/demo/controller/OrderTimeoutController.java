@@ -1,6 +1,7 @@
 package com.sxpcwlkj.demo.controller;
 
-import com.sxpcwlkj.common.entity.R;
+
+import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.demo.mq.OrderTimeoutDemo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试1：创建普通订单（30分钟超时）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-normal
      * {
@@ -31,7 +32,7 @@ public class OrderTimeoutController {
      * }
      */
     @PostMapping("/create-normal")
-    public R<String> createNormalOrder(@RequestParam String orderId, 
+    public R<String> createNormalOrder(@RequestParam String orderId,
                                        @RequestParam String buyerId) {
         try {
             orderTimeoutDemo.createOrderWithTimeout(orderId, buyerId);
@@ -44,7 +45,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试2：快速创建订单（使用简化方法）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-quick?orderId=ORDER_002
      */
@@ -61,7 +62,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试3：创建秒杀订单（5分钟超时）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-seckill
      * {
@@ -70,7 +71,7 @@ public class OrderTimeoutController {
      * }
      */
     @PostMapping("/create-seckill")
-    public R<String> createSeckillOrder(@RequestParam String orderId, 
+    public R<String> createSeckillOrder(@RequestParam String orderId,
                                         @RequestParam String buyerId) {
         try {
             orderTimeoutDemo.createSeckillOrder(orderId, buyerId);
@@ -83,7 +84,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试4：创建预售订单（2小时超时）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-presale
      * {
@@ -92,7 +93,7 @@ public class OrderTimeoutController {
      * }
      */
     @PostMapping("/create-presale")
-    public R<String> createPresaleOrder(@RequestParam String orderId, 
+    public R<String> createPresaleOrder(@RequestParam String orderId,
                                         @RequestParam String buyerId) {
         try {
             orderTimeoutDemo.createPresaleOrder(orderId, buyerId);
@@ -105,7 +106,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试5：订单支付成功（取消超时任务）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/payment-success
      * {
@@ -114,7 +115,7 @@ public class OrderTimeoutController {
      * }
      */
     @PostMapping("/payment-success")
-    public R<String> onPaymentSuccess(@RequestParam String orderId, 
+    public R<String> onPaymentSuccess(@RequestParam String orderId,
                                       @RequestParam String messageId) {
         try {
             orderTimeoutDemo.onPaymentSuccess(orderId, messageId);
@@ -127,7 +128,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试6：批量创建订单
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/batch-create
      * {
@@ -138,7 +139,7 @@ public class OrderTimeoutController {
     public R<String> batchCreateOrders(@RequestBody String[] orderIds) {
         try {
             orderTimeoutDemo.batchCreateOrderTimeout(orderIds);
-            return R.success("✅ 批量创建订单成功，共 " + orderIds.length + " 个订单", 
+            return R.success("✅ 批量创建订单成功，共 " + orderIds.length + " 个订单",
                 String.valueOf(orderIds.length));
         } catch (Exception e) {
             log.error("批量创建订单失败", e);
@@ -148,7 +149,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试7：查看队列状态
-     * 
+     *
      * 调用示例：
      * GET http://localhost:8080/demo/order-timeout/queue-status
      */
@@ -165,7 +166,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试8：演示不同场景的延时时间
-     * 
+     *
      * 调用示例：
      * GET http://localhost:8080/demo/order-timeout/demo-delay-scenarios
      */
@@ -182,7 +183,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试9：完整的订单创建流程（推荐）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-complete
      * {
@@ -191,7 +192,7 @@ public class OrderTimeoutController {
      * }
      */
     @PostMapping("/create-complete")
-    public R<String> createCompleteOrder(@RequestParam String buyerId, 
+    public R<String> createCompleteOrder(@RequestParam String buyerId,
                                          @RequestParam BigDecimal amount) {
         try {
             String orderId = orderTimeoutDemo.createOrderWithCompleteFlow(buyerId, amount);
@@ -208,7 +209,7 @@ public class OrderTimeoutController {
 
     /**
      * 测试10：订单支付成功（完整流程）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/order-paid?orderId=ORDER_001
      */
@@ -229,19 +230,19 @@ public class OrderTimeoutController {
 
     /**
      * 测试11：创建测试订单（1分钟超时，用于快速测试）
-     * 
+     *
      * 调用示例：
      * POST http://localhost:8080/demo/order-timeout/create-test?orderId=TEST_001&buyerId=USER_001
      */
     @PostMapping("/create-test")
-    public R<String> createTestOrder(@RequestParam String orderId, 
+    public R<String> createTestOrder(@RequestParam String orderId,
                                      @RequestParam String buyerId) {
         try {
             log.info("创建测试订单（1分钟超时）: orderId={}", orderId);
-            
+
             // 使用快速方法创建1分钟超时的订单
             orderTimeoutDemo.quickCreateOrderTimeout(orderId);
-            
+
             return R.success("✅ 测试订单创建成功，1分钟后自动取消（请等待观察效果）", orderId);
         } catch (Exception e) {
             log.error("创建测试订单失败", e);

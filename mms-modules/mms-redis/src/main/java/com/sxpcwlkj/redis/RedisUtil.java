@@ -235,6 +235,15 @@ public class RedisUtil {
     }
 
     /**
+     * 删除单个对象（别名方法）
+     *
+     * @param key 缓存的键值
+     */
+    public static boolean delCacheObject(final String key) {
+        return CLIENT.getBucket(key).delete();
+    }
+
+    /**
      * 删除集合对象
      *
      * @param collection 多个对象
@@ -448,7 +457,195 @@ public class RedisUtil {
         RMap<K, V> rMap = CLIENT.getMap(key);
         return rMap.getAll(hKeys);
     }
-
+    
+    /**
+     * Hash递增
+     *
+     * @param key Redis键
+     * @param hKey Hash键
+     * @param delta 递增数(小于0递减)
+     * @return 递增后的值
+     */
+    public static Long hIncrBy(final String key, final String hKey, final Long delta) {
+        RMap<String, Long> rMap = CLIENT.getMap(key);
+        return rMap.addAndGet(hKey, delta);
+    }
+    
+    /**
+     * Hash写入
+     *
+     * @param key Redis键
+     * @param hKey Hash键
+     * @param value 值
+     */
+    public static <T> void hPut(final String key, final String hKey, final T value) {
+        RMap<String, T> rMap = CLIENT.getMap(key);
+        rMap.put(hKey, value);
+    }
+    
+    /**
+     * Hash获取
+     *
+     * @param key Redis键
+     * @param hKey Hash键
+     * @return 值
+     */
+    public static <T> T hGet(final String key, final String hKey) {
+        RMap<String, T> rMap = CLIENT.getMap(key);
+        return rMap.get(hKey);
+    }
+    
+    /**
+     * Hash删除
+     *
+     * @param key Redis键
+     * @param hKey Hash键
+     * @return 值
+     */
+    public static <T> T hDel(final String key, final String hKey) {
+        RMap<String, T> rMap = CLIENT.getMap(key);
+        return rMap.remove(hKey);
+    }
+    
+    /**
+     * 检查Hash中是否存在指定的key
+     *
+     * @param key Redis键
+     * @param hKey Hash键
+     * @return 是否存在
+     */
+    public static Boolean hHasKey(final String key, final String hKey) {
+        RMap<String, String> rMap = CLIENT.getMap(key);
+        return rMap.containsKey(hKey);
+    }
+    
+    /**
+     * Set添加
+     *
+     * @param key Redis键
+     * @param values 值
+     * @return 成功个数
+     */
+    public static long sSet(final String key, final Object... values) {
+        RSet<Object> rSet = CLIENT.getSet(key);
+        boolean result = rSet.addAll(Arrays.asList(values));
+        return result ? values.length : 0;
+    }
+    
+    /**
+     * Set删除
+     *
+     * @param key Redis键
+     * @param values 值
+     * @return 成功个数
+     */
+    public static long sRemove(final String key, final Object... values) {
+        RSet<Object> rSet = CLIENT.getSet(key);
+        java.util.Set<Object> valueSet = new java.util.HashSet<>(java.util.Arrays.asList(values));
+        boolean result = rSet.removeAll(valueSet);
+        return result ? valueSet.size() : 0;
+    }
+    
+    /**
+     * Set是否存在
+     *
+     * @param key Redis键
+     * @param value 值
+     * @return 是否存在
+     */
+    public static Boolean sHasKey(final String key, final Object value) {
+        RSet<Object> rSet = CLIENT.getSet(key);
+        return rSet.contains(value);
+    }
+    
+    /**
+     * Set获取
+     *
+     * @param key Redis键
+     * @return Set集合
+     */
+    public static <T> Set<T> sGet(final String key) {
+        RSet<T> rSet = CLIENT.getSet(key);
+        return rSet.readAll();
+    }
+    
+    /**
+     * Set大小
+     *
+     * @param key Redis键
+     * @return 大小
+     */
+    public static long sSize(final String key) {
+        RSet<Object> rSet = CLIENT.getSet(key);
+        return rSet.size();
+    }
+    
+    /**
+     * List添加
+     *
+     * @param key Redis键
+     * @param values 值
+     */
+    public static void lRightPush(final String key, final Object... values) {
+        RList<Object> rList = CLIENT.getList(key);
+        rList.addAll(java.util.Arrays.asList(values));
+    }
+    
+    /**
+     * List范围修剪
+     *
+     * @param key Redis键
+     * @param start 开始位置
+     * @param end 结束位置
+     */
+    public static void lTrim(final String key, final long start, final long end) {
+        RList<Object> rList = CLIENT.getList(key);
+        rList.trim((int) start, (int) end);
+    }
+    
+    /**
+     * List范围获取
+     *
+     * @param key Redis键
+     * @param start 开始位置
+     * @param end 结束位置
+     * @return 列表
+     */
+    public static <T> List<T> lGet(final String key, final long start, final long end) {
+        RList<T> rList = CLIENT.getList(key);
+        if (rList == null) {
+            return new ArrayList<>();
+        }
+        if (start >= 0 && end >= 0) {
+            int listSize = rList.size();
+            int adjustedEnd = Math.min((int) end + 1, listSize);
+            if ((int) start >= listSize || (int) start >= adjustedEnd) {
+                return new ArrayList<>();
+            }
+            return new ArrayList<>(rList.subList((int) start, adjustedEnd));
+        } else {
+            // 处理负数索引
+            int size = rList.size();
+            int actualStart = start < 0 ? Math.max(0, size + (int) start) : (int) start;
+            int actualEnd = end < 0 ? Math.max(actualStart, size + (int) end + 1) : (int) Math.min((int) end + 1, size);
+            if (actualStart >= size || actualStart >= actualEnd) {
+                return new ArrayList<>();
+            }
+            return new ArrayList<>(rList.subList(actualStart, actualEnd));
+        }
+    }
+    
+    /**
+     * List大小
+     *
+     * @param key Redis键
+     * @return 大小
+     */
+    public static long lSize(final String key) {
+        RList<Object> rList = CLIENT.getList(key);
+        return rList.size();
+    }
+    
     /**
      * 设置原子值
      *

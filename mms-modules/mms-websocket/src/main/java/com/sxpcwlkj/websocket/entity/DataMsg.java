@@ -1,9 +1,11 @@
 package com.sxpcwlkj.websocket.entity;
 
+import cn.hutool.json.JSONUtil;
 import com.sxpcwlkj.websocket.enums.CmdEnum;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author mmsAdmin
@@ -24,7 +26,7 @@ public class DataMsg {
     /**
      * 消息内容
      */
-    private String data;
+    private Object data;
 
     /**
      * 初始化构造器
@@ -43,12 +45,18 @@ public class DataMsg {
      */
     public String setData(String data) {
         this.data = data;
-        StringBuffer sb = new StringBuffer();
-        sb.append("{");
-        sb.append("\"cmd\": ").append(this.cmd).append(", ");
-        sb.append("\"data\": \"").append(this.data).append("\"");
-        sb.append("}");
-        return sb.toString();
+        return buildResponse();
+    }
+
+    /**
+     * 设置Data
+     *
+     * @param data 任意对象类型
+     * @return 响应对象
+     */
+    public String setData(Object data) {
+        this.data = data;
+        return buildResponse();
     }
 
     /**
@@ -58,13 +66,8 @@ public class DataMsg {
      * @return 响应对象
      */
     public String setData(MsgInfo msgInfo) {
-        this.data = data;
-        StringBuffer sb = new StringBuffer();
-        sb.append("{");
-        sb.append("\"cmd\": ").append(this.cmd).append(", ");
-        sb.append("\"data\": ").append(this.data);
-        sb.append("}");
-        return sb.toString();
+        this.data = msgInfo;
+        return buildResponse();
     }
 
     /**
@@ -74,31 +77,29 @@ public class DataMsg {
      * @return 响应对象
      */
     public String setData(List<ChatRoom> chatRoomList) {
-        this.data = chatRoomListToString(chatRoomList);
-        StringBuffer sb = new StringBuffer();
-        sb.append("{");
-        sb.append("\"cmd\": ").append(this.cmd).append(", ");
-        sb.append("\"data\": ").append(this.data);
-        sb.append("}");
-        return sb.toString();
+        this.data = chatRoomList;
+        return buildResponse();
+    }
+    
+    /**
+     * 设置Data
+     *
+     * @param stringSet 字符串集合类型
+     * @return 响应对象
+     */
+    public String setData(Set<String> stringSet) {
+        this.data = stringSet;
+        return buildResponse();
     }
 
     /**
-     * 聊天室列表 toString
-     *
-     * @param chatRoomList 聊天室列表
-     * @return 消息
+     * 构建响应JSON字符串
+     * @return JSON字符串
      */
-    public static String chatRoomListToString(List<ChatRoom> chatRoomList) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("[");
-        for (int i = 0; i < chatRoomList.size(); i++) {
-            sb.append(chatRoomList.get(i).build());
-            if (i < chatRoomList.size() - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
+    private String buildResponse() {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("cmd", this.cmd);
+        response.put("data", this.data);
+        return JSONUtil.toJsonStr(response);
     }
 }
