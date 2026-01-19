@@ -30,7 +30,9 @@ public enum SystemCommonEnum implements IEnum<Integer> {
     /**
      * 系统默认头像
      */
-    SYS_USER_AVATAR(1, "https://sxpcwlkj.oss-cn-beijing.aliyuncs.com/default_avatar.png","系统默认头像");
+    SYS_USER_AVATAR(1, "https://tc.z.wiki/autoupload/f/XPEogUuiWaxwD_qii5_MWoNMEw9GhPtHlYmP-O-FHwSyl5f0KlZfm6UsKj-HyTuv/20250927/fjhk/200X200/%E9%BB%98%E8%AE%A4%E5%A4%B4%E5%83%8F.png/webp","系统默认头像"),
+
+    LIMIT_ONE(1, "LIMIT 1","限制一个");
 
     private final Integer value;
     @Getter

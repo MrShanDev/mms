@@ -1,7 +1,7 @@
 package com.sxpcwlkj.system.service;
 
 import com.sxpcwlkj.common.code.entity.FileStorageConfig;
-import com.sxpcwlkj.framework.sercice.BaseService;
+import com.sxpcwlkj.framework.service.BaseService;
 import com.sxpcwlkj.system.entity.SysOssConfig;
 import com.sxpcwlkj.system.entity.bo.SysOssConfigBo;
 import com.sxpcwlkj.system.entity.vo.SysOssConfigVo;

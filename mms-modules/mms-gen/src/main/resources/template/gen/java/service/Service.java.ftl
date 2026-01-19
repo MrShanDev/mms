@@ -1,6 +1,6 @@
 package ${package}.${moduleName}.service;
 
-import com.sxpcwlkj.framework.sercice.BaseService;
+import com.sxpcwlkj.framework.service.BaseService;
 import ${package}.${moduleName}.entity.${ClassName};
 import ${package}.${moduleName}.entity.bo.${ClassName}Bo;
 import ${package}.${moduleName}.entity.vo.${ClassName}Vo;

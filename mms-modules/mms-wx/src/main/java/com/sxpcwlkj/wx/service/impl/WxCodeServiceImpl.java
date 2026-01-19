@@ -6,10 +6,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sxpcwlkj.common.code.entity.WxCodeBo;
 import com.sxpcwlkj.common.enums.WxCodeStatusEnum;
-import com.sxpcwlkj.common.properties.WxPayProperties;
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
+import com.sxpcwlkj.wx.config.WxProperties;
 import com.sxpcwlkj.wx.entity.WechatEventEnum;
 import com.sxpcwlkj.wx.service.WxCodeService;
 import com.sxpcwlkj.wx.service.WxService;
@@ -36,15 +36,15 @@ public class WxCodeServiceImpl implements WxCodeService {
     private final WxService wxService;
     @Override
     public String getCode(WxCodeBo wxCodeBo) {
-        WxPayProperties wxPayProperties = wxService.getWxProperties();
+        WxProperties wxProperties = wxService.getWxProperties();
         String codeUrl="";
-        if (wxPayProperties.getModelType() == 1) {
+        if (wxProperties.getModelType() == 1) {
             codeUrl=  getMpCode(wxCodeBo);
         }
-        if (wxPayProperties.getModelType() == 2) {
+        if (wxProperties.getModelType() == 2) {
             codeUrl= getMaCode(wxCodeBo);
         }
-        if (wxPayProperties.getModelType() == 3) {
+        if (wxProperties.getModelType() == 3) {
             codeUrl= getOpenCode(wxCodeBo);
         }
         //保存二维码
@@ -224,13 +224,12 @@ public class WxCodeServiceImpl implements WxCodeService {
     }
     private String msgStr(WxMpXmlMessage message, String content) {
         // 根据来时的信息格式，重组返回。(注意中间不能有空格)
-        final String msgStr = "<xml>"
+        return "<xml>"
             + "<ToUserName><![CDATA[" + message.getFromUser() + "]]></ToUserName>"
             + "<FromUserName><![CDATA[" + message.getToUser() + "]]></FromUserName>"
             + "<CreateTime>" + new Date().getTime() + "</CreateTime>"
             + "<MsgType><![CDATA[text]]></MsgType>"
             + "<Content><![CDATA[" + content + "]]></Content>"
             + "</xml>";
-        return msgStr;
     }
 }

@@ -20,7 +20,7 @@ import com.sxpcwlkj.common.utils.IPUtil;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.email.service.EmailService;
-import com.sxpcwlkj.framework.sercice.SysSignService;
+import com.sxpcwlkj.framework.service.SysSignService;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.redis.constant.RedisConstant;
 import com.sxpcwlkj.sms.service.SmsService;

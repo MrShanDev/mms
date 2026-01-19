@@ -1,17 +1,14 @@
 package com.sxpcwlkj.system.service.impl;
 
-import cn.hutool.core.util.ArrayUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.DataUtil;
-import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
+import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
 import com.sxpcwlkj.system.entity.SysLog;
 import com.sxpcwlkj.system.entity.bo.SysLogBo;
 import com.sxpcwlkj.system.entity.vo.SysLogVo;
@@ -26,7 +23,7 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
+
 /**
  * 操作日志记录表-接口实现
  *

@@ -44,6 +44,12 @@
         <dependency>
             <groupId>com.github.javen205</groupId>
             <artifactId>IJPay-WxPay</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcprov-jdk15on</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.sxpcwlkj</groupId>

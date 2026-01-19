@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sxpcwlkj.store.mapper.StoreRefundApplyMapper">
+
+    <select id="selectVoPageAfterSever" resultType="com.sxpcwlkj.store.entity.vo.StoreRefundApplyVo">
+        SELECT
+            sra.*
+        FROM store_refund_apply sra
+                 INNER JOIN store_order so ON sra.order_id = so.id
+        WHERE so.user_id = #{userId}
+          <if test="orderNo!=null">
+              AND sra.order_no = #{orderNo}
+          </if>
+        ORDER BY sra.apply_time DESC
+    </select>
+</mapper>

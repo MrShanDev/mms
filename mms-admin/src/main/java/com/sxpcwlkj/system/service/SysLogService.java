@@ -1,11 +1,11 @@
 package com.sxpcwlkj.system.service;
 
-import com.sxpcwlkj.framework.sercice.BaseService;
+import com.sxpcwlkj.framework.service.BaseService;
 import com.sxpcwlkj.system.entity.SysLog;
 import com.sxpcwlkj.system.entity.bo.SysLogBo;
 import com.sxpcwlkj.system.entity.vo.SysLogVo;
 import com.sxpcwlkj.system.entity.export.SysLogExport;
-import java.util.List;
+
 import java.util.Set;
 
 /**

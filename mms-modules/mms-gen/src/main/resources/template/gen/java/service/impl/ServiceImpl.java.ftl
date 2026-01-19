@@ -11,7 +11,7 @@ import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
+import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
 import ${package}.${moduleName}.entity.${ClassName};
 import ${package}.${moduleName}.entity.bo.${ClassName}Bo;
 import ${package}.${moduleName}.entity.vo.${ClassName}Vo;
@@ -72,18 +72,18 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
             String parentId = vo.getParentId();
             parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
         }
-        
+
         return buildTreeWithMap(parentChildMap, fid, level, currentLevel);
     }
-    
+
     private List<${ClassName}Vo> buildTreeWithMap(java.util.Map<String, List<${ClassName}Vo>> parentChildMap, String parentId, int maxLevel, int currentLevel) {
         List<${ClassName}Vo> result = new ArrayList<>();
         List<${ClassName}Vo> children = parentChildMap.get(parentId);
-        
+
         if (children == null || children.isEmpty()) {
             return result;
         }
-        
+
         for (${ClassName}Vo child : children) {
             // 检查层级限制
             if (maxLevel > currentLevel || maxLevel == 0) {
@@ -93,7 +93,7 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
                 result.add(child);
             }
         }
-        
+
         return result;
     }
     </#if>
@@ -159,13 +159,13 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         // 获取所有可能需要的节点，避免递归查询
         List<${ClassName}Vo> allNodes = baseMapper.selectVoList(new LambdaQueryWrapper<${ClassName}>()
                 .orderByAsc(${ClassName}::getSort));
-        
+
         // 构建ID到节点的映射
         java.util.Map<String, ${ClassName}Vo> idNodeMap = new java.util.HashMap<>();
         for (${ClassName}Vo node : allNodes) {
             idNodeMap.put(node.get${TableId}(), node);
         }
-        
+
         // 通过循环而不是递归获取上级节点
         String currentId = id;
         while (currentId != null && !"0".equals(currentId)) {

@@ -8,7 +8,7 @@ import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.entity.AesKeyEntity;
 import com.sxpcwlkj.framework.entity.SysSign;
-import com.sxpcwlkj.framework.sercice.SysSignService;
+import com.sxpcwlkj.framework.service.SysSignService;
 import com.sxpcwlkj.framework.utils.SignUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

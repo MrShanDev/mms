@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sxpcwlkj.store.mapper.StoreAttrKeyMapper">
+
+    <select id="selectListSpuId" resultType="com.sxpcwlkj.store.entity.StoreAttrKey">
+        select k.* from store_attr_key_spu kspu
+        left join store_attr_key k on kspu.attr_key_id=k.id
+        where kspu.spu_id=#{spuId}
+        order by kspu.created_by
+    </select>
+</mapper>

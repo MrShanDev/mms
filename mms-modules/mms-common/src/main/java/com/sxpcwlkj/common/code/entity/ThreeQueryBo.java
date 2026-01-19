@@ -16,4 +16,8 @@ public class ThreeQueryBo {
      * 显示级别，0：全部 1：一级 2：二级 3：三级
      */
     private Integer showLevel=0;
+    /**
+     * 父级ID
+     */
+    private String fatherId;
 }

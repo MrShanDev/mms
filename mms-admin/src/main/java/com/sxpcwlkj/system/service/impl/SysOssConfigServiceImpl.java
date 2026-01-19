@@ -13,7 +13,7 @@ import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
+import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
 import com.sxpcwlkj.oss.service.MyFileStorageService;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.system.entity.SysOssConfig;

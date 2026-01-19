@@ -2,7 +2,7 @@ package com.sxpcwlkj.wx.service;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.github.binarywang.wxpay.service.WxPayService;
-import com.sxpcwlkj.common.properties.WxPayProperties;
+import com.sxpcwlkj.wx.config.WxProperties;
 import me.chanjar.weixin.mp.api.WxMpService;
 
 /**
@@ -14,7 +14,7 @@ public interface WxService {
      *
      * @return WxProperties
      */
-    WxPayProperties getWxProperties();
+    WxProperties getWxProperties();
 
     /**
      * 获取微信公众号服务

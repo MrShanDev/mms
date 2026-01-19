@@ -5,7 +5,7 @@ import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.constant.Constants;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.framework.sercice.SysSignService;
+import com.sxpcwlkj.framework.service.SysSignService;
 import com.sxpcwlkj.log.annotation.MmsLog;
 import com.sxpcwlkj.log.enums.OperationType;
 import com.sxpcwlkj.redis.RedisUtil;

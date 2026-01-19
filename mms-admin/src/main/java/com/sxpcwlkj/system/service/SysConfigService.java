@@ -1,6 +1,6 @@
 package com.sxpcwlkj.system.service;
 
-import com.sxpcwlkj.framework.sercice.BaseService;
+import com.sxpcwlkj.framework.service.BaseService;
 import com.sxpcwlkj.system.entity.SysConfig;
 import com.sxpcwlkj.system.entity.bo.SysConfigBo;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;

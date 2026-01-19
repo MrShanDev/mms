@@ -8,6 +8,7 @@ import org.redisson.config.Config;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -457,7 +458,7 @@ public class RedisUtil {
         RMap<K, V> rMap = CLIENT.getMap(key);
         return rMap.getAll(hKeys);
     }
-    
+
     /**
      * Hash递增
      *
@@ -470,7 +471,7 @@ public class RedisUtil {
         RMap<String, Long> rMap = CLIENT.getMap(key);
         return rMap.addAndGet(hKey, delta);
     }
-    
+
     /**
      * Hash写入
      *
@@ -482,7 +483,7 @@ public class RedisUtil {
         RMap<String, T> rMap = CLIENT.getMap(key);
         rMap.put(hKey, value);
     }
-    
+
     /**
      * Hash获取
      *
@@ -494,7 +495,7 @@ public class RedisUtil {
         RMap<String, T> rMap = CLIENT.getMap(key);
         return rMap.get(hKey);
     }
-    
+
     /**
      * Hash删除
      *
@@ -506,7 +507,7 @@ public class RedisUtil {
         RMap<String, T> rMap = CLIENT.getMap(key);
         return rMap.remove(hKey);
     }
-    
+
     /**
      * 检查Hash中是否存在指定的key
      *
@@ -518,7 +519,7 @@ public class RedisUtil {
         RMap<String, String> rMap = CLIENT.getMap(key);
         return rMap.containsKey(hKey);
     }
-    
+
     /**
      * Set添加
      *
@@ -531,7 +532,7 @@ public class RedisUtil {
         boolean result = rSet.addAll(Arrays.asList(values));
         return result ? values.length : 0;
     }
-    
+
     /**
      * Set删除
      *
@@ -545,7 +546,7 @@ public class RedisUtil {
         boolean result = rSet.removeAll(valueSet);
         return result ? valueSet.size() : 0;
     }
-    
+
     /**
      * Set是否存在
      *
@@ -557,7 +558,7 @@ public class RedisUtil {
         RSet<Object> rSet = CLIENT.getSet(key);
         return rSet.contains(value);
     }
-    
+
     /**
      * Set获取
      *
@@ -568,7 +569,7 @@ public class RedisUtil {
         RSet<T> rSet = CLIENT.getSet(key);
         return rSet.readAll();
     }
-    
+
     /**
      * Set大小
      *
@@ -579,7 +580,7 @@ public class RedisUtil {
         RSet<Object> rSet = CLIENT.getSet(key);
         return rSet.size();
     }
-    
+
     /**
      * List添加
      *
@@ -590,7 +591,7 @@ public class RedisUtil {
         RList<Object> rList = CLIENT.getList(key);
         rList.addAll(java.util.Arrays.asList(values));
     }
-    
+
     /**
      * List范围修剪
      *
@@ -602,7 +603,7 @@ public class RedisUtil {
         RList<Object> rList = CLIENT.getList(key);
         rList.trim((int) start, (int) end);
     }
-    
+
     /**
      * List范围获取
      *
@@ -634,7 +635,7 @@ public class RedisUtil {
             return new ArrayList<>(rList.subList(actualStart, actualEnd));
         }
     }
-    
+
     /**
      * List大小
      *
@@ -645,7 +646,7 @@ public class RedisUtil {
         RList<Object> rList = CLIENT.getList(key);
         return rList.size();
     }
-    
+
     /**
      * 设置原子值
      *
@@ -719,6 +720,22 @@ public class RedisUtil {
         RKeys rKeys = CLIENT.getKeys();
         return rKeys.countExists(getNameMapper().map(key)) > 0;
     }
+    /**
+     * 锁前缀
+     */
+    private static final String LOCK_PREFIX = "lock:";
+    public static boolean tryLock(String lockKey, long expireTime, TimeUnit timeUnit) {
+        RBucket<String> bucket = CLIENT.getBucket(LOCK_PREFIX + lockKey);
+        // 使用 trySet 实现 SETNX 语义（如果 key 不存在则设置）
+        return bucket.trySet("locked", expireTime, timeUnit);
+    }
 
-
+    /**
+     * 释放锁
+     * @param lockKey 锁的名称
+     */
+    public static void unlock(String lockKey) {
+        RBucket<String> bucket = CLIENT.getBucket(LOCK_PREFIX + lockKey);
+        bucket.delete();
+    }
 }

@@ -6,7 +6,7 @@ import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.entity.AesKeyEntity;
 import com.sxpcwlkj.framework.entity.SysSign;
-import com.sxpcwlkj.framework.sercice.SysSignService;
+import com.sxpcwlkj.framework.service.SysSignService;
 import com.sxpcwlkj.framework.utils.SignUtil;
 import com.sxpcwlkj.gen.common.GenQueryBo;
 import com.sxpcwlkj.gen.common.service.impl.BaseServiceImpl;

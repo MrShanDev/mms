@@ -10,7 +10,7 @@ import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.framework.sercice.impl.BaseServiceImpl;
+import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
 import com.sxpcwlkj.system.entity.SysNotice;
 import com.sxpcwlkj.system.entity.bo.SysNoticeBo;
 import com.sxpcwlkj.system.entity.export.SysNoticeExport;
