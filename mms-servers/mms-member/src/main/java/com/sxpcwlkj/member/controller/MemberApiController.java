@@ -265,9 +265,14 @@ public class MemberApiController extends BaseController {
     @SaCheckLogin
     @Operation(summary = "会员设置邮箱", description = "会员设置邮箱")
     @PostMapping("/setEmail")
-    public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email) {
-        String code = RandomUtil.randomNumbers(6);
-        return emailService.sendRegisterCode(email, code);
+    public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email, @Validated @NotNull(message = "验证码不能为空") String code) {
+        String key = RedisUtil.CAPTCHA_CODE_KEY + "_bind_" + email;
+        String cacheCode = RedisUtil.getCacheObject(key);
+        if (cacheCode == null || !cacheCode.equals(code)) {
+            return R.fail("验证码错误或已过期");
+        }
+        // 验证成功，删除验证码
+        RedisUtil.deleteObject(key);
+        return apiMemberService.updateEmail(LoginObject.getLoginId(), email);
     }
-
 }

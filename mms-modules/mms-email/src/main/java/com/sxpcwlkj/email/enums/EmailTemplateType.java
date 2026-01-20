@@ -29,6 +29,13 @@ public enum EmailTemplateType {
         "register_code.html"),
     
     /**
+     * 绑定邮箱模板
+     */
+    BIND_EMAIL("bind_email", "绑定邮箱", 
+        "【{appName}】绑定邮箱验证",
+        "bind_email.html"),
+    
+    /**
      * 密码找回模板
      */
     PASSWORD_RESET("password_reset", "密码找回", 
@@ -84,19 +91,26 @@ public enum EmailTemplateType {
     private final String templateFileName;
     
     /**
-     * 模板目录
+     * 模板目录（相对于 resources/template/）
      */
-    private static final String TEMPLATE_PATH = "templates/email/";
-    
+    private static final String TEMPLATE_PATH = "email/";
+
+    /**
+     * 获取模板完整路径（相对于 resources/template/，用于 sms4j）
+     */
+    public String getTemplatePath() {
+        return TEMPLATE_PATH + templateFileName;
+    }
+
     /**
      * 获取HTML模板内容
-     * 从 resources/templates/email/ 目录读取
+     * 从 resources/template/email/ 目录读取
      * 
      * @return HTML模板内容
      */
     public String getHtmlTemplate() {
         try {
-            ClassPathResource resource = new ClassPathResource(TEMPLATE_PATH + templateFileName);
+            ClassPathResource resource = new ClassPathResource("template/" + TEMPLATE_PATH + templateFileName);
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
                 return reader.lines().collect(Collectors.joining("\n"));

@@ -1,5 +1,6 @@
 package com.sxpcwlkj.email.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.email.entity.EmailMessage;
 import com.sxpcwlkj.email.enums.EmailTemplateType;
@@ -12,6 +13,7 @@ import org.dromara.email.jakarta.core.factory.MailFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Year;
 import java.util.*;
 
@@ -74,8 +76,16 @@ public class MyEmailServiceImpl implements EmailService {
                 .title(emailMessage.getSubject());
 
             // 设置内容（HTML优先）
-            if (emailMessage.getIsHtml() != null && emailMessage.getIsHtml() && emailMessage.getHtmlContent() != null) {
-                messageBuilder.body(emailMessage.getHtmlContent());
+            if (StrUtil.isNotBlank(emailMessage.getTemplatePath())) {
+                messageBuilder.html(emailMessage.getTemplatePath());
+                if (emailMessage.getTemplateVariables() != null) {
+                    Map<String, String> stringVars = new HashMap<>();
+                    emailMessage.getTemplateVariables().forEach((k, v) -> 
+                        stringVars.put(k, v != null ? v.toString() : ""));
+                    messageBuilder.htmlValues(stringVars);
+                }
+            } else if (emailMessage.getIsHtml() != null && emailMessage.getIsHtml() && emailMessage.getHtmlContent() != null) {
+                messageBuilder.html(emailMessage.getHtmlContent());
             } else if (emailMessage.getContent() != null) {
                 messageBuilder.body(emailMessage.getContent());
             }
@@ -130,12 +140,19 @@ public class MyEmailServiceImpl implements EmailService {
             allVariables.put("supportEmail", supportEmail);
             allVariables.put("expireMinutes", expireMinutes);
 
-            // 替换模板变量
+            // 替换主题变量（主题仍需手动替换，Builder目前不支持主题变量）
             String subject = replaceVariables(templateType.getSubjectTemplate(), allVariables);
-            String htmlContent = replaceVariables(templateType.getHtmlTemplate(), allVariables);
 
-            // 发送邮件
-            return sendHtmlEmail(to, subject, htmlContent);
+            // 构建邮件消息，使用内置模板引擎处理 HTML 正文
+            EmailMessage emailMessage = EmailMessage.builder()
+                .to(Collections.singletonList(to))
+                .subject(subject)
+                .templatePath(templateType.getTemplatePath())
+                .templateVariables(allVariables)
+                .isHtml(true)
+                .build();
+
+            return sendEmail(emailMessage);
 
         } catch (Exception e) {
             log.error("❌ 模板邮件发送失败 - to: {}, template: {}", 
@@ -149,6 +166,18 @@ public class MyEmailServiceImpl implements EmailService {
     @Override
     public R<Object> sendRegisterCode(String email, String code) {
         return sendRegisterCode(email, code, defaultAppName);
+    }
+
+    @Override
+    public R<Object> sendBindEmailCode(String email, String code) {
+        return sendBindEmailCode(email, code, defaultAppName);
+    }
+
+    @Override
+    public R<Object> sendBindEmailCode(String email, String code, String appName) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("code", code);
+        return sendTemplateEmail(email, EmailTemplateType.BIND_EMAIL, variables, appName);
     }
 
     @Override

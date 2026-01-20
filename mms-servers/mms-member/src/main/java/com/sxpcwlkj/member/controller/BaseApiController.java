@@ -5,9 +5,11 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.email.service.EmailService;
 import com.sxpcwlkj.member.entity.StoreSmsBo;
 import com.sxpcwlkj.member.entity.StoreToolArea;
+import com.sxpcwlkj.member.entity.bo.SendEmailBo;
 import com.sxpcwlkj.member.entity.vo.StoreMemberVo;
 import com.sxpcwlkj.member.mapper.ApiToolAreaMapper;
 import com.sxpcwlkj.member.service.StoreMemberService;
@@ -24,6 +26,7 @@ import com.sxpcwlkj.sms.service.SmsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +38,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 基础接口
@@ -137,7 +137,12 @@ public class BaseApiController extends BaseController {
                 return R.fail("该手机号已注册！");
             }
         }
-        if (type == 2 || type == 3) {
+        if (type == 2) {
+            if (!Objects.equals(storeMemberVos.getStatus(), SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
+                throw new MmsException("会员状态不正常！");
+            }
+        }
+        if (type == 3) {
 
             if (storeMemberVos == null) {
                 return R.fail("该手机号账号不存在！");
@@ -286,23 +291,54 @@ public class BaseApiController extends BaseController {
     }
 
     /**
-     * 发送邮件
+     * 发送邮件验证码
+     * @param bo 邮箱验证码业务对象
+     * @return
      */
     @SaIgnore
-    @Operation(summary = "发送邮件", description = "发送邮件")
-    @PostMapping("/sendEmail")
-    public R<Void> sendEmail(@RequestParam String email) {
-        return R.success("邮件已发送，请查收！");
-    }
-
-    /**
-     * 发送邮箱
-     */
-    @SaCheckLogin
-    @Operation(summary = "会员设置邮箱", description = "会员设置邮箱")
-    @PostMapping("/setEmail")
-    public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email) {
+    @Operation(summary = "发送邮件验证码", description = "发送邮件验证码，1注册 2忘记密码 3登录 4绑定邮箱")
+    @PostMapping("/sendEmailCode")
+    public R<Object> sendEmailCode(@RequestBody @Validated SendEmailBo bo) {
         String code = RandomUtil.randomNumbers(6);
-        return emailService.sendRegisterCode(email, code);
+        String codeType="bin";
+        if (bo.getType() == 1) {
+            codeType = "register";
+        } else if (bo.getType() == 2) {
+            codeType = "forget";
+        } else if (bo.getType() == 3) {
+            codeType = "login";
+        } else if (bo.getType() == 4) {
+            codeType = "bind";
+        }
+        String key = RedisUtil.CAPTCHA_CODE_KEY + "_" + codeType + "_" + bo.getEmail();
+
+        // 校验发送频率
+        if (RedisUtil.getCacheObject(key) != null) {
+            return R.fail("验证码发送频繁，请稍后再试");
+        }
+
+        R<Object> sendResult;
+        switch (bo.getType()) {
+            case 1 -> sendResult = emailService.sendRegisterCode(bo.getEmail(), code);
+            case 2 -> sendResult = emailService.sendPasswordReset(bo.getEmail(), "用户", code);
+            case 3 -> {
+                Map<String, String> loginInfo = new HashMap<>();
+                loginInfo.put("loginTime", cn.hutool.core.date.DateUtil.now());
+                loginInfo.put("loginIp", "未知");
+                loginInfo.put("deviceInfo", "未知设备");
+                sendResult = emailService.sendLoginCode(bo.getEmail(), code, loginInfo);
+            }
+            case 4 -> sendResult = emailService.sendBindEmailCode(bo.getEmail(), code);
+            default -> {
+                return R.fail("不支持的业务类型");
+            }
+        }
+
+        if (sendResult.isSuccess()) {
+            RedisUtil.setCacheObject(key, code);
+            RedisUtil.expire(key, Duration.ofMinutes(10));
+            return R.success("验证码已发送");
+        }
+        return sendResult;
     }
 }

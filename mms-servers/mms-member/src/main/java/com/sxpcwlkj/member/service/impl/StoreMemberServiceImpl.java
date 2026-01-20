@@ -1,6 +1,7 @@
 package com.sxpcwlkj.member.service.impl;
 
 import cn.hutool.core.convert.Convert;
+import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -284,5 +285,31 @@ public class StoreMemberServiceImpl extends BaseServiceImpl<StoreMember, StoreMe
         }
         return icrdInfo;
 
+    }
+
+    @Override
+    public R<Object> updateEmail(String loginId, String email) {
+        StoreMember storeMember = baseMapper.selectOne(new LambdaQueryWrapper<StoreMember>().eq(StoreMember::getId, loginId));
+        if (storeMember == null) {
+            return R.fail("用户不存在");
+        }
+        storeMember.setAccount(email);
+        if(baseMapper.updateById(storeMember)>0){
+            return R.success("修改成功");
+        }
+        return R.fail("修改失败");
+    }
+
+    @Override
+    public R<Object> setPassword(String loginId, String password) {
+        StoreMember storeMember = baseMapper.selectOne(new LambdaQueryWrapper<StoreMember>().eq(StoreMember::getId, loginId));
+        if (storeMember == null) {
+            return R.fail("用户不存在");
+        }
+        storeMember.setPassword(SecureUtil.md5(password));
+        if(baseMapper.updateById(storeMember)>0){
+            return R.success("设置成功");
+        }
+        return null;
     }
 }

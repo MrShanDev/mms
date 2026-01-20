@@ -53,6 +53,11 @@ public class EmailMessage implements Serializable {
     private String htmlContent;
     
     /**
+     * 模板路径（若使用模板引擎则设置此项）
+     */
+    private String templatePath;
+    
+    /**
      * 模板变量
      */
     private Map<String, Object> templateVariables;

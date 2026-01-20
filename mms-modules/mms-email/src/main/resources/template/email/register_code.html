@@ -17,23 +17,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">{appName}</div>
+            <div class="logo">#{appName}</div>
         </div>
         <div class="content">
             <p>尊敬的用户，您好！</p>
-            <p>您正在进行账号注册操作，您的验证码为：</p>
+            <p>感谢您注册 #{appName}。您正在进行会员注册操作，您的验证码为：</p>
             <div class="code-box">
-                <div class="code">{code}</div>
+                <div class="code">#{code}</div>
             </div>
             <p class="tips">
-                • 验证码有效期为 <strong>{expireMinutes} 分钟</strong><br>
+                • 验证码有效期为 <strong>#{expireMinutes} 分钟</strong><br>
                 • 如非本人操作，请忽略此邮件<br>
-                • 请勿将验证码泄露给他人
+                • 验证码泄露给他人可能导致账号被盗，请务必妥善保管
             </p>
         </div>
         <div class="footer">
             此邮件由系统自动发送，请勿直接回复<br>
-            © {year} {appName}. All rights reserved.
+            © #{year} #{appName}. All rights reserved.
         </div>
     </div>
 </body>

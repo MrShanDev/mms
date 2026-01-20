@@ -65,4 +65,20 @@ public interface StoreMemberService extends BaseService<StoreMember, StoreMember
      * @return
      */
     R<Map<String, String>> authentication(String a, String b);
+
+    /**
+     * 更新邮箱
+     * @param loginId 登录账号
+     * @param email 邮箱
+     * @return true：成功 false ：失败
+     */
+    R<Object> updateEmail(String loginId, String email);
+
+    /**
+     * 设置密码
+      * @param loginId 登录账号
+     * @param password 密码
+     * @return true：成功 false ：失败
+     */
+    R<Object> setPassword(String loginId, String password);
 }

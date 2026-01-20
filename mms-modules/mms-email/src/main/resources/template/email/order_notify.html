@@ -16,34 +16,34 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">{appName}</div>
+            <div class="logo">#{appName}</div>
         </div>
         <div class="content">
-            <p>尊敬的 <strong>{username}</strong>，您好！</p>
-            <p>您的订单 <strong>{orderNo}</strong> 状态已更新：</p>
+            <p>尊敬的 <strong>#{username}</strong>，您好！</p>
+            <p>您的订单 <strong>#{orderNo}</strong> 状态已更新：</p>
             <div class="order-box">
                 <div class="order-item">
                     <span>订单编号：</span>
-                    <span><strong>{orderNo}</strong></span>
+                    <span><strong>#{orderNo}</strong></span>
                 </div>
                 <div class="order-item">
                     <span>订单状态：</span>
-                    <span><strong>{orderStatus}</strong></span>
+                    <span><strong>#{orderStatus}</strong></span>
                 </div>
                 <div class="order-item">
                     <span>订单金额：</span>
-                    <span><strong>¥{orderAmount}</strong></span>
+                    <span><strong>¥#{orderAmount}</strong></span>
                 </div>
                 <div class="order-item">
                     <span>更新时间：</span>
-                    <span>{updateTime}</span>
+                    <span>#{updateTime}</span>
                 </div>
             </div>
-            <p>{orderMessage}</p>
+            <p>#{orderMessage}</p>
         </div>
         <div class="footer">
             此邮件由系统自动发送，请勿直接回复<br>
-            © {year} {appName}. All rights reserved.
+            © #{year} #{appName}. All rights reserved.
         </div>
     </div>
 </body>

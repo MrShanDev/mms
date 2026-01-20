@@ -16,10 +16,7 @@ import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.*;
 import com.sxpcwlkj.framework.utils.AddressUtil;
 import com.sxpcwlkj.member.entity.StoreMember;
-import com.sxpcwlkj.member.entity.bo.StoreMemberBo;
-import com.sxpcwlkj.member.entity.bo.StoreMemberLoginBo;
-import com.sxpcwlkj.member.entity.bo.StoreMemberRegisterBo;
-import com.sxpcwlkj.member.entity.bo.WxCodeLogoBo;
+import com.sxpcwlkj.member.entity.bo.*;
 import com.sxpcwlkj.member.entity.vo.StoreMemberVo;
 
 import com.sxpcwlkj.member.enums.DefStaticEnum;
@@ -84,12 +81,11 @@ public class LoginApiController extends BaseController {
 
     /**
      * token自动登录
-     * token传递在header
      *
      * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "token自动登录", description = "token自动登录")
+    @Operation(summary = "token自动登录", description = "在接口带Token传递在header下完成自动登录")
     @GetMapping("/tokenLogin")
     public R<StoreMemberVo> tokenLogin(HttpServletRequest request) {
         if (LoginObject.isLogin()) {
@@ -101,12 +97,11 @@ public class LoginApiController extends BaseController {
 
     /**
      * 微信根据code，获取code进行静默登录
-     * token传递在header
      * @param code 微信获取的code
      * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "微信静默登录", description = "微信静默登录")
+    @Operation(summary = "微信静默登录", description = "微信生态，获取用户openid进行登录")
     @GetMapping("/codeGetOpenIdLogin")
     public R<StoreMemberVo> codeGetOpenIdLogin(@RequestParam("code")String code, HttpServletRequest request) {
         // 调用微信 API 获取用户的 openid 和 session_key
@@ -120,6 +115,9 @@ public class LoginApiController extends BaseController {
             throw new MmsException("获取微信登录信息为空！");
         }
         StoreMemberVo vo = apiMemberService.selectVoByOpenId(session.getOpenid());
+        if (vo==null) {
+            return R.fail("该微信没有绑定账号！");
+        }
         return getLoginMemberInfo(request, vo);
     }
 
@@ -132,7 +130,7 @@ public class LoginApiController extends BaseController {
      * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "微信注册/登录", description = "微信注册/登录")
+    @Operation(summary = "微信注册/登录", description = "微信小程序手机号授权,依据手机号进行注册或登录")
     @GetMapping("/codeGetPhoneRegisterOrLogin")
     public R<StoreMemberVo> codeGetPhoneRegisterOrLogin(@RequestParam("code") String code, @RequestParam("encryptedData") String encryptedData, @RequestParam("iv") String iv, HttpServletRequest request) throws WxErrorException {
             // 调用微信 API 获取用户的 openid 和 session_key
@@ -147,11 +145,11 @@ public class LoginApiController extends BaseController {
             StoreMemberVo vo = apiMemberService.selectVoByPhone(phoneNumber);
             if (vo==null) {
                 StoreMemberBo storeMemberBo = new StoreMemberBo();
-                storeMemberBo.setAccount(phoneNumber);
+                storeMemberBo.setAccount(null);
                 storeMemberBo.setPhone(phoneNumber);
                 storeMemberBo.setNickname("");
                 storeMemberBo.setHeadPortrait(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
-                storeMemberBo.setPassword(SecureUtil.md5(phoneNumber));
+                storeMemberBo.setPassword(SecureUtil.md5(RandomUtil.getRandomNumber(12)));
                 storeMemberBo.setSex(0);
                 storeMemberBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 storeMemberBo.setReputationScore(100);
@@ -169,15 +167,15 @@ public class LoginApiController extends BaseController {
 
 
     /**
-     * 短信验证会员注册
+     * 手机短信验证会员注册、登录
      *
      * @param bo bo
      * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "短信验证会员注册", description = "短信验证码注册")
-    @PostMapping("/accountRegister")
-    public R<StoreMemberVo> accountRegister(@RequestBody StoreMemberRegisterBo bo, HttpServletRequest request) {
+    @Operation(summary = "短信验证会员注册、登录", description = "没账号将自动注册完成登录（发送短信，type=1或2）")
+    @PostMapping("/login")
+    public R<StoreMemberVo> accountRegister(@RequestBody StoreMemberLoginPhoneBo bo, HttpServletRequest request) {
 
         if (StringUtil.isEmpty(bo.getPhone())) {
             return R.fail("请输入手机号!");
@@ -185,34 +183,37 @@ public class LoginApiController extends BaseController {
         if (StringUtil.isEmpty(bo.getSmsCode())) {
             return R.fail("请输入短信验证码!");
         }
-        if (StringUtil.isEmpty(bo.getPassword())) {
-           bo.setPassword(RandomUtil.getRandomNumber(12));
-        }else{
-            if (bo.getPassword().length() < 6 || bo.getPassword().length() > 16) {
-                return R.fail("密码长度应该在6~16位之间!");
-            }
-        }
-
-        StoreMemberVo storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
-        if (StringUtil.isNotEmpty(storeMemberVo)) {
-            return R.fail("该手机号已注册！");
-        }
-
+        // 验证短信验证码类型，注册或登录
         String key = RedisUtil.CAPTCHA_CODE_KEY + "_register_" + bo.getPhone();
         Object object = RedisUtil.getCacheObject(key);
         if (object == null) {
-            return R.fail("短信验证码失效！");
+            key = RedisUtil.CAPTCHA_CODE_KEY + "_login_" + bo.getPhone();
+            object = RedisUtil.getCacheObject(key);
+            if (object == null) {
+                return R.fail("短信验证码失效！");
+            } else {
+                if (!bo.getSmsCode().equals(object.toString())) {
+                    return R.fail("短信验证码有误！");
+                }
+            }
         } else {
             if (!bo.getSmsCode().equals(object.toString())) {
                 return R.fail("短信验证码有误！");
             }
         }
+
+        StoreMemberVo storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
+        if (StringUtil.isNotEmpty(storeMemberVo)) {
+            log.info("会员已存在，直接登录");
+            return getLoginMemberInfo(request, storeMemberVo);
+        }
+
         StoreMemberBo storeMemberBo = new StoreMemberBo();
-        storeMemberBo.setAccount(bo.getPhone());
+        storeMemberBo.setAccount(null);
         storeMemberBo.setPhone(bo.getPhone());
         storeMemberBo.setNickname("");
         storeMemberBo.setHeadPortrait(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
-        storeMemberBo.setPassword(SecureUtil.md5(bo.getPassword()));
+        storeMemberBo.setPassword(SecureUtil.md5(RandomUtil.getRandomNumber(12)));
         storeMemberBo.setSex(3);
         storeMemberBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
         storeMemberBo.setReputationScore(100);
@@ -227,32 +228,22 @@ public class LoginApiController extends BaseController {
     }
 
     /**
-     * 账号密码登录
-     *
-     * @param bo bo
+     * 邮箱账号,密码登录
+     * @param bo  bo
+     * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "账号密码登录", description = "账号密码登录")
+    @Operation(summary = "邮箱账号,密码登录", description = "前提是账户进行了邮箱绑定和密码设置")
     @PostMapping("/accountLogin")
-    public R<StoreMemberVo> accountLogin(@RequestBody @Validated StoreMemberLoginBo bo, HttpServletRequest request) {
+    public R<StoreMemberVo> accountLogin(@RequestBody @Validated StoreMemberEmailLoginBo bo, HttpServletRequest request) {
         StoreMemberVo storeMemberVo=null;
-        if(bo.getType()==1){
-            if (StringUtil.isEmpty(bo.getAccount())) {
-                return R.fail("请输入账号!");
-            }
-            if (StringUtil.isEmpty(bo.getPassword())) {
-                return R.fail("请输入密码!");
-            }
-            storeMemberVo = apiMemberService.selectVoByAccount(bo.getAccount());
-        }else {
-            if (StringUtil.isEmpty(bo.getPhone())) {
-                return R.fail("请输入手机号!");
-            }
-            if (StringUtil.isEmpty(bo.getSmsCode())) {
-                return R.fail("请输入短信验证码!");
-            }
-            storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
+        if (StringUtil.isEmpty(bo.getEmail())) {
+            return R.fail("请输入账号!");
         }
+        if (StringUtil.isEmpty(bo.getPassword())) {
+            return R.fail("请输入密码!");
+        }
+        storeMemberVo = apiMemberService.selectVoByAccount(bo.getEmail());
         if (storeMemberVo == null) {
             return R.fail("账号不存在！");
         }
@@ -263,46 +254,14 @@ public class LoginApiController extends BaseController {
     }
 
     /**
-     * 手机号登录
-     *
-     * @param bo bo
-     */
-    @SaIgnore
-    @Operation(summary = "手机号登录", description = "手机号登录")
-    @PostMapping("/login")
-    public R<StoreMemberVo> login(@RequestBody StoreMemberLoginBo bo, HttpServletRequest request) {
-
-        if (StringUtil.isEmpty(bo.getPhone())) {
-            return R.fail("请输入手机号!");
-        }
-        if (StringUtil.isEmpty(bo.getSmsCode())) {
-            return R.fail("请输入短信验证码!");
-        }
-        StoreMemberVo storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
-        if (storeMemberVo==null) {
-            return R.fail("账号不存在！");
-        }
-        String key = RedisUtil.CAPTCHA_CODE_KEY + "_login_" + bo.getPhone();
-        Object object = RedisUtil.getCacheObject(key);
-        if (object == null) {
-            return R.fail("短信验证码失效！");
-        } else {
-            if (!bo.getSmsCode().equals(object.toString())) {
-                return R.fail("短信验证码有误！");
-            }
-        }
-        return getLoginMemberInfo(request, storeMemberVo);
-    }
-
-    /**
      * 手机号验证找回密码
      *
      * @param bo bo
      */
     @SaIgnore
-    @Operation(summary = "手机号验证找回密码", description = "找回密码")
+    @Operation(summary = "手机号验证设置密码", description = "依据手机号验证设置密码（支持不登录状态找回）")
     @PostMapping("/findPassword")
-    public R<StoreMemberVo> findPassword(@RequestBody StoreMemberLoginBo bo, HttpServletRequest request) {
+    public R<StoreMemberVo> findPassword(@RequestBody StoreMemberSetPasswordBo bo, HttpServletRequest request) {
 
         if (StringUtil.isEmpty(bo.getPhone())) {
             return R.fail("请输入手机号!");
@@ -334,25 +293,13 @@ public class LoginApiController extends BaseController {
 
     }
 
-    /**
-     * 退出登录
-     *
-     */
-    @SaIgnore
-    @Operation(summary = "退出登录", description = "退出登录")
-    @PostMapping("/logout")
-    public R<Void> logout() {
-        LoginObject.logout();
-        return R.success("退出成功");
-    }
-
-
 
     /**
-     * 登录二维码
+     * 获取服务号登录二维码
      * @return 二维码
      */
     @SaIgnore
+    @Operation(summary = "获取服务号登录二维码", description = "获取服务号登录二维码，带参数，mms-wx模块接收到参数后，进行登录操作")
     @PostMapping("/oauth-authorize")
     public R<Map<String,String>> oauthAuthorize(){
         Map<String,String> data= new HashMap<>();
@@ -380,6 +327,7 @@ public class LoginApiController extends BaseController {
      * @return 登录状态
      */
     @SaIgnore
+    @Operation(summary = "登录二维码轮询", description = "登录二维码轮询，进行注册并登录")
     @PostMapping("/oauth-polling")
     public R<StoreMemberVo> oauthPolling(@RequestBody WxCodeLogoBo bo, HttpServletRequest request, HttpServletResponse response){
         String uuid = bo.getUuid();
@@ -429,6 +377,22 @@ public class LoginApiController extends BaseController {
         }
         return fail("登录失败,请尝试其他方式！");
     }
+
+
+    /**
+     * 退出登录
+     *
+     */
+    @SaIgnore
+    @Operation(summary = "退出登录", description = "退出当前登录")
+    @PostMapping("/logout")
+    public R<Void> logout() {
+        LoginObject.logout();
+        return R.success("退出成功");
+    }
+
+
+
 
 
 }

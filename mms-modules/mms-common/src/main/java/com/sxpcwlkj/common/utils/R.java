@@ -41,6 +41,15 @@ public class R<T> {
     private Boolean isSecurity=false;
 
     /**
+     * 判断是否成功
+     *
+     * @return boolean
+     */
+    public boolean isSuccess() {
+        return this.code != null && this.code == 200;
+    }
+
+    /**
      * 全参数方法
      *
      * @param code    状态码
@@ -307,5 +316,6 @@ public class R<T> {
         ajaxResult.setIsSecurity(false);
         return ajaxResult;
     }
+
 }
 

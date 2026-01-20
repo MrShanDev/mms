@@ -15,22 +15,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">{appName}</div>
+            <div class="logo">#{appName}</div>
         </div>
         <div class="content">
-            <p>尊敬的 <strong>{username}</strong>，您好！</p>
+            <p>尊敬的 <strong>#{username}</strong>，您好！</p>
             <p>您的账户发生了以下变动：</p>
             <div class="change-box">
-                <strong>变动类型：</strong>{changeType}<br>
-                <strong>变动时间：</strong>{changeTime}<br>
-                <strong>变动内容：</strong>{changeContent}
+                <strong>变动类型：</strong>#{changeType}<br>
+                <strong>变动时间：</strong>#{changeTime}<br>
+                <strong>变动内容：</strong>#{changeContent}
             </div>
             <p>如非本人操作，请立即联系客服处理。</p>
         </div>
         <div class="footer">
             此邮件由系统自动发送，请勿直接回复<br>
-            客服邮箱：{supportEmail}<br>
-            © {year} {appName}. All rights reserved.
+            客服邮箱：#{supportEmail}<br>
+            © #{year} #{appName}. All rights reserved.
         </div>
     </div>
 </body>

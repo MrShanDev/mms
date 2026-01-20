@@ -79,6 +79,25 @@ public interface EmailService {
     R<Object> sendRegisterCode(String email, String code);
 
     /**
+     * 发送绑定邮箱验证码邮件
+     * 
+     * @param email 收件人邮箱
+     * @param code 验证码
+     * @return 发送结果
+     */
+    R<Object> sendBindEmailCode(String email, String code);
+
+    /**
+     * 发送绑定邮箱验证码邮件（自定义应用名称）
+     * 
+     * @param email 收件人邮箱
+     * @param code 验证码
+     * @param appName 应用名称
+     * @return 发送结果
+     */
+    R<Object> sendBindEmailCode(String email, String code, String appName);
+
+    /**
      * 发送注册验证码邮件（自定义应用名称）
      * 
      * @param email 收件人邮箱
