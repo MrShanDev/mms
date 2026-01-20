@@ -38,17 +38,17 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAIr4bhkGGacV5zGwVnMAWakSSCPmXSzA1Em8BF51mI1HM4BW4TMRDYRHtehFD+h7ANlCnmI6T8tZmai36UcNBSECAwEAAQ==
+      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALVNuyb9ZEkdhW2LaaKMLCO6Y0x2bXtw+jBOkctSpTGwCmZDTej69fOd/+QccDBE6fMGXtx4qvEZWKb1uNYShG8CAwEAAQ==
       # 账号密码
       datasource:
         # 主库数据源
         master:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://mmsadmin.cn:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          url: jdbc:mysql://1.12.220.50:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: mms
           # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ENC(SV7sBbRzULy65Z5fvGhhVVemMPaWRBlu3Dq6mqr+GdKO/oDMp/ZksT4i4Z4vymZ2yAmkyWSo7n/hn8FgSm/xEQ==)
+          password: ENC(XgsSsz/DUB6P+yexQSJRAc/eAA57i1lUsxJowpk20DQ9Ft3xoVO4TU16X6nQJSdnEkeHpLXg3ZiGWH9exJ88BQ==)
 #          # 从库数据源
 #        slave:
 #          lazy: true

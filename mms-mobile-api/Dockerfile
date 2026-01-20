@@ -4,27 +4,27 @@ FROM eclipse-temurin:21-jre-alpine
 MAINTAINER SXPCWLKJ
 
 # 创建必要的目录结构
-RUN mkdir -p /sxpcwlkj/mms-admin/logs \
-    && mkdir -p /sxpcwlkj/mms-admin/files \
-    && mkdir -p /sxpcwlkj/mms-admin/temp \
-    && mkdir -p /sxpcwlkj/mms-admin/skywalking/agent
+RUN mkdir -p /sxpcwlkj/mms-mall-pc-api/logs \
+    && mkdir -p /sxpcwlkj/mms-mall-pc-api/files \
+    && mkdir -p /sxpcwlkj/mms-mall-pc-api/temp \
+    && mkdir -p /sxpcwlkj/mms-mall-pc-api/skywalking/agent
 
-WORKDIR /sxpcwlkj/mms-admin
+WORKDIR /sxpcwlkj/mms-mall-pc-api
 
 # 设置环境变量
-ENV SERVER_PORT=8080 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
+ENV SERVER_PORT=8060 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
 
 EXPOSE ${SERVER_PORT}
 
 # 添加应用 JAR 文件
-ADD ./target/mms-admin.jar ./app.jar
+ADD ./target/mms-mall-pc-api.jar ./app.jar
 
 # 启动命令，使用 JDK 21 的最佳实践 JVM 参数
 ENTRYPOINT exec java -Djava.security.egd=file:/dev/./urandom \
            -Dserver.port=${SERVER_PORT} \
            # SkyWalking APM 监控配置（可选） \
-           # -Dskywalking.agent.service_name=sxpcwlkj-mms \
-           # -javaagent:/sxpcwlkj/mms/skywalking/agent/skywalking-agent.jar \
+           # -Dskywalking.agent.service_name=website-mms \
+           # -javaagent:/website/mms/skywalking/agent/skywalking-agent.jar \
            -jar app.jar \
            -XX:+HeapDumpOnOutOfMemoryError \
            -Xlog:gc*:stdout:time,tags \

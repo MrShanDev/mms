@@ -1,7 +1,3 @@
-# 演示模式配置
-demo:
-  mode:
-    enabled: false # 默认开启演示模式
 
 --- # powerjob 配置
 powerjob:
@@ -31,37 +27,34 @@ spring:
         username: admin               #账号
         password: 123456              #密码
 
-#配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
+--- #配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
 --- # 数据源配置
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     dynamic:
       # 性能分析插件(有性能损耗 不建议生产环境使用)
-      p6spy: false
+      p6spy: true
       # 设置默认的数据源或者数据源组,默认值即为 master
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALVNuyb9ZEkdhW2LaaKMLCO6Y0x2bXtw+jBOkctSpTGwCmZDTej69fOd/+QccDBE6fMGXtx4qvEZWKb1uNYShG8CAwEAAQ==
-      # 账号密码
       datasource:
         # 主库数据源
         master:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: mms
-          # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ENC(XgsSsz/DUB6P+yexQSJRAc/eAA57i1lUsxJowpk20DQ9Ft3xoVO4TU16X6nQJSdnEkeHpLXg3ZiGWH9exJ88BQ==)
+          username: root
+          password: 123456
         # 从库数据源
-#        slave:
-#          lazy: true
-#          type: ${spring.datasource.type}
-#          driverClassName: com.mysql.cj.jdbc.Driver
-#          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-#          username: mms
-#          password: ENC(SV7sBbRzULy65Z5fvGhhVVemMPaWRBlu3Dq6mqr+GdKO/oDMp/ZksT4i4Z4vymZ2yAmkyWSo7n/hn8FgSm/xEQ==)
+        slave:
+          lazy: true
+          type: ${spring.datasource.type}
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          username: root
+          password: 123456
       #        oracle:
       #          type: ${spring.datasource.type}
       #          driverClassName: oracle.jdbc.OracleDriver
@@ -104,9 +97,9 @@ spring:
 spring:
   data:
     redis:
-      host: localhost
+      host: 127.0.0.1
       port: 6379
-      database: 2
+      database: 0
       password: 123456
       timeout: 100s
       ssl:
@@ -135,30 +128,5 @@ redisson:
     # 发布和订阅连接池大小
     subscriptionConnectionPoolSize: 50
 
---- # Actuator 监控端点的配置项
-management:
-  endpoints:
-    enabled-by-default: true #暴露所有端点信息
-    web:
-      exposure:
-        include: '*' #以web方式暴露
-  endpoint:
-    health:
-      show-details: ALWAYS
-    logfile:
-      external-file: ./logs/sys-console.log
 
---- # Spring Boot Admin
-spring:
-  boot:
-    admin:
-      client:
-        url: http://localhost:9001    # Spring Boot Admin 监控服务器端地址
-
---- # 日志配置
-logging:
-  level:
-    com.sxpcwlkj: @logging.level@
-    org.springframework: warn
-  config: classpath:logback.xml
 

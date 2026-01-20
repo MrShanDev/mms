@@ -96,20 +96,53 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public Executor virtualThreadExecutor() {
         try {
             // 尝试使用JDK 19+的虚拟线程
-            Class<?> threadClass = Thread.class;
-            java.lang.reflect.Method ofVirtualMethod = threadClass.getMethod("ofVirtual");
-            Object virtualThreadBuilder = ofVirtualMethod.invoke(null);
-            java.util.concurrent.ThreadFactory virtualThreadFactory = 
-                (java.util.concurrent.ThreadFactory) virtualThreadBuilder.getClass()
-                    .getMethod("factory").invoke(virtualThreadBuilder);
-            
-            log.info("使用JDK 21虚拟线程执行器，支持万人级并发");
-            return Executors.newThreadPerTaskExecutor(virtualThreadFactory);
+            // 通过检查Java版本和方法可用性来安全地创建虚拟线程执行器
+            if (isVirtualThreadsSupported()) {
+                Thread.Builder.OfVirtual builder = Thread.ofVirtual();
+                java.util.concurrent.ThreadFactory virtualThreadFactory = builder.factory();
+                
+                log.info("使用JDK 21虚拟线程执行器，支持万人级并发");
+                return Executors.newThreadPerTaskExecutor(virtualThreadFactory);
+            }
         } catch (Exception e) {
             // 如果虚拟线程不可用，使用传统的线程池
-            log.warn("虚拟线程不可用，使用传统线程池: {}", e.getMessage());
-            return Executors.newCachedThreadPool(new CustomizableThreadFactory("websocket-thread-"));
+            log.debug("虚拟线程不可用，使用传统线程池: {}", e.getMessage());
         }
+        
+        // 回退到传统线程池
+        log.info("使用传统线程池执行器");
+        return Executors.newCachedThreadPool(new CustomizableThreadFactory("websocket-thread-"));
+    }
+    
+    /**
+     * 检查是否支持虚拟线程
+     * 通过检查Java版本和Thread::ofVirtual方法是否存在
+     */
+    private boolean isVirtualThreadsSupported() {
+        try {
+            // 检查Java版本（Java 19及以上）
+            String version = System.getProperty("java.version");
+            if (version != null) {
+                // 提取主版本号
+                if (version.contains(".") && version.startsWith("1")) {
+                    // 格式为 1.x.x -> 提取第二部分
+                    version = version.split("\\.")[1];
+                } else {
+                    // 格式为 xx.x.x -> 提取第一部分
+                    version = version.split("\\.")[0];
+                }
+                
+                int majorVersion = Integer.parseInt(version);
+                if (majorVersion >= 19) {  // 虚拟线程在Java 19中成为标准功能
+                    // 检查Thread::ofVirtual方法是否存在
+                    Thread.class.getDeclaredMethod("ofVirtual");
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            log.debug("检查虚拟线程支持时出错: {}", e.getMessage());
+        }
+        return false;
     }
 
     /**
