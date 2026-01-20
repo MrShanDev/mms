@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @TableName("sys_config")
 @EqualsAndHashCode(callSuper = true)
-public class ApiSysConfig extends BaseEntity {
+public class StoreSysConfig extends BaseEntity {
 	/**
 	* 主键ID
 	*/

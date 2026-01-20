@@ -8,9 +8,9 @@ import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
 import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
-import com.sxpcwlkj.member.entity.ApiSysConfig;
-import com.sxpcwlkj.member.entity.ApiSysConfigVo;
-import com.sxpcwlkj.member.entity.bo.ApiSysConfigBo;
+import com.sxpcwlkj.member.entity.StoreSysConfig;
+import com.sxpcwlkj.member.entity.StoreSysConfigVo;
+import com.sxpcwlkj.member.entity.bo.StoreSysConfigBo;
 import com.sxpcwlkj.member.mapper.ApiSysConfigMapper;
 import com.sxpcwlkj.member.service.ApiSysConfigService;
 import com.sxpcwlkj.redis.RedisUtil;
@@ -32,51 +32,51 @@ import java.util.List;
 @Transactional
 @Service("store_sys_config")
 @RequiredArgsConstructor
-public class ApiSysConfigServiceImpl extends BaseServiceImpl<ApiSysConfig, ApiSysConfigVo, ApiSysConfigBo> implements ApiSysConfigService {
+public class ApiSysConfigServiceImpl extends BaseServiceImpl<StoreSysConfig, StoreSysConfigVo, StoreSysConfigBo> implements ApiSysConfigService {
 
    private final ApiSysConfigMapper baseMapper;
 
     @Override
-    public BaseMapperPlus<ApiSysConfig, ApiSysConfigVo> getBaseMapper() {
+    public BaseMapperPlus<StoreSysConfig, StoreSysConfigVo> getBaseMapper() {
         return baseMapper;
     }
 
 
     @Override
-    public ApiSysConfigVo selectVoById(Serializable id) {
+    public StoreSysConfigVo selectVoById(Serializable id) {
         return this.getBaseMapper().selectVoById(id);
 
     }
     @Override
-    public TableDataInfo<ApiSysConfigVo> selectListVoPage(ApiSysConfigBo bo, PageQuery pageQuery) {
-        LambdaQueryWrapper<ApiSysConfig> lqw = buildQueryWrapper(bo);
-        Page<ApiSysConfigVo> page = baseMapper.selectVoPage(pageQuery.build(),lqw);
+    public TableDataInfo<StoreSysConfigVo> selectListVoPage(StoreSysConfigBo bo, PageQuery pageQuery) {
+        LambdaQueryWrapper<StoreSysConfig> lqw = buildQueryWrapper(bo);
+        Page<StoreSysConfigVo> page = baseMapper.selectVoPage(pageQuery.build(),lqw);
         return TableDataInfo.build(page);
     }
 
-    private LambdaQueryWrapper<ApiSysConfig> buildQueryWrapper(ApiSysConfigBo query){
+    private LambdaQueryWrapper<StoreSysConfig> buildQueryWrapper(StoreSysConfigBo query){
         if(query==null){
-            query=new ApiSysConfigBo();
+            query=new StoreSysConfigBo();
         }
-        LambdaQueryWrapper<ApiSysConfig> wrapper = Wrappers.lambdaQuery();
+        LambdaQueryWrapper<StoreSysConfig> wrapper = Wrappers.lambdaQuery();
         return wrapper;
     }
 
 
     @Override
     public void initStoreSysConfig() {
-       ApiSysConfigVo idVo =  baseMapper.selectVoOne(new LambdaQueryWrapper<ApiSysConfig>()
-            .eq(ApiSysConfig::getConfigKey,"kdniao:id")
-            .eq(ApiSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-            .eq(ApiSysConfig::getConfigType,2)
+       StoreSysConfigVo idVo =  baseMapper.selectVoOne(new LambdaQueryWrapper<StoreSysConfig>()
+            .eq(StoreSysConfig::getConfigKey,"kdniao:id")
+            .eq(StoreSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .eq(StoreSysConfig::getConfigType,2)
             .last("LIMIT 1"));
        if(idVo!=null) {
            RedisUtil.setCacheObject("kdniao:id",idVo.getConfigValue());
        }
-        ApiSysConfigVo keyVo =  baseMapper.selectVoOne(new LambdaQueryWrapper<ApiSysConfig>()
-            .eq(ApiSysConfig::getConfigKey,"kdniao:key")
-            .eq(ApiSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-            .eq(ApiSysConfig::getConfigType,2)
+        StoreSysConfigVo keyVo =  baseMapper.selectVoOne(new LambdaQueryWrapper<StoreSysConfig>()
+            .eq(StoreSysConfig::getConfigKey,"kdniao:key")
+            .eq(StoreSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .eq(StoreSysConfig::getConfigType,2)
             .last("LIMIT 1"));
        if (keyVo!=null){
            RedisUtil.setCacheObject("kdniao:key",keyVo.getConfigValue());
@@ -84,23 +84,23 @@ public class ApiSysConfigServiceImpl extends BaseServiceImpl<ApiSysConfig, ApiSy
     }
 
     @Override
-    public List<ApiSysConfigVo> selectWebsiteConfigList() {
-        return baseMapper.selectVoList(new LambdaQueryWrapper<ApiSysConfig>()
-            .likeRight(ApiSysConfig::getConfigKey,"website_")
-            .eq(ApiSysConfig::getConfigType,2)
-            .eq(ApiSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-            .orderByAsc(ApiSysConfig::getSort)
+    public List<StoreSysConfigVo> selectWebsiteConfigList() {
+        return baseMapper.selectVoList(new LambdaQueryWrapper<StoreSysConfig>()
+            .likeRight(StoreSysConfig::getConfigKey,"website_")
+            .eq(StoreSysConfig::getConfigType,2)
+            .eq(StoreSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .orderByAsc(StoreSysConfig::getSort)
         );
     }
 
     @Override
-    public ApiSysConfigVo selectVoByKey(String key) {
+    public StoreSysConfigVo selectVoByKey(String key) {
         //前缀是website_
         if(key.startsWith("website_")){
-            return baseMapper.selectVoOne(new LambdaQueryWrapper<ApiSysConfig>()
-                .eq(ApiSysConfig::getConfigKey,key)
-                .eq(ApiSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-                .eq(ApiSysConfig::getConfigType,2)
+            return baseMapper.selectVoOne(new LambdaQueryWrapper<StoreSysConfig>()
+                .eq(StoreSysConfig::getConfigKey,key)
+                .eq(StoreSysConfig::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+                .eq(StoreSysConfig::getConfigType,2)
                 .last("LIMIT 1"));
         }
         return null;

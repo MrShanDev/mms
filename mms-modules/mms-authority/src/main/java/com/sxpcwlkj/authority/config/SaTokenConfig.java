@@ -1,12 +1,11 @@
 package com.sxpcwlkj.authority.config;
 
 import cn.dev33.satoken.SaManager;
+
 import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.json.SaJsonTemplateForJackson;
 import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
-import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpLogic;
-import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sxpcwlkj.common.properties.SaTokenProperties;
 import jakarta.annotation.PostConstruct;
@@ -87,26 +86,9 @@ public class SaTokenConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册路由拦截器，自定义验证规则
-        registry.addInterceptor(new SaInterceptor(handler -> {
-                    // 登录验证 -- 排除多个路径
-                    SaRouter
-                            // 获取所有的
-                            .match("/**")
-                            // 对未排除的路径进行检查
-                            .check(() -> {
-                                // 检验当前会话是否已经登录, 如果未登录，则抛出异常：NotLoginException
-                                StpUtil.checkLogin();
-
-                                // 有效率影响 用于临时测试
-                                 if (saTokenProperties.getInfoTimeOpen()) {
-                                     log.debug("剩余有效时间: {}", StpUtil.getTokenTimeout());
-                                     log.debug("临时有效时间: {}", StpUtil.getTokenActiveTimeout());
-                                 }
-
-                            });
-                })).addPathPatterns("/**")
-                // 排除不需要拦截的路径
+        // 注册Sa-Token的拦截器，自动处理@SaIgnore等注解，并排除配置文件中定义的路径
+        registry.addInterceptor(new SaInterceptor()).addPathPatterns("/**")
+                // 排除不需要拦截的路径（来自配置文件）
                 .excludePathPatterns(saTokenProperties.getExcludes());
     }
 

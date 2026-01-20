@@ -1,12 +1,11 @@
 package com.sxpcwlkj.member.entity;
 
-
-import com.sxpcwlkj.framework.entity.BaseEntityVo;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
 * 配置表Vo
@@ -16,16 +15,12 @@ import java.io.Serial;
 */
 
 @Data
-@AutoMapper(target = ApiSysConfig.class)
+@AutoMapper(target = StoreSysConfig.class)
 @EqualsAndHashCode(callSuper=false)
-public class ApiSysConfigVo extends BaseEntityVo{
+public class StoreSysConfigVo implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 主键ID
-	 */
-	private String id;
 	/**
 	 * 配置名称
 	 */

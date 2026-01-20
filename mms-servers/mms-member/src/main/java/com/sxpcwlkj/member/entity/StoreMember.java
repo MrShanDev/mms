@@ -29,7 +29,7 @@ public class StoreMember extends BaseEntity {
 	*/
 	private String nickname;
 	/**
-	* 账号
+	* 账号/邮箱
 	*/
 	private String account;
 	/**

@@ -5,7 +5,7 @@ import lombok.Data;
 
 
 @Data
-public class ApiSmsBo {
+public class StoreSmsBo {
 
     @NotBlank(message = "手机号不能为空")
     private String phone;

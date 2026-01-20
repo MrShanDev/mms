@@ -43,6 +43,10 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-wx</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-email</artifactId>
+        </dependency>
     </dependencies>
 
 

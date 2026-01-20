@@ -1,6 +1,7 @@
 package com.sxpcwlkj.member.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.alibaba.excel.util.StringUtils;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -11,6 +12,7 @@ import com.sxpcwlkj.common.utils.BeanCopyUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
+import com.sxpcwlkj.email.service.EmailService;
 import com.sxpcwlkj.member.entity.StoreMember;
 import com.sxpcwlkj.member.entity.StoreMemberAddress;
 
@@ -43,12 +45,12 @@ import java.util.Map;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("mms-api/v1/member")
-public class ApiStoreMemberController extends BaseController {
+@RequestMapping("member-api/v1")
+public class MemberApiController extends BaseController {
 
     private final StoreMemberService apiMemberService;
     private final StoreMemberAddressService apiMemberAddressService;
-
+    private final EmailService emailService;
     /**
      * 已登录会员信息
      */
@@ -255,6 +257,17 @@ public class ApiStoreMemberController extends BaseController {
     public R<Boolean> delete(@PathVariable String id) {
         StoreMember storeMember = LoginObject.getLoginObject(StoreMember.class);
         return success(apiMemberAddressService.deleteByIdAndMid(id, storeMember.getId()));
+    }
+
+    /**
+     * 会员设置邮箱
+     */
+    @SaCheckLogin
+    @Operation(summary = "会员设置邮箱", description = "会员设置邮箱")
+    @PostMapping("/setEmail")
+    public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email) {
+        String code = RandomUtil.randomNumbers(6);
+        return emailService.sendRegisterCode(email, code);
     }
 
 }

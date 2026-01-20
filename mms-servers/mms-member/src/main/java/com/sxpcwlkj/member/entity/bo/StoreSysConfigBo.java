@@ -3,7 +3,7 @@ package com.sxpcwlkj.member.entity.bo;
 
 import com.sxpcwlkj.datasource.entity.BaseEntity;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
-import com.sxpcwlkj.member.entity.ApiSysConfig;
+import com.sxpcwlkj.member.entity.StoreSysConfig;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,9 +19,9 @@ import java.io.Serial;
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Data
-@AutoMapper(target = ApiSysConfig.class, reverseConvertGenerate = false)
+@AutoMapper(target = StoreSysConfig.class, reverseConvertGenerate = false)
 @EqualsAndHashCode(callSuper=false)
-public class ApiSysConfigBo extends BaseEntity {
+public class StoreSysConfigBo extends BaseEntity {
     @Serial
     private static final long serialVersionUID = 1L;
 

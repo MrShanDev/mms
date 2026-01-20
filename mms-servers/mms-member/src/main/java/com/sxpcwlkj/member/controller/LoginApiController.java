@@ -55,8 +55,8 @@ import java.util.UUID;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("mms-api/v1/login")
-public class ApiLoginController extends BaseController {
+@RequestMapping("login-api/v1")
+public class LoginApiController extends BaseController {
 
     private final StoreMemberService apiMemberService;
     private final WxService wxService;
@@ -169,13 +169,13 @@ public class ApiLoginController extends BaseController {
 
 
     /**
-     * 账号会员注册
+     * 短信验证会员注册
      *
      * @param bo bo
      * @return 会员信息
      */
     @SaIgnore
-    @Operation(summary = "账号会员注册", description = "账号会员注册")
+    @Operation(summary = "短信验证会员注册", description = "短信验证码注册")
     @PostMapping("/accountRegister")
     public R<StoreMemberVo> accountRegister(@RequestBody StoreMemberRegisterBo bo, HttpServletRequest request) {
 
@@ -186,11 +186,13 @@ public class ApiLoginController extends BaseController {
             return R.fail("请输入短信验证码!");
         }
         if (StringUtil.isEmpty(bo.getPassword())) {
-            return R.fail("请输入密码!");
+           bo.setPassword(RandomUtil.getRandomNumber(12));
+        }else{
+            if (bo.getPassword().length() < 6 || bo.getPassword().length() > 16) {
+                return R.fail("密码长度应该在6~16位之间!");
+            }
         }
-        if (bo.getPassword().length() < 6 || bo.getPassword().length() > 16) {
-            return R.fail("密码长度应该在6~16位之间!");
-        }
+
         StoreMemberVo storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
         if (StringUtil.isNotEmpty(storeMemberVo)) {
             return R.fail("该手机号已注册！");
@@ -293,12 +295,12 @@ public class ApiLoginController extends BaseController {
     }
 
     /**
-     * 找回密码
+     * 手机号验证找回密码
      *
      * @param bo bo
      */
     @SaIgnore
-    @Operation(summary = "找回密码", description = "找回密码")
+    @Operation(summary = "手机号验证找回密码", description = "找回密码")
     @PostMapping("/findPassword")
     public R<StoreMemberVo> findPassword(@RequestBody StoreMemberLoginBo bo, HttpServletRequest request) {
 

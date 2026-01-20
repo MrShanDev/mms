@@ -6,7 +6,7 @@ import lombok.Data;
  * @author shanpengnian
  */
 @Data
-public class ApiToolArea {
+public class StoreToolArea {
 
     /**
      * 名称

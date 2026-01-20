@@ -1,8 +1,8 @@
 package com.sxpcwlkj.member.mapper;
 
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.member.entity.ApiSysConfig;
-import com.sxpcwlkj.member.entity.ApiSysConfigVo;
+import com.sxpcwlkj.member.entity.StoreSysConfig;
+import com.sxpcwlkj.member.entity.StoreSysConfigVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +14,6 @@ import org.springframework.stereotype.Repository;
 */
 @Mapper
 @Repository
-public interface ApiSysConfigMapper extends BaseMapperPlus<ApiSysConfig, ApiSysConfigVo> {
+public interface ApiSysConfigMapper extends BaseMapperPlus<StoreSysConfig, StoreSysConfigVo> {
 
 }

@@ -31,10 +31,8 @@ public class StoreMemberRegisterBo {
     @NotNull
     private String smsCode;
     /**
-     * 账号密码
+     * 账号密码（不传则系统随机生成）
      */
-    @NotBlank(message = "密码不能为空")
-    @NotNull
     private String password;
     /**
      * 注册邀请码

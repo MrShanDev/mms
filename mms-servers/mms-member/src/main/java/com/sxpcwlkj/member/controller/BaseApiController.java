@@ -5,8 +5,9 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.sxpcwlkj.member.entity.ApiSmsBo;
-import com.sxpcwlkj.member.entity.ApiToolArea;
+import com.sxpcwlkj.email.service.EmailService;
+import com.sxpcwlkj.member.entity.StoreSmsBo;
+import com.sxpcwlkj.member.entity.StoreToolArea;
 import com.sxpcwlkj.member.entity.vo.StoreMemberVo;
 import com.sxpcwlkj.member.mapper.ApiToolAreaMapper;
 import com.sxpcwlkj.member.service.StoreMemberService;
@@ -16,13 +17,14 @@ import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.IPUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.common.utils.StringUtil;
-import com.sxpcwlkj.member.entity.ApiSysConfigVo;
+import com.sxpcwlkj.member.entity.StoreSysConfigVo;
 import com.sxpcwlkj.member.service.ApiSysConfigService;
 import com.sxpcwlkj.redis.RedisUtil;
 import com.sxpcwlkj.sms.service.SmsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.x.file.storage.core.FileInfo;
@@ -47,8 +49,8 @@ import java.util.Objects;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("mms-api/v1/base")
-public class ApiBaseController extends BaseController {
+@RequestMapping("base-api/v1")
+public class BaseApiController extends BaseController {
 
     private final FileStorageService fileStorageService;
     private final StoreMemberService apiMemberService;
@@ -56,14 +58,15 @@ public class ApiBaseController extends BaseController {
     private final ApiToolAreaMapper storeToolAreaMapper;
     private final SmsService smsService;
     private final ApiSysConfigService sysConfigService;
+    private final EmailService emailService;
     /**
      * 网站信息
      * @return 网站信息
      */
     @SaIgnore
-    @Operation(summary = "网站信息", description = "自定义类型,系统配置前缀：website_")
+    @Operation(summary = "网站信息", description = "返回自定义类型,系统配置前缀：website_")
     @GetMapping("/getWebsite")
-    public R<List<ApiSysConfigVo>> getWebsite(){
+    public R<List<StoreSysConfigVo>> getWebsite(){
         return R.success(sysConfigService.selectWebsiteConfigList());
     }
 
@@ -75,7 +78,7 @@ public class ApiBaseController extends BaseController {
     @SaIgnore
     @Operation(summary = "根据key查询单个系统配置", description = "website_开头的系统变量")
     @GetMapping("/getConfigByKey/{key}")
-    public R<ApiSysConfigVo> getConfig(@PathVariable String key){
+    public R<StoreSysConfigVo> getConfig(@PathVariable String key){
         return R.success(sysConfigService.selectVoByKey(key));
     }
 
@@ -88,7 +91,7 @@ public class ApiBaseController extends BaseController {
     @Operation(summary = "发送短信验证码", description = "1:注册 2:登录 3:修改密码 4:支付密码 5:更换手机号")
     @SaIgnore
     @PostMapping("/smsCode")
-    public R<Void> smsCode(@RequestBody ApiSmsBo bo, HttpServletRequest request) {
+    public R<Void> smsCode(@RequestBody StoreSmsBo bo, HttpServletRequest request) {
 
         Integer type = bo.getType();
 
@@ -156,6 +159,9 @@ public class ApiBaseController extends BaseController {
         smsService.sendSms(phone, code);
         RedisUtil.setCacheObject(key, code);
         RedisUtil.expire(key, Duration.ofMinutes(1));
+        if (Objects.equals(env.getProperty("spring.profiles.active"), "prod")) {
+            return R.success("手机短信码已发送！");
+        }
         return R.success("手机短信码已发送！"+code);
     }
 
@@ -186,80 +192,80 @@ public class ApiBaseController extends BaseController {
     @GetMapping("/storeToolAreaList")
     public R<List<Object>> storeToolAreaList(String provincialName, String cityName) {
 
-        List<ApiToolArea> areasOne = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                .eq(ApiToolArea::getParentCode, "0").orderByAsc(ApiToolArea::getSort));
-        String[] array = areasOne.stream().map(ApiToolArea::getName).toArray(String[]::new);
+        List<StoreToolArea> areasOne = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                .eq(StoreToolArea::getParentCode, "0").orderByAsc(StoreToolArea::getSort));
+        String[] array = areasOne.stream().map(StoreToolArea::getName).toArray(String[]::new);
 
-        List<ApiToolArea> areasTwo = new ArrayList<>();
-        List<ApiToolArea> areasThree = new ArrayList<>();
+        List<StoreToolArea> areasTwo = new ArrayList<>();
+        List<StoreToolArea> areasThree = new ArrayList<>();
 
         if (!areasOne.isEmpty()) {
             //获取第一个
             String provincialCode = areasOne.get(0).getCode();
             // 指定省
             if (StringUtil.isNotEmpty(provincialName)) {
-                ApiToolArea areaClick = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<ApiToolArea>()
-                        .eq(ApiToolArea::getParentCode, 0)
-                        .eq(ApiToolArea::getName, provincialName)
+                StoreToolArea areaClick = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<StoreToolArea>()
+                        .eq(StoreToolArea::getParentCode, 0)
+                        .eq(StoreToolArea::getName, provincialName)
                         .last("LIMIT 1"));
                 if (areaClick != null) {
                     provincialCode = areaClick.getCode();
-                    areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                            .eq(ApiToolArea::getParentCode, provincialCode)
-                            .orderByAsc(ApiToolArea::getSort));
+                    areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                            .eq(StoreToolArea::getParentCode, provincialCode)
+                            .orderByAsc(StoreToolArea::getSort));
                     if (!areasTwo.isEmpty()) {
                         String cityCode = areasTwo.get(0).getCode();
                         // 指定市
                         if (StringUtil.isNotEmpty(cityName)) {
-                            ApiToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<ApiToolArea>()
-                                    .eq(ApiToolArea::getParentCode, provincialCode)
-                                    .eq(ApiToolArea::getName, cityName)
+                            StoreToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<StoreToolArea>()
+                                    .eq(StoreToolArea::getParentCode, provincialCode)
+                                    .eq(StoreToolArea::getName, cityName)
                                     .last("LIMIT 1"));
                             if (area != null) {
                                 cityCode = area.getCode();
                             }
                         }
-                        areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                                .eq(ApiToolArea::getParentCode, cityCode).orderByAsc(ApiToolArea::getSort));
+                        areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                                .eq(StoreToolArea::getParentCode, cityCode).orderByAsc(StoreToolArea::getSort));
 
                     }
                 }
                 else{
-                    areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                            .eq(ApiToolArea::getParentCode, provincialCode).orderByAsc(ApiToolArea::getSort));
+                    areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                            .eq(StoreToolArea::getParentCode, provincialCode).orderByAsc(StoreToolArea::getSort));
                     if (!areasTwo.isEmpty()) {
                         String cityCode = areasTwo.get(0).getCode();
                         // 指定市
                         if (StringUtil.isNotEmpty(cityName)) {
-                            ApiToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<ApiToolArea>()
-                                    .eq(ApiToolArea::getParentCode, provincialCode)
-                                    .eq(ApiToolArea::getName, cityName)
+                            StoreToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<StoreToolArea>()
+                                    .eq(StoreToolArea::getParentCode, provincialCode)
+                                    .eq(StoreToolArea::getName, cityName)
                                     .last("LIMIT 1"));
                             if (area != null) {
                                 cityCode = area.getCode();
                             }
                         }
-                        areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                                .eq(ApiToolArea::getParentCode, cityCode).orderByAsc(ApiToolArea::getSort));
+                        areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                                .eq(StoreToolArea::getParentCode, cityCode).orderByAsc(StoreToolArea::getSort));
                     }
                 }
             }else {
-                areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                        .eq(ApiToolArea::getParentCode, provincialCode).orderByAsc(ApiToolArea::getSort));
+                areasTwo = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                        .eq(StoreToolArea::getParentCode, provincialCode).orderByAsc(StoreToolArea::getSort));
                 if (!areasTwo.isEmpty()) {
                     String cityCode = areasTwo.get(0).getCode();
                     // 指定市
                     if (StringUtil.isNotEmpty(cityName)) {
-                        ApiToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<ApiToolArea>()
-                                .eq(ApiToolArea::getParentCode, provincialCode)
-                                .eq(ApiToolArea::getName, cityName)
+                        StoreToolArea area = storeToolAreaMapper.selectOne(new LambdaQueryWrapper<StoreToolArea>()
+                                .eq(StoreToolArea::getParentCode, provincialCode)
+                                .eq(StoreToolArea::getName, cityName)
                                 .last("LIMIT 1"));
                         if (area != null) {
                             cityCode = area.getCode();
                         }
                     }
-                    areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<ApiToolArea>()
-                            .eq(ApiToolArea::getParentCode, cityCode).orderByAsc(ApiToolArea::getSort));
+                    areasThree = storeToolAreaMapper.selectList(new LambdaQueryWrapper<StoreToolArea>()
+                            .eq(StoreToolArea::getParentCode, cityCode).orderByAsc(StoreToolArea::getSort));
 
                 }
             }
@@ -268,8 +274,8 @@ public class ApiBaseController extends BaseController {
 
         List<Object> list = new ArrayList<>();
 
-        String[] arrayTwo = areasTwo.stream().map(ApiToolArea::getName).toArray(String[]::new);
-        String[] arrayThree = areasThree.stream().map(ApiToolArea::getName).toArray(String[]::new);
+        String[] arrayTwo = areasTwo.stream().map(StoreToolArea::getName).toArray(String[]::new);
+        String[] arrayThree = areasThree.stream().map(StoreToolArea::getName).toArray(String[]::new);
 
         list.add(array);
         list.add(arrayTwo);
@@ -279,5 +285,24 @@ public class ApiBaseController extends BaseController {
 
     }
 
+    /**
+     * 发送邮件
+     */
+    @SaIgnore
+    @Operation(summary = "发送邮件", description = "发送邮件")
+    @PostMapping("/sendEmail")
+    public R<Void> sendEmail(@RequestParam String email) {
+        return R.success("邮件已发送，请查收！");
+    }
 
+    /**
+     * 发送邮箱
+     */
+    @SaCheckLogin
+    @Operation(summary = "会员设置邮箱", description = "会员设置邮箱")
+    @PostMapping("/setEmail")
+    public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email) {
+        String code = RandomUtil.randomNumbers(6);
+        return emailService.sendRegisterCode(email, code);
+    }
 }
