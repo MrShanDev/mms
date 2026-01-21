@@ -30,10 +30,19 @@ public interface BbsTopicService extends BaseService<BbsTopic, BbsTopicVo, BbsTo
      * @param cateId    分类id
      * @param keyWord   关键字
      * @param memberId  会员ID
+     * @param attentionList 关注列表
+     * @param latitude  纬度（附近功能使用）
+     * @param longitude 经度（附近功能使用）
      * @param pageQuery 分页查询
+     * @param topicIds  话题ID列表（收藏/点赞功能使用）
      * @return 分页对象
      */
-    TableDataInfo<BbsTopicVo> selectListVoPageXml(String cateId, String keyWord, String memberId, PageQuery pageQuery);
-
+    TableDataInfo<BbsTopicVo> selectListVoPageXml(String cateId, String keyWord, String memberId, List<String> attentionList, Double latitude, Double longitude, PageQuery pageQuery, List<String> topicIds);
+    /**
+     * 删除话题
+     * @param id 主键
+     * @param loginId 登录会员ID
+     * @return true：成功 false ：失败
+     */
     Boolean deleteByIdXml(String id, String loginId);
 }

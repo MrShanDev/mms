@@ -93,4 +93,24 @@ public class StoreMemberBo extends BaseEntity {
      * IP地址信息
      */
     private String iPAddressInfo;
+	/**
+	 * 纬度
+	 */
+	private Double latitude;
+	/**
+	 * 经度
+	 */
+	private Double longitude;
+	/**
+	 * 所在城市（根据IP解析）
+	 */
+	private String city;
+	/**
+	 * 个性签名
+	 */
+	private String signature;
+	/**
+	 * 用户标签（多个标签用逗号分隔）
+	 */
+	private String tags;
 }

@@ -64,33 +64,75 @@ public class LoginApiController extends BaseController {
      * 【公共部分】获取登录对象信息
      * @param request 请求
      * @param vo 会员信息
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @NotNull
-    private R<StoreMemberVo> getLoginMemberInfo(HttpServletRequest request, StoreMemberVo vo) {
+    private R<StoreMemberVo> getLoginMemberInfo(HttpServletRequest request, StoreMemberVo vo, Double latitude, Double longitude) {
         if(vo==null){
             return R.fail("登录失败！");
         }
         String token = LoginObject.loginToken(vo.getId(), DeviceEnum.MOBILE.getType(), 10000000L, "id", vo.getId());
         vo.setToken(token);
         String ip = IPUtil.getIp(request);
-        apiMemberService.update(new LambdaUpdateWrapper<StoreMember>().eq(StoreMember::getId, vo.getId()).set(StoreMember::getLastLoginIp, ip));
-        RedisUtil.setCacheObject(RedisConstant.MOBILE_KEY+vo.getId(),vo, Duration.ofHours(24));
-        return R.response(Boolean.TRUE, vo);
+        
+        // 解析IP获取城市信息
+        String cityInfo = AddressUtil.getCityInfo(ip);
+        String city = null;
+        if (cityInfo != null && !cityInfo.isEmpty()) {
+            // 解析城市信息，格式通常为："国家|省份|城市"或直接是城市名
+            String[] parts = cityInfo.split("\\|");
+            if (parts.length >= 3) {
+                city = parts[2]; // 取城市部分
+            } else if (parts.length >= 2) {
+                city = parts[1]; // 取省份或城市
+            } else {
+                city = cityInfo; // 直接使用原始信息
+            }
+        }
+        
+        // 更新登录IP、地理位置和城市信息
+        LambdaUpdateWrapper<StoreMember> updateWrapper = new LambdaUpdateWrapper<StoreMember>()
+            .eq(StoreMember::getId, vo.getId())
+            .set(StoreMember::getLastLoginIp, ip);
+        
+        // 如果解析到城市信息，则更新
+        if(city != null && !city.isEmpty()){
+            updateWrapper.set(StoreMember::getCity, city);
+            vo.setCity(city); // 同时设置到返回对象
+        }
+        
+        // 如果传入了经纬度，则更新位置信息
+        if(latitude != null && longitude != null){
+            updateWrapper.set(StoreMember::getLatitude, latitude)
+                        .set(StoreMember::getLongitude, longitude);
+        }
+        
+        apiMemberService.update(updateWrapper);
+        
+        // 重新查询获取最新数据（包含城市、签名、标签）
+        StoreMemberVo latestVo = apiMemberService.selectVoById(vo.getId());
+        latestVo.setToken(token);
+        
+        RedisUtil.setCacheObject(RedisConstant.MOBILE_KEY+vo.getId(),latestVo, Duration.ofHours(24));
+        return R.response(Boolean.TRUE, latestVo);
     }
 
     /**
      * token自动登录
      *
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @SaIgnore
     @Operation(summary = "token自动登录", description = "在接口带Token传递在header下完成自动登录")
     @GetMapping("/tokenLogin")
-    public R<StoreMemberVo> tokenLogin(HttpServletRequest request) {
+    public R<StoreMemberVo> tokenLogin(HttpServletRequest request, Double latitude, Double longitude) {
         if (LoginObject.isLogin()) {
             StoreMemberVo vo = apiMemberService.selectVoById(LoginObject.getLoginId());
-            return getLoginMemberInfo(request, vo);
+            return getLoginMemberInfo(request, vo, latitude, longitude);
         }
         throw new MmsException("请先登录！", HttpStatusEnum.FORBIDDEN.getCode());
     }
@@ -98,12 +140,14 @@ public class LoginApiController extends BaseController {
     /**
      * 微信根据code，获取code进行静默登录
      * @param code 微信获取的code
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @SaIgnore
     @Operation(summary = "微信静默登录", description = "微信生态，获取用户openid进行登录")
     @GetMapping("/codeGetOpenIdLogin")
-    public R<StoreMemberVo> codeGetOpenIdLogin(@RequestParam("code")String code, HttpServletRequest request) {
+    public R<StoreMemberVo> codeGetOpenIdLogin(@RequestParam("code")String code, HttpServletRequest request, Double latitude, Double longitude) {
         // 调用微信 API 获取用户的 openid 和 session_key
         WxMaJscode2SessionResult session = null;
         try {
@@ -118,7 +162,7 @@ public class LoginApiController extends BaseController {
         if (vo==null) {
             return R.fail("该微信没有绑定账号！");
         }
-        return getLoginMemberInfo(request, vo);
+        return getLoginMemberInfo(request, vo, latitude, longitude);
     }
 
     /**
@@ -127,12 +171,14 @@ public class LoginApiController extends BaseController {
      * @param code          微信获取的code
      * @param encryptedData 微信获取的加密数据
      * @param iv            微信获取的iv
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @SaIgnore
     @Operation(summary = "微信注册/登录", description = "微信小程序手机号授权,依据手机号进行注册或登录")
     @GetMapping("/codeGetPhoneRegisterOrLogin")
-    public R<StoreMemberVo> codeGetPhoneRegisterOrLogin(@RequestParam("code") String code, @RequestParam("encryptedData") String encryptedData, @RequestParam("iv") String iv, HttpServletRequest request) throws WxErrorException {
+    public R<StoreMemberVo> codeGetPhoneRegisterOrLogin(@RequestParam("code") String code, @RequestParam("encryptedData") String encryptedData, @RequestParam("iv") String iv, HttpServletRequest request, Double latitude, Double longitude) throws WxErrorException {
             // 调用微信 API 获取用户的 openid 和 session_key
             WxMaJscode2SessionResult session = wxService.getWxMaService().getUserService().getSessionInfo(code);
             String openid = session.getOpenid();
@@ -149,20 +195,25 @@ public class LoginApiController extends BaseController {
                 storeMemberBo.setPhone(phoneNumber);
                 storeMemberBo.setNickname("");
                 storeMemberBo.setHeadPortrait(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
-                storeMemberBo.setPassword(SecureUtil.md5(RandomUtil.getRandomNumber(12)));
+                storeMemberBo.setPassword(null);
                 storeMemberBo.setSex(0);
                 storeMemberBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 storeMemberBo.setReputationScore(100);
                 storeMemberBo.setLevel(1);
                 storeMemberBo.setInvitationCode("");
                 storeMemberBo.setWxOpenid(openid);
+                // 如果传入了经纬度，在注册时保存
+                if(latitude != null && longitude != null){
+                    storeMemberBo.setLatitude(latitude);
+                    storeMemberBo.setLongitude(longitude);
+                }
                 apiMemberService.insert(storeMemberBo);
                 vo = apiMemberService.selectVoByPhone(phoneNumber);
             }
             if (vo.getWxOpenid()==null|| vo.getWxOpenid().isEmpty()) {
                 apiMemberService.update(new LambdaUpdateWrapper<StoreMember>().eq(StoreMember::getId, vo.getId()).set(StoreMember::getWxOpenid, openid));
             }
-            return getLoginMemberInfo(request, vo);
+            return getLoginMemberInfo(request, vo, latitude, longitude);
     }
 
 
@@ -170,12 +221,14 @@ public class LoginApiController extends BaseController {
      * 手机短信验证会员注册、登录
      *
      * @param bo bo
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @SaIgnore
     @Operation(summary = "短信验证会员注册、登录", description = "没账号将自动注册完成登录（发送短信，type=1或2）")
     @PostMapping("/login")
-    public R<StoreMemberVo> accountRegister(@RequestBody StoreMemberLoginPhoneBo bo, HttpServletRequest request) {
+    public R<StoreMemberVo> accountRegister(@RequestBody StoreMemberLoginPhoneBo bo, HttpServletRequest request, Double latitude, Double longitude) {
 
         if (StringUtil.isEmpty(bo.getPhone())) {
             return R.fail("请输入手机号!");
@@ -205,7 +258,7 @@ public class LoginApiController extends BaseController {
         StoreMemberVo storeMemberVo = apiMemberService.selectVoByPhone(bo.getPhone());
         if (StringUtil.isNotEmpty(storeMemberVo)) {
             log.info("会员已存在，直接登录");
-            return getLoginMemberInfo(request, storeMemberVo);
+            return getLoginMemberInfo(request, storeMemberVo, latitude, longitude);
         }
 
         StoreMemberBo storeMemberBo = new StoreMemberBo();
@@ -213,16 +266,21 @@ public class LoginApiController extends BaseController {
         storeMemberBo.setPhone(bo.getPhone());
         storeMemberBo.setNickname("");
         storeMemberBo.setHeadPortrait(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
-        storeMemberBo.setPassword(SecureUtil.md5(RandomUtil.getRandomNumber(12)));
+        storeMemberBo.setPassword(null);
         storeMemberBo.setSex(3);
         storeMemberBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
         storeMemberBo.setReputationScore(100);
         storeMemberBo.setLevel(1);
         storeMemberBo.setInvitationCode(bo.getInvitationCode());
+        // 如果传入了经纬度，在注册时保存
+        if(latitude != null && longitude != null){
+            storeMemberBo.setLatitude(latitude);
+            storeMemberBo.setLongitude(longitude);
+        }
         Boolean aBoolean = apiMemberService.insert(storeMemberBo);
         if (aBoolean) {
             StoreMemberVo vo = apiMemberService.selectVoByPhone(storeMemberBo.getPhone());
-            return getLoginMemberInfo(request, vo);
+            return getLoginMemberInfo(request, vo, latitude, longitude);
         }
         return R.fail("注册失败!");
     }
@@ -230,12 +288,14 @@ public class LoginApiController extends BaseController {
     /**
      * 邮箱账号,密码登录
      * @param bo  bo
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 会员信息
      */
     @SaIgnore
     @Operation(summary = "邮箱账号,密码登录", description = "前提是账户进行了邮箱绑定和密码设置")
     @PostMapping("/accountLogin")
-    public R<StoreMemberVo> accountLogin(@RequestBody @Validated StoreMemberEmailLoginBo bo, HttpServletRequest request) {
+    public R<StoreMemberVo> accountLogin(@RequestBody @Validated StoreMemberEmailLoginBo bo, HttpServletRequest request, Double latitude, Double longitude) {
         StoreMemberVo storeMemberVo=null;
         if (StringUtil.isEmpty(bo.getEmail())) {
             return R.fail("请输入账号!");
@@ -248,7 +308,7 @@ public class LoginApiController extends BaseController {
             return R.fail("账号不存在！");
         }
         if (storeMemberVo.getPassword().equals(SecureUtil.md5(bo.getPassword()))) {
-            return getLoginMemberInfo(request, storeMemberVo);
+            return getLoginMemberInfo(request, storeMemberVo, latitude, longitude);
         }
         return R.fail("登录密码错误!");
     }
@@ -257,11 +317,13 @@ public class LoginApiController extends BaseController {
      * 手机号验证找回密码
      *
      * @param bo bo
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      */
     @SaIgnore
     @Operation(summary = "手机号验证设置密码", description = "依据手机号验证设置密码（支持不登录状态找回）")
     @PostMapping("/findPassword")
-    public R<StoreMemberVo> findPassword(@RequestBody StoreMemberSetPasswordBo bo, HttpServletRequest request) {
+    public R<StoreMemberVo> findPassword(@RequestBody StoreMemberSetPasswordBo bo, HttpServletRequest request, Double latitude, Double longitude) {
 
         if (StringUtil.isEmpty(bo.getPhone())) {
             return R.fail("请输入手机号!");
@@ -289,7 +351,7 @@ public class LoginApiController extends BaseController {
             }
         }
         apiMemberService.update(new LambdaUpdateWrapper<StoreMember>().eq(StoreMember::getPhone, bo.getPhone()).set(StoreMember::getPassword, SecureUtil.md5(bo.getPassword())));
-        return getLoginMemberInfo(request, storeMemberVo);
+        return getLoginMemberInfo(request, storeMemberVo, latitude, longitude);
 
     }
 
@@ -324,12 +386,14 @@ public class LoginApiController extends BaseController {
     /**
      * 登录二维码轮询，进行注册并登录
      * @param bo 请求
+     * @param latitude 纬度（可选）
+     * @param longitude 经度（可选）
      * @return 登录状态
      */
     @SaIgnore
     @Operation(summary = "登录二维码轮询", description = "登录二维码轮询，进行注册并登录")
     @PostMapping("/oauth-polling")
-    public R<StoreMemberVo> oauthPolling(@RequestBody WxCodeLogoBo bo, HttpServletRequest request, HttpServletResponse response){
+    public R<StoreMemberVo> oauthPolling(@RequestBody WxCodeLogoBo bo, HttpServletRequest request, HttpServletResponse response, Double latitude, Double longitude){
         String uuid = bo.getUuid();
         if(uuid==null){
             return R.fail("state不能为空！");
@@ -351,7 +415,7 @@ public class LoginApiController extends BaseController {
             StoreMemberVo vov = apiMemberService.selectVoByOpenId(wxCodeBo.getOpenId());
             if(vov!=null){
                 CookieUtil.setCookie(response,"docToken",vov.getToken(),1000*60*60*24*7);
-                return getLoginMemberInfo(request, vov);
+                return getLoginMemberInfo(request, vov, latitude, longitude);
             }
             StoreMemberBo storeMemberBo = new StoreMemberBo();
             storeMemberBo.setAccount(null);
@@ -359,7 +423,7 @@ public class LoginApiController extends BaseController {
             storeMemberBo.setNickname("");
             storeMemberBo.setWxOpenid(wxCodeBo.getOpenId());
             storeMemberBo.setHeadPortrait(DefStaticEnum.MEMBER_DEF_HEADER_IMG.getValue());
-            storeMemberBo.setPassword(SecureUtil.md5(UUID.randomUUID().toString()));
+            storeMemberBo.setPassword(null);
             storeMemberBo.setSex(3);
             storeMemberBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
             storeMemberBo.setReputationScore(100);
@@ -368,11 +432,16 @@ public class LoginApiController extends BaseController {
             String address= AddressUtil.getCityInfo(IPUtil.getIp(request));
             storeMemberBo.setLastLoginIp(IPUtil.getIp(request));
             storeMemberBo.setIPAddressInfo(address);
+            // 如果传入了经纬度，在注册时保存
+            if(latitude != null && longitude != null){
+                storeMemberBo.setLatitude(latitude);
+                storeMemberBo.setLongitude(longitude);
+            }
             Boolean aBoolean = apiMemberService.insert(storeMemberBo);
             if (aBoolean) {
                 StoreMemberVo vo = apiMemberService.selectVoByOpenId(wxCodeBo.getOpenId());
                 CookieUtil.setCookie(response,"docToken",vo.getToken(),1000*60*60*24*7);
-                return getLoginMemberInfo(request, vo);
+                return getLoginMemberInfo(request, vo, latitude, longitude);
             }
         }
         return fail("登录失败,请尝试其他方式！");

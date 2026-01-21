@@ -21,6 +21,10 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-member</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-bbs</artifactId>
+        </dependency>
 
     </dependencies>
 

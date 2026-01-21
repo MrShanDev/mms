@@ -175,8 +175,8 @@ public class BbsTopicServiceImpl extends BaseServiceImpl<BbsTopic, BbsTopicVo,Bb
     }
 
     @Override
-    public TableDataInfo<BbsTopicVo> selectListVoPageXml(String cateId, String keyWord, String memberId, PageQuery pageQuery) {
-        Page<BbsTopicVo> page = baseMapper.selectVoPageXml(pageQuery.build(),cateId,keyWord,memberId);
+    public TableDataInfo<BbsTopicVo> selectListVoPageXml(String cateId, String keyWord, String memberId, List<String> attentionList, Double latitude, Double longitude, PageQuery pageQuery, List<String> topicIds) {
+        Page<BbsTopicVo> page = baseMapper.selectVoPageXml(pageQuery.build(),cateId,keyWord,memberId,attentionList,latitude,longitude,topicIds);
         for (BbsTopicVo vo : page.getRecords()) {
             vo.setFiles(bbsFilesService.selectVoListByLqw(new LambdaQueryWrapper<BbsFiles>()
                 .eq(BbsFiles::getBbsId,vo.getId())

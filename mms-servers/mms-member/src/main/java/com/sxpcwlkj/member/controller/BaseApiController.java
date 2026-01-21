@@ -2,10 +2,8 @@ package com.sxpcwlkj.member.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.email.service.EmailService;
 import com.sxpcwlkj.member.entity.StoreSmsBo;
 import com.sxpcwlkj.member.entity.StoreToolArea;
@@ -16,7 +14,6 @@ import com.sxpcwlkj.member.service.StoreMemberService;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.MmsException;
-import com.sxpcwlkj.common.utils.IPUtil;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.member.entity.StoreSysConfigVo;
@@ -26,8 +23,6 @@ import com.sxpcwlkj.sms.service.SmsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.x.file.storage.core.FileInfo;
@@ -113,31 +108,31 @@ public class BaseApiController extends BaseController {
         if (type == 5) {
             keytype = "_updatePhone_";
         }
-        if (Objects.equals(env.getProperty("spring.profiles.active"), "prod")) {
-            try {
-                String ip = null;
-                ip = IPUtil.getIp(request);
-                log.info("ips:" + ip);
-                Object s = RedisUtil.getCacheObject("ip:" + ip);
-                int num = Convert.toInt(s == null ? 0 : Convert.toInt(s), 0);
-                if (num >= 10) {
-                    log.info("ips>=10,拦截:" + ip);
-                    return R.fail("当前IP发送频繁,请一天后再发送哦！");
-                }
-                num++;
-                RedisUtil.setCacheObject("ip:" + ip, num);
-                RedisUtil.setCacheObject("ip:" + ip, num, Duration.ofDays(1));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        if (Objects.equals(env.getProperty("spring.profiles.active"), "prod")) {
+//            try {
+//                String ip = null;
+//                ip = IPUtil.getIp(request);
+//                log.info("ips:" + ip);
+//                Object s = RedisUtil.getCacheObject("ip:" + ip);
+//                int num = Convert.toInt(s == null ? 0 : Convert.toInt(s), 0);
+//                if (num >= 10) {
+//                    log.info("ips>=10,拦截:" + ip);
+//                    return R.fail("当前IP发送频繁,请一天后再发送哦！");
+//                }
+//                num++;
+//                RedisUtil.setCacheObject("ip:" + ip, num);
+//                RedisUtil.setCacheObject("ip:" + ip, num, Duration.ofDays(1));
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
         StoreMemberVo storeMemberVos = apiMemberService.selectVoByPhone(phone);
         if (type == 1) {
             if (storeMemberVos != null) {
                 return R.fail("该手机号已注册！");
             }
         }
-        if (type == 2) {
+        if (type == 2&&storeMemberVos != null) {
             if (!Objects.equals(storeMemberVos.getStatus(), SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
                 throw new MmsException("会员状态不正常！");
             }
@@ -164,9 +159,9 @@ public class BaseApiController extends BaseController {
         smsService.sendSms(phone, code);
         RedisUtil.setCacheObject(key, code);
         RedisUtil.expire(key, Duration.ofMinutes(1));
-        if (Objects.equals(env.getProperty("spring.profiles.active"), "prod")) {
-            return R.success("手机短信码已发送！");
-        }
+//        if (Objects.equals(env.getProperty("spring.profiles.active"), "prod")) {
+//            return R.success("手机短信码已发送！");
+//        }
         return R.success("手机短信码已发送！"+code);
     }
 

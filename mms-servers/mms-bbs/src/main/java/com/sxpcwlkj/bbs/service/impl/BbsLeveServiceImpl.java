@@ -127,7 +127,8 @@ public class BbsLeveServiceImpl extends BaseServiceImpl<BbsLeve, BbsLeveVo,BbsLe
 
     @Override
     public Boolean clickTopic(String id, int type, String loginId) {
-        if(type==1){
+        if(type==1 || type==3){
+            // type=1 话题点赞, type=3 话题收藏
             BbsTopicVo vo=bbsTopicService.selectVoById(id);
             if(vo==null){
                 throw  new MmsException("话题不存在");

@@ -102,6 +102,18 @@ public class StoreMemberVo extends BaseEntityVo {
 	 * Token
 	 */
 	private String token ;
+	/**
+	 * 所在城市（根据IP解析）
+	 */
+	private String city;
+	/**
+	 * 个性签名
+	 */
+	private String signature;
+	/**
+	 * 用户标签（多个标签用逗号分隔）
+	 */
+	private String tags;
 
 
 

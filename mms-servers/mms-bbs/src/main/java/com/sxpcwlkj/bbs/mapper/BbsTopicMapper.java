@@ -8,6 +8,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
 * 话题-Mapper
 *
@@ -18,5 +20,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BbsTopicMapper extends BaseMapperPlus<BbsTopic, BbsTopicVo> {
 
-    Page<BbsTopicVo> selectVoPageXml(@Param("page") Page<?> page, @Param("cateId") String cateId, @Param("keyWord") String keyWord, @Param("memberId") String memberId);
+    Page<BbsTopicVo> selectVoPageXml(@Param("page") Page<?> page, 
+                                      @Param("cateId") String cateId, 
+                                      @Param("keyWord") String keyWord, 
+                                      @Param("memberId") String memberId,
+                                      @Param("attentionList") List<String> attentionList,
+                                      @Param("latitude") Double latitude,
+                                      @Param("longitude") Double longitude,
+                                      @Param("topicIds") List<String> topicIds);
 }

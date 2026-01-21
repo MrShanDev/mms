@@ -275,4 +275,42 @@ public class MemberApiController extends BaseController {
         RedisUtil.deleteObject(key);
         return apiMemberService.updateEmail(LoginObject.getLoginId(), email);
     }
+
+    /**
+     * 设置个性签名
+     * @param signature 个性签名
+     * @return 结果
+     */
+    @SaCheckLogin
+    @Operation(summary = "设置个性签名", description = "设置用户个性签名，最多255个字符")
+    @PostMapping("/setSignature")
+    public R<Boolean> setSignature(@RequestParam String signature) {
+        if (signature != null && signature.length() > 255) {
+            return R.fail("个性签名不能超过255个字符");
+        }
+        StoreMember storeMember = LoginObject.getLoginObject(StoreMember.class);
+        boolean result = apiMemberService.update(new LambdaUpdateWrapper<StoreMember>()
+            .eq(StoreMember::getId, storeMember.getId())
+            .set(StoreMember::getSignature, signature));
+        return R.success("设置成功", result);
+    }
+
+    /**
+     * 设置用户标签
+     * @param tags 用户标签（多个标签用逗号分隔，如："美食达人,旅行爱好者,摄影师"）
+     * @return 结果
+     */
+    @SaCheckLogin
+    @Operation(summary = "设置用户标签", description = "设置用户标签，多个标签用逗号分隔，最多500个字符")
+    @PostMapping("/setTags")
+    public R<Boolean> setTags(@RequestParam String tags) {
+        if (tags != null && tags.length() > 500) {
+            return R.fail("标签总长度不能超过500个字符");
+        }
+        StoreMember storeMember = LoginObject.getLoginObject(StoreMember.class);
+        boolean result = apiMemberService.update(new LambdaUpdateWrapper<StoreMember>()
+            .eq(StoreMember::getId, storeMember.getId())
+            .set(StoreMember::getTags, tags));
+        return R.success("设置成功", result);
+    }
 }
