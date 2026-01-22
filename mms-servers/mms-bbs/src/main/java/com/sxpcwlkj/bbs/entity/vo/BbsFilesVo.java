@@ -10,6 +10,8 @@ import io.github.linpeilie.annotations.AutoMapper;
 import com.sxpcwlkj.bbs.entity.BbsFiles;
 import com.sxpcwlkj.framework.entity.BaseEntityVo;
 import com.alibaba.excel.annotation.ExcelProperty;
+
+import java.io.Serializable;
 import java.util.List;
 import java.util.Date;
 
@@ -23,7 +25,7 @@ import java.util.Date;
 @Data
 @AutoMapper(target = BbsFiles.class)
 @EqualsAndHashCode(callSuper=false)
-public class BbsFilesVo  extends BaseEntityVo{
+public class BbsFilesVo implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
@@ -55,4 +57,8 @@ public class BbsFilesVo  extends BaseEntityVo{
      * 附件地址
      */
     private String url;
+    /**
+     * 创建时间
+     */
+    private Date createdTime;
 }

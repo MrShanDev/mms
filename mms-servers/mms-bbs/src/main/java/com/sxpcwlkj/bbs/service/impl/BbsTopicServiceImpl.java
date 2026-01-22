@@ -124,8 +124,8 @@ public class BbsTopicServiceImpl extends BaseServiceImpl<BbsTopic, BbsTopicVo,Bb
         vo.setMemberNickName(memberVo.getNickname());
         vo.setMemberHeadImg(memberVo.getHeadPortrait());
         BbsFilesVo filesVo=vo.getFiles().get(0);
-        vo.setWidth(212);
-        vo.setHeight(212*filesVo.getHeight()/filesVo.getWidth());
+        //vo.setWidth(212);
+        //vo.setHeight(212*filesVo.getHeight()/filesVo.getWidth());
         vo.setFileUrl(filesVo.getUrl());
         vo.setFileType(filesVo.getType());
         Long num=bbsLeveMapper.selectCount(new LambdaQueryWrapper<BbsLeve>()
@@ -189,10 +189,10 @@ public class BbsTopicServiceImpl extends BaseServiceImpl<BbsTopic, BbsTopicVo,Bb
             vo.setMemberHeadImg(memberVo.getHeadPortrait());
             if(!vo.getFiles().isEmpty()){
                 BbsFilesVo filesVo=vo.getFiles().get(0);
-                vo.setWidth(212);
-                    if(filesVo.getWidth()>0&&filesVo.getHeight()>0) {
-                        vo.setHeight(212 * filesVo.getHeight() / filesVo.getWidth());
-                    }
+//                vo.setWidth(212);
+//                if(filesVo.getWidth()>0&&filesVo.getHeight()>0) {
+//                    vo.setHeight(212 * filesVo.getHeight() / filesVo.getWidth());
+//                }
                 vo.setFileUrl(filesVo.getUrl());
                 vo.setFileType(filesVo.getType());
             }

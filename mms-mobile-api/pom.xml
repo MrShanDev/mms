@@ -25,6 +25,10 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-bbs</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-websocket</artifactId>
+        </dependency>
 
     </dependencies>
 

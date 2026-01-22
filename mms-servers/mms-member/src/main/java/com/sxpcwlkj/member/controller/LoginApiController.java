@@ -76,7 +76,7 @@ public class LoginApiController extends BaseController {
         String token = LoginObject.loginToken(vo.getId(), DeviceEnum.MOBILE.getType(), 10000000L, "id", vo.getId());
         vo.setToken(token);
         String ip = IPUtil.getIp(request);
-        
+
         // 解析IP获取城市信息
         String cityInfo = AddressUtil.getCityInfo(ip);
         String city = null;
@@ -91,30 +91,30 @@ public class LoginApiController extends BaseController {
                 city = cityInfo; // 直接使用原始信息
             }
         }
-        
+
         // 更新登录IP、地理位置和城市信息
         LambdaUpdateWrapper<StoreMember> updateWrapper = new LambdaUpdateWrapper<StoreMember>()
             .eq(StoreMember::getId, vo.getId())
             .set(StoreMember::getLastLoginIp, ip);
-        
+
         // 如果解析到城市信息，则更新
         if(city != null && !city.isEmpty()){
             updateWrapper.set(StoreMember::getCity, city);
             vo.setCity(city); // 同时设置到返回对象
         }
-        
+
         // 如果传入了经纬度，则更新位置信息
         if(latitude != null && longitude != null){
             updateWrapper.set(StoreMember::getLatitude, latitude)
                         .set(StoreMember::getLongitude, longitude);
         }
-        
+
         apiMemberService.update(updateWrapper);
-        
+
         // 重新查询获取最新数据（包含城市、签名、标签）
         StoreMemberVo latestVo = apiMemberService.selectVoById(vo.getId());
         latestVo.setToken(token);
-        
+
         RedisUtil.setCacheObject(RedisConstant.MOBILE_KEY+vo.getId(),latestVo, Duration.ofHours(24));
         return R.response(Boolean.TRUE, latestVo);
     }
@@ -306,6 +306,12 @@ public class LoginApiController extends BaseController {
         storeMemberVo = apiMemberService.selectVoByAccount(bo.getEmail());
         if (storeMemberVo == null) {
             return R.fail("账号不存在！");
+        }
+        if (!Objects.equals(storeMemberVo.getStatus(), SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
+            return R.fail("账号已禁用！");
+        }
+        if (StringUtil.isEmpty(storeMemberVo.getPassword())) {
+            return R.fail("账号未设置密码！");
         }
         if (storeMemberVo.getPassword().equals(SecureUtil.md5(bo.getPassword()))) {
             return getLoginMemberInfo(request, storeMemberVo, latitude, longitude);

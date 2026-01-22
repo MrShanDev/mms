@@ -40,12 +40,14 @@ public class MonitorController {
     @Operation(summary = "获取WebSocket服务状态")
     public Map<String, Object> getStatus() {
         Map<String, Object> status = new java.util.HashMap<>();
-        
+
         status.put("websocket_enabled", true); // 这里应该从配置获取
         status.put("online_users_count", WebSocketUtil.getOnlineUsers().size());
         status.put("server_time", System.currentTimeMillis());
         status.put("active_sessions", WebSocketUtil.SESSION_POOL.size());
-        
+
+        status.put("msg","server_time：服务器当前时间戳（毫秒格式）,online_users_count：系统当前在线用户数量,active_sessions：当前活跃的会话连接数量,websocket_enabled：WebSocket长连接功能是否已启用。");
+
         return status;
     }
 
@@ -56,11 +58,11 @@ public class MonitorController {
     @Operation(summary = "获取在线用户列表及详情")
     public Map<String, Object> getOnlineUsersDetail() {
         Map<String, Object> result = new java.util.HashMap<>();
-        
+
         var onlineUsers = WebSocketUtil.getOnlineUsers();
         result.put("count", onlineUsers.size());
         result.put("users", onlineUsers);
-        
+
         return result;
     }
 }

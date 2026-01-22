@@ -46,6 +46,7 @@ public class SocketInterceptor implements HandshakeInterceptor {
         if (!StringUtils.isEmpty(authToken)) {
             Object objId = StpUtil.getLoginIdByToken(authToken);
             if (null == objId) {
+                log.info("用户登录已失效");
                 return Boolean.FALSE;
             }
 

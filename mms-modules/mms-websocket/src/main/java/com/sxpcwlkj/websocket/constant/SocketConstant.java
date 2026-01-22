@@ -50,4 +50,7 @@ public class SocketConstant {
     
     // 消息计数相关常量
     public static final String SOCKET_MESSAGE_COUNT_PREFIX = "socket:message:count:"; // 消息计数前缀
+    
+    // 离线消息队列
+    public static final String SOCKET_OFFLINE_MESSAGE_QUEUE_PREFIX = "socket:offline:queue:"; // 离线消息队列前缀
 }

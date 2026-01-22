@@ -1,18 +1,14 @@
 package com.sxpcwlkj.bbs.entity.vo;
 
 
-import java.io.Serial;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.sxpcwlkj.bbs.entity.bo.BbsFilesBo;
-import com.sxpcwlkj.common.utils.DateUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import io.github.linpeilie.annotations.AutoMapper;
 import com.sxpcwlkj.bbs.entity.BbsTopic;
-import com.sxpcwlkj.framework.entity.BaseEntityVo;
-import com.alibaba.excel.annotation.ExcelProperty;
-import java.util.List;
+
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
 * 话题Vo
@@ -24,8 +20,7 @@ import java.util.Date;
 @Data
 @AutoMapper(target = BbsTopic.class)
 @EqualsAndHashCode(callSuper=false)
-public class BbsTopicVo  extends BaseEntityVo{
-	@Serial
+public class BbsTopicVo implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -48,18 +43,29 @@ public class BbsTopicVo  extends BaseEntityVo{
 	 * 内容
 	 */
 	private String contentHtml;
-
+    /**
+     * 昵称
+     */
     private String memberNickName;
-
+    /**
+     * 头像
+     */
     private String memberHeadImg;
 
-    private Integer height;
+//    private Integer height;
 
-    private Integer width;
-    // 评论数
+//    private Integer width;
+    /**
+     * 评论数
+     */
     private Long commentCount;
-    //点赞数
+    /**
+     * 点赞数
+     */
     private Long likeCount;
+    /**
+     * 是否点赞
+     */
     private Boolean like;
 
     private String fileUrl;
@@ -69,4 +75,8 @@ public class BbsTopicVo  extends BaseEntityVo{
      * 附件
      */
     private List<BbsFilesVo> files;
+    /**
+     * 创建时间
+     */
+    private Date createdTime;
 }

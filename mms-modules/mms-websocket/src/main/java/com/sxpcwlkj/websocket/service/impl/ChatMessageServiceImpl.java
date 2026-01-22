@@ -303,6 +303,9 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                 // 限制缓存大小
                 RedisUtil.lTrim(cacheKey, -MAX_CACHE_SIZE, -1);
                 
+                // 设置缓存过期时间（7天），防止内存泄漏
+                RedisUtil.expire(cacheKey, 7, java.util.concurrent.TimeUnit.DAYS);
+                
                 log.debug("消息已添加到缓存 - Key: {}", cacheKey);
             }
         } catch (Exception e) {

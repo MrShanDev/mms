@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sxpcwlkj.websocket.mapper.UserConversationMapper">
+    
+    <!-- 查询用户的会话列表（按置顶和最后消息时间排序） -->
+    <select id="selectUserConversations" resultType="com.sxpcwlkj.websocket.entity.UserConversation">
+        SELECT * FROM t_user_conversation
+        WHERE user_id = #{userId}
+        ORDER BY is_pinned DESC, last_message_time DESC
+    </select>
+    
+    <!-- 查询指定会话 -->
+    <select id="selectByUserAndConversation" resultType="com.sxpcwlkj.websocket.entity.UserConversation">
+        SELECT * FROM t_user_conversation
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+          AND conversation_type = #{conversationType}
+        LIMIT 1
+    </select>
+    
+</mapper>

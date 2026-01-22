@@ -246,6 +246,17 @@ management:
     logfile:
       external-file: ./logs/mobile-console.log
 
---- # websocket
+--- # WebSocket 配置
 websocket:
-  enable: false
+  # 是否启用 WebSocket 功能
+  enable: true
+  # 最大消息大小（单位：字节）
+  max-message-size: 8192
+  # 发送缓冲区大小（单位：字节）
+  send-buffer-size: 8192
+  # 接收缓冲区大小（单位：字节）
+  receive-buffer-size: 8192
+  # 最大文本消息大小（单位：字节）
+  max-text-message-size: 8192
+  # 最大二进制消息大小（单位：字节）
+  max-binary-message-size: 8192

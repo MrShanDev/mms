@@ -144,13 +144,27 @@ public class WebSocketUtil {
 
 //    =====================================发送消息==================================
     /**
-     * 发送消息
+     * 发送消息（线程安全版本）
+     * 修复：增加同步锁，避免竞态条件导致的 IllegalStateException
      */
     public static void sendMsg(WebSocketSession session, String data) throws IOException {
+        if (session == null) {
+            log.warn("会话为空，无法发送消息");
+            return;
+        }
+        
         try {
-            if (session != null && session.isOpen()) {
-                session.sendMessage(new TextMessage(data));
+            // 使用 session 对象作为锁，避免并发发送
+            synchronized (session) {
+                if (session.isOpen()) {
+                    session.sendMessage(new TextMessage(data));
+                } else {
+                    log.warn("会话已关闭，无法发送消息");
+                }
             }
+        } catch (IllegalStateException e) {
+            // 会话在发送过程中关闭
+            log.warn("会话状态异常，消息发送失败: {}", e.getMessage());
         } catch (Exception e) {
             log.error("发送消息失败", e);
             throw e;
@@ -180,21 +194,30 @@ public class WebSocketUtil {
 
     /**
      * 发送给指定用户
+     * 优化：如果用户不在线，返回失败状态供上层处理（如存入离线消息）
      */
     public static boolean sendToUser(String userId, String text) {
         try {
             String sessionId = getSessionId(userId);
-            if (sessionId != null) {
-                WebSocketSession session = get(sessionId);
-                if (session != null && session.isOpen()) {
-                    sendMsg(session, text);
-                    return true;
-                }
+            if (sessionId == null) {
+                log.debug("用户 {} 不在线，无法发送消息", userId);
+                return false;
+            }
+            
+            WebSocketSession session = get(sessionId);
+            if (session != null && session.isOpen()) {
+                sendMsg(session, text);
+                return true;
+            } else {
+                log.debug("用户 {} 的会话已失效", userId);
+                // 清理失效的会话映射
+                close(sessionId);
+                return false;
             }
         } catch (Exception e) {
             log.error("发送消息给用户 {} 失败", userId, e);
+            return false;
         }
-        return false;
     }
     
     /**

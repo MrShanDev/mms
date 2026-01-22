@@ -2,7 +2,10 @@ package com.sxpcwlkj.websocket.controller;
 
 import com.sxpcwlkj.common.utils.DataUtil;
 import com.sxpcwlkj.websocket.entity.Message;
+import com.sxpcwlkj.websocket.entity.UserConversation;
 import com.sxpcwlkj.websocket.service.MessageService;
+import com.sxpcwlkj.websocket.service.UserConversationService;
+import com.sxpcwlkj.websocket.service.OfflineMessageService;
 import com.sxpcwlkj.websocket.utils.WebSocketUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +30,8 @@ import java.util.Set;
 public class WebSocketController {
 
     private final MessageService messageService;
+    private final UserConversationService userConversationService;
+    private final OfflineMessageService offlineMessageService;
 
     /**
      * 获取在线用户数量
@@ -142,5 +147,159 @@ public class WebSocketController {
     public boolean sendSystemMessage(@RequestParam String userId,
                                      @RequestParam String content) {
         return WebSocketUtil.sendToUser(userId, content);
+    }
+    
+    /**
+     * 撤回消息
+     */
+    @PostMapping("/recall-message")
+    @Operation(summary = "撤回消息")
+    public boolean recallMessage(@RequestParam String messageId,
+                                 @RequestParam String userId) {
+        return messageService.recallMessage(messageId, userId);
+    }
+    
+    /**
+     * 标记消息为已读
+     */
+    @PostMapping("/mark-read")
+    @Operation(summary = "标记消息为已读")
+    public boolean markMessageAsRead(@RequestParam String messageId,
+                                     @RequestParam String userId) {
+        return messageService.markMessageAsRead(messageId, userId);
+    }
+    
+    /**
+     * 批量标记消息为已读
+     */
+    @PostMapping("/mark-read-batch")
+    @Operation(summary = "批量标记消息为已读")
+    public int markMessagesAsRead(@RequestParam String userId,
+                                  @RequestBody List<String> messageIds) {
+        return messageService.markMessagesAsRead(messageIds, userId);
+    }
+    
+    /**
+     * 获取用户未读消息数
+     */
+    @GetMapping("/unread-count/{userId}")
+    @Operation(summary = "获取用户未读消息数")
+    public long getUnreadCount(@PathVariable String userId) {
+        return messageService.getUnreadMessageCount(userId);
+    }
+    
+    /**
+     * 获取私聊未读消息数
+     */
+    @GetMapping("/unread-count/private")
+    @Operation(summary = "获取私聊未读消息数")
+    public long getUnreadPrivateCount(@RequestParam String userId,
+                                      @RequestParam String otherUserId) {
+        return messageService.getUnreadPrivateMessageCount(userId, otherUserId);
+    }
+    
+    // ==================== 会话管理接口 ====================
+    
+    /**
+     * 置顶会话
+     */
+    @PostMapping("/conversation/pin")
+    @Operation(summary = "置顶会话")
+    public boolean pinConversation(@RequestParam String userId,
+                                   @RequestParam String conversationId,
+                                   @RequestParam String conversationType) {
+        return userConversationService.pinConversation(userId, conversationId, conversationType);
+    }
+    
+    /**
+     * 取消置顶
+     */
+    @PostMapping("/conversation/unpin")
+    @Operation(summary = "取消置顶会话")
+    public boolean unpinConversation(@RequestParam String userId,
+                                     @RequestParam String conversationId,
+                                     @RequestParam String conversationType) {
+        return userConversationService.unpinConversation(userId, conversationId, conversationType);
+    }
+    
+    /**
+     * 设置免打扰
+     */
+    @PostMapping("/conversation/mute")
+    @Operation(summary = "设置会话免打扰")
+    public boolean setConversationMute(@RequestParam String userId,
+                                       @RequestParam String conversationId,
+                                       @RequestParam String conversationType,
+                                       @RequestParam boolean muted) {
+        return userConversationService.setMute(userId, conversationId, conversationType, muted);
+    }
+    
+    /**
+     * 获取用户会话列表
+     */
+    @GetMapping("/conversation/list/{userId}")
+    @Operation(summary = "获取用户会话列表")
+    public List<UserConversation> getConversationList(@PathVariable String userId) {
+        return userConversationService.getUserConversations(userId);
+    }
+    
+    /**
+     * 删除会话
+     */
+    @PostMapping("/conversation/delete")
+    @Operation(summary = "删除会话")
+    public boolean deleteConversation(@RequestParam String userId,
+                                      @RequestParam String conversationId,
+                                      @RequestParam String conversationType) {
+        return userConversationService.deleteConversation(userId, conversationId, conversationType);
+    }
+    
+    /**
+     * 清空会话未读数
+     */
+    @PostMapping("/conversation/clear-unread")
+    @Operation(summary = "清空会话未读数")
+    public void clearConversationUnread(@RequestParam String userId,
+                                        @RequestParam String conversationId,
+                                        @RequestParam String conversationType) {
+        userConversationService.clearUnreadCount(userId, conversationId, conversationType);
+    }
+    
+    // ==================== 离线消息管理接口 ====================
+    
+    /**
+     * 获取离线消息列表
+     */
+    @GetMapping("/offline-messages/{userId}")
+    @Operation(summary = "获取用户离线消息")
+    public List<Message> getOfflineMessages(@PathVariable String userId) {
+        return offlineMessageService.getOfflineMessages(userId);
+    }
+    
+    /**
+     * 获取离线消息数量
+     */
+    @GetMapping("/offline-messages/count/{userId}")
+    @Operation(summary = "获取离线消息数量")
+    public long getOfflineMessageCount(@PathVariable String userId) {
+        return offlineMessageService.getOfflineMessageCount(userId);
+    }
+    
+    /**
+     * 手动推送离线消息
+     */
+    @PostMapping("/offline-messages/push")
+    @Operation(summary = "推送离线消息给用户")
+    public int pushOfflineMessages(@RequestParam String userId) {
+        return offlineMessageService.pushOfflineMessages(userId);
+    }
+    
+    /**
+     * 清空离线消息
+     */
+    @PostMapping("/offline-messages/clear")
+    @Operation(summary = "清空离线消息")
+    public void clearOfflineMessages(@RequestParam String userId) {
+        offlineMessageService.clearOfflineMessages(userId);
     }
 }

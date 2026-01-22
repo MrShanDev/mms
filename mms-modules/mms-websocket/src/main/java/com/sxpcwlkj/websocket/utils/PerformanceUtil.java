@@ -18,10 +18,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 public class PerformanceUtil {
-    
+
     // 线程池用于异步处理
     private static final ExecutorService executorService = Executors.newFixedThreadPool(
-        Runtime.getRuntime().availableProcessors() * 2, 
+        Runtime.getRuntime().availableProcessors() * 2,
         r -> {
             Thread t = new Thread(r, "websocket-performance-thread");
             t.setDaemon(true);
@@ -62,12 +62,12 @@ public class PerformanceUtil {
     public static void batchSaveMessages(String chatRoomId, java.util.List<Object> messages) {
         try {
             String historyKey = SocketConstant.SOCKET_MESSAGE_HISTORY_PREFIX + "group:" + chatRoomId;
-            
+
             // 使用Redis管道批量操作提高性能
             for (Object message : messages) {
                 RedisUtil.lRightPush(historyKey, message);
             }
-            
+
             // 限制历史记录数量
             RedisUtil.lTrim(historyKey, -1000, -1);
         } catch (Exception e) {
@@ -80,27 +80,29 @@ public class PerformanceUtil {
      */
     public static java.util.Map<String, Object> getPerformanceMetrics() {
         java.util.Map<String, Object> metrics = new java.util.HashMap<>();
-        
+
         // 内存使用情况
         Runtime runtime = Runtime.getRuntime();
         long totalMemory = runtime.totalMemory();
         long freeMemory = runtime.freeMemory();
         long usedMemory = totalMemory - freeMemory;
-        
+
         metrics.put("memory_used_mb", usedMemory / (1024 * 1024));
         metrics.put("memory_total_mb", totalMemory / (1024 * 1024));
         metrics.put("memory_free_mb", freeMemory / (1024 * 1024));
         metrics.put("memory_usage_rate", String.format("%.2f%%", (double) usedMemory / totalMemory * 100));
-        
+
         // CPU核心数
         metrics.put("cpu_cores", runtime.availableProcessors());
-        
+
         // 在线用户数
         metrics.put("online_users_count", WebSocketUtil.getOnlineUsers().size());
-        
+
         // 当前线程池状态
         metrics.put("active_threads", Thread.activeCount());
-        
+
+        metrics.put("msg","memory_total_mb：系统物理内存总量，单位是兆字节,memory_free_mb：当前未被使用的空闲内存大小,online_users_count：正在访问或使用系统的用户总数,memory_used_mb：已被系统和程序占用的内存容量,cpu_cores：中央处理器的逻辑核心数量,active_threads：系统当前正在执行的并发任务数,memory_usage_rate：已用内存占总内存的百分比。");
+
         return metrics;
     }
 

@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.sxpcwlkj.websocket.WebSocketService;
+import com.sxpcwlkj.websocket.service.OfflineMessageService;
 import com.sxpcwlkj.websocket.entity.DataMsg;
 import com.sxpcwlkj.websocket.entity.DataMsgVo;
 import com.sxpcwlkj.websocket.enums.CmdEnum;
@@ -37,6 +38,9 @@ public class SocketHandler extends AbstractWebSocketHandler  {
     
     @Autowired
     private WebSocketService webSocketService;
+    
+    @Autowired
+    private OfflineMessageService offlineMessageService;
 
     /**
      * 连接成功后
@@ -53,6 +57,14 @@ public class SocketHandler extends AbstractWebSocketHandler  {
         
         //返回自己的sessionId
         WebSocketUtil.sendMsg(session, new DataMsg(CmdEnum.SUCCEED).setData(session.getId()));
+        
+        // 推送离线消息
+        if (userId != null) {
+            int pushedCount = offlineMessageService.pushOfflineMessages(userId);
+            if (pushedCount > 0) {
+                log.info("用户 {} 上线，已推送 {} 条离线消息", userId, pushedCount);
+            }
+        }
         
         // 设置用户默认权限
         // 注意：实际项目中应根据用户角色动态设置权限

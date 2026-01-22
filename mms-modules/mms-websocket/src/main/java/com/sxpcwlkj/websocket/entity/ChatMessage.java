@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @Accessors(chain = true)
-@TableName("t_chat_message")
+@TableName("chat_message")
 public class ChatMessage {
     
     /**
