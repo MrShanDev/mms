@@ -50,7 +50,6 @@ public class MemberApiController extends BaseController {
 
     private final StoreMemberService apiMemberService;
     private final StoreMemberAddressService apiMemberAddressService;
-    private final EmailService emailService;
     /**
      * 已登录会员信息
      */

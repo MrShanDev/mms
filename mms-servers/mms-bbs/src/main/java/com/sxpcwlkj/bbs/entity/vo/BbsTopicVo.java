@@ -64,9 +64,25 @@ public class BbsTopicVo implements Serializable {
      */
     private Long likeCount;
     /**
+     * 收藏数
+     */
+    private Long favoriteCount;
+    /**
+     * 关注数
+     */
+    private Long attentionCount;
+    /**
      * 是否点赞
      */
     private Boolean like;
+    /**
+     * 是否收藏
+     */
+    private Boolean favorite;
+    /**
+     * 是否关注
+     */
+    private Boolean attention;
 
     private String fileUrl;
 
