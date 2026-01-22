@@ -205,6 +205,19 @@ public class RedisUtil {
     }
 
     /**
+     * 设置有效时间
+     *
+     * @param key     Redis键
+     * @param timeout 超时时间
+     * @param unit    时间单位
+     * @return true=设置成功；false=设置失败
+     */
+    public static boolean expire(final String key, final long timeout, final java.util.concurrent.TimeUnit unit) {
+        RBucket rBucket = CLIENT.getBucket(key);
+        return rBucket.expire(timeout, unit);
+    }
+
+    /**
      * 获得缓存的基本对象。
      *
      * @param key 缓存键值
@@ -645,6 +658,28 @@ public class RedisUtil {
     public static long lSize(final String key) {
         RList<Object> rList = CLIENT.getList(key);
         return rList.size();
+    }
+
+    /**
+     * List从左侧弹出
+     *
+     * @param key Redis键
+     * @return 弹出的值
+     */
+    public static <T> T lLeftPop(final String key) {
+        RDeque<T> rDeque = CLIENT.getDeque(key);
+        return rDeque.pollFirst();
+    }
+
+    /**
+     * List从右侧弹出
+     *
+     * @param key Redis键
+     * @return 弹出的值
+     */
+    public static <T> T lRightPop(final String key) {
+        RDeque<T> rDeque = CLIENT.getDeque(key);
+        return rDeque.pollLast();
     }
 
     /**
