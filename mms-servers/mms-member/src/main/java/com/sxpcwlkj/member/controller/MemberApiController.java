@@ -289,7 +289,7 @@ public class MemberApiController extends BaseController {
     @SaCheckLogin
     @Operation(summary = "设置个性签名", description = "设置用户个性签名，最多255个字符")
     @GetMapping("/setSignature")
-    public R<Boolean> setSignature(@RequestParam String signature) {
+    public R<Boolean> setSignature(String signature) {
         if (signature != null && signature.length() > 255) {
             return R.fail("个性签名不能超过255个字符");
         }
@@ -308,7 +308,7 @@ public class MemberApiController extends BaseController {
     @SaCheckLogin
     @Operation(summary = "设置用户标签", description = "设置用户标签，多个标签用逗号分隔，最多500个字符")
     @GetMapping("/setTags")
-    public R<Boolean> setTags(@RequestParam String tags) {
+    public R<Boolean> setTags(String tags) {
         if (tags != null && tags.length() > 500) {
             return R.fail("标签总长度不能超过500个字符");
         }
@@ -327,7 +327,7 @@ public class MemberApiController extends BaseController {
     @SaCheckLogin
     @Operation(summary = "设置个人中心背景图", description = "设置用户个人中心背景图")
     @GetMapping("/setMemberBgImg")
-    public R<Boolean> setMemberBgImg(@RequestParam String memberBgImg) {
+    public R<Boolean> setMemberBgImg(String memberBgImg) {
         if (StringUtils.isEmpty(memberBgImg)) {
             return R.fail("背景图地址不能为空");
         }
