@@ -115,6 +115,9 @@ public class StoreMemberVo extends BaseEntityVo {
 	 */
 	private String tags;
 
-
-
+	/**
+	 * 个人中心背景图
+	 */
+	private String memberBgImg;
 }
+

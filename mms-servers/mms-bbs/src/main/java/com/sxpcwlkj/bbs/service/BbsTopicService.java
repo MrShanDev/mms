@@ -6,6 +6,7 @@ import com.sxpcwlkj.framework.service.BaseService;
 import com.sxpcwlkj.bbs.entity.BbsTopic;
 import com.sxpcwlkj.bbs.entity.bo.BbsTopicBo;
 import com.sxpcwlkj.bbs.entity.vo.BbsTopicVo;
+import com.sxpcwlkj.bbs.entity.vo.BbsMsgVo;
 import com.sxpcwlkj.bbs.entity.export.BbsTopicExport;
 import java.util.List;
 import java.util.Set;
@@ -45,4 +46,19 @@ public interface BbsTopicService extends BaseService<BbsTopic, BbsTopicVo, BbsTo
      * @return true：成功 false ：失败
      */
     Boolean deleteByIdXml(String id, String loginId);
+
+    /**
+     * 查询收到的赞和收藏
+     */
+    TableDataInfo<BbsMsgVo> selectReceivedLeveList(String memberId, PageQuery pageQuery);
+
+    /**
+     * 查询关注用户列表
+     */
+    TableDataInfo<BbsMsgVo> selectFollowingList(String memberId, PageQuery pageQuery);
+
+    /**
+     * 查询@我的评论列表
+     */
+    TableDataInfo<BbsMsgVo> selectAtMeCommentList(String memberId, PageQuery pageQuery);
 }

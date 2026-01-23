@@ -221,6 +221,9 @@ public class StoreMemberServiceImpl extends BaseServiceImpl<StoreMember, StoreMe
         if(bo.getType()==7){
             row = baseMapper.update(null,new LambdaUpdateWrapper<StoreMember>().eq(StoreMember::getId,bo.getMemberId()).set(StoreMember::getBirthday,bo.getBirthday()));
         }
+        if(bo.getType()==8){
+            row = baseMapper.update(null,new LambdaUpdateWrapper<StoreMember>().eq(StoreMember::getId,bo.getMemberId()).set(StoreMember::getMemberBgImg,bo.getMemberBgImg()));
+        }
 
         if(row>0){
             return R.success("修改成功");

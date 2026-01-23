@@ -18,6 +18,10 @@ import com.sxpcwlkj.bbs.entity.vo.BbsAttentionVo;
 import com.sxpcwlkj.bbs.entity.export.BbsAttentionExport;
 import com.sxpcwlkj.bbs.mapper.BbsAttentionMapper;
 import com.sxpcwlkj.bbs.service.BbsAttentionService;
+import com.sxpcwlkj.member.entity.vo.StoreMemberVo;
+import com.sxpcwlkj.member.service.StoreMemberService;
+import com.sxpcwlkj.websocket.entity.Message;
+import com.sxpcwlkj.websocket.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +46,8 @@ import java.util.HashMap;
 public class BbsAttentionServiceImpl extends BaseServiceImpl<BbsAttention, BbsAttentionVo,BbsAttentionBo> implements BbsAttentionService {
 
    private final BbsAttentionMapper baseMapper;
+   private final StoreMemberService storeMemberService;
+   private final MessageService messageService;
 
     @Override
     public BaseMapperPlus<BbsAttention, BbsAttentionVo> getBaseMapper() {
@@ -128,7 +134,30 @@ public class BbsAttentionServiceImpl extends BaseServiceImpl<BbsAttention, BbsAt
           bbsAttention = new BbsAttention();
           bbsAttention.setMemberId(loginId);
           bbsAttention.setAttentionId(mid);
-          return baseMapper.insert(bbsAttention) > 0;
+          boolean success = baseMapper.insert(bbsAttention) > 0;
+          if (success) {
+              // 1. 发送系统通知
+              StoreMemberVo sender = storeMemberService.selectVoById(loginId);
+              String nickname = sender != null ? sender.getNickname() : "有人";
+              Message notice = new Message();
+              notice.setSenderId(loginId);
+              notice.setReceiverId(mid);
+              notice.setMessageType("private");
+              notice.setContentType("follow_notice");
+              notice.setContent(nickname + " 关注了你");
+              messageService.sendPrivateMessage(notice);
+
+              // 2. 检查互相关注
+              BbsAttention otherSide = baseMapper.selectOne(new LambdaQueryWrapper<BbsAttention>()
+                  .eq(BbsAttention::getMemberId, mid)
+                  .eq(BbsAttention::getAttentionId, loginId).last("LIMIT 1"));
+              if (otherSide != null) {
+                  // 互关打招呼
+                  Message greetMsg = Message.createPrivateMessage(loginId, mid, "我们已经互相关注，开始聊天吧！");
+                  messageService.sendPrivateMessage(greetMsg);
+              }
+          }
+          return success;
       } else {
           // 取消关注
           return baseMapper.delete(new LambdaQueryWrapper<BbsAttention>()

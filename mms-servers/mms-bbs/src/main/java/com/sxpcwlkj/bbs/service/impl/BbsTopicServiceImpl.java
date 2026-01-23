@@ -25,6 +25,7 @@ import com.sxpcwlkj.framework.service.impl.BaseServiceImpl;
 import com.sxpcwlkj.bbs.entity.BbsTopic;
 import com.sxpcwlkj.bbs.entity.bo.BbsTopicBo;
 import com.sxpcwlkj.bbs.entity.vo.BbsTopicVo;
+import com.sxpcwlkj.bbs.entity.vo.BbsMsgVo;
 import com.sxpcwlkj.bbs.entity.export.BbsTopicExport;
 import com.sxpcwlkj.bbs.mapper.BbsTopicMapper;
 import com.sxpcwlkj.bbs.service.BbsTopicService;
@@ -239,5 +240,175 @@ public class BbsTopicServiceImpl extends BaseServiceImpl<BbsTopic, BbsTopicVo,Bb
             return this.getBaseMapper().deleteById(id)>0;
         }
         throw new MmsException("您无权删除该话题");
+    }
+
+    @Override
+    public TableDataInfo<BbsMsgVo> selectReceivedLeveList(String memberId, PageQuery pageQuery) {
+        // 1. 获取我的所有话题ID
+        List<BbsTopic> myTopics = baseMapper.selectList(new LambdaQueryWrapper<BbsTopic>()
+            .eq(BbsTopic::getMemberId, memberId)
+            .select(BbsTopic::getId));
+        if (myTopics.isEmpty()) {
+            return TableDataInfo.build();
+        }
+        List<String> topicIds = myTopics.stream().map(BbsTopic::getId).toList();
+
+        // 2. 分页查询这些话题收到的赞和收藏 (排除自己)
+        Page<BbsLeve> page = bbsLeveMapper.selectPage(pageQuery.build(), new LambdaQueryWrapper<BbsLeve>()
+            .in(BbsLeve::getBbsId, topicIds)
+            .ne(BbsLeve::getMemberId, memberId)
+            .in(BbsLeve::getType, List.of(1, 3))
+            .eq(BbsLeve::getStatus, 1)
+            .orderByDesc(BbsLeve::getCreatedTime));
+
+        List<BbsMsgVo> voList = new ArrayList<>();
+        for (BbsLeve leve : page.getRecords()) {
+            BbsMsgVo msgVo = new BbsMsgVo();
+            msgVo.setId(leve.getId());
+            msgVo.setMemberId(leve.getMemberId());
+            msgVo.setBbsId(leve.getBbsId());
+            msgVo.setType(leve.getType());
+            msgVo.setCreatedTime(leve.getCreatedTime());
+            msgVo.setContent(leve.getType() == 1 ? "赞了你的帖子" : "收藏了你的帖子");
+
+            // 填充用户信息
+            StoreMemberVo actor = storeMemberService.selectVoById(leve.getMemberId());
+            if (actor != null) {
+                msgVo.setMemberNickName(actor.getNickname());
+                msgVo.setMemberHeadImg(actor.getHeadPortrait());
+            }
+
+            // 填充帖子主图
+            msgVo.setTopicMainImg(getTopicMainImg(leve.getBbsId()));
+            voList.add(msgVo);
+        }
+
+        TableDataInfo<BbsMsgVo> result = TableDataInfo.build();
+        result.setRows(voList);
+        result.setTotal(page.getTotal());
+        return result;
+    }
+
+    @Override
+    public TableDataInfo<BbsMsgVo> selectFollowingList(String memberId, PageQuery pageQuery) {
+        // 1. 分页查询我关注的人
+        Page<BbsAttention> page = bbsAttentionMapper.selectPage(pageQuery.build(), new LambdaQueryWrapper<BbsAttention>()
+            .eq(BbsAttention::getMemberId, memberId)
+            .orderByDesc(BbsAttention::getCreatedTime));
+
+        List<BbsMsgVo> voList = new ArrayList<>();
+        for (BbsAttention attention : page.getRecords()) {
+            BbsMsgVo msgVo = new BbsMsgVo();
+            msgVo.setId(attention.getId());
+            msgVo.setMemberId(attention.getAttentionId());
+            msgVo.setType(5); // 关注
+            msgVo.setCreatedTime(attention.getCreatedTime());
+
+            // 填充用户信息
+            StoreMemberVo actor = storeMemberService.selectVoById(attention.getAttentionId());
+            if (actor != null) {
+                msgVo.setMemberNickName(actor.getNickname());
+                msgVo.setMemberHeadImg(actor.getHeadPortrait());
+            }
+
+            // 判断回关注状态
+            Long count = bbsAttentionMapper.selectCount(new LambdaQueryWrapper<BbsAttention>()
+                .eq(BbsAttention::getMemberId, attention.getAttentionId())
+                .eq(BbsAttention::getAttentionId, memberId));
+            msgVo.setMutualAttention(count != null && count > 0);
+
+            // 获取该用户最新帖子的主图
+            BbsTopic latestTopic = baseMapper.selectOne(new LambdaQueryWrapper<BbsTopic>()
+                .eq(BbsTopic::getMemberId, attention.getAttentionId())
+                .orderByDesc(BbsTopic::getCreatedTime)
+                .last("LIMIT 1"));
+            if (latestTopic != null) {
+                msgVo.setBbsId(latestTopic.getId());
+                msgVo.setTopicMainImg(getTopicMainImg(latestTopic.getId()));
+            }
+
+            voList.add(msgVo);
+        }
+
+        TableDataInfo<BbsMsgVo> result = TableDataInfo.build();
+        result.setRows(voList);
+        result.setTotal(page.getTotal());
+        return result;
+    }
+
+    @Override
+    public TableDataInfo<BbsMsgVo> selectAtMeCommentList(String memberId, PageQuery pageQuery) {
+        // 1. 获取我的所有话题ID
+        List<BbsTopic> myTopics = baseMapper.selectList(new LambdaQueryWrapper<BbsTopic>()
+            .eq(BbsTopic::getMemberId, memberId)
+            .select(BbsTopic::getId));
+        List<String> topicIds = myTopics.stream().map(BbsTopic::getId).toList();
+
+        // 2. 获取我发表的所有评论ID (为了查回复)
+        List<BbsComment> myComments = bbsCommentMapper.selectList(new LambdaQueryWrapper<BbsComment>()
+            .eq(BbsComment::getMemberId, memberId)
+            .select(BbsComment::getId));
+        List<String> myCommentIds = myComments.stream().map(BbsComment::getId).toList();
+
+        // 3. 分页查询：
+        // (a) 评论我的话题的 (排除自己)
+        // (b) 回复我的评论的 (排除自己)
+        LambdaQueryWrapper<BbsComment> lqw = new LambdaQueryWrapper<BbsComment>();
+        lqw.and(wrapper -> {
+            if (!topicIds.isEmpty()) {
+                wrapper.in(BbsComment::getBbsId, topicIds);
+            }
+            if (!myCommentIds.isEmpty()) {
+                wrapper.or().in(BbsComment::getFatherId, myCommentIds);
+            }
+        });
+        lqw.ne(BbsComment::getMemberId, memberId)
+           .eq(BbsComment::getStatus, 1)
+           .orderByDesc(BbsComment::getCreatedTime);
+
+        // 如果既没有话题也没有评论，直接返回空
+        if (topicIds.isEmpty() && myCommentIds.isEmpty()) {
+            return TableDataInfo.build();
+        }
+
+        Page<BbsComment> page = bbsCommentMapper.selectPage(pageQuery.build(), lqw);
+
+        List<BbsMsgVo> voList = new ArrayList<>();
+        for (BbsComment comment : page.getRecords()) {
+            BbsMsgVo msgVo = new BbsMsgVo();
+            msgVo.setId(comment.getId());
+            msgVo.setMemberId(comment.getMemberId());
+            msgVo.setBbsId(comment.getBbsId());
+            msgVo.setContent(comment.getComment());
+            msgVo.setType(4); // 评论
+            msgVo.setCreatedTime(comment.getCreatedTime());
+
+            // 填充用户信息
+            StoreMemberVo actor = storeMemberService.selectVoById(comment.getMemberId());
+            if (actor != null) {
+                msgVo.setMemberNickName(actor.getNickname());
+                msgVo.setMemberHeadImg(actor.getHeadPortrait());
+            }
+
+            // 填充帖子主图
+            msgVo.setTopicMainImg(getTopicMainImg(comment.getBbsId()));
+            voList.add(msgVo);
+        }
+
+        TableDataInfo<BbsMsgVo> result = TableDataInfo.build();
+        result.setRows(voList);
+        result.setTotal(page.getTotal());
+        return result;
+    }
+
+    private String getTopicMainImg(String bbsId) {
+        List<BbsFilesVo> files = bbsFilesService.selectVoListByLqw(new LambdaQueryWrapper<BbsFiles>()
+            .eq(BbsFiles::getBbsId, bbsId)
+            .eq(BbsFiles::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
+            .orderByDesc(BbsFiles::getCreatedTime));
+        if (files != null && !files.isEmpty()) {
+            return files.get(0).getUrl();
+        }
+        return null;
     }
 }

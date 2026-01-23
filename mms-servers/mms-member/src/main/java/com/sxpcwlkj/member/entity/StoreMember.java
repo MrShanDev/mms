@@ -109,4 +109,8 @@ public class StoreMember extends BaseEntity {
 	 * 用户标签（多个标签用逗号分隔）
 	 */
 	private String tags;
+	/**
+	 * 个人中心背景图
+	 */
+	private String memberBgImg;
 }

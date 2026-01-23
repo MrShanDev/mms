@@ -12,10 +12,7 @@ import com.sxpcwlkj.bbs.entity.bo.BbsCommentBo;
 import com.sxpcwlkj.bbs.entity.bo.BbsTopicBo;
 import com.sxpcwlkj.bbs.entity.bo.BbsAttentionBo;
 import com.sxpcwlkj.bbs.entity.bo.BbsLeveBo;
-import com.sxpcwlkj.bbs.entity.vo.BbsCateVo;
-import com.sxpcwlkj.bbs.entity.vo.BbsCommentVo;
-import com.sxpcwlkj.bbs.entity.vo.BbsTopicVo;
-import com.sxpcwlkj.bbs.entity.vo.BbsLeveVo;
+import com.sxpcwlkj.bbs.entity.vo.*;
 import com.sxpcwlkj.bbs.mapper.BbsAttentionMapper;
 import com.sxpcwlkj.bbs.mapper.BbsTopicMapper;
 import com.sxpcwlkj.bbs.mapper.BbsLeveMapper;
@@ -23,6 +20,7 @@ import com.sxpcwlkj.bbs.service.*;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Max;
@@ -292,39 +290,39 @@ public class ApiBbsController extends BaseController {
     @GetMapping("/myDataCount")
     public R<Map<String, Long>> getMyDataCount() {
         String memberId = LoginObject.getLoginId();
-        
+
         // 统计我关注的人数
         Long followingCount = bbsAttentionMapper.selectCount(new LambdaQueryWrapper<BbsAttention>()
             .eq(BbsAttention::getMemberId, memberId));
-        
+
         // 统计关注我的人数（粉丝数）
         Long fansCount = bbsAttentionMapper.selectCount(new LambdaQueryWrapper<BbsAttention>()
             .eq(BbsAttention::getAttentionId, memberId));
-        
+
         // 统计我发布的话题数
         Long topicCount = bbsTopicMapper.selectCount(new LambdaQueryWrapper<BbsTopic>()
             .eq(BbsTopic::getMemberId, memberId)
             .eq(BbsTopic::getStatus, 1));
-        
+
         // 统计我收藏的贴子数
         Long collectCount = bbsLeveMapper.selectCount(new LambdaQueryWrapper<BbsLeve>()
             .eq(BbsLeve::getMemberId, memberId)
             .eq(BbsLeve::getType, 3)
             .eq(BbsLeve::getStatus, 1));
-        
+
         // 统计我点赞的贴子数
         Long likeCount = bbsLeveMapper.selectCount(new LambdaQueryWrapper<BbsLeve>()
             .eq(BbsLeve::getMemberId, memberId)
             .eq(BbsLeve::getType, 1)
             .eq(BbsLeve::getStatus, 1));
-        
+
         Map<String, Long> result = new HashMap<>();
         result.put("followingCount", followingCount == null ? 0L : followingCount);  // 我关注的人数
         result.put("fansCount", fansCount == null ? 0L : fansCount);            // 粉丝数
         result.put("topicCount", topicCount == null ? 0L : topicCount);          // 我发布的话题数
         result.put("collectCount", collectCount == null ? 0L : collectCount);      // 我收藏的贴子数
         result.put("likeCount", likeCount == null ? 0L : likeCount);            // 我点赞的贴子数
-        
+
         return success(result);
     }
 
@@ -346,18 +344,18 @@ public class ApiBbsController extends BaseController {
             @NotNull(message = "页码不能为空")
             @Min(value = 1, message = "页码不能小于1")
             @RequestParam(defaultValue = "1") Integer pageNum) {
-        
+
         String memberId = LoginObject.getLoginId();
         BbsTopicBo bo = new BbsTopicBo();
         bo.setPageNum(pageNum);
         bo.setPageSize(pageSize);
-        
+
         if (type == 1) {
             // 我的发布：直接查询话题表
             bo.setMemberId(memberId);
             bo.setStatus(1);
             return success(bbsTopicService.selectListVoPage(bo, bo.getPageQuery()));
-            
+
         } else if (type == 2) {
             // 我的收藏：查询 bbs_leve 表中 type=3 的话题ID，然后查询话题详情
             List<BbsLeveVo> collectList = bbsLeveService.selectVoListByLqw(
@@ -367,17 +365,17 @@ public class ApiBbsController extends BaseController {
                     .eq(BbsLeve::getStatus, 1)
                     .select(BbsLeve::getBbsId)
             );
-            
+
             if (collectList.isEmpty()) {
                 return success(TableDataInfo.build());
             }
-            
+
             List<String> topicIds = collectList.stream()
                 .map(BbsLeveVo::getBbsId)
                 .toList();
-            
+
             return success(bbsTopicService.selectListVoPageXml(null, null, null, null, null, null, bo.getPageQuery(), topicIds));
-            
+
         } else if (type == 3) {
             // 我的点赞：查询 bbs_leve 表中 type=1 的话题ID，然后查询话题详情
             List<BbsLeveVo> likeList = bbsLeveService.selectVoListByLqw(
@@ -387,20 +385,77 @@ public class ApiBbsController extends BaseController {
                     .eq(BbsLeve::getStatus, 1)
                     .select(BbsLeve::getBbsId)
             );
-            
+
             if (likeList.isEmpty()) {
                 return success(TableDataInfo.build());
             }
-            
+
             List<String> topicIds = likeList.stream()
                 .map(BbsLeveVo::getBbsId)
                 .toList();
-            
+
             return success(bbsTopicService.selectListVoPageXml(null, null, null, null, null, null, bo.getPageQuery(), topicIds));
-            
+
         } else {
             return fail("类型参数错误，请传入 1-发布，2-收藏，3-点赞");
         }
+    }
+
+    /**
+     * 我收到的赞和收藏
+     */
+    @SaCheckLogin
+    @GetMapping("/receivedLeveList")
+    public R<TableDataInfo<BbsMsgVo>> receivedLeveList(
+            @NotNull(message = "每页大小不能为空")
+            @Min(value = 1, message = "每页大小不能小于1")
+            @Max(value = 100, message = "每页大小不能大于100")
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @NotNull(message = "页码不能为空")
+            @Min(value = 1, message = "页码不能小于1")
+            @RequestParam(defaultValue = "1") Integer pageNum) {
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setPageNum(pageNum);
+        pageQuery.setPageSize(pageSize);
+        return success(bbsTopicService.selectReceivedLeveList(LoginObject.getLoginId(), pageQuery));
+    }
+
+    /**
+     * 关注用户的列表
+     */
+    @SaCheckLogin
+    @GetMapping("/followingList")
+    public R<TableDataInfo<BbsMsgVo>> followingList(
+            @NotNull(message = "每页大小不能为空")
+            @Min(value = 1, message = "每页大小不能小于1")
+            @Max(value = 100, message = "每页大小不能大于100")
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @NotNull(message = "页码不能为空")
+            @Min(value = 1, message = "页码不能小于1")
+            @RequestParam(defaultValue = "1") Integer pageNum) {
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setPageNum(pageNum);
+        pageQuery.setPageSize(pageSize);
+        return success(bbsTopicService.selectFollowingList(LoginObject.getLoginId(), pageQuery));
+    }
+
+    /**
+     * 有人评论@我的列表
+     */
+    @SaCheckLogin
+    @GetMapping("/atMeList")
+    public R<TableDataInfo<BbsMsgVo>> atMeList(
+            @NotNull(message = "每页大小不能为空")
+            @Min(value = 1, message = "每页大小不能小于1")
+            @Max(value = 100, message = "每页大小不能大于100")
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @NotNull(message = "页码不能为空")
+            @Min(value = 1, message = "页码不能小于1")
+            @RequestParam(defaultValue = "1") Integer pageNum) {
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setPageNum(pageNum);
+        pageQuery.setPageSize(pageSize);
+        return success(bbsTopicService.selectAtMeCommentList(LoginObject.getLoginId(), pageQuery));
     }
 
 }

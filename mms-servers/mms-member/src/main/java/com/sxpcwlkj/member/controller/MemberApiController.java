@@ -16,6 +16,7 @@ import com.sxpcwlkj.email.service.EmailService;
 import com.sxpcwlkj.member.entity.StoreMember;
 import com.sxpcwlkj.member.entity.StoreMemberAddress;
 
+import com.sxpcwlkj.member.entity.bo.SignatureBo;
 import com.sxpcwlkj.member.entity.bo.StoreMemberAddressBo;
 import com.sxpcwlkj.member.entity.bo.StoreMemberUpdateBo;
 import com.sxpcwlkj.member.entity.vo.StoreMemberAddressVo;
@@ -132,6 +133,11 @@ public class MemberApiController extends BaseController {
         else if (bo.getType() == 7) {
             if (bo.getBirthday()==null) {
                 return R.fail("请传入生日（yyyy-MM-dd）!");
+            }
+        }
+        else if (bo.getType() == 8) {
+            if (StringUtils.isEmpty(bo.getMemberBgImg())) {
+                return R.fail("请传入背景图地址!");
             }
         }
         return apiMemberService.updateMember(bo);
@@ -263,7 +269,7 @@ public class MemberApiController extends BaseController {
      */
     @SaCheckLogin
     @Operation(summary = "会员设置邮箱", description = "会员设置邮箱")
-    @PostMapping("/setEmail")
+    @GetMapping("/setEmail")
     public R<Object> setEmail(@Validated @NotNull(message = "邮箱不能为空") String email, @Validated @NotNull(message = "验证码不能为空") String code) {
         String key = RedisUtil.CAPTCHA_CODE_KEY + "_bind_" + email;
         String cacheCode = RedisUtil.getCacheObject(key);
@@ -282,7 +288,7 @@ public class MemberApiController extends BaseController {
      */
     @SaCheckLogin
     @Operation(summary = "设置个性签名", description = "设置用户个性签名，最多255个字符")
-    @PostMapping("/setSignature")
+    @GetMapping("/setSignature")
     public R<Boolean> setSignature(@RequestParam String signature) {
         if (signature != null && signature.length() > 255) {
             return R.fail("个性签名不能超过255个字符");
@@ -301,7 +307,7 @@ public class MemberApiController extends BaseController {
      */
     @SaCheckLogin
     @Operation(summary = "设置用户标签", description = "设置用户标签，多个标签用逗号分隔，最多500个字符")
-    @PostMapping("/setTags")
+    @GetMapping("/setTags")
     public R<Boolean> setTags(@RequestParam String tags) {
         if (tags != null && tags.length() > 500) {
             return R.fail("标签总长度不能超过500个字符");
@@ -312,4 +318,25 @@ public class MemberApiController extends BaseController {
             .set(StoreMember::getTags, tags));
         return R.success("设置成功", result);
     }
+
+    /**
+     * 设置个人中心背景图
+     * @param memberBgImg 背景图地址
+     * @return 结果
+     */
+    @SaCheckLogin
+    @Operation(summary = "设置个人中心背景图", description = "设置用户个人中心背景图")
+    @GetMapping("/setMemberBgImg")
+    public R<Boolean> setMemberBgImg(@RequestParam String memberBgImg) {
+        if (StringUtils.isEmpty(memberBgImg)) {
+            return R.fail("背景图地址不能为空");
+        }
+        StoreMember storeMember = LoginObject.getLoginObject(StoreMember.class);
+        boolean result = apiMemberService.update(new LambdaUpdateWrapper<StoreMember>()
+            .eq(StoreMember::getId, storeMember.getId())
+            .set(StoreMember::getMemberBgImg, memberBgImg));
+        return R.success("设置成功", result);
+    }
+
+
 }

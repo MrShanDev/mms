@@ -11,7 +11,7 @@ import java.util.Date;
 public class StoreMemberUpdateBo {
 
     /**
-     * 操作类型 1:手机号 2:密码 3:昵称 4:头像 5:性别 6：账号 7:生日
+     * 操作类型 1:手机号 2:密码 3:昵称 4:头像 5:性别 6：账号 7:生日 8:背景图
      */
     @NotBlank
     @NotNull
@@ -53,5 +53,10 @@ public class StoreMemberUpdateBo {
      */
     @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd")
     private Date birthday;
+
+    /**
+     * 个人中心背景图 type=8 必传
+     */
+    private String memberBgImg;
 
 }
