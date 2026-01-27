@@ -633,12 +633,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-mobile-api</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -757,6 +751,15 @@
             <id>public</id>
             <name>huawei nexus</name>
             <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <!-- 中央仓库 - 作为备选源，用于获取华为云镜像中没有的包（如腾讯云SDK） -->
+        <repository>
+            <id>central</id>
+            <name>maven central repository</name>
+            <url>https://repo.maven.apache.org/maven2</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

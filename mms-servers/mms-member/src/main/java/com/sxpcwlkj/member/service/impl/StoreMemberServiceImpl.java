@@ -315,4 +315,21 @@ public class StoreMemberServiceImpl extends BaseServiceImpl<StoreMember, StoreMe
         }
         return null;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateLocation(String loginId, Double latitude, Double longitude) {
+        // 获取最新版本号
+        StoreMember member = baseMapper.selectById(loginId);
+        if (member != null) {
+            member.setLatitude(latitude);
+            member.setLongitude(longitude);
+            // updateById 会自动处理 @Version 字段 (revision)
+            // 如果版本冲突，它会返回 0 (更新失败)
+            int rows = baseMapper.updateById(member);
+            if (rows == 0) {
+                log.warn("更新用户经纬度失败，可能存在并发修改 (ID: {}, Revision: {})", loginId, member.getRevision());
+            }
+        }
+    }
 }

@@ -1,21 +1,32 @@
-package com.sxpcwlkj.member.entity;
+package com.sxpcwlkj.member.entity.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
-import com.sxpcwlkj.datasource.entity.BaseEntity;
-import java.util.Date;
+import java.io.Serial;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sxpcwlkj.common.utils.DateUtil;
+import com.sxpcwlkj.member.entity.StoreMemberAuthentication;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import io.github.linpeilie.annotations.AutoMapper;
+
+import com.sxpcwlkj.framework.entity.BaseEntityVo;
+import com.alibaba.excel.annotation.ExcelProperty;
+import java.util.List;
+import java.util.Date;
 
 /**
- * 会员认证
+ * 会员认证Vo
  *
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
+
 @Data
-@TableName("store_member_authentication")
-@EqualsAndHashCode(callSuper = true)
-public class StoreMemberAuthentication  extends BaseEntity {
+@AutoMapper(target = StoreMemberAuthentication.class)
+@EqualsAndHashCode(callSuper=false)
+public class StoreMemberAuthenticationVo  extends BaseEntityVo{
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     /**
      * ID
      */
@@ -60,5 +71,5 @@ public class StoreMemberAuthentication  extends BaseEntity {
      * 生日
      */
     private String nationality;
-}
 
+}
