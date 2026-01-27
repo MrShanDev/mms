@@ -641,7 +641,6 @@
         <module>mms-modules</module>
         <module>mms-zoom</module>
         <module>mms-servers</module>
-        <module>mms-mobile-api</module>
     </modules>
 
 
