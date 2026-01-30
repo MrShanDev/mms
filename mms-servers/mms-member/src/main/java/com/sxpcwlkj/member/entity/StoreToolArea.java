@@ -1,31 +1,40 @@
 package com.sxpcwlkj.member.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
+import com.sxpcwlkj.datasource.entity.BaseEntity;
+import java.util.Date;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * @author shanpengnian
+ * 行政区域
+ *
+ * @author mmsAdmin
+ * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Data
-public class StoreToolArea {
-
+@TableName("store_tool_area")
+@EqualsAndHashCode(callSuper = true)
+public class StoreToolArea  extends BaseEntity {
+    /**
+     * ID
+     */
+    @TableId
+    private Long id;
     /**
      * 名称
      */
     private String name;
     /**
-     * /编码
+     * CODE
      */
     private String code;
     /**
-     * 父编码
+     * 父CODE
      */
     private String parentCode;
     /**
      * 级别
      */
-    private Integer level;
-    /**
-     * 排序
-     */
-    private Integer sort;
+    private String level;
 }

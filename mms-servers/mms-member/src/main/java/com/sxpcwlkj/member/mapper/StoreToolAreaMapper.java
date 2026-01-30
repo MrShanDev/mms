@@ -1,20 +1,20 @@
 package com.sxpcwlkj.member.mapper;
 
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
-import com.sxpcwlkj.member.entity.StoreMemberAuthentication;
-import com.sxpcwlkj.member.entity.vo.StoreMemberAuthenticationVo;
+import com.sxpcwlkj.member.entity.StoreToolArea;
+import com.sxpcwlkj.member.entity.vo.StoreToolAreaVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 /**
- * 会员认证-Mapper
+ * 行政区域-Mapper
  *
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
 @Mapper
 @Repository
-public interface StoreMemberAuthenticationMapper extends BaseMapperPlus<StoreMemberAuthentication, StoreMemberAuthenticationVo> {
+public interface StoreToolAreaMapper extends BaseMapperPlus<StoreToolArea, StoreToolAreaVo> {
 
 }
 

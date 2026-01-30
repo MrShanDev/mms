@@ -81,4 +81,13 @@ public interface StoreMemberService extends BaseService<StoreMember, StoreMember
      * @return true：成功 false ：失败
      */
     R<Object> setPassword(String loginId, String password);
+
+    /**
+     * 更新经纬度 (考虑 @Version 乐观锁)
+     * @param loginId 用户ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @return 结果
+     */
+    void updateLocation(String loginId, Double latitude, Double longitude);
 }
