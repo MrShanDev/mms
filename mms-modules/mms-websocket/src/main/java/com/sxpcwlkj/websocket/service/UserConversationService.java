@@ -12,17 +12,17 @@ import java.util.List;
 
 /**
  * 用户会话服务类
- * 
+ *
  * @author mmsAdmin
  * @since 2025年1月22日
  */
 @Service
 @Slf4j
 public class UserConversationService extends ServiceImpl<UserConversationMapper, UserConversation> {
-    
+
     /**
      * 获取或创建会话
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -30,7 +30,7 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
      */
     public UserConversation getOrCreateConversation(String userId, String conversationId, String conversationType) {
         UserConversation conversation = baseMapper.selectByUserAndConversation(userId, conversationId, conversationType);
-        
+
         if (conversation == null) {
             conversation = new UserConversation();
             conversation.setUserId(userId);
@@ -43,13 +43,13 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             conversation.setUpdateTime(LocalDateTime.now());
             this.save(conversation);
         }
-        
+
         return conversation;
     }
-    
+
     /**
      * 置顶会话
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -62,7 +62,7 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             conversation.setPinnedTime(LocalDateTime.now());
             conversation.setUpdateTime(LocalDateTime.now());
             this.updateById(conversation);
-            
+
             log.info("用户 {} 置顶会话 {}", userId, conversationId);
             return true;
         } catch (Exception e) {
@@ -70,10 +70,10 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             return false;
         }
     }
-    
+
     /**
      * 取消置顶
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -88,7 +88,7 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
                 conversation.setUpdateTime(LocalDateTime.now());
                 this.updateById(conversation);
             }
-            
+
             log.info("用户 {} 取消置顶会话 {}", userId, conversationId);
             return true;
         } catch (Exception e) {
@@ -96,10 +96,10 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             return false;
         }
     }
-    
+
     /**
      * 设置免打扰
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -112,7 +112,7 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             conversation.setIsMuted(muted ? 1 : 0);
             conversation.setUpdateTime(LocalDateTime.now());
             this.updateById(conversation);
-            
+
             log.info("用户 {} {} 会话 {} 免打扰", userId, muted ? "开启" : "关闭", conversationId);
             return true;
         } catch (Exception e) {
@@ -120,10 +120,10 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             return false;
         }
     }
-    
+
     /**
      * 更新会话最后消息
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -140,10 +140,10 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             log.error("更新会话最后消息失败", e);
         }
     }
-    
+
     /**
      * 增加未读数
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -158,10 +158,10 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             log.error("增加未读数失败", e);
         }
     }
-    
+
     /**
      * 清空未读数
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -178,20 +178,20 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
             log.error("清空未读数失败", e);
         }
     }
-    
+
     /**
      * 获取用户会话列表（按置顶和时间排序）
-     * 
+     *
      * @param userId 用户ID
      * @return 会话列表
      */
     public List<UserConversation> getUserConversations(String userId) {
         return baseMapper.selectUserConversations(userId);
     }
-    
+
     /**
      * 删除会话
-     * 
+     *
      * @param userId 用户ID
      * @param conversationId 会话ID
      * @param conversationType 会话类型
@@ -204,7 +204,7 @@ public class UserConversationService extends ServiceImpl<UserConversationMapper,
                    .eq(UserConversation::getConversationId, conversationId)
                    .eq(UserConversation::getConversationType, conversationType);
             this.remove(wrapper);
-            
+
             log.info("用户 {} 删除会话 {}", userId, conversationId);
             return true;
         } catch (Exception e) {

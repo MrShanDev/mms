@@ -1,8 +1,8 @@
 package com.sxpcwlkj.gen.controller;
 
 import cn.hutool.core.io.IoUtil;
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.gen.common.GenQueryBo;
 import com.sxpcwlkj.gen.entity.ProjectModifyEntity;
 import com.sxpcwlkj.gen.service.ProjectModifyService;
@@ -25,8 +25,8 @@ public class ProjectModifyController {
     private final ProjectModifyService projectModifyService;
 
     @GetMapping("page")
-    public TableDataInfo<ProjectModifyEntity> page(GenQueryBo query) {
-        return projectModifyService.page(query);
+    public R<PageResult<ProjectModifyEntity>> page(GenQueryBo query) {
+        return R.success(projectModifyService.page(query).toPageResult());
     }
 
     @GetMapping("{id}")

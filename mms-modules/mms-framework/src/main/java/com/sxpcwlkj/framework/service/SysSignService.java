@@ -44,4 +44,7 @@ public interface SysSignService {
     SysSign getSign();
 
 
+    void updateByIdBase(SysSign sysSign);
+
+    void insert(SysSign sysSign);
 }

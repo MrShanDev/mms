@@ -2,6 +2,7 @@ package com.sxpcwlkj.gen.common.aspect;
 
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.entity.AesKeyEntity;
 import com.sxpcwlkj.framework.entity.SysSign;
@@ -76,8 +77,8 @@ public class EncryptParameterAspect {
         }
 
         Object data = ((R<?>) object).getData();
-        if (data instanceof List || data instanceof TableDataInfo) {
-            List<?> itemList = data instanceof List ? (List<?>) data : ((TableDataInfo<?>) data).getRows();
+        if (data instanceof List || data instanceof TableDataInfo || data instanceof PageResult) {
+            List<?> itemList = data instanceof List ? (List<?>) data : (data instanceof TableDataInfo ? ((TableDataInfo<?>) data).getRows() : ((PageResult<?>) data).getRows());
             itemList.forEach(f ->
                     handleItem(f, false)
             );

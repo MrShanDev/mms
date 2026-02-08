@@ -17,6 +17,7 @@ import com.sxpcwlkj.framework.service.SysSignService;
 import com.sxpcwlkj.framework.utils.SignUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -53,6 +54,7 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
     private static final String NONCE_KEY = "X-Nonce";
     private static final String TIMESTAMP_KEY = "X-Timestamp";
     private static final String ENCRYPT_TYPE = "Encrypt-Type";
+    private static final String APPID = "App-Id";
 
 
     /**
@@ -124,6 +126,9 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             if (StringUtils.isNotBlank(sign)) {
                 headers.set(SIGN_KEY, sign);
             }
+            if (apiSecurityParam.getAppId() == null){
+                apiSecurityParam.setAppid(headers.getFirst(APPID));
+            }
             // 验证签名sign
             // 获取aes秘钥
             SysSign sysSign = sysSignService.getSign();
@@ -133,7 +138,7 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             commonVerify(inputMessage.getHeaders());
             if (apiSecurity.encryptType().getType().equalsIgnoreCase(SignUtil.ENCRYPTION_TYPE_AES)) {
                 SignUtil.verifyAesCryptoJs(apiSecurityParam, new AesKeyEntity(sysSign.getAppId(), sysSign.getSecretKey()));
-            }else
+            }
             //非对称解密验签
             if (apiSecurity.encryptType().getType().equalsIgnoreCase(SignUtil.ENCRYPTION_TYPE_RSA)) {
                 SignUtil.verifyRsa(apiSecurityParam, new RsaKeyEntity(sysSign.getPublicKey(), sysSign.getPrivateKey()));
@@ -192,11 +197,11 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
 
         String sign = headers.getFirst(SIGN_KEY);
         if (StringUtils.isBlank(sign)) {
-            throw new ParamsException("签名不能为空");
+            throw new ParamsException("签名["+SIGN_KEY+"]不能为空");
         }
         String timestamp = headers.getFirst(TIMESTAMP_KEY);
         if (StringUtils.isBlank(timestamp)) {
-            throw new ParamsException("时间戳不能为空");
+            throw new ParamsException("请求头缺少:"+TIMESTAMP_KEY+"参数");
         }
         try {
             long time = Long.parseLong(timestamp);
@@ -207,15 +212,15 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
                 throw new MmsException("签名已过期");
             }
         } catch (Exception e) {
-            throw new MmsException("非法的时间戳");
+            throw new MmsException("签名已过期");
         }
         String encryptType = headers.getFirst(ENCRYPT_TYPE);
         if (StringUtils.isBlank(encryptType)) {
-            throw new ParamsException("请求头缺少:encrypt-type 参数");
+            throw new ParamsException("请求头缺少:"+ENCRYPT_TYPE+"参数");
         }
         String appId = headers.getFirst(Constants.APPID);
         if (StringUtils.isBlank(appId)) {
-            throw new ParamsException("请求头缺少:app-id 参数");
+            throw new ParamsException("请求头缺少:"+Constants.APPID+"参数");
         }
 
     }

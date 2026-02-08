@@ -29,7 +29,7 @@ spring:
         # Spring Boot Admin
         url: http://localhost:9001    #监控服务器端地址
         username: admin               #账号
-        password: 123456              #密码
+        password: ${SPRING_BOOT_ADMIN_PASSWORD:}              #密码
 
 #配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
 --- # 数据源配置
@@ -43,7 +43,7 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALVNuyb9ZEkdhW2LaaKMLCO6Y0x2bXtw+jBOkctSpTGwCmZDTej69fOd/+QccDBE6fMGXtx4qvEZWKb1uNYShG8CAwEAAQ==
+      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJpocwyy7m8F8tAUeMgn6GOU404nYeL+yRnKG3JL7IZghb4N9ew9v5O6hJ+gZFlXnGiMjlo5dx5/tpArvtbRwGkCAwEAAQ==
       # 账号密码
       datasource:
         # 主库数据源
@@ -51,9 +51,9 @@ spring:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: mms
+          username: root
           # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ENC(XgsSsz/DUB6P+yexQSJRAc/eAA57i1lUsxJowpk20DQ9Ft3xoVO4TU16X6nQJSdnEkeHpLXg3ZiGWH9exJ88BQ==)
+          password: ${SPRING_DATASOURCE_PASSWORD:}
         # 从库数据源
 #        slave:
 #          lazy: true
@@ -84,11 +84,11 @@ spring:
       #          password: root
       hikari:
         # 最大连接池数量
-        maxPoolSize: 20
+        maxPoolSize: ${DB_MAX_POOL_SIZE:40}
         # 最小空闲线程数量
-        minIdle: 10
+        minIdle: ${DB_MIN_IDLE:10}
         # 配置获取连接等待超时的时间
-        connectionTimeout: 30000
+        connectionTimeout: ${DB_CONNECTION_TIMEOUT:10000}
         # 校验超时时间
         validationTimeout: 5000
         # 空闲连接存活最大时间，默认10分钟
@@ -99,6 +99,8 @@ spring:
         connectionTestQuery: SELECT 1
         # 多久检查一次连接的活性
         keepaliveTime: 30000
+        # 连接泄漏检测（毫秒，0 表示关闭）
+        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
 
 --- # Redis配置
 spring:
@@ -107,7 +109,7 @@ spring:
       host: localhost
       port: 6379
       database: 2
-      password: 123456
+      password: ${SPRING_REDIS_PASSWORD:}
       timeout: 100s
       ssl:
         enabled: false
@@ -135,18 +137,35 @@ redisson:
     # 发布和订阅连接池大小
     subscriptionConnectionPoolSize: 50
 
+--- # websocket
+websocket:
+  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:}
+
+--- # CORS 配置
+mms:
+  cors:
+    allowed-origins: ${MMS_CORS_ALLOWED_ORIGINS:}
+    allowed-headers: ${MMS_CORS_ALLOWED_HEADERS:*}
+    allowed-methods: ${MMS_CORS_ALLOWED_METHODS:*}
+    allow-credentials: ${MMS_CORS_ALLOW_CREDENTIALS:true}
+    max-age: ${MMS_CORS_MAX_AGE:1800}
+
 --- # Actuator 监控端点的配置项
 management:
   endpoints:
     enabled-by-default: true #暴露所有端点信息
     web:
       exposure:
-        include: '*' #以web方式暴露
+        include: health,info
   endpoint:
     health:
       show-details: ALWAYS
     logfile:
       external-file: ./logs/sys-console.log
+
+--- # Swagger 开关
+swagger:
+  enabled: false
 
 --- # Spring Boot Admin
 spring:
@@ -161,4 +180,9 @@ logging:
     com.sxpcwlkj: @logging.level@
     org.springframework: warn
   config: classpath:logback.xml
+
+--- # MyBatisPlus 生产日志
+mybatis-plus:
+  configuration:
+    logImpl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 

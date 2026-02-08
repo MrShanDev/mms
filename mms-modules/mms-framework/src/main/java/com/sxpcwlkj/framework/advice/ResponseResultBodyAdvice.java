@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sxpcwlkj.common.annotation.MssSafety;
 import com.sxpcwlkj.common.exception.MmsException;
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.entity.AesKeyEntity;
@@ -64,8 +65,6 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
                                   @NotNull ServerHttpRequest request,
                                   @NotNull ServerHttpResponse response) {
         MssSafety apiSecurity = getApiSecurity(returnType);
-        boolean isEncrypt=  apiSecurity.encryptResponse();
-
         Method method = returnType.getMethod();
         assert method != null;
         Class<?> returnClass = method.getReturnType();
@@ -78,19 +77,26 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
             if (sysSign == null) {
                 throw new MmsException("秘钥不存在/请重新登录");
             }
+            boolean wrapPagedRows = false;
             if(returnClass.equals(TableDataInfo.class)){
                 data = ((TableDataInfo<?>) body).getRows();
                 data = JSONArray.toJSONString(data);
                 code = ((TableDataInfo<?>) body).getCode();
                 msg = ((TableDataInfo<?>) body).getMsg();
                 total = ((TableDataInfo<?>) body).getTotal();
+                wrapPagedRows = true;
             }
-            if(returnClass.equals(R.class)){
-                assert body instanceof R<?>;
-                data = ((R<?>) body).getData();
-                data = JSONObject.toJSONString(data);
-                code = ((R<?>) body).getCode();
-                msg = ((R<?>) body).getMsg();
+            if(returnClass.equals(R.class) && body instanceof R<?> result){
+                data = result.getData();
+                if (data instanceof PageResult<?> pageResult) {
+                    total = pageResult.getTotal();
+                    data = JSONObject.toJSONString(pageResult.getRows());
+                    wrapPagedRows = true;
+                } else {
+                    data = JSONObject.toJSONString(data);
+                }
+                code = result.getCode();
+                msg = result.getMsg();
             }
             if(code==200){
                 // 加密返回数据
@@ -99,7 +105,7 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
                     .addData(data.toString());
                 ApiSecurityParam  apiSecurityParam1 = SignUtil.encryptAesCryptoJs(param1,new AesKeyEntity(sysSign.getAppId(),sysSign.getSecretKey()));
                 data = apiSecurityParam1.getSign();
-                if(body instanceof TableDataInfo<?>){
+                if(wrapPagedRows) {
                     Map<String,String> map=new HashMap<>();
                     map.put("total",total+"");
                     map.put("rows",data.toString());
@@ -158,14 +164,5 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
 //        return ResponseVO.success(body);
 //    }
 
-    JSONObject encryptResponse(Object result) {
-        String aseKey = "aseKey";
-        String content = JSONObject.toJSONString(result);
-        String data = "";
-        String key = "key";
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("key", key);
-        jsonObject.put("data", data);
-        return jsonObject;
-    }
+    // 预留：如需扩展响应加密逻辑，可在此增加辅助方法
 }

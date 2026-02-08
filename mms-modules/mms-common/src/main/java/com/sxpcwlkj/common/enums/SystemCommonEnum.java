@@ -26,6 +26,10 @@ public enum SystemCommonEnum implements IEnum<Integer> {
      * 系统状态：禁用
      */
     SYS_COMMON_STATE_CLOSE(0, "common_state","系统状态-关闭/失效"),
+    /**
+     * 系统状态：开放API
+     */
+    SYS_COMMON_STATE_OPEN_API(-99, "common_state","系统状态-开放API"),
 
     /**
      * 系统默认头像

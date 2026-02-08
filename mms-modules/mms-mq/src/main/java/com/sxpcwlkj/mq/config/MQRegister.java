@@ -1,7 +1,7 @@
 package com.sxpcwlkj.mq.config;
 
-import com.sxpcwlkj.mq.hander.handler.DefaultMqHandler;
-import com.sxpcwlkj.mq.hander.handler.DistributionMqHandler;
+import com.sxpcwlkj.mq.handler.impl.DefaultMqHandler;
+import com.sxpcwlkj.mq.handler.impl.DistributionMqHandler;
 import com.sxpcwlkj.mq.service.MqService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

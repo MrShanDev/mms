@@ -201,7 +201,9 @@
     import {CURDEnum} from "/@/enums/CURDEnum";
     import {generateUUID, isEmpty} from "/@/utils/mms";
     import {NextLoading} from "/@/utils/loading";
-
+    import FastTableColumn from "/@/components/fast-table-column/src/fast-table-column.vue";
+    import FastSwitch from "/@/components/fast-switch/src/fast-switch.vue";
+    import FastSelect from "/@/components/fast-select/src/fast-select.vue";
     import {${FunctionName}Bo, ${FunctionName}Vo} from '/@/views/${moduleName}/${functionName}/type';
     import {${functionName}Api} from '/@/views/${moduleName}/${functionName}';
     const baseApi = ${functionName}Api();
@@ -239,7 +241,7 @@
             </#if>
             </#list>
             <#if formLayout==2 >
-                isAll:true,
+                ,isAll:true,
             </#if>
             }
         }

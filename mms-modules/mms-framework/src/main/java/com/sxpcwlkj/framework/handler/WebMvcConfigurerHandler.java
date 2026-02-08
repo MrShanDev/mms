@@ -4,14 +4,18 @@ package com.sxpcwlkj.framework.handler;
 import com.sxpcwlkj.common.properties.WebThymeleafProperties;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.function.Consumer;
 
 /**
  * @author mmsAdmin
@@ -23,6 +27,17 @@ public class WebMvcConfigurerHandler implements WebMvcConfigurer {
 
 
     private final WebThymeleafProperties webThymeleafProperties;
+
+    @Value("${mms.cors.allowed-origins:*}")
+    private String allowedOrigins;
+    @Value("${mms.cors.allowed-headers:*}")
+    private String allowedHeaders;
+    @Value("${mms.cors.allowed-methods:*}")
+    private String allowedMethods;
+    @Value("${mms.cors.allow-credentials:true}")
+    private boolean allowCredentials;
+    @Value("${mms.cors.max-age:1800}")
+    private long maxAge;
     @Override
     public void addInterceptors(@org.jetbrains.annotations.NotNull InterceptorRegistry registry) {
         // 全局访问性能拦截
@@ -48,20 +63,32 @@ public class WebMvcConfigurerHandler implements WebMvcConfigurer {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
+        config.setAllowCredentials(allowCredentials);
         // 设置访问源地址
-        config.addAllowedOriginPattern("*");
+        applyAllowedList(allowedOrigins, config::addAllowedOriginPattern);
         // 设置访问源请求头
-        config.addAllowedHeader("*");
+        applyAllowedList(allowedHeaders, config::addAllowedHeader);
         // 设置访问源请求方法
-        config.addAllowedMethod("*");
-        // 有效期 1800秒
-        config.setMaxAge(1800L);
+        applyAllowedList(allowedMethods, config::addAllowedMethod);
+        // 有效期
+        config.setMaxAge(maxAge);
         // 添加映射路径，拦截一切请求
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         // 返回新的CorsFilter
         return new CorsFilter(source);
+    }
+
+    private void applyAllowedList(String rawValues, Consumer<String> applier) {
+        if (!StringUtils.hasText(rawValues)) {
+            return;
+        }
+        for (String value : StringUtils.commaDelimitedListToStringArray(rawValues)) {
+            String trimmed = value.trim();
+            if (StringUtils.hasText(trimmed)) {
+                applier.accept(trimmed);
+            }
+        }
     }
 
 //    @Bean

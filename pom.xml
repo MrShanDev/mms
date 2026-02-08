@@ -26,22 +26,22 @@
         <mybatis.version>3.5.16</mybatis.version>
         <mybatis-plus.version>3.5.14</mybatis-plus.version>
         <mybatis-plus-join-core.version>1.4.7</mybatis-plus-join-core.version>
-        <dynamic-dsb3.version>4.3.1</dynamic-dsb3.version>
+        <dynamic-dsb3.version>4.5.0</dynamic-dsb3.version>
         <mysql.version>8.2.0</mysql.version>
         <postgresql.version>42.7.3</postgresql.version>
         <p6spy.version>3.9.1</p6spy.version>
 
-        <satoken.version>1.43.0</satoken.version>
-        <token-redis.version>1.43.0</token-redis.version>
+        <satoken.version>1.44.0</satoken.version>
+        <token-redis.version>1.44.0</token-redis.version>
         <redisson.version>3.52.0</redisson.version>
         <lock4j.version>2.2.7</lock4j.version>
-        <alibaba-ttl.version>2.14.2</alibaba-ttl.version>
+        <alibaba-ttl.version>2.14.5</alibaba-ttl.version>
         <powerjob.version>4.3.9</powerjob.version>
         <mapstruct-plus.version>1.4.3</mapstruct-plus.version>
         <mapstruct-plus.lombok.version>0.2.0</mapstruct-plus.lombok.version>
-        <lombok.version>1.18.32</lombok.version>
+        <lombok.version>1.18.38</lombok.version>
         <guava.version>33.4.0-jre</guava.version>
-        <hutool.version>5.8.32</hutool.version>
+        <hutool.version>5.8.43</hutool.version>
         <okhttp.version>5.0.0-alpha.14</okhttp.version>
         <springdoc.version>2.5.0</springdoc.version>
         <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
@@ -55,12 +55,12 @@
         <!--文件存储-->
         <x-file-storage.version>2.1.0</x-file-storage.version>
         <!--三方服务商-->
-        <aliyun-sdk-oss.version>3.16.1</aliyun-sdk-oss.version>
+        <aliyun-sdk-oss.version>3.18.5</aliyun-sdk-oss.version>
         <huaweicloud.obs.version>3.22.12</huaweicloud.obs.version>
         <qiniu.sdk.version>7.12.1</qiniu.sdk.version>
         <qcloud.cos.version>5.6.137</qcloud.cos.version>
-        <baidubce.bce.version>0.10.313</baidubce.bce.version>
-        <amazonaws.sdk.s3.version>1.12.429</amazonaws.sdk.s3.version>
+        <baidubce.bce.version>0.10.412</baidubce.bce.version>
+        <amazonaws.sdk.s3.version>1.12.797</amazonaws.sdk.s3.version>
 
         <!-- 离线IP地址定位库 -->
         <ip2region.version>2.7.0</ip2region.version>
@@ -82,10 +82,12 @@
         <!-- 插件版本 -->
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
-        <maven-compiler-plugin.verison>3.11.0</maven-compiler-plugin.verison>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
         <therapi-javadoc-plugin.version>0.15.0</therapi-javadoc-plugin.version>
+        <dependency-check.version>10.0.4</dependency-check.version>
+        <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
 
     </properties>
 
@@ -491,7 +493,12 @@
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
-
+            <!-- 系统工具-->
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-system</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <!-- 通用工具-->
             <dependency>
                 <groupId>com.sxpcwlkj</groupId>
@@ -632,6 +639,33 @@
                 <artifactId>mms-app</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-open</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-cms</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-game</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-mobile-admin</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-mobile-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -640,7 +674,6 @@
         <module>mms-admin</module>
         <module>mms-modules</module>
         <module>mms-zoom</module>
-        <module>mms-servers</module>
     </modules>
 
 
@@ -649,36 +682,39 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven-compiler-plugin.verison}</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <annotationProcessorPaths>
-                        <path>
-                            <groupId>com.github.therapi</groupId>
-                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
-                            <version>${therapi-javadoc-plugin.version}</version>
-                        </path>
+                        <!-- Lombok 必须放在第一个，先生成 getter/setter -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
                             <version>${lombok.version}</version>
                         </path>
+                        <!-- Lombok-MapStruct 绑定，必须在 mapstruct-plus-processor 之前 -->
                         <path>
-                            <groupId>org.springframework.boot</groupId>
-                            <artifactId>spring-boot-configuration-processor</artifactId>
-                            <version>${spring-boot.version}</version>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${mapstruct-plus.lombok.version}</version>
                         </path>
+                        <!-- MapStruct-Plus 处理器，使用 Lombok 生成的方法 -->
                         <path>
                             <groupId>io.github.linpeilie</groupId>
                             <artifactId>mapstruct-plus-processor</artifactId>
                             <version>${mapstruct-plus.version}</version>
                         </path>
                         <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok-mapstruct-binding</artifactId>
-                            <version>${mapstruct-plus.lombok.version}</version>
+                            <groupId>com.github.therapi</groupId>
+                            <artifactId>therapi-runtime-javadoc-scribe</artifactId>
+                            <version>${therapi-javadoc-plugin.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
                         </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
@@ -697,6 +733,22 @@
                     <!-- 排除标签 -->
                     <excludedGroups>exclude</excludedGroups>
                 </configuration>
+            </plugin>
+            <!-- 依赖安全扫描 -->
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency-check.version}</version>
+                <configuration>
+                    <format>HTML</format>
+                    <failBuildOnCVSS>8</failBuildOnCVSS>
+                </configuration>
+            </plugin>
+            <!-- 依赖版本升级检查 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions-maven-plugin.version}</version>
             </plugin>
             <!-- 统一版本号管理 -->
             <plugin>

@@ -76,7 +76,7 @@
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
-        <!--数据源模块（包括common、redis、authority）-->
+        <!--数据源模块(已包括common、redis、authority)-->
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-datasource</artifactId>
@@ -102,8 +102,9 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-common</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
 

@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.SqlUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
@@ -31,24 +32,28 @@ public class PageQuery implements Serializable {
     /**
      * 分页大小
      */
+    @JsonIgnore
     @TableField(exist = false)
     private Integer pageSize;
 
     /**
      * 当前页数
      */
+    @JsonIgnore
     @TableField(exist = false)
     private Integer pageNum;
 
     /**
      * 排序列
      */
+    @JsonIgnore
     @TableField(exist = false)
     private String orderByColumn;
 
     /**
      * 排序的方向desc或者asc
      */
+    @JsonIgnore
     @TableField(exist = false)
     private String isAsc;
 
@@ -64,6 +69,7 @@ public class PageQuery implements Serializable {
     @TableField(exist = false)
     public static final int DEFAULT_PAGE_SIZE = Integer.MAX_VALUE;
     public PageQuery() {}
+    @JsonIgnore
     public PageQuery getPageQuery() {
         return this;
     }

@@ -62,14 +62,14 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         ${ClassName}Vo vo = baseMapper.selectVoById(id);
         if (vo != null) {
             endList.add(vo);
-            queryListSon(vo.getParentId(), endList);
+            queryListSon(String.valueOf(vo.getParentId()), endList);
         }
     }
     private List<${ClassName}Vo> formatTree(List<${ClassName}Vo> vos, String fid, int level,int currentLevel) {
         // 构建parentId到子节点列表的映射，提高查找效率
         java.util.Map<String, List<${ClassName}Vo>> parentChildMap = new java.util.HashMap<>();
         for (${ClassName}Vo vo : vos) {
-            String parentId = vo.getParentId();
+            String parentId = String.valueOf(vo.getParentId());
             parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
         }
 
@@ -88,7 +88,7 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
             // 检查层级限制
             if (maxLevel > currentLevel || maxLevel == 0) {
                 // 递归构建子树
-                List<${ClassName}Vo> grandchildren = buildTreeWithMap(parentChildMap, child.get${TableId}(), maxLevel, currentLevel + 1);
+                List<${ClassName}Vo> grandchildren = buildTreeWithMap(parentChildMap, String.valueOf(child.get${TableId}()), maxLevel, currentLevel + 1);
                 child.setChildren(grandchildren);
                 result.add(child);
             }
@@ -128,14 +128,14 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
     }
 
     @Override
-    public Boolean updateById(${ClassName}Bo bo) {
+    public Boolean updateByIdBase(${ClassName}Bo bo) {
         try {
             int row;
             ${ClassName} obj = MapstructUtil.convert(bo, ${ClassName}.class);
             row = this.getBaseMapper().updateById(obj);
             return row > 0;
         } catch (Exception e) {
-            log.error("${tableComment},updateById 操作失败", e);
+            log.error("${tableComment},updateByIdBase 操作失败", e);
             throw e;
         }
     }
@@ -145,7 +145,7 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         <#if formLayout==2 >
         ${ClassName}Vo vo= this.getBaseMapper().selectVoById(id);
         List<String> end= new ArrayList<>();
-            getIds(end,vo.getDeptId());
+            getIds(end,String.valueOf(vo.get${TableId}()));
             Collections.reverse(end);
             vo.set${TableId}s(end.toArray(new String[]{}));
         return vo;
@@ -163,7 +163,7 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         // 构建ID到节点的映射
         java.util.Map<String, ${ClassName}Vo> idNodeMap = new java.util.HashMap<>();
         for (${ClassName}Vo node : allNodes) {
-            idNodeMap.put(node.get${TableId}(), node);
+            idNodeMap.put(String.valueOf(node.get${TableId}()), node);
         }
 
         // 通过循环而不是递归获取上级节点
@@ -171,8 +171,8 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         while (currentId != null && !"0".equals(currentId)) {
             ${ClassName}Vo currentNode = idNodeMap.get(currentId);
             if (currentNode != null) {
-                end.add(currentNode.get${TableId}());
-                currentId = currentNode.get${TableParentId}();
+                end.add(String.valueOf(currentNode.get${TableId}()));
+                currentId = String.valueOf(currentNode.get${TableParentId}());
             } else {
                 break; // 节点不存在，跳出循环
             }

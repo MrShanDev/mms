@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -63,6 +65,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Value("${websocket.max-binary-message-size:8192}")
     private Integer maxBinaryMessageSize;
 
+    @Value("${websocket.allowed-origins:*}")
+    private String allowedOrigins;
+
     /**
      * 注册WebSocket处理器
      * 配置万人级并发处理能力
@@ -74,7 +79,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 .addHandler(socketHandler, "/ws")
                 .addInterceptors(socketInterceptor)
                 // 生产环境中应使用具体的域名，而不是通配符
-                .setAllowedOrigins("*");
+                .setAllowedOrigins(parseAllowedOrigins(allowedOrigins));
 
             // 初始化系统用户
             initSystemUser();
@@ -85,6 +90,16 @@ public class WebSocketConfig implements WebSocketConfigurer {
         } else {
             log.warn("WebSocket服务未启用，请在配置文件中设置 websocket.enable=true");
         }
+    }
+
+    private String[] parseAllowedOrigins(String rawOrigins) {
+        if (!StringUtils.hasText(rawOrigins)) {
+            return new String[0];
+        }
+        return Arrays.stream(StringUtils.commaDelimitedListToStringArray(rawOrigins))
+            .map(String::trim)
+            .filter(StringUtils::hasText)
+            .toArray(String[]::new);
     }
 
     /**

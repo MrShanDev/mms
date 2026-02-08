@@ -1,8 +1,8 @@
 package com.sxpcwlkj.gen.controller;
 
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.framework.entity.AesKeyEntity;
 import com.sxpcwlkj.framework.entity.SysSign;
 import com.sxpcwlkj.framework.service.SysSignService;
@@ -35,8 +35,8 @@ public class DataSourceController {
     private final DataSourceService datasourceService;
     private final SysSignService sysSignService;
     @GetMapping("page")
-    public TableDataInfo<DataSourceEntity> page(GenQueryBo query) {
-        return datasourceService.page(query);
+    public R<PageResult<DataSourceEntity>> page(GenQueryBo query) {
+        return R.success(datasourceService.page(query).toPageResult());
     }
 
     @GetMapping("list")

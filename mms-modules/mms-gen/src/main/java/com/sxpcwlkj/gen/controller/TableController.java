@@ -1,9 +1,9 @@
 package com.sxpcwlkj.gen.controller;
 
 import com.sxpcwlkj.common.code.controller.BaseController;
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.gen.common.GenQueryBo;
 import com.sxpcwlkj.gen.entity.TableEntity;
 import com.sxpcwlkj.gen.entity.TableFieldEntity;
@@ -36,8 +36,8 @@ public class TableController extends BaseController {
      * @param query 查询参数
      */
     @GetMapping("page")
-    public TableDataInfo<TableEntity> page(GenQueryBo query) {
-        return baseService.page(query);
+    public R<PageResult<TableEntity>> page(GenQueryBo query) {
+        return R.success(baseService.page(query).toPageResult());
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.sxpcwlkj.gen.controller;
 
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.gen.common.GenQueryBo;
 import com.sxpcwlkj.gen.entity.FieldTypeEntity;
 import com.sxpcwlkj.gen.service.FieldTypeService;
@@ -24,8 +24,8 @@ public class FieldTypeController {
     private final FieldTypeService fieldTypeService;
 
     @GetMapping("page")
-    public TableDataInfo<FieldTypeEntity> page(GenQueryBo query) {
-        return fieldTypeService.page(query);
+    public R<PageResult<FieldTypeEntity>> page(GenQueryBo query) {
+        return R.success(fieldTypeService.page(query).toPageResult());
     }
 
     @GetMapping("{id}")

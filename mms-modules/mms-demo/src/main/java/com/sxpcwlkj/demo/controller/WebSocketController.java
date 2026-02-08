@@ -1,5 +1,6 @@
 package com.sxpcwlkj.demo.controller;
 
+import com.sxpcwlkj.common.utils.R;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class WebSocketController {
 
     @GetMapping("sendMsg")
-    public void sendMsg(@NotBlank(message = "msg：不能为空") String msg  ){
+    public R<Boolean> sendMsg(@NotBlank(message = "msg：不能为空") String msg  ){
         //WebSocketService.sendMessage("服务端消息  :"  + LocalDateTime.now().toString()+" "+msg);
+        return R.success(true);
     }
 }

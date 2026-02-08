@@ -102,5 +102,21 @@ public class SysSignServiceImpl implements SysSignService {
         return sysSign;
     }
 
+    @Override
+    public void updateByIdBase(SysSign sysSign) {
+        boolean flag = sysSignMapper.updateById(sysSign) > 0;
+        if (!flag) {
+            throw new MmsException("更新失败");
+        }
+    }
+
+    @Override
+    public void insert(SysSign sysSign) {
+        boolean flag = sysSignMapper.insert(sysSign) > 0;
+        if (!flag) {
+            throw new MmsException("新增失败");
+        }
+    }
+
 
 }

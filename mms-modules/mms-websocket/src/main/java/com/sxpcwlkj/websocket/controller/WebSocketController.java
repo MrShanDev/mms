@@ -1,6 +1,7 @@
 package com.sxpcwlkj.websocket.controller;
 
 import com.sxpcwlkj.common.utils.DataUtil;
+import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.websocket.entity.Message;
 import com.sxpcwlkj.websocket.entity.UserConversation;
 import com.sxpcwlkj.websocket.service.MessageService;
@@ -9,7 +10,6 @@ import com.sxpcwlkj.websocket.service.OfflineMessageService;
 import com.sxpcwlkj.websocket.utils.WebSocketUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +38,8 @@ public class WebSocketController {
      */
     @GetMapping("/online-count")
     @Operation(summary = "获取在线用户数量")
-    public Long getOnlineUserCount() {
-        return DataUtil.getLong(WebSocketUtil.getOnlineUsers().size());
+    public R<Long> getOnlineUserCount() {
+        return R.success(DataUtil.getLong(WebSocketUtil.getOnlineUsers().size()));
     }
 
     /**
@@ -47,8 +47,8 @@ public class WebSocketController {
      */
     @GetMapping("/online-users")
     @Operation(summary = "获取在线用户列表")
-    public Set<String> getOnlineUsers() {
-        return WebSocketUtil.getOnlineUsers();
+    public R<Set<String>> getOnlineUsers() {
+        return R.success(WebSocketUtil.getOnlineUsers());
     }
 
     /**
@@ -56,8 +56,8 @@ public class WebSocketController {
      */
     @PostMapping("/send-private-msg")
     @Operation(summary = "发送私聊消息")
-    public boolean sendPrivateMessage(@RequestBody Message message) {
-        return messageService.sendPrivateMessage(message);
+    public R<Boolean> sendPrivateMessage(@RequestBody Message message) {
+        return R.success(messageService.sendPrivateMessage(message));
     }
 
     /**
@@ -65,8 +65,8 @@ public class WebSocketController {
      */
     @PostMapping("/send-group-msg")
     @Operation(summary = "发送群聊消息")
-    public boolean sendGroupMessage(@RequestBody Message message) {
-        return messageService.sendGroupMessage(message);
+    public R<Boolean> sendGroupMessage(@RequestBody Message message) {
+        return R.success(messageService.sendGroupMessage(message));
     }
 
     /**
@@ -74,10 +74,10 @@ public class WebSocketController {
      */
     @PostMapping("/create-group")
     @Operation(summary = "创建群聊")
-    public boolean createGroupChat(@RequestParam String chatRoomId,
+    public R<Boolean> createGroupChat(@RequestParam String chatRoomId,
                                    @RequestParam String roomName,
                                    @RequestParam String creatorId) {
-        return messageService.createGroupChat(chatRoomId, roomName, creatorId);
+        return R.success(messageService.createGroupChat(chatRoomId, roomName, creatorId));
     }
 
     /**
@@ -85,9 +85,9 @@ public class WebSocketController {
      */
     @PostMapping("/join-group")
     @Operation(summary = "加入群聊")
-    public boolean joinGroupChat(@RequestParam String chatRoomId,
+    public R<Boolean> joinGroupChat(@RequestParam String chatRoomId,
                                  @RequestParam String userId) {
-        return messageService.joinGroupChat(chatRoomId, userId);
+        return R.success(messageService.joinGroupChat(chatRoomId, userId));
     }
 
     /**
@@ -95,9 +95,9 @@ public class WebSocketController {
      */
     @PostMapping("/leave-group")
     @Operation(summary = "离开群聊")
-    public boolean leaveGroupChat(@RequestParam String chatRoomId,
+    public R<Boolean> leaveGroupChat(@RequestParam String chatRoomId,
                                   @RequestParam String userId) {
-        return messageService.leaveGroupChat(chatRoomId, userId);
+        return R.success(messageService.leaveGroupChat(chatRoomId, userId));
     }
 
     /**
@@ -105,8 +105,8 @@ public class WebSocketController {
      */
     @GetMapping("/group-members/{chatRoomId}")
     @Operation(summary = "获取群聊成员列表")
-    public Set<String> getGroupMembers(@PathVariable String chatRoomId) {
-        return messageService.getGroupMembers(chatRoomId);
+    public R<Set<String>> getGroupMembers(@PathVariable String chatRoomId) {
+        return R.success(messageService.getGroupMembers(chatRoomId));
     }
 
     /**
@@ -114,10 +114,10 @@ public class WebSocketController {
      */
     @GetMapping("/chat-history/private")
     @Operation(summary = "获取私聊消息历史记录")
-    public List<Message> getPrivateChatHistory(@RequestParam String userId1,
+    public R<List<Message>> getPrivateChatHistory(@RequestParam String userId1,
                                                @RequestParam String userId2,
                                                @RequestParam(defaultValue = "50") int count) {
-        return messageService.getPrivateChatHistory(userId1, userId2, count);
+        return R.success(messageService.getPrivateChatHistory(userId1, userId2, count));
     }
 
     /**
@@ -125,9 +125,9 @@ public class WebSocketController {
      */
     @GetMapping("/chat-history/group/{chatRoomId}")
     @Operation(summary = "获取群聊消息历史记录")
-    public List<Message> getGroupChatHistory(@PathVariable String chatRoomId,
+    public R<List<Message>> getGroupChatHistory(@PathVariable String chatRoomId,
                                              @RequestParam(defaultValue = "50") int count) {
-        return messageService.getGroupChatHistory(chatRoomId, count);
+        return R.success(messageService.getGroupChatHistory(chatRoomId, count));
     }
 
     /**
@@ -135,8 +135,8 @@ public class WebSocketController {
      */
     @GetMapping("/is-online/{userId}")
     @Operation(summary = "检查用户是否在线")
-    public boolean isUserOnline(@PathVariable String userId) {
-        return WebSocketUtil.isOnline(userId);
+    public R<Boolean> isUserOnline(@PathVariable String userId) {
+        return R.success(WebSocketUtil.isOnline(userId));
     }
 
     /**
@@ -144,9 +144,9 @@ public class WebSocketController {
      */
     @PostMapping("/send-system-msg")
     @Operation(summary = "发送系统消息给指定用户")
-    public boolean sendSystemMessage(@RequestParam String userId,
+    public R<Boolean> sendSystemMessage(@RequestParam String userId,
                                      @RequestParam String content) {
-        return WebSocketUtil.sendToUser(userId, content);
+        return R.success(WebSocketUtil.sendToUser(userId, content));
     }
     
     /**
@@ -154,9 +154,9 @@ public class WebSocketController {
      */
     @PostMapping("/recall-message")
     @Operation(summary = "撤回消息")
-    public boolean recallMessage(@RequestParam String messageId,
+    public R<Boolean> recallMessage(@RequestParam String messageId,
                                  @RequestParam String userId) {
-        return messageService.recallMessage(messageId, userId);
+        return R.success(messageService.recallMessage(messageId, userId));
     }
     
     /**
@@ -164,9 +164,9 @@ public class WebSocketController {
      */
     @PostMapping("/mark-read")
     @Operation(summary = "标记消息为已读")
-    public boolean markMessageAsRead(@RequestParam String messageId,
+    public R<Boolean> markMessageAsRead(@RequestParam String messageId,
                                      @RequestParam String userId) {
-        return messageService.markMessageAsRead(messageId, userId);
+        return R.success(messageService.markMessageAsRead(messageId, userId));
     }
     
     /**
@@ -174,9 +174,9 @@ public class WebSocketController {
      */
     @PostMapping("/mark-read-batch")
     @Operation(summary = "批量标记消息为已读")
-    public int markMessagesAsRead(@RequestParam String userId,
+    public R<Integer> markMessagesAsRead(@RequestParam String userId,
                                   @RequestBody List<String> messageIds) {
-        return messageService.markMessagesAsRead(messageIds, userId);
+        return R.success(messageService.markMessagesAsRead(messageIds, userId));
     }
     
     /**
@@ -184,8 +184,8 @@ public class WebSocketController {
      */
     @GetMapping("/unread-count/{userId}")
     @Operation(summary = "获取用户未读消息数")
-    public long getUnreadCount(@PathVariable String userId) {
-        return messageService.getUnreadMessageCount(userId);
+    public R<Long> getUnreadCount(@PathVariable String userId) {
+        return R.success(messageService.getUnreadMessageCount(userId));
     }
     
     /**
@@ -193,9 +193,9 @@ public class WebSocketController {
      */
     @GetMapping("/unread-count/private")
     @Operation(summary = "获取私聊未读消息数")
-    public long getUnreadPrivateCount(@RequestParam String userId,
+    public R<Long> getUnreadPrivateCount(@RequestParam String userId,
                                       @RequestParam String otherUserId) {
-        return messageService.getUnreadPrivateMessageCount(userId, otherUserId);
+        return R.success(messageService.getUnreadPrivateMessageCount(userId, otherUserId));
     }
     
     // ==================== 会话管理接口 ====================
@@ -205,10 +205,10 @@ public class WebSocketController {
      */
     @PostMapping("/conversation/pin")
     @Operation(summary = "置顶会话")
-    public boolean pinConversation(@RequestParam String userId,
+    public R<Boolean> pinConversation(@RequestParam String userId,
                                    @RequestParam String conversationId,
                                    @RequestParam String conversationType) {
-        return userConversationService.pinConversation(userId, conversationId, conversationType);
+        return R.success(userConversationService.pinConversation(userId, conversationId, conversationType));
     }
     
     /**
@@ -216,10 +216,10 @@ public class WebSocketController {
      */
     @PostMapping("/conversation/unpin")
     @Operation(summary = "取消置顶会话")
-    public boolean unpinConversation(@RequestParam String userId,
+    public R<Boolean> unpinConversation(@RequestParam String userId,
                                      @RequestParam String conversationId,
                                      @RequestParam String conversationType) {
-        return userConversationService.unpinConversation(userId, conversationId, conversationType);
+        return R.success(userConversationService.unpinConversation(userId, conversationId, conversationType));
     }
     
     /**
@@ -227,11 +227,11 @@ public class WebSocketController {
      */
     @PostMapping("/conversation/mute")
     @Operation(summary = "设置会话免打扰")
-    public boolean setConversationMute(@RequestParam String userId,
+    public R<Boolean> setConversationMute(@RequestParam String userId,
                                        @RequestParam String conversationId,
                                        @RequestParam String conversationType,
                                        @RequestParam boolean muted) {
-        return userConversationService.setMute(userId, conversationId, conversationType, muted);
+        return R.success(userConversationService.setMute(userId, conversationId, conversationType, muted));
     }
     
     /**
@@ -239,8 +239,8 @@ public class WebSocketController {
      */
     @GetMapping("/conversation/list/{userId}")
     @Operation(summary = "获取用户会话列表")
-    public List<UserConversation> getConversationList(@PathVariable String userId) {
-        return userConversationService.getUserConversations(userId);
+    public R<List<UserConversation>> getConversationList(@PathVariable String userId) {
+        return R.success(userConversationService.getUserConversations(userId));
     }
     
     /**
@@ -248,10 +248,10 @@ public class WebSocketController {
      */
     @PostMapping("/conversation/delete")
     @Operation(summary = "删除会话")
-    public boolean deleteConversation(@RequestParam String userId,
+    public R<Boolean> deleteConversation(@RequestParam String userId,
                                       @RequestParam String conversationId,
                                       @RequestParam String conversationType) {
-        return userConversationService.deleteConversation(userId, conversationId, conversationType);
+        return R.success(userConversationService.deleteConversation(userId, conversationId, conversationType));
     }
     
     /**
@@ -259,10 +259,11 @@ public class WebSocketController {
      */
     @PostMapping("/conversation/clear-unread")
     @Operation(summary = "清空会话未读数")
-    public void clearConversationUnread(@RequestParam String userId,
+    public R<Boolean> clearConversationUnread(@RequestParam String userId,
                                         @RequestParam String conversationId,
                                         @RequestParam String conversationType) {
         userConversationService.clearUnreadCount(userId, conversationId, conversationType);
+        return R.success(true);
     }
     
     // ==================== 离线消息管理接口 ====================
@@ -272,8 +273,8 @@ public class WebSocketController {
      */
     @GetMapping("/offline-messages/{userId}")
     @Operation(summary = "获取用户离线消息")
-    public List<Message> getOfflineMessages(@PathVariable String userId) {
-        return offlineMessageService.getOfflineMessages(userId);
+    public R<List<Message>> getOfflineMessages(@PathVariable String userId) {
+        return R.success(offlineMessageService.getOfflineMessages(userId));
     }
     
     /**
@@ -281,8 +282,8 @@ public class WebSocketController {
      */
     @GetMapping("/offline-messages/count/{userId}")
     @Operation(summary = "获取离线消息数量")
-    public long getOfflineMessageCount(@PathVariable String userId) {
-        return offlineMessageService.getOfflineMessageCount(userId);
+    public R<Long> getOfflineMessageCount(@PathVariable String userId) {
+        return R.success(offlineMessageService.getOfflineMessageCount(userId));
     }
     
     /**
@@ -290,8 +291,8 @@ public class WebSocketController {
      */
     @PostMapping("/offline-messages/push")
     @Operation(summary = "推送离线消息给用户")
-    public int pushOfflineMessages(@RequestParam String userId) {
-        return offlineMessageService.pushOfflineMessages(userId);
+    public R<Integer> pushOfflineMessages(@RequestParam String userId) {
+        return R.success(offlineMessageService.pushOfflineMessages(userId));
     }
     
     /**
@@ -299,7 +300,8 @@ public class WebSocketController {
      */
     @PostMapping("/offline-messages/clear")
     @Operation(summary = "清空离线消息")
-    public void clearOfflineMessages(@RequestParam String userId) {
+    public R<Boolean> clearOfflineMessages(@RequestParam String userId) {
         offlineMessageService.clearOfflineMessages(userId);
+        return R.success(true);
     }
 }

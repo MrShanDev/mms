@@ -1,8 +1,8 @@
 package com.sxpcwlkj.framework.service;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import org.apache.ibatis.annotations.Param;
@@ -12,11 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description BaseService
+ * @Description BaseService 继承 MyBatis-Plus IService
  * @Author sxpcwlkj
  * @Version v1.0.0
  */
-public interface BaseService<T, V, B> {
+public interface BaseService<T, V, B> extends IService<T> {
     //=================基础的增删改查操作========================
 
     /**
@@ -59,7 +59,7 @@ public interface BaseService<T, V, B> {
      *
      * @param entity
      */
-    Boolean updateById(B entity);
+    Boolean updateByIdBase(B entity);
 
     /**
      * 根据参数查询
@@ -185,7 +185,18 @@ public interface BaseService<T, V, B> {
      *
      * @param sql
      */
+    @Deprecated
     Boolean updateBysql(@Param("sql") String sql);
+
+    /**
+     * 通过sql查询到的结果修改
+     *
+     * @param sql
+     */
+    @SuppressWarnings("deprecation")
+    default Boolean updateBySql(@Param("sql") String sql) {
+        return updateBysql(sql);
+    }
 
     /**
      * 通过sql删除

@@ -20,49 +20,16 @@
             <artifactId>mms-gen</artifactId>
         </dependency>
 
-        <!--存储模块-->
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-oss</artifactId>
-            <exclusions>
-                <!-- 解决slf4j冲突  -->
-                <exclusion>
-                    <artifactId>slf4j-reload4j</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--短信模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-sms</artifactId>
-        </dependency>
-        <!--邮件模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-email</artifactId>
-        </dependency>
-        <!--redis模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-redis</artifactId>
-        </dependency>
-        <!--微信模块-->
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-wx</artifactId>
+            <artifactId>mms-system</artifactId>
         </dependency>
 
-        <!--操作日志模块-->
         <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-log</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.sxpcwlkj</groupId>
-            <artifactId>mms-websocket</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -72,6 +39,11 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

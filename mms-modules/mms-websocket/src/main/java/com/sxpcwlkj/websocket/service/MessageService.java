@@ -28,10 +28,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageService {
-    
+
     private final ChatMessageService chatMessageService;
     private final OfflineMessageService offlineMessageService;
-    
+
     /**
      * 消息可撤回的最大时间（分钟）
      */
@@ -59,7 +59,7 @@ public class MessageService {
 
             // 发送消息给接收者（在线直接发送，离线存储）
             boolean sent = offlineMessageService.sendOrStore(message.getReceiverId(), message);
-            
+
             if (sent) {
                 message.markAsDelivered();
                 log.debug("私聊消息已发送给用户 {}: {}", message.getReceiverId(), message.getContent());
@@ -93,7 +93,7 @@ public class MessageService {
             // 发送消息给群组所有成员（除了发送者自己）
             Set<String> members = WebSocketUtil.getChatRoomMembers(message.getChatRoomId());
             members.remove(message.getSenderId()); // 不发送给自己
-            
+
             WebSocketUtil.sendToUsers(members.stream().toList(), JSONUtil.toJsonStr(message));
 
             log.debug("群聊消息已发送到群组 {}: {}", message.getChatRoomId(), message.getContent());
@@ -172,12 +172,12 @@ public class MessageService {
             String[] ids = new String[]{userId1, userId2};
             java.util.Arrays.sort(ids);
             String historyKey = SocketConstant.SOCKET_MESSAGE_HISTORY_PREFIX + "private:" + ids[0] + "_" + ids[1];
-            
+
             java.util.List<Object> rawMessages = RedisUtil.lGet(historyKey, -count, -1); // 获取最后count条消息
             if (rawMessages == null) {
                 rawMessages = new java.util.ArrayList<>();
             }
-            
+
             List<Message> messages = new java.util.ArrayList<>();
             for (Object obj : rawMessages) {
                 if (obj instanceof Message) {
@@ -205,7 +205,7 @@ public class MessageService {
             if (rawMessages == null) {
                 rawMessages = new java.util.ArrayList<>();
             }
-            
+
             List<Message> messages = new java.util.ArrayList<>();
             for (Object obj : rawMessages) {
                 if (obj instanceof Message) {
@@ -337,10 +337,10 @@ public class MessageService {
             return Set.of();
         }
     }
-    
+
     /**
      * 撤回消息
-     * 
+     *
      * @param messageId 消息ID
      * @param userId 操作用户ID（必须是消息发送者）
      * @return 是否撤回成功
@@ -353,13 +353,13 @@ public class MessageService {
                 log.warn("消息 {} 不存在", messageId);
                 return false;
             }
-            
+
             // 2. 验证是否是消息发送者
             if (!userId.equals(chatMessage.getSenderId())) {
                 log.warn("用户 {} 无权撤回消息 {}，消息发送者为 {}", userId, messageId, chatMessage.getSenderId());
                 return false;
             }
-            
+
             // 3. 检查是否在可撤回时间范围内
             LocalDateTime now = LocalDateTime.now();
             Duration duration = Duration.between(chatMessage.getCreateTime(), now);
@@ -367,18 +367,18 @@ public class MessageService {
                 log.warn("消息 {} 已超过可撤回时间（{}分钟）", messageId, MAX_RECALL_MINUTES);
                 return false;
             }
-            
+
             // 4. 检查消息是否已经被撤回
             if ("recall".equals(chatMessage.getStatus())) {
                 log.warn("消息 {} 已经被撤回", messageId);
                 return true; // 已撤回，返回成功
             }
-            
+
             // 5. 更新数据库状态为撤回
             chatMessage.setStatus("recall");
             chatMessage.setUpdateTime(now);
             chatMessageService.updateById(chatMessage);
-            
+
             // 6. 通知相关用户消息已撤回
             Message recallNotice = new Message();
             recallNotice.setMessageId(messageId);
@@ -386,7 +386,7 @@ public class MessageService {
             recallNotice.setContent("撤回了一条消息");
             recallNotice.setContentType("recall");
             recallNotice.setStatus("recall");
-            
+
             if ("private".equals(chatMessage.getMessageType())) {
                 // 私聊：通知接收者
                 recallNotice.setMessageType("private");
@@ -398,7 +398,7 @@ public class MessageService {
                 recallNotice.setChatRoomId(chatMessage.getChatRoomId());
                 WebSocketUtil.sendToChatRoom(chatMessage.getChatRoomId(), JSONUtil.toJsonStr(recallNotice));
             }
-            
+
             log.info("用户 {} 成功撤回消息 {}", userId, messageId);
             return true;
         } catch (Exception e) {
@@ -406,10 +406,10 @@ public class MessageService {
             return false;
         }
     }
-    
+
     /**
      * 标记消息为已读
-     * 
+     *
      * @param messageId 消息ID
      * @param userId 用户ID（必须是消息接收者）
      * @return 是否标记成功
@@ -421,27 +421,27 @@ public class MessageService {
                 log.warn("消息 {} 不存在", messageId);
                 return false;
             }
-            
+
             // 验证是否是消息接收者
-            if (!userId.equals(chatMessage.getReceiverId()) && 
+            if (!userId.equals(chatMessage.getReceiverId()) &&
                 !WebSocketUtil.isUserInChatRoom(chatMessage.getChatRoomId(), userId)) {
                 log.warn("用户 {} 无权标记消息 {} 为已读", userId, messageId);
                 return false;
             }
-            
+
             // 在 Redis 中记录已读状态
             String readKey = SocketConstant.SOCKET_MESSAGE_HISTORY_PREFIX + "read:" + userId + ":" + messageId;
             RedisUtil.setCacheObject(readKey, true, Duration.ofDays(30));
-            
+
             // 发送已读回执给发送者
             Message readReceipt = new Message();
             readReceipt.setMessageId(messageId);
             readReceipt.setReceiverId(userId);
             readReceipt.setContentType("read_receipt");
             readReceipt.setStatus("read");
-            
+
             WebSocketUtil.sendToUser(chatMessage.getSenderId(), JSONUtil.toJsonStr(readReceipt));
-            
+
             log.debug("用户 {} 标记消息 {} 为已读", userId, messageId);
             return true;
         } catch (Exception e) {
@@ -449,10 +449,10 @@ public class MessageService {
             return false;
         }
     }
-    
+
     /**
      * 批量标记消息为已读
-     * 
+     *
      * @param messageIds 消息ID列表
      * @param userId 用户ID
      * @return 成功标记的数量
@@ -466,10 +466,10 @@ public class MessageService {
         }
         return successCount;
     }
-    
+
     /**
      * 获取用户未读消息数量
-     * 
+     *
      * @param userId 用户ID
      * @return 未读消息数
      */
@@ -477,7 +477,7 @@ public class MessageService {
         try {
             // 从数据库查询用户的所有消息
             List<ChatMessage> messages = chatMessageService.getUserMessages(userId, 1000);
-            
+
             long unreadCount = 0;
             for (ChatMessage msg : messages) {
                 String readKey = SocketConstant.SOCKET_MESSAGE_HISTORY_PREFIX + "read:" + userId + ":" + msg.getId();
@@ -486,17 +486,17 @@ public class MessageService {
                     unreadCount++;
                 }
             }
-            
+
             return unreadCount;
         } catch (Exception e) {
             log.error("获取未读消息数量异常", e);
             return 0;
         }
     }
-    
+
     /**
      * 获取与指定用户的未读消息数（私聊）
-     * 
+     *
      * @param userId 当前用户ID
      * @param otherUserId 对方用户ID
      * @return 未读消息数
@@ -504,7 +504,7 @@ public class MessageService {
     public long getUnreadPrivateMessageCount(String userId, String otherUserId) {
         try {
             List<ChatMessage> messages = chatMessageService.getPrivateChatHistory(userId, otherUserId, 500);
-            
+
             long unreadCount = 0;
             for (ChatMessage msg : messages) {
                 // 只统计对方发给自己的消息
@@ -516,7 +516,7 @@ public class MessageService {
                     }
                 }
             }
-            
+
             return unreadCount;
         } catch (Exception e) {
             log.error("获取私聊未读消息数异常", e);

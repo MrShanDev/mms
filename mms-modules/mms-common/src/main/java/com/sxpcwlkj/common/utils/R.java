@@ -1,5 +1,6 @@
 package com.sxpcwlkj.common.utils;
 
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.enums.HttpStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +37,14 @@ public class R<T> {
      */
     private T data;
     /**
+     * 兼容分页：列表数据
+     */
+    private Object rows;
+    /**
+     * 兼容分页：总记录数
+     */
+    private Long total;
+    /**
      * 是否加密
      */
     private Boolean isSecurity=false;
@@ -62,9 +71,10 @@ public class R<T> {
     private static <T> R<T> response(Integer code, Boolean status, String message, T data) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(code);
-        ajaxResult.setStatus(code==200);
+        ajaxResult.setStatus(status);
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
+        applyPageResult(ajaxResult, data);
         return ajaxResult;
     }
 
@@ -80,7 +90,7 @@ public class R<T> {
     private static <T> R<T> response(Integer code, Boolean status, String message) {
         R<T> ajaxResult = new R<>();
         ajaxResult.setCode(code);
-        ajaxResult.setStatus(code==200);
+        ajaxResult.setStatus(status);
         ajaxResult.setMsg(message);
         return ajaxResult;
     }
@@ -98,6 +108,7 @@ public class R<T> {
         ajaxResult.setStatus(aBoolean);
         ajaxResult.setMsg(aBoolean ? HttpStatusEnum.SUCCESS.getMessage() : HttpStatusEnum.ERROR.getMessage());
         ajaxResult.setData(data);
+        applyPageResult(ajaxResult, data);
         return ajaxResult;
     }
 
@@ -296,6 +307,7 @@ public class R<T> {
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
         ajaxResult.setIsSecurity(true);
+        applyPageResult(ajaxResult, data);
         return ajaxResult;
     }
 
@@ -314,7 +326,15 @@ public class R<T> {
         ajaxResult.setMsg(message);
         ajaxResult.setData(data);
         ajaxResult.setIsSecurity(false);
+        applyPageResult(ajaxResult, data);
         return ajaxResult;
+    }
+
+    private static <T> void applyPageResult(R<T> ajaxResult, T data) {
+        if (data instanceof PageResult<?> pageResult) {
+            ajaxResult.setRows(pageResult.getRows());
+            ajaxResult.setTotal(pageResult.getTotal());
+        }
     }
 
 }

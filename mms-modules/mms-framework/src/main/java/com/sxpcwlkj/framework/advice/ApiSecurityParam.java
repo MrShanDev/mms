@@ -30,7 +30,7 @@ public class ApiSecurityParam  {
 
 
     public ApiSecurityParam() {
-        this.timestamp=System.currentTimeMillis()+"";
+        //this.timestamp=System.currentTimeMillis()+"";
     }
 
     public ApiSecurityParam setAppid(String appId){

@@ -48,13 +48,13 @@ spring:
           username: root
           password: 123456
         # 从库数据源
-        slave:
-          lazy: true
-          type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: root
-          password: 123456
+#        slave:
+#          lazy: true
+#          type: ${spring.datasource.type}
+#          driverClassName: com.mysql.cj.jdbc.Driver
+#          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+#          username: root
+#          password: 123456
       #        oracle:
       #          type: ${spring.datasource.type}
       #          driverClassName: oracle.jdbc.OracleDriver
@@ -77,11 +77,11 @@ spring:
       #          password: root
       hikari:
         # 最大连接池数量
-        maxPoolSize: 20
+        maxPoolSize: ${DB_MAX_POOL_SIZE:20}
         # 最小空闲线程数量
-        minIdle: 10
+        minIdle: ${DB_MIN_IDLE:10}
         # 配置获取连接等待超时的时间
-        connectionTimeout: 30000
+        connectionTimeout: ${DB_CONNECTION_TIMEOUT:30000}
         # 校验超时时间
         validationTimeout: 5000
         # 空闲连接存活最大时间，默认10分钟
@@ -92,6 +92,8 @@ spring:
         connectionTestQuery: SELECT 1
         # 多久检查一次连接的活性
         keepaliveTime: 30000
+        # 连接泄漏检测（毫秒，0 表示关闭）
+        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
 
 --- # Redis配置
 spring:
@@ -127,6 +129,15 @@ redisson:
     timeout: 3000
     # 发布和订阅连接池大小
     subscriptionConnectionPoolSize: 50
+
+--- # CORS 配置
+mms:
+  cors:
+    allowed-origins: "*"
+    allowed-headers: "*"
+    allowed-methods: "*"
+    allow-credentials: true
+    max-age: 1800
 
 --- # Actuator 监控端点的配置项
 management:

@@ -3,11 +3,12 @@ package com.sxpcwlkj.datasource.entity.page;
 
 import cn.hutool.http.HttpStatus;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.sxpcwlkj.common.code.entity.PageResult;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -16,20 +17,11 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class TableDataInfo<T> implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class TableDataInfo<T> extends PageResult<T> {
 
     @Serial
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 总记录数
-     */
-    private long total;
-
-    /**
-     * 列表数据
-     */
-    private List<T> rows;
 
     /**
      * 消息状态码
@@ -41,11 +33,10 @@ public class TableDataInfo<T> implements Serializable {
      */
     private String msg;
 
-    public TableDataInfo(int code, String msg, Object rows, long total){
-        this.total = total;
+    public TableDataInfo(int code, String msg, List<T> rows, long total){
+        super(rows, total);
         this.code = code;
         this.msg = msg;
-        this.rows = (List<T>) rows;
     }
 
     /**
@@ -55,8 +46,7 @@ public class TableDataInfo<T> implements Serializable {
      * @param total 总记录数
      */
     public TableDataInfo(List<T> list, long total) {
-        this.rows = list;
-        this.total = total;
+        super(list, total);
     }
 
     public static <T> TableDataInfo<T> build(IPage<T> page) {
@@ -82,6 +72,13 @@ public class TableDataInfo<T> implements Serializable {
         rspData.setCode(HttpStatus.HTTP_OK);
         rspData.setMsg("查询成功");
         return rspData;
+    }
+
+    /**
+     * 转换为统一分页模型。
+     */
+    public PageResult<T> toPageResult() {
+        return new PageResult<>(getRows(), getTotal());
     }
 
 }

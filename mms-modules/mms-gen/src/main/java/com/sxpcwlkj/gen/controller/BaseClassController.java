@@ -1,7 +1,7 @@
 package com.sxpcwlkj.gen.controller;
 
+import com.sxpcwlkj.common.code.entity.PageResult;
 import com.sxpcwlkj.common.utils.R;
-import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.gen.common.GenQueryBo;
 import com.sxpcwlkj.gen.entity.BaseClassEntity;
 import com.sxpcwlkj.gen.service.BaseClassService;
@@ -24,8 +24,8 @@ public class BaseClassController {
     private final BaseClassService baseClassService;
 
     @GetMapping("page")
-    public TableDataInfo<BaseClassEntity> page(GenQueryBo query) {
-        return baseClassService.page(query);
+    public R<PageResult<BaseClassEntity>> page(GenQueryBo query) {
+        return R.success(baseClassService.page(query).toPageResult());
     }
 
     @GetMapping("list")

@@ -3,7 +3,7 @@ package com.sxpcwlkj.mq.service.impl;
 import com.rabbitmq.client.Channel;
 import com.sxpcwlkj.mq.entity.DistributionMessage;
 import com.sxpcwlkj.mq.entity.QueueStatus;
-import com.sxpcwlkj.mq.hander.MqHandler;
+import com.sxpcwlkj.mq.handler.MqHandler;
 import com.sxpcwlkj.mq.service.MqService;
 import com.sxpcwlkj.mq.utils.MessageTraceUtil;
 import com.sxpcwlkj.redis.RedisUtil;

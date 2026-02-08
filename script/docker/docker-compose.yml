@@ -8,7 +8,7 @@ services:
       # 时区上海
       TZ: Asia/Shanghai
       # root 密码
-      MYSQL_ROOT_PASSWORD: 123456@@
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       # 初始化数据库(后续的初始化sql会在这个库执行)
       MYSQL_DATABASE: sxpcwlkj_mms
     ports:

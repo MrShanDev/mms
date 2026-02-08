@@ -232,7 +232,7 @@ public class EmailDemoController {
      * 批量测试接口
      */
     @PostMapping("/testAll")
-    public Map<String, Object> testAll(@RequestParam String email) {
+    public R<Map<String, Object>> testAll(@RequestParam String email) {
         log.info("📧 批量测试所有邮件功能");
         
         Map<String, Object> results = new LinkedHashMap<>();
@@ -264,11 +264,15 @@ public class EmailDemoController {
             
             results.put("总体结果", "✅ 批量测试完成");
             
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("批量测试被中断", e);
+            results.put("错误", "批量测试被中断");
+        } catch (RuntimeException e) {
             log.error("批量测试失败", e);
             results.put("错误", e.getMessage());
         }
         
-        return results;
+        return R.success(results);
     }
 }

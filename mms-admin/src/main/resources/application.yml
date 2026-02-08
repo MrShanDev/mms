@@ -247,15 +247,16 @@ tenant:
 --- # websocket
 websocket:
   enable: true
+  allowed-origins: "*"
 
 --- # springdoc
 springdoc:
   api-docs:
     # 是否开启接口文档
-    enabled: true
+    enabled: ${swagger.enabled:true}
     path: /v3/api-docs  # 自定义路径，默认为 "/v3/api-docs"
   swagger-ui:
-    enabled: true # 开启swagger界面，依赖OpenApi，需要OpenApi同时开启
+    enabled: ${swagger.enabled:true} # 开启swagger界面，依赖OpenApi，需要OpenApi同时开启
     path: /swagger-ui/index.html # 自定义路径，默认为"/swagger-ui/index.html"
     #    # 持久化认证数据
     #    persistAuthorization: true
@@ -311,11 +312,9 @@ sms:
 
 --- # 对象存储 配置教程 https://x-file-storage.xuyanwu.cn/#/快速入门
 dromara:
-  x-file-storage: #文件存储配置
-    default-platform: aliyun-oss-1 #默认使用的存储平台
-    aliyun-oss:
-      - platform: aliyun-oss-1 # 存储平台标识
-        enable-storage: true  # 启用存储
+  x-file-storage: #文件存储配置（由数据库动态加载）
+    default-platform: ${OSS_DEFAULT_PLATFORM:}
+    aliyun-oss: []
 
 --- #MmsAi
 server:

@@ -13,7 +13,7 @@ import java.util.Set;
  *
  * @author ${author}
  * @Doc ${website}
- * @describe  支持自定义扩展,已继承接口：{insert、deleteById、updateById、selectById、getByEntityListPage}（更多查看BaseService接口）
+ * @describe  支持自定义扩展,已继承接口：{insert、deleteById、updateByIdBase、selectById、getByEntityListPage}（更多查看BaseService接口）
  */
 public interface ${ClassName}Service extends BaseService<${ClassName}, ${ClassName}Vo, ${ClassName}Bo> {
     <#if formLayout==2 >

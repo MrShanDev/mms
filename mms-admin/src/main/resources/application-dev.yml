@@ -38,17 +38,17 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALVNuyb9ZEkdhW2LaaKMLCO6Y0x2bXtw+jBOkctSpTGwCmZDTej69fOd/+QccDBE6fMGXtx4qvEZWKb1uNYShG8CAwEAAQ==
+      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJpocwyy7m8F8tAUeMgn6GOU404nYeL+yRnKG3JL7IZghb4N9ew9v5O6hJ+gZFlXnGiMjlo5dx5/tpArvtbRwGkCAwEAAQ==
       # 账号密码
       datasource:
         # 主库数据源
         master:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://1.12.220.50:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: mms
+          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          username: root
           # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ENC(XgsSsz/DUB6P+yexQSJRAc/eAA57i1lUsxJowpk20DQ9Ft3xoVO4TU16X6nQJSdnEkeHpLXg3ZiGWH9exJ88BQ==)
+          password: ENC(bOk3dciU9b7DePoU9figF1HAFz+BcAtoW9IvCDqQm8S8HwwwX/4LRhBWX9rAfCEA9iehbZvqfZEC1F1BCa9pgA==)
 #          # 从库数据源
 #        slave:
 #          lazy: true
@@ -79,11 +79,11 @@ spring:
 #          password: root
       hikari:
         # 最大连接池数量
-        maxPoolSize: 20
+        maxPoolSize: ${DB_MAX_POOL_SIZE:20}
         # 最小空闲线程数量
-        minIdle: 10
+        minIdle: ${DB_MIN_IDLE:10}
         # 配置获取连接等待超时的时间
-        connectionTimeout: 30000
+        connectionTimeout: ${DB_CONNECTION_TIMEOUT:30000}
         # 校验超时时间
         validationTimeout: 5000
         # 空闲连接存活最大时间，默认10分钟
@@ -94,6 +94,8 @@ spring:
         connectionTestQuery: SELECT 1
         # 多久检查一次连接的活性
         keepaliveTime: 30000
+        # 连接泄漏检测（毫秒，0 表示关闭）
+        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
 
 --- # Redis配置
 spring:
@@ -129,6 +131,15 @@ redisson:
     timeout: 3000
     # 发布和订阅连接池大小
     subscriptionConnectionPoolSize: 50
+
+--- # CORS 配置
+mms:
+  cors:
+    allowed-origins: "*"
+    allowed-headers: "*"
+    allowed-methods: "*"
+    allow-credentials: true
+    max-age: 1800
 
 --- # Actuator 监控端点的配置项
 management:

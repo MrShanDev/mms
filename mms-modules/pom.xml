@@ -33,6 +33,7 @@
         <module>mms-ai</module>
         <module>mms-thymeleaf</module>
         <module>mms-log</module>
+        <module>mms-system</module>
     </modules>
 
 </project>

@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
@@ -57,6 +58,8 @@ public class GlobalException {
         return map;
     }
 
+
+
     // 专门处理演示模式异常
     @ExceptionHandler(DemoModeException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -81,11 +84,26 @@ public class GlobalException {
      */
     @ExceptionHandler(value = ParamsException.class)
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, Object> handleObjectExistException(ParamsException e,
+    public R<Void> handleObjectExistException(ParamsException e,
                                                           HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
-        log.error("请求地址'{}',参数异常'{}'", requestUrl, e.getMessage());
-        return getResult(ErrorCodeEnum.PARAM_EXIST_EXCEPTION);
+        String message = e.getMessage();
+        log.error("请求地址'{}',参数异常'{}'", requestUrl, message);
+
+        // 检查是否是验签相关的异常
+//        if (message != null && (
+//            message.contains("签名") ||
+//            message.contains("sign") ||
+//            message.contains("验签") ||
+//            message.contains("时间戳") ||
+//            message.contains("timestamp") ||
+//            message.contains("请求参数body不能为空")
+//        )) {
+//            log.warn("请求地址'{}',检测到验签失败: {}", requestUrl, message);
+//            return R.fail("验签失败，请检查请求签名参数");
+//        }
+
+        return R.fail(message);
     }
 
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
@@ -95,6 +113,34 @@ public class GlobalException {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',参数异常'{}'", requestUrl, e.getMessage());
         return R.fail(HttpStatus.BAD_REQUEST.value(), "请求参数错误，请检查请求体格式");
+    }
+
+    /**
+     * 处理参数类型不匹配异常，通常由验签或解密失败引起
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public R<Void> handleIllegalStateException(IllegalStateException ex, HttpServletRequest request) {
+        String message = ex.getMessage();
+        String requestUrl = request.getRequestURI();
+        log.error("请求地址'{}',参数类型不匹配异常: ", requestUrl, ex);
+
+        // 检查是否是验签或解密相关的异常
+        if (message != null && (
+            message.contains("argument type mismatch") ||
+            message.contains("ApiSecurityParam") ||
+            message.contains("签名") ||
+            message.contains("sign") ||
+            message.contains("验签") ||
+            message.contains("加密") ||
+            message.contains("timestamp") ||
+            message.contains("时间戳") ||
+            message.contains("appId")
+        )) {
+            log.warn("请求地址'{}',检测到验签或解密失败: {}", requestUrl, message);
+            return R.fail("验签失败，请检查请求签名参数");
+        }
+
+        return R.fail("请求参数错误: " + message);
     }
 
 
@@ -110,6 +156,17 @@ public class GlobalException {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',参数异常'{}'", requestUrl, e.getMessage());
         return R.fail(HttpStatus.NOT_FOUND.value(), "接口不存在: " + e.getRequestURL());
+    }
+    
+    /**
+     * 静态资源找不到异常处理
+     */
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    public R<Void> handleNoResourceFoundException(NoResourceFoundException e, HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        log.debug("请求静态资源'{}',资源不存在: {}", requestUrl, e.getResourcePath());
+        // 返回404状态，而不是错误日志
+        return R.fail(HttpStatus.NOT_FOUND.value(), "Resource not found");
     }
     /**
      * 用户校验不通过
@@ -329,7 +386,8 @@ public class GlobalException {
     public R<Void> handleServiceException(MmsException e,
                                           HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
-        log.error("请求地址'{}','{}'.", requestUrl, e.getMessage());
+        String message = e.getMessage();
+        log.error("请求地址'{}','{}'.", requestUrl, message);
         return R.fail(e.getCode(), e.getMessage());
     }
 

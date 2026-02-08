@@ -3,6 +3,8 @@ package com.sxpcwlkj.framework.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.sxpcwlkj.common.utils.EmptyUtil;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.BaseMapperPlus;
@@ -16,9 +18,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author 抽象类  ----通过子类来完成实例化
+ * @author 抽象类  ----通过子类来完成实例化 继承 MyBatis-Plus ServiceImpl
  */
-public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
+public abstract class BaseServiceImpl<T, V, B> extends ServiceImpl<BaseMapperPlus<T, V>, T> implements BaseService<T, V, B> {
 
     Class<T> clazz;
 
@@ -30,6 +32,7 @@ public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
         return clazz;
     }
 
+    @Override
     public abstract BaseMapperPlus<T, V> getBaseMapper();
 
     @Override
@@ -66,7 +69,7 @@ public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
     }
 
     @Override
-    public Boolean updateById(B entity) {
+    public Boolean updateByIdBase(B entity) {
         int row;
         T obj = MapstructUtil.convert(entity, getTClass());
         row = getBaseMapper().updateById(obj);
@@ -103,7 +106,7 @@ public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
     @Override
     public TableDataInfo<T> selectVoListPage(Integer current, Integer pageSize) {
         //参数一是当前页，参数二是每页个数
-        IPage<T> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<T>(current, pageSize);
+        IPage<T> page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(current, pageSize);
         page = getBaseMapper().selectPage(page, null);
         return TableDataInfo.build(page);
     }
@@ -157,6 +160,11 @@ public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
     }
 
     @Override
+    public Boolean updateBySql(String sql) {
+        return updateBysql(sql);
+    }
+
+    @Override
     public Boolean deleteBySql(String sql) {
         return getBaseMapper().deleteBySql(sql) > 0;
     }
@@ -164,35 +172,72 @@ public abstract class BaseServiceImpl<T, V, B> implements BaseService<T, V, B> {
 
     //判断空
     public boolean isEmpty(String str) {
-        return (null == str) || (str.trim().length() <= 0);
+        return EmptyUtil.isEmpty(str);
     }
 
     public boolean isEmpty(Character cha) {
-        return (null == cha) || cha.equals(' ');
+        return EmptyUtil.isEmpty(cha);
     }
 
     public boolean isEmpty(Object obj) {
-        return (null == obj);
+        return EmptyUtil.isEmpty(obj);
     }
 
     public boolean isEmpty(Object[] objs) {
-        return (null == objs) || (objs.length <= 0);
+        return EmptyUtil.isEmpty(objs);
     }
 
     public boolean isEmpty(Collection<?> obj) {
-        return (null == obj) || obj.isEmpty();
+        return EmptyUtil.isEmpty(obj);
     }
 
     public boolean isEmpty(Set<?> set) {
-        return (null == set) || set.isEmpty();
+        return EmptyUtil.isEmpty(set);
     }
 
     public boolean isEmpty(Serializable obj) {
-        return null == obj;
+        return EmptyUtil.isEmpty(obj);
     }
 
     public boolean isEmpty(Map<?, ?> map) {
-        return (null == map) || map.isEmpty();
+        return EmptyUtil.isEmpty(map);
     }
+
+    // 实现 IService 中的方法
+    @Override
+    public boolean save(T entity) {
+        return super.save(entity);
+    }
+
+    @Override
+    public boolean saveBatch(Collection<T> entityList) {
+        return super.saveBatch(entityList);
+    }
+
+    @Override
+    public boolean saveOrUpdate(T entity) {
+        return super.saveOrUpdate(entity);
+    }
+
+    @Override
+    public boolean saveOrUpdateBatch(Collection<T> entityList) {
+        return super.saveOrUpdateBatch(entityList);
+    }
+
+    @Override
+    public boolean removeById(Serializable id) {
+        return super.removeById(id);
+    }
+
+    @Override
+    public T getById(Serializable id) {
+        return super.getById(id);
+    }
+
+    @Override
+    public List<T> listByIds(Collection<? extends Serializable> idList) {
+        return super.listByIds(idList);
+    }
+
 }
 

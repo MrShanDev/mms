@@ -90,7 +90,7 @@ public class ${ClassName}Controller extends BaseController{
     @SaCheckPermission("${moduleName}:${functionName}:edit")
     @PutMapping
     public R<Boolean> edit(@RequestBody @Validated(ValidatedGroupConfig.update.class) ${ClassName}Bo bo) {
-        return success(baseService.updateById(bo));
+        return success(baseService.updateByIdBase(bo));
     }
 
     /**
