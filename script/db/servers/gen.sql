@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.41, for macos15.2 (arm64)
+-- MySQL dump 10.13  Distrib 8.0.43, for macos15 (arm64)
 --
 -- Host: 127.0.0.1    Database: mms
 -- ------------------------------------------------------
--- Server version	8.0.41
+-- Server version	8.0.43
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -164,7 +164,7 @@ CREATE TABLE `sys_gen_table` (
   `span` int DEFAULT '24' COMMENT '表单排列',
   PRIMARY KEY (`id`),
   UNIQUE KEY `table_name` (`table_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1913853443831947266 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表';
+) ENGINE=InnoDB AUTO_INCREMENT=2011709057713762307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,6 +173,7 @@ CREATE TABLE `sys_gen_table` (
 
 LOCK TABLES `sys_gen_table` WRITE;
 /*!40000 ALTER TABLE `sys_gen_table` DISABLE KEYS */;
+INSERT INTO `sys_gen_table` (`id`, `table_name`, `class_name`, `table_comment`, `author`, `email`, `package_name`, `version`, `generator_type`, `backend_path`, `frontend_path`, `module_name`, `function_name`, `form_layout`, `datasource_id`, `baseclass_id`, `menu_id`, `parent_id`, `create_time`, `table_label`, `span`) VALUES (2011709057713762306,'sys_log','SysLog','操作日志记录表','mmsAdmin','942879858@qq.com','com.sxpcwlkj','1.0.0',0,'sxpcwlkj/admin','sxpcwlkj/front','system','sysLog',1,0,1,'3','0','2026-01-15 15:56:30','0',24);
 /*!40000 ALTER TABLE `sys_gen_table` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -207,7 +208,7 @@ CREATE TABLE `sys_gen_table_field` (
   `query_type` varchar(200) DEFAULT NULL COMMENT '查询方式',
   `query_form_type` varchar(200) DEFAULT NULL COMMENT '查询表单类型',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1913853444012302338 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表字段';
+) ENGINE=InnoDB AUTO_INCREMENT=2011709058770726914 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代码生成表字段';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -216,6 +217,7 @@ CREATE TABLE `sys_gen_table_field` (
 
 LOCK TABLES `sys_gen_table_field` WRITE;
 /*!40000 ALTER TABLE `sys_gen_table_field` DISABLE KEYS */;
+INSERT INTO `sys_gen_table_field` VALUES (2011709057847980033,2011709057713762306,'oper_id','bigint','日志主键','operId','Long',NULL,0,'DEFAULT',1,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709057910894593,2011709057713762306,'tenant_id','bigint','租户ID','tenantId','Long',NULL,1,'DEFAULT',0,1,0,0,'text',NULL,NULL,0,0,0,'=','text'),(2011709057952837634,2011709057713762306,'module','varchar','模块名称','module','String',NULL,2,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709057986392065,2011709057713762306,'oper_type','int','操作类型','operType','Integer',NULL,3,'DEFAULT',0,0,1,1,'select','operType','@NotNull',1,0,0,'=','text'),(2011709058024140801,2011709057713762306,'description','varchar','操作描述','description','String',NULL,4,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058066083842,2011709057713762306,'request_method','varchar','请求方法','requestMethod','String',NULL,5,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058112221185,2011709057713762306,'method','varchar','操作方法(类名.方法名)','method','String',NULL,6,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058154164225,2011709057713762306,'oper_url','varchar','请求URL','operUrl','String',NULL,7,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058191912961,2011709057713762306,'user_id','bigint','操作人员ID','userId','Long',NULL,8,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058233856002,2011709057713762306,'user_name','varchar','操作人员账号','userName','String',NULL,9,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058275799041,2011709057713762306,'user_roles','varchar','操作人员角色','userRoles','String',NULL,10,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058309353473,2011709057713762306,'oper_ip','varchar','主机地址','operIp','String',NULL,11,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058347102209,2011709057713762306,'oper_location','varchar','操作地点','operLocation','String',NULL,12,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058393239553,2011709057713762306,'oper_param','text','请求参数','operParam','String',NULL,13,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058426793985,2011709057713762306,'before_data','text','操作前数据','beforeData','String',NULL,14,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058460348417,2011709057713762306,'json_result','text','返回结果','jsonResult','String',NULL,15,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058510680065,2011709057713762306,'status','int','操作状态','status','Integer',NULL,16,'DEFAULT',0,0,1,1,'radio','SYS_STATE','@NotNull',1,0,0,'=','select'),(2011709058552623105,2011709057713762306,'error_msg','text','错误消息','errorMsg','String',NULL,17,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058594566145,2011709057713762306,'oper_time','datetime','操作时间','operTime','Date','java.util.Date',18,'DEFAULT',0,0,1,1,'text',NULL,'@NotNull',1,0,0,'=','text'),(2011709058644897793,2011709057713762306,'cost_time','bigint','消耗时间(毫秒)','costTime','Long',NULL,19,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058682646530,2011709057713762306,'user_agent','varchar','用户代理','userAgent','String',NULL,20,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058732978177,2011709057713762306,'browser','varchar','浏览器类型','browser','String',NULL,21,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text'),(2011709058770726913,2011709057713762306,'os','varchar','操作系统','os','String',NULL,22,'DEFAULT',0,0,1,1,'text',NULL,'@NotBlank',1,0,0,'=','text');
 /*!40000 ALTER TABLE `sys_gen_table_field` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -228,4 +230,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-25 20:44:52
+-- Dump completed on 2026-04-01  0:11:30
