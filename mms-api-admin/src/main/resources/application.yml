@@ -197,10 +197,8 @@ mybatis-plus:
     # MyBatis 自动映射时未知列或未知属性处理策
     # NONE：不做处理 WARNING：打印相关警告 FAILING：抛出异常和详细信息
     autoMappingUnknownColumnBehavior: NONE
-    # 更详细的日志输出 会有性能损耗 org.apache.ibatis.logging.stdout.StdOutImpl
-    # 关闭日志记录 (可单纯使用 p6spy 分析) org.apache.ibatis.logging.nologging.NoLoggingImpl
-    # 默认日志输出 org.apache.ibatis.logging.slf4j.Slf4jImpl
-    logImpl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 生产见 application-prod.yml（NoLoggingImpl）。默认走 Slf4j，按需调整 logging.level 打印 SQL，避免 StdOut 持续刷屏带来 I/O 损耗。
+    logImpl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     # 是否 mybatis-plus 在控制台输出的logo
     banner: false
@@ -237,12 +235,18 @@ tenant:
     - sys_function
     - sys_dict_data
     - sys_dict
-    - sys_dept
     - sys_config
     - sys_sign
     - sys_gen_table
   # 租户字段名称
   column: tenant_id
+
+--- # MMS 扩展插件宿主（mms-plugin-host，安装目录布局见在线文档「JAR 插件」）
+mms:
+  plugin:
+    enabled: false
+    root-dir: ${user.dir}/mms-plugins
+    host-mms-revision: ${revision}
 
 --- # websocket
 websocket:
@@ -268,6 +272,8 @@ springdoc:
       # http://localhost:8080/v3/api-docs/9.演示模块
     - group: 9.演示模块
       packages-to-scan: com.sxpcwlkj.demo
+    - group: 8.插件宿主
+      packages-to-scan: com.sxpcwlkj.plugin.host
 
   info:
     # 标题

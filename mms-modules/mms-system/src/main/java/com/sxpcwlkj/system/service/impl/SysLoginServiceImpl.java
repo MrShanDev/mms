@@ -18,8 +18,10 @@ import com.sxpcwlkj.system.entity.SysTenant;
 import com.sxpcwlkj.system.entity.SysUser;
 import com.sxpcwlkj.system.entity.bo.LoginBodyBo;
 import com.sxpcwlkj.system.mapper.SysUserMapper;
+import com.sxpcwlkj.system.entity.SysTenantPackage;
 import com.sxpcwlkj.system.service.SysConfigService;
 import com.sxpcwlkj.system.service.SysLoginService;
+import com.sxpcwlkj.system.service.SysTenantPackageService;
 import com.sxpcwlkj.system.service.SysTenantService;
 import com.sxpcwlkj.system.service.SysUserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,6 +43,8 @@ import java.util.Map;
 public class SysLoginServiceImpl implements SysLoginService {
 
     private final SysTenantService sysTenantService;
+
+    private final SysTenantPackageService sysTenantPackageService;
 
     private final SysUserService sysUserService;
 
@@ -135,6 +139,22 @@ public class SysLoginServiceImpl implements SysLoginService {
             if (!sysTenant.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
                 log.info("登录用户ID：{} 租户状态为禁用.", sysUser.getUserId());
                 throw new TenantException("tenant off state");
+            }
+            if (sysTenant.getExpireTime() != null && !sysTenant.getExpireTime().after(new Date())) {
+                log.info("登录用户ID：{} 租户已到过期时间.", sysUser.getUserId());
+                throw new TenantException("租户已过期，请联系管理员续期");
+            }
+            if (StringUtil.isNotEmpty(sysTenant.getPackageId())) {
+                SysTenantPackage pkg = sysTenantPackageService.findById(sysTenant.getPackageId()).orElse(null);
+                if (pkg == null) {
+                    log.info("登录用户ID：{} 关联套餐不存在: {}", sysUser.getUserId(), sysTenant.getPackageId());
+                    throw new TenantException("租户套餐不存在或已删除");
+                }
+                if (pkg.getStatus() != null
+                        && !pkg.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
+                    log.info("登录用户ID：{} 租户套餐已停用: {}", sysUser.getUserId(), sysTenant.getPackageId());
+                    throw new TenantException("租户套餐已停用");
+                }
             }
 
         }

@@ -1,0 +1,12 @@
+{
+  "id": "com.acme.sample",
+  "version": "1.0.0",
+  "name": "Sample",
+  "description": "单元测试用",
+  "requiresMms": {
+    "revisionMin": 21,
+    "revisionMax": 22
+  },
+  "entryClass": "com.acme.sample.SamplePlugin",
+  "kind": "extension"
+}

@@ -19,8 +19,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * MybatisPlus配置
@@ -46,12 +47,16 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(demoModeInterceptor);
 
         //多租户插件
-        if (tenantProperties.getEnable()) {
+        if (Boolean.TRUE.equals(tenantProperties.getEnable())) {
+            final Set<String> tenantExclusions = normalizeTenantExclusions(tenantProperties.getExclusionTable());
             interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
                 @Override
                 public Expression getTenantId() {
-                    //获得当前登录用户的租户id
-                    return new StringValue(Objects.requireNonNull(LoginObject.getLoginTenant()));
+                    String tenantId = LoginObject.getLoginTenant();
+                    if (tenantId == null || tenantId.isBlank()) {
+                        tenantId = "000000";
+                    }
+                    return new StringValue(tenantId);
                 }
                 // 租户字段名（对应数据库字段）
                 @Override
@@ -62,19 +67,14 @@ public class MybatisPlusConfig {
                 // 忽略多租户的表或SQL（如系统表）
                 @Override
                 public boolean ignoreTable(String tableName) {
-                    List<String> exclusionList= tenantProperties.getExclusionTable();
-                    boolean state=Boolean.FALSE;
-                    if(exclusionList==null|| exclusionList.isEmpty()){
-                        return state;
+                    if (tableName == null || tableName.isEmpty()) {
+                        return false;
                     }
-                    for (int i = 0; i < exclusionList.size(); i++) {
-                        String s=exclusionList.get(i);
-                        if(s.equalsIgnoreCase(tableName)||s.startsWith("sys_gen_")){
-                            state= Boolean.TRUE;
-                            break;
-                        }
+                    String tn = tableName.toLowerCase(Locale.ROOT);
+                    if (tn.startsWith("sys_gen_")) {
+                        return true;
                     }
-                    return state;
+                    return tenantExclusions.contains(tn);
                 }
             }));
         }
@@ -88,6 +88,22 @@ public class MybatisPlusConfig {
         // 如果配置多个插件, 【切记分页最后添加】
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
+    }
+
+    /**
+     * 启动期归一化排除表名：去空白、小写、去重，避免运行期对 exclusionTable 线性扫描。
+     */
+    static Set<String> normalizeTenantExclusions(java.util.List<String> exclusionList) {
+        if (exclusionList == null || exclusionList.isEmpty()) {
+            return Set.of();
+        }
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+        for (String s : exclusionList) {
+            if (s != null && !s.isBlank()) {
+                set.add(s.trim().toLowerCase(Locale.ROOT));
+            }
+        }
+        return Set.copyOf(set);
     }
 
 

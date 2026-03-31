@@ -1,0 +1,25 @@
+{
+  "id": "com.example.mms.comments",
+  "version": "1.0.0",
+  "name": "评论插件",
+  "description": "示例：P0 仅描述契约，宿主加载逻辑在后续阶段实现。",
+  "requiresMms": {
+    "revisionMin": 21,
+    "revisionMax": 21,
+    "springBoot": "3.5.8"
+  },
+  "entryClass": "com.example.mms.comments.CommentsPlugin",
+  "kind": "extension",
+  "dependencies": [
+    {
+      "id": "com.example.mms.user-api",
+      "versionRange": "[1.0.0,2.0.0)",
+      "optional": false
+    }
+  ],
+  "frontend": {
+    "modulePackage": "@example/mms-comments-ui",
+    "compatibleMmsUi": "1.x",
+    "routePrefixes": ["/comments"]
+  }
+}

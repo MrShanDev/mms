@@ -70,12 +70,13 @@ public class LoginObject<T> {
      * 获取租户号
      * @return
      */
-    public static String getLoginTenant(){
-        String id=getLoginId();
-        if(id==null) {
+    public static String getLoginTenant() {
+        String id = getLoginId();
+        if (id == null) {
             return "000000";
         }
-        return RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + id);
+        String tenantId = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + id);
+        return tenantId != null && !tenantId.isBlank() ? tenantId : "000000";
     }
 
     /**

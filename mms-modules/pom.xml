@@ -17,6 +17,9 @@
     </properties>
     <modules>
         <module>mms-common</module>
+        <module>mms-plugin-api</module>
+        <module>mms-plugin-host</module>
+        <module>mms-plugin-sample-health</module>
         <module>mms-framework</module>
         <module>mms-mq</module>
         <module>mms-wx</module>

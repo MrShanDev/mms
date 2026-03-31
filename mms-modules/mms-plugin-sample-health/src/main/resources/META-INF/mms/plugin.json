@@ -1,0 +1,11 @@
+{
+  "id": "com.sxpcwlkj.plugin.sample.health",
+  "version": "1.0.0",
+  "name": "示例健康插件",
+  "description": "联调 mms-plugin-host：SPI + PluginHealthContributor",
+  "requiresMms": {
+    "revisionMin": 21
+  },
+  "entryClass": "com.sxpcwlkj.plugin.sample.health.SampleHealthPlugin",
+  "kind": "extension"
+}
