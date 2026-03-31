@@ -4,12 +4,12 @@ FROM eclipse-temurin:21-jre-alpine
 MAINTAINER SXPCWLKJ
 
 # 创建必要的目录结构
-RUN mkdir -p /sxpcwlkj/mms-admin/logs \
-    && mkdir -p /sxpcwlkj/mms-admin/files \
-    && mkdir -p /sxpcwlkj/mms-admin/temp \
-    && mkdir -p /sxpcwlkj/mms-admin/skywalking/agent
+RUN mkdir -p /sxpcwlkj/mms-api-admin/logs \
+    && mkdir -p /sxpcwlkj/mms-api-admin/files \
+    && mkdir -p /sxpcwlkj/mms-api-admin/temp \
+    && mkdir -p /sxpcwlkj/mms-api-admin/skywalking/agent
 
-WORKDIR /sxpcwlkj/mms-admin
+WORKDIR /sxpcwlkj/mms-api-admin
 
 # 设置环境变量
 ENV SERVER_PORT=8080 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
@@ -17,7 +17,7 @@ ENV SERVER_PORT=8080 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS=""
 EXPOSE ${SERVER_PORT}
 
 # 添加应用 JAR 文件
-ADD ./target/mms-admin.jar ./app.jar
+ADD ./target/mms-api-admin.jar ./app.jar
 
 # 启动命令，使用 JDK 21 的最佳实践 JVM 参数
 ENTRYPOINT exec java -Djava.security.egd=file:/dev/./urandom \
