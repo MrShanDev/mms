@@ -244,8 +244,8 @@ tenant:
 --- # MMS 扩展插件宿主（mms-plugin-host，安装目录布局见在线文档「JAR 插件」）
 mms:
   plugin:
-    enabled: false
-    root-dir: ${user.dir}/mms-plugins
+    enabled: true
+    root-dir: ${user.dir}/plugins
     host-mms-revision: ${revision}
 
 --- # websocket

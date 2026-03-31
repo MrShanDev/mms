@@ -1,0 +1,54 @@
+package com.sxpcwlkj.system.controller;
+
+import cn.dev33.satoken.annotation.SaCheckRole;
+import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
+import com.sxpcwlkj.system.entity.bo.PluginMarketRemoveBo;
+import com.sxpcwlkj.system.entity.vo.PluginMarketCardVo;
+import com.sxpcwlkj.system.service.SysPluginMarketService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+/**
+ * 插件市场：合并 sys_plugins 元数据与宿主运行时状态（仅超级管理员）。
+ */
+@Tag(name = "系统管理模块-插件市场", description = "插件市场卡片数据")
+@RequestMapping("system/pluginMarket")
+@RestController
+@RequiredArgsConstructor
+public class PluginMarketController {
+
+    private final SysPluginMarketService sysPluginMarketService;
+    private final PluginLifecycleManager pluginLifecycleManager;
+
+    @SaCheckRole("super_admin")
+    @GetMapping("/cards")
+    public R<List<PluginMarketCardVo>> cards() {
+        return R.success(sysPluginMarketService.listMarketCards());
+    }
+
+    /**
+     * 移除库表市场登记与版本记录并重载；不删除磁盘（与 uninstall 区分）。
+     */
+    @SaCheckRole("super_admin")
+    @PostMapping("/removeCatalog")
+    public R<Void> removeCatalog(@RequestBody PluginMarketRemoveBo body) {
+        if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
+            return R.fail("pluginId 不能为空");
+        }
+        try {
+            sysPluginMarketService.removeCatalogEntry(body.getPluginId());
+            pluginLifecycleManager.reload();
+            return R.success();
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        }
+    }
+}

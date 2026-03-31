@@ -47,6 +47,11 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-wx</artifactId>
         </dependency>
+        <!--插件宿主：市场页合并磁盘/加载状态-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-plugin-host</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

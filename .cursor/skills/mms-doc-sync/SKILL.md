@@ -20,6 +20,10 @@ description: 当用户要求更新/同步 mms-doc 在线文档时使用。解析
 | `docs/index.md` | 站点首页 |
 | `docs/index/*.md` | Admin 导览区（introduction、mmsAdmin、mmsAdmin-ui、deploy 等） |
 | `docs/mms-api-admin/*.md` | 后端 / 管理端能力说明 |
+| `docs/mms-admin/modules-map.md`、`scaffold-evolution.md` | `mms-modules` 子模块速查、分阶段质量与插件路线 |
+| `docs/mms-admin/saas-tenant-gap.md`、`plugin-jar-phases.md`、`plugin-overview.md`、`plugin-developer-guide.md` | SaaS 缺口；JAR 插件阶段（P0～P4）；插件体系介绍与开发指南 |
+| `docs/index/scaffold-capability-matrix.md`、`docs/mms-ui/plugin-route-protocol.md` | 脚手架能力矩阵、插件与 mms-ui 动态路由协议 |
+| 主仓 `mms-ui/src/views/system/pluginMarket/` | 插件市场页：与 `plugin-overview` / `plugin-developer-guide` / `plugin-jar-phases` 叙述一致时，同步文档中的**操作说明**（详情入口、安装/卸载/删除语义、运行中隐藏安装与删除、`pluginsRootReady` 与列表「磁盘」标记等） |
 | `docs/mms-ui/**/*.md` | 管理端前端（MMS-UI）说明 |
 | `docs/.vitepress/config.mts` | **站点菜单**：`themeConfig.nav`（顶栏）、`themeConfig.sidebar`（侧栏） |
 
@@ -36,7 +40,7 @@ description: 当用户要求更新/同步 mms-doc 在线文档时使用。解析
 当用户在对话中明确说 **「更新 mms-doc 文档」「同步 mms-doc」「完善在线文档」** 等时：
 
 1. **定位仓库**：解析 `{mmsRoot}/../mms-doc`，确认 `docs/` 与 `.vitepress/config.mts` 存在。
-2. **对比源**：以当前 `mms` 工作区已实现的代码、配置与 **`.cursor/skills/mms-kills/SKILL.md`**（MMS 开发规范）为准，识别文档缺口或过时描述（接口路径、权限、`formLayout`、分页结构等）。
+2. **对比源**：以当前 `mms` 工作区已实现的代码、配置与 **`.cursor/skills/mms-kills/SKILL.md`**、**`.cursor/skills/mms-plugin/SKILL.md`**（插件宿主、市场 API/UI、`removeCatalog`、磁盘探测、`status` 字段等）为准，识别文档缺口或过时描述（接口路径、权限、`formLayout`、分页结构等）。
 3. **版本与修订记录**：
    - **产品版本**：仍以 `docs/log/index.md` 中既有 `v1.0.x` 系列为准；勿随意改号，除非用户明确要求发布新版本说明。
    - **文档修订**：在 `docs/log/index.md` **顶部**（第一个 `# 日志` 标题之后）追加一节，标题格式：`## 文档修订 YYYY-MM-DD`，下列出本次相对上一版文档的变更要点（对应改了哪些 `.md`、对齐了哪些代码行为）。若同日多次同步，可用后缀 `(2)` 或补充小节区分。

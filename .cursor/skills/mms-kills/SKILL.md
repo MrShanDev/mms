@@ -9,7 +9,9 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 
 当用户新增功能、修复、重构、接口调整或配置变更时：
 
-0. 若用户要求 **更新 / 同步 mms-doc 在线文档**，优先阅读并遵循 **`.cursor/skills/mms-doc-sync/SKILL.md`**（同级 `mms-doc` 仓库、`docs/` 正文、`docs/.vitepress/config.mts` 菜单与 `docs/log/index.md` 修订记录）。
+0. 若用户要求 **更新 / 同步 mms-doc 在线文档**，优先阅读并遵循 **`.cursor/skills/mms-doc-sync/SKILL.md`**（同级 `mms-doc` 仓库、`docs/` 正文、`docs/.vitepress/config.mts` 菜单与 `docs/log/index.md` 修订记录）。  
+0b. **JAR 插件、plugin.json、插件市场 / 宿主 API、SPI 与 ClassLoader**：见 **`.cursor/skills/mms-plugin/SKILL.md`**。
+0a. **模块地图 / 多租户 / 分阶段脚手架**：见 **`.cursor/skills/mms-modules-map/SKILL.md`**、**`mms-tenant-saas/SKILL.md`**、**`mms-scaffold-phases/SKILL.md`**；**依赖 DAG、冒烟、压测基线** 见主仓 **`version/v1-20260331-脚手架回归与扩展基线.md`**（与 `mms-doc` 中 `index/scaffold-capability-matrix`、`mms-admin/modules-map`、`plugin-jar-phases`、`mms-ui/plugin-route-protocol` 等交叉维护）。
 1. 先确定流量入口：**管理端（mms-api-admin + mms-ui）** 还是 **开放端（mms-servers*）**  
 2. 按本规范统一 **响应结构 / 分页 / 错误码 / 权限 / 日志 / 配置**  
 3. 对外回调、SSE、下载等特殊接口保持原样  
@@ -28,6 +30,13 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 | `mms-modules/mms-gen/src/main/resources/template/gen` | Freemarker 模板：`config.json` 登记输出文件 |
 
 新增业务优先落在 **`mms-system` 同包风格** 的业务模块目录，或与现有模块一致；具体包名以表生成配置中的 `packageName` / `moduleName` 为准。
+
+## 模块与依赖 DAG（核心 vs 可选）
+
+- **主干（管理端最小闭环）**：`mms-common` → `mms-redis` / `mms-authority` → `mms-datasource` → `mms-framework` → `mms-log` → **`mms-gen` + `mms-system`**（`mms-api-admin` 聚合）。
+- **插件链**：`mms-plugin-api`（契约）← `mms-plugin-host`（宿主）；**`mms-plugin-sample-health`** 为示例 JAR，独立 `package`。细节与运维路径见 **`mms-plugin`** skill。
+- **可选集成**：`mms-oss`、`mms-sms`、`mms-email`、`mms-wx`、`mms-mq`、`mms-websocket`、`mms-aliyun`、`mms-ai`、`mms-thymeleaf`、`mms-demo` 等，按需引入。
+- **完整 Mermaid、ClassLoader vs 进程级评审、冒烟表、压测接口**：见 **`version/v1-20260331-脚手架回归与扩展基线.md`**；在线 **脚手架能力矩阵**：[脚手架能力矩阵](https://mmsadmin.cn/index/scaffold-capability-matrix.html)。
 
 ## mms-gen 代码生成：业务流程与排查要点
 
@@ -118,7 +127,7 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 
 ## 核心模块其它风险点（排查备忘，非本次必改）
 
-- **多租户**：`TenantLineInnerInterceptor` 使用 `Objects.requireNonNull(LoginObject.getLoginTenant())`，无登录上下文（定时任务、内部调用）直接跑业务 SQL 可能 **NPE**；应使用忽略租户表或填充默认租户。  
+- **多租户**：`TenantLineInnerInterceptor` 的 `getTenantId()` 依赖 **`LoginObject.getLoginTenant()`**；无登录用户时依赖 **`getLoginId()`** 返回 `null` 后回退 **`"000000"`**。若在**应用就绪、定时任务等无 Sa-Token 上下文**的线程中访问 `StpUtil`，可能抛 **`SaTokenContextException`**（需在进入 `getLoginTenant()` 前由 **`getLoginId()`** 吞掉，见 **`mms-authority` `LoginObject`**、**`.cursor/skills/mms-plugin/SKILL.md`**「启动加载与多租户」）。其它业务若在异步线程 / 就绪回调中跑 Mapper，需同理或 `@InterceptorIgnore` / 显式租户。  
 - **限流**：`@RateLimit` 仅进程内；集群需网关或 Redis 限流。
 
 ## 功能开发速查清单（AI 与人类共用）

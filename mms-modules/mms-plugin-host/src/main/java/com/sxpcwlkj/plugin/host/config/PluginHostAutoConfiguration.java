@@ -1,7 +1,9 @@
 package com.sxpcwlkj.plugin.host.config;
 
+import com.sxpcwlkj.plugin.host.PluginHostDbBridge;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +17,9 @@ import org.springframework.context.annotation.Bean;
 public class PluginHostAutoConfiguration {
 
     @Bean
-    public PluginLifecycleManager pluginLifecycleManager(PluginHostProperties properties) {
-        return new PluginLifecycleManager(properties);
+    public PluginLifecycleManager pluginLifecycleManager(
+            PluginHostProperties properties,
+            ObjectProvider<PluginHostDbBridge> dbBridge) {
+        return new PluginLifecycleManager(properties, dbBridge);
     }
 }

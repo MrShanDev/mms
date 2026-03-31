@@ -2,6 +2,7 @@ package com.sxpcwlkj.authority;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotWebContextException;
+import cn.dev33.satoken.exception.SaTokenContextException;
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
@@ -60,7 +61,8 @@ public class LoginObject<T> {
         try {
             SaSession session = StpUtil.getSession();
             return session != null ? session.getLoginId().toString() : null;
-        }catch (NotWebContextException e){
+        } catch (NotWebContextException | SaTokenContextException e) {
+            // 无 Web 上下文或非请求线程（如应用就绪后加载插件、定时任务）无法初始化 SaToken 上下文
             return null;
         }
 

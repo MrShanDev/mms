@@ -6,12 +6,14 @@ import com.sxpcwlkj.plugin.PluginDescriptorReader;
 import com.sxpcwlkj.plugin.PluginDescriptorValidator;
 import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.PluginHealthContributor;
+import com.sxpcwlkj.plugin.PluginConstants;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
 import com.sxpcwlkj.plugin.PluginKind;
 import com.sxpcwlkj.plugin.host.internal.DefaultPluginRuntimeContext;
 import com.sxpcwlkj.plugin.host.internal.LoadedPluginInstance;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringBootVersion;
 
 import java.io.IOException;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Comparator;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -37,11 +41,13 @@ import java.util.stream.Stream;
 public class PluginLifecycleManager {
 
     private final PluginHostProperties properties;
+    private final ObjectProvider<PluginHostDbBridge> dbBridgeProvider;
     @Getter
     private final Map<String, LoadedPluginInstance> loadedPlugins = new ConcurrentHashMap<>();
 
-    public PluginLifecycleManager(PluginHostProperties properties) {
+    public PluginLifecycleManager(PluginHostProperties properties, ObjectProvider<PluginHostDbBridge> dbBridgeProvider) {
         this.properties = properties;
+        this.dbBridgeProvider = dbBridgeProvider;
     }
 
     public List<PluginEntrySummary> listSummaries() {
@@ -89,6 +95,53 @@ public class PluginLifecycleManager {
             return;
         }
         String springVer = SpringBootVersion.getVersion();
+        PluginHostDbBridge bridge = dbBridgeProvider.getIfAvailable();
+        if (bridge == null) {
+            scanAllDiskVersions(root, springVer);
+            return;
+        }
+        Set<String> managed = bridge.pluginIdsManagedInDatabase();
+        if (managed == null || managed.isEmpty()) {
+            scanAllDiskVersions(root, springVer);
+            return;
+        }
+        List<PluginVersionCoordinate> active = bridge.activeVersionsForStartup();
+        if (active != null && !active.isEmpty()) {
+            log.info("插件加载：库表激活版本 {} 条", active.size());
+            loadCoordinates(root, active, springVer);
+        } else {
+            log.warn("库中已有插件版本记录但未配置激活版本，跳过受管插件加载");
+        }
+        loadOrphanDiskPlugins(root, managed, springVer);
+    }
+
+    /** 磁盘上「库中无任何版本行」的插件目录：仍按全版本扫描，兼容旧数据。 */
+    private void loadOrphanDiskPlugins(Path root, Set<String> managedPluginIds, String springVer) {
+        try (Stream<Path> idDirs = Files.list(root)) {
+            idDirs.filter(Files::isDirectory).sorted().forEach(idDir -> {
+                String folderId = idDir.getFileName().toString();
+                if (managedPluginIds.contains(folderId)) {
+                    return;
+                }
+                log.info("插件目录未纳入库表，按磁盘全版本加载: {}", folderId);
+                try (Stream<Path> versionDirs = Files.list(idDir)) {
+                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
+                        try {
+                            tryLoadOne(folderId, verDir.getFileName().toString(), verDir, springVer);
+                        } catch (Exception e) {
+                            log.warn("插件目录加载失败 {} : {}", verDir.toAbsolutePath(), e.getMessage());
+                        }
+                    });
+                } catch (IOException e) {
+                    log.warn("列举版本目录失败: {}", idDir, e);
+                }
+            });
+        } catch (IOException e) {
+            log.warn("列举插件根目录失败: {}", root, e);
+        }
+    }
+
+    private void scanAllDiskVersions(Path root, String springVer) {
         try (Stream<Path> pluginIdDirs = Files.list(root)) {
             pluginIdDirs.filter(Files::isDirectory).sorted().forEach(idDir -> {
                 try (Stream<Path> versionDirs = Files.list(idDir)) {
@@ -105,6 +158,26 @@ public class PluginLifecycleManager {
             });
         } catch (IOException e) {
             log.warn("列举插件根目录失败: {}", root, e);
+        }
+    }
+
+    private void loadCoordinates(Path root, List<PluginVersionCoordinate> coords, String springVer) {
+        for (PluginVersionCoordinate c : coords) {
+            if (c.pluginId() == null || c.version() == null) {
+                continue;
+            }
+            String dirId = PluginInstallationLayout.safeSegment(c.pluginId());
+            String dirVer = PluginInstallationLayout.safeSegment(c.version());
+            Path verDir = root.resolve(dirId).resolve(dirVer);
+            if (!Files.isDirectory(verDir)) {
+                log.warn("库中激活版本在磁盘不存在，跳过加载: {} @ {}（路径 {}）", c.pluginId(), c.version(), verDir);
+                continue;
+            }
+            try {
+                tryLoadOne(dirId, dirVer, verDir, springVer);
+            } catch (Exception e) {
+                log.warn("插件加载失败 {}@{}: {}", c.pluginId(), c.version(), e.getMessage());
+            }
         }
     }
 
@@ -209,9 +282,134 @@ public class PluginLifecycleManager {
     }
 
     /**
-     * 将上传的单个插件 JAR 安装到约定目录并覆盖同名文件；加载需由调用方执行 {@link #reload()}。
+     * 当前解析后的插件根目录是否为已存在目录（否则市场页应提示无法扫描磁盘）。
      */
-    public void installJarFromUpload(Path tempJarFile) throws Exception {
+    public boolean isPluginsRootDirectory() {
+        return Files.isDirectory(resolveRoot());
+    }
+
+    /**
+     * 探测某插件版本的安装布局是否具备可加载的 JAR（与加载逻辑中 lib 扫描一致）。
+     */
+    public PluginJarLocationStatus probeVersionLayout(String pluginId, String version) {
+        Path root = resolveRoot();
+        if (!Files.isDirectory(root)) {
+            return PluginJarLocationStatus.ROOT_NOT_DIRECTORY;
+        }
+        if (pluginId == null || pluginId.isBlank() || version == null || version.isBlank()) {
+            return PluginJarLocationStatus.OK;
+        }
+        Path verDir = PluginInstallationLayout.pluginRoot(root, pluginId.trim(), version.trim());
+        if (!Files.isDirectory(verDir)) {
+            return PluginJarLocationStatus.VERSION_DIR_MISSING;
+        }
+        Path libDir = verDir.resolve(PluginConstants.SUBDIR_LIB);
+        if (!Files.isDirectory(libDir)) {
+            return PluginJarLocationStatus.LIB_DIR_MISSING;
+        }
+        try (Stream<Path> js = Files.list(libDir)) {
+            boolean any = js.anyMatch(p -> p.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar"));
+            return any ? PluginJarLocationStatus.OK : PluginJarLocationStatus.JAR_NOT_FOUND;
+        } catch (IOException e) {
+            log.debug("probeVersionLayout 列举 lib 失败: {}", libDir, e);
+            return PluginJarLocationStatus.JAR_NOT_FOUND;
+        }
+    }
+
+    /**
+     * 枚举磁盘上 {@code <pluginId>/<version>/lib/*.jar} 已就绪的安装槽位（不要求当前已加载）。
+     */
+    public List<DiskPluginSlot> listDiskSlots() {
+        Path root = resolveRoot();
+        List<DiskPluginSlot> list = new ArrayList<>();
+        if (!Files.isDirectory(root)) {
+            return list;
+        }
+        try (Stream<Path> idDirs = Files.list(root)) {
+            idDirs.filter(Files::isDirectory).sorted().forEach(idDir -> {
+                String pluginId = idDir.getFileName().toString();
+                try (Stream<Path> verDirs = Files.list(idDir)) {
+                    verDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
+                        String ver = verDir.getFileName().toString();
+                        Path lib = verDir.resolve("lib");
+                        boolean hasJar = false;
+                        if (Files.isDirectory(lib)) {
+                            try (Stream<Path> js = Files.list(lib)) {
+                                hasJar = js.anyMatch(p -> p.getFileName().toString()
+                                        .toLowerCase(Locale.ROOT).endsWith(".jar"));
+                            } catch (IOException e) {
+                                log.debug("列举 lib 失败: {}", lib, e);
+                            }
+                        }
+                        list.add(new DiskPluginSlot(pluginId, ver, hasJar));
+                    });
+                } catch (IOException e) {
+                    log.debug("列举版本目录失败: {}", idDir, e);
+                }
+            });
+        } catch (IOException e) {
+            log.warn("列举插件根目录失败: {}", root, e);
+        }
+        list.sort(Comparator.comparing(DiskPluginSlot::pluginId, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER));
+        return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * 从磁盘卸载：{@code version} 为空则删除该 {@code pluginId} 下所有版本目录。
+     */
+    public synchronized void uninstallFromDisk(String pluginId, String versionOrNull) throws IOException {
+        if (pluginId == null || pluginId.isBlank()) {
+            throw new PluginException("pluginId 不能为空");
+        }
+        Path root = resolveRoot();
+        Path base = root.resolve(PluginInstallationLayout.safeSegment(pluginId));
+        if (!Files.isDirectory(base)) {
+            return;
+        }
+        if (versionOrNull == null || versionOrNull.isBlank()) {
+            deleteRecursive(base);
+            return;
+        }
+        Path ver = base.resolve(PluginInstallationLayout.safeSegment(versionOrNull));
+        deleteRecursive(ver);
+        try (Stream<Path> left = Files.list(base)) {
+            if (left.findAny().isEmpty()) {
+                deleteRecursive(base);
+            }
+        } catch (IOException ignored) {
+            // ignore
+        }
+    }
+
+    private static void deleteRecursive(Path root) throws IOException {
+        if (root == null || !Files.exists(root)) {
+            return;
+        }
+        try (Stream<Path> walk = Files.walk(root)) {
+            List<Path> paths = walk.sorted(Comparator.reverseOrder()).toList();
+            IOException first = null;
+            for (Path p : paths) {
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException e) {
+                    if (first == null) {
+                        first = e;
+                    }
+                }
+            }
+            if (first != null) {
+                throw first;
+            }
+        }
+    }
+
+    /**
+     * 校验并将上传的 JAR 写入约定目录（不写库）；调用方负责 {@link PluginHostDbBridge} 与 {@link #reload()}。
+     *
+     * @return 已校验通过的描述符（与磁盘写入一致）
+     */
+    public PluginDescriptor installJarFromUpload(Path tempJarFile) throws Exception {
         PluginDescriptor d = PluginDescriptorReader.readFromJar(tempJarFile);
         PluginDescriptorValidator.validateStructureOrThrow(d);
         String springVer = SpringBootVersion.getVersion();
@@ -229,6 +427,7 @@ public class PluginLifecycleManager {
         Files.copy(tempJarFile, target, StandardCopyOption.REPLACE_EXISTING);
         Files.createDirectories(PluginInstallationLayout.dataDirectory(root, d.getId(), d.getVersion()));
         Files.createDirectories(PluginInstallationLayout.temporaryDirectory(root, d.getId(), d.getVersion()));
+        return d;
     }
 
     private void unloadAllQuietly() {
