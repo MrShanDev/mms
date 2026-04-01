@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * 将 {@code /plugin/{pluginId}/...} 分发给插件控制器方法。
- * <p>与 {@code mms-api-admin} 共用 Sa-Token 拦截器链（{@code sa-token.excludes} 未放行 {@code /plugin/**} 时需登录），
+ * <p>与 {@code mms-admin} 共用 Sa-Token 拦截器链（{@code sa-token.excludes} 未放行 {@code /plugin/**} 时需登录），
  * 租户/权限与常规管理端接口一致；仅子进程 peer 等明确 {@code @SaIgnore} 的路径例外。</p>
  */
 @RestController

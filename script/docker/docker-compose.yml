@@ -67,16 +67,16 @@ services:
     network_mode: "host"
 
   # 品创网络-MMS
-  mms-api-admin:
-    image: sxpcwlkj/mms-api-admin:1.0.0
-    container_name: mms-api-admin
+  mms-admin:
+    image: sxpcwlkj/mms-admin:1.0.0
+    container_name: mms-admin
     environment:
       # 时区上海
       TZ: Asia/Shanghai
     volumes:
       # 配置文件
-      - /docker/sxpcwlkj/mms-api-admin/logs/:/sxpcwlkj/mms-api-admin/logs
-      - /docker/sxpcwlkj/mms-api-admin/files/:/sxpcwlkj/mms-api-admin/files
+      - /docker/sxpcwlkj/mms-admin/logs/:/sxpcwlkj/mms-admin/logs
+      - /docker/sxpcwlkj/mms-admin/files/:/sxpcwlkj/mms-admin/files
     privileged: true
     network_mode: "host"
 

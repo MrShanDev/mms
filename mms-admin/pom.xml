@@ -10,7 +10,7 @@
     </parent>
 
     <packaging>jar</packaging>
-    <artifactId>mms-api-admin</artifactId>
+    <artifactId>mms-admin</artifactId>
     <description>后台系统模块</description>
 
     <dependencies>

@@ -58,19 +58,19 @@ select_module() {
   local module
   echo
   echo "选择模块："
-  echo "  1) mms-api-admin           (系统管理后台)"
+  echo "  1) mms-admin           (系统管理后台)"
   echo "  2) mms-unix-api        (移动端 API)"
   echo "  3) mms-zoom/mms-monitor(监控服务)"
   echo "  4) mms-zoom/mms-powerjob(定时任务服务)"
   echo "  5) 自己手动输入模块路径（例如 mms-xxx 或 mms-zoom/mms-xxx）"
   read -rp "请输入编号 [1-5]： " module
   case "$module" in
-    1) echo "mms-api-admin" ;;
+    1) echo "mms-admin" ;;
     2) echo "mms-unix-api" ;;
     3) echo "mms-zoom/mms-monitor" ;;
     4) echo "mms-zoom/mms-powerjob" ;;
     5)
-      read -rp "请输入模块路径（相对于项目根，例如 mms-api-admin 或 mms-zoom/mms-monitor）： " custom
+      read -rp "请输入模块路径（相对于项目根，例如 mms-admin 或 mms-zoom/mms-monitor）： " custom
       echo "$custom"
       ;;
     *)
@@ -171,7 +171,7 @@ download_all_deps() {
 download_module_deps() {
   echo
   echo "依赖下载（指定模块）"
-  echo "提示：模块示例：mms-api-admin、mms-modules、mms-zoom/mms-monitor 等"
+  echo "提示：模块示例：mms-admin、mms-modules、mms-zoom/mms-monitor 等"
   read -rp "请输入模块路径（留空返回菜单）： " module_path
   [[ -z "$module_path" ]] && return
 
@@ -239,7 +239,7 @@ docker_build_and_push_menu() {
   echo
   echo "Docker 构建 / 推送"
   echo "提示：项目中已有的 Dockerfile 主要示例："
-  echo "  - mms-api-admin/Dockerfile"
+  echo "  - mms-admin/Dockerfile"
   echo "  - mms-zoom/mms-monitor/Dockerfile"
   echo "  - mms-zoom/mms-powerjob/Dockerfile"
   echo
@@ -253,7 +253,7 @@ docker_build_and_push_menu() {
   fi
 
   read -rp "请输入镜像仓库前缀（例如：registry.example.com/mms 或留空使用本地 mms）： " repo
-  read -rp "请输入镜像名称（默认使用模块名，如 mms-api-admin）： " image
+  read -rp "请输入镜像名称（默认使用模块名，如 mms-admin）： " image
   read -rp "请输入镜像 tag（默认：latest）： " tag
 
   if [[ -z "$image" ]]; then

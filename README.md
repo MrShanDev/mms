@@ -120,10 +120,10 @@
    - 根据实际环境修改数据库连接配置
 2. **后端服务部署**
 
-   - 修改 `mms-api-admin/src/main/resources/application.yml` 配置文件
+   - 修改 `mms-admin/src/main/resources/application.yml` 配置文件
    - 根据不同环境激活对应的 profile (local/dev/prod)
    - 执行 Maven 命令打包：`mvn clean package -DskipTests`
-   - 运行 jar 包：`java -jar mms-api-admin.jar`
+   - 运行 jar 包：`java -jar mms-admin.jar`
 3. **前端服务部署**
 
    - 进入前端项目目录
@@ -158,7 +158,7 @@
 
 | 序号 | 目录        | 子模块名称        | 模块名称                                         | 备注       |
 | ---- | ----------- | ----------------- | ------------------------------------------------ | ---------- |
-| 1    | mms-api-admin   |                   | 系统管理启动模块                                 | 已完成     |
+| 1    | mms-admin   |                   | 系统管理启动模块                                 | 已完成     |
 | 1    | mms-docs    |                   | VitePress会员主题（知识付费）<br>MMS适配接口服务 | 已完成     |
 | 5    | ｜________  | mms-doc-admin     | 会员主题后端模块                                 | 已完成     |
 | 6    | ｜________  | mms-doc-api       | 会员主题接口模块                                 | 已完成     |
@@ -238,7 +238,7 @@ MMS（模块化管理系统）采用前后端分离的架构设计，后端基�
 
 ### 核心模块说明
 
-1. **mms-api-admin**：系统管理启动模块，整合各业务模块
+1. **mms-admin**：系统管理启动模块，整合各业务模块
 2. **mms-modules**：核心业务模块集合
    - mms-common：公共模块，包含通用工具类和枚举
    - mms-framework：核心框架模块，包含基础配置和工具
@@ -268,7 +268,7 @@ MMS（模块化管理系统）采用前后端分离的架构设计，后端基�
 
 ```
 mms
-├── mms-api-admin          # 系统管理启动模块
+├── mms-admin          # 系统管理启动模块
 ├── mms-modules        # 核心业务模块集合
 │   ├── mms-common     # 公共模块
 │   ├── mms-framework  # 核心框架模块
@@ -297,7 +297,7 @@ mms
 
 1. 在 `mms-modules` 目录下创建新模块
 2. 在模块中创建对应的 entity、mapper、service、controller 层
-3. 在 `mms-api-admin` 的 pom.xml 中添加模块依赖
+3. 在 `mms-admin` 的 pom.xml 中添加模块依赖
 4. 在数据库中创建对应的表结构
 5. 在菜单管理中添加对应的菜单和权限
 
@@ -489,7 +489,7 @@ MMS基于Spring Boot 3.x构建，采用Maven多模块架构，整合了众多优
 
 ```
 mms
-├── mms-api-admin          # 系统管理启动模块
+├── mms-admin          # 系统管理启动模块
 ├── mms-modules        # 核心业务模块集合
 │   ├── mms-common     # 公共模块
 │   ├── mms-framework  # 核心框架模块
@@ -619,7 +619,7 @@ mms
 
 ### v1.0.5 (2024-11-14)
 
-- [新增] mms-api-admin整合easyexcel支持数据的导入/导出（支持字典的自动翻译和导入的逆翻译）
+- [新增] mms-admin整合easyexcel支持数据的导入/导出（支持字典的自动翻译和导入的逆翻译）
 - [新增] mms-ui对Table列表页面进行工具栏的封装（表格数据的导出，导入，打印）等功能
 - [优化] 系统整体的架构布局优化
 - [预告] 接口加密，接口防抖，接口限流等技术

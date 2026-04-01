@@ -6,9 +6,9 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 function print_menu() {
   echo ""
   echo "MMS 启动菜单"
-  echo "1) 启动 mms-api-admin (profile=local)"
-  echo "2) 启动 mms-api-admin (profile=dev)"
-  echo "3) 启动 mms-api-admin (profile=prod)"
+  echo "1) 启动 mms-admin (profile=local)"
+  echo "2) 启动 mms-admin (profile=dev)"
+  echo "3) 启动 mms-admin (profile=prod)"
   echo "4) 启动 mms-monitor"
   echo "5) 启动 mms-powerjob (profile=local)"
   echo "6) 退出"
@@ -17,8 +17,8 @@ function print_menu() {
 
 function run_admin() {
   local profile="$1"
-  echo ">>> 启动 mms-api-admin (profile=${profile})"
-  cd "${ROOT_DIR}/mms-api-admin"
+  echo ">>> 启动 mms-admin (profile=${profile})"
+  cd "${ROOT_DIR}/mms-admin"
   mvn spring-boot:run -Dspring-boot.run.profiles="${profile}"
 }
 
