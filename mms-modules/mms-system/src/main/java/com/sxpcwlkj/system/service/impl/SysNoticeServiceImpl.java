@@ -89,6 +89,7 @@ public class SysNoticeServiceImpl extends BaseServiceImpl<SysNotice, SysNoticeVo
         wrapper.eq(StringUtil.isNotEmpty(query.getId()), SysNotice::getId, query.getId());
         wrapper.eq(StringUtil.isNotEmpty(query.getTitle()), SysNotice::getTitle, query.getTitle());
         wrapper.eq(StringUtil.isNotEmpty(query.getType()), SysNotice::getType, query.getType());
+        wrapper.orderByDesc(SysNotice::getCreatedTime);
         return wrapper;
     }
 

@@ -138,9 +138,8 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             commonVerify(inputMessage.getHeaders());
             if (apiSecurity.encryptType().getType().equalsIgnoreCase(SignUtil.ENCRYPTION_TYPE_AES)) {
                 SignUtil.verifyAesCryptoJs(apiSecurityParam, new AesKeyEntity(sysSign.getAppId(), sysSign.getSecretKey()));
-            }
-            //非对称解密验签
-            if (apiSecurity.encryptType().getType().equalsIgnoreCase(SignUtil.ENCRYPTION_TYPE_RSA)) {
+            } else if (apiSecurity.encryptType().getType().equalsIgnoreCase(SignUtil.ENCRYPTION_TYPE_RSA)) {
+                // 非对称解密验签
                 SignUtil.verifyRsa(apiSecurityParam, new RsaKeyEntity(sysSign.getPublicKey(), sysSign.getPrivateKey()));
             } else {
                 throw new MmsException("加密方式不匹配");

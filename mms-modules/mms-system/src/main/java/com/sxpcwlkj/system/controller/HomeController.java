@@ -5,12 +5,21 @@ import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.properties.MmsAdminProperties;
 import com.sxpcwlkj.common.utils.R;
+import com.sxpcwlkj.system.entity.SysNotice;
+import com.sxpcwlkj.system.entity.SysRole;
+import com.sxpcwlkj.system.entity.SysTenant;
+import com.sxpcwlkj.system.entity.SysUser;
 import com.sxpcwlkj.system.entity.vo.SysConfigVo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
+import com.sxpcwlkj.system.mapper.SysNoticeMapper;
+import com.sxpcwlkj.system.mapper.SysRoleMapper;
+import com.sxpcwlkj.system.mapper.SysTenantMapper;
+import com.sxpcwlkj.system.mapper.SysUserMapper;
 import com.sxpcwlkj.system.service.SysConfigService;
 import com.sxpcwlkj.system.service.SysFunctionService;
 import com.sxpcwlkj.system.service.SysNoticeService;
@@ -41,6 +50,10 @@ public class HomeController extends BaseController {
     private final SysConfigService configService;
     private final MmsAdminProperties mmsAdminProperties;
     private final SysNoticeService sysNoticeService;
+    private final SysUserMapper sysUserMapper;
+    private final SysRoleMapper sysRoleMapper;
+    private final SysTenantMapper sysTenantMapper;
+    private final SysNoticeMapper sysNoticeMapper;
 
     /**
      * 控制台默认数据
@@ -81,77 +94,75 @@ public class HomeController extends BaseController {
     }
 
 
-    //1:会员总人数 ，今日新增
-    //2:代发货总数量 ，  今日数量
-    //3:待还机总数量 ，  今到期数量
-    //4:分期付款总订单 ， 今日付款数量
-
-
     /**
-     * 待处理任务
+     * 控制台顶部统计卡片（与 MMS 系统管理模块能力对齐）
+     * num1：总量；num2：当日新增（按 createdTime）；num3：标题；num4：mms-ui SvgIcon 名（ele- 前缀）
      */
     @SaCheckLogin
     @GetMapping("/info")
     public R<Object> homeInfo() {
-        String loginId = LoginObject.getLoginId();
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        Date now = new Date();
+        Date dayStart = DateUtil.beginOfDay(now);
+        Date dayEnd = DateUtil.endOfDay(now);
+
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        long userTotal = sysUserMapper.selectCount(Wrappers.lambdaQuery(SysUser.class));
+        long userToday = sysUserMapper.selectCount(Wrappers.lambdaQuery(SysUser.class)
+                .ge(SysUser::getCreatedTime, dayStart)
+                .le(SysUser::getCreatedTime, dayEnd));
         Map<String, Object> map = new HashMap<>();
-        //总人数
-        Long memberCount = 0L;
-        map.put("num1", memberCount);
-        //今日数量
-        Long todayMemberCount = 0L;
-        map.put("num2", todayMemberCount);
-        map.put("num3", "会员人数");
-        //https://icones.js.org
-        map.put("num4", "iconoir:accessibility");
+        map.put("num1", userTotal);
+        map.put("num2", userToday);
+        map.put("num3", "系统用户");
+        map.put("num4", "ele-User");
         map.put("num5", "人");
-        map.put("color1", "#FF6462");
+        map.put("color1", "#409eff");
         map.put("color2", "--next-color-primary-lighter");
         map.put("color3", "--el-color-primary");
         list.add(map);
 
+        long roleTotal = sysRoleMapper.selectCount(Wrappers.lambdaQuery(SysRole.class));
+        long roleToday = sysRoleMapper.selectCount(Wrappers.lambdaQuery(SysRole.class)
+                .ge(SysRole::getCreatedTime, dayStart)
+                .le(SysRole::getCreatedTime, dayEnd));
         Map<String, Object> map2 = new HashMap<>();
-        //待发货
-        Long orderCount = 0L;
-        map2.put("num1", orderCount);
-        //今日数量
-        Long todayOrderCount = 0L;
-        map2.put("num2", todayOrderCount);
-        map2.put("num3", "订单发货");
-        map2.put("num4", "octicon:copilot-16");
-        map2.put("num5", "件");
-        map2.put("color1", "#6690F9");
+        map2.put("num1", roleTotal);
+        map2.put("num2", roleToday);
+        map2.put("num3", "系统角色");
+        map2.put("num4", "ele-Key");
+        map2.put("num5", "个");
+        map2.put("color1", "#67c23a");
         map2.put("color2", "--next-color-success-lighter");
         map2.put("color3", "--el-color-success");
         list.add(map2);
 
+        long tenantTotal = sysTenantMapper.selectCount(Wrappers.lambdaQuery(SysTenant.class));
+        long tenantToday = sysTenantMapper.selectCount(Wrappers.lambdaQuery(SysTenant.class)
+                .ge(SysTenant::getCreatedTime, dayStart)
+                .le(SysTenant::getCreatedTime, dayEnd));
         Map<String, Object> map3 = new HashMap<>();
-        //待发货
-        Long orderCountGuiHai = 0L;
-        map3.put("num1", orderCountGuiHai);
-        //今日数量
-        Long todayOrderCountGuiHai = 0L;
-        map3.put("num2", todayOrderCountGuiHai);
-        map3.put("num3", "到期待还");
-        map3.put("num4", "emojione-monotone:alembic");
-        map3.put("num5", "件");
-        map3.put("color1", "#6690F9");
+        map3.put("num1", tenantTotal);
+        map3.put("num2", tenantToday);
+        map3.put("num3", "系统租户");
+        map3.put("num4", "ele-OfficeBuilding");
+        map3.put("num5", "个");
+        map3.put("color1", "#e6a23c");
         map3.put("color2", "--next-color-warning-lighter");
         map3.put("color3", "--el-color-warning");
         list.add(map3);
 
+        long noticeTotal = sysNoticeMapper.selectCount(Wrappers.lambdaQuery(SysNotice.class));
+        long noticeToday = sysNoticeMapper.selectCount(Wrappers.lambdaQuery(SysNotice.class)
+                .ge(SysNotice::getCreatedTime, dayStart)
+                .le(SysNotice::getCreatedTime, dayEnd));
         Map<String, Object> map4 = new HashMap<>();
-        //待发货
-        Long orderCountFenQi = 0L;
-        map4.put("num1", orderCountFenQi);
-        //今日数量
-        Long todayOrderCountFenQi = 0L;
-        map4.put("num2", todayOrderCountFenQi);
-        map4.put("num3", "分期待付");
-        map4.put("num4", "emojione-monotone:bear-face");
-        map4.put("num5", "个");
-        map4.put("color1", "#FF6462");
+        map4.put("num1", noticeTotal);
+        map4.put("num2", noticeToday);
+        map4.put("num3", "系统公告");
+        map4.put("num4", "ele-Bell");
+        map4.put("num5", "条");
+        map4.put("color1", "#f56c6c");
         map4.put("color2", "--next-color-danger-lighter");
         map4.put("color3", "--el-color-danger");
         list.add(map4);
