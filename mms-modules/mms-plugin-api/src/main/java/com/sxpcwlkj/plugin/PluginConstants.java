@@ -14,6 +14,14 @@ public final class PluginConstants {
     public static final String DESCRIPTOR_PATH_IN_JAR = "META-INF/mms/plugin.json";
 
     /**
+     * 可选：依赖指纹清单路径（JAR 内 UTF-8 文本）。
+     * <p><b>GAV 生成规范</b>：每行一条 Maven 坐标 {@code groupId:artifactId:version}（无多余空格），
+     * 按字典序排序整文件后写入；{@link PluginDescriptor#getDependencyFingerprintSha256()} 为该文件<strong>原始字节</strong>
+     * 的 SHA-256 十六进制（小写存库，校验时大小写不敏感）。可用 {@code mvn dependency:list} 再配合脚本排序去重后生成。</p>
+     */
+    public static final String DEPS_FINGERPRINT_MANIFEST = "META-INF/mms/deps-fingerprint.manifest";
+
+    /**
      * 描述文件在 JAR 根下的兼容路径（可选用）。
      */
     public static final String DESCRIPTOR_FALLBACK_PATH_IN_JAR = "plugin.json";

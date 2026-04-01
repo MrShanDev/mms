@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PluginDescriptorValidatorTest {
@@ -44,6 +45,33 @@ class PluginDescriptorValidatorTest {
         d.setKind(PluginKind.LIBRARY);
         d.setEntryClass(null);
         assertTrue(PluginDescriptorValidator.validateStructure(d).isEmpty());
+    }
+
+    @Test
+    void spiOnlyMustNotDeclarePort() {
+        PluginDescriptor d = minimalDescriptor("com.acme.x", "1.0.0", 21, 21);
+        d.setRuntimeMode(PluginRuntimeMode.SPI_ONLY);
+        d.setIndependentPort(8082);
+        assertFalse(PluginDescriptorValidator.validateStructure(d).isEmpty());
+    }
+
+    @Test
+    void independentProcessRequiresPortAndMainClass() {
+        PluginDescriptor d = minimalDescriptor("com.acme.x", "1.0.0", 21, 21);
+        d.setRuntimeMode(PluginRuntimeMode.INDEPENDENT_PROCESS);
+        assertFalse(PluginDescriptorValidator.validateStructure(d).isEmpty());
+        d.setIndependentPort(8082);
+        d.setMainClass("com.acme.Boot");
+        assertTrue(PluginDescriptorValidator.validateStructure(d).isEmpty());
+    }
+
+    @Test
+    void hostServicesContractRejectsLowHost() {
+        PluginDescriptor d = minimalDescriptor("com.acme.x", "1.0.0", 21, 21);
+        d.setHostServicesContractVersion(2);
+        assertThrows(PluginException.class, () ->
+                PluginDescriptorValidator.validateHostServicesContractOrThrow(d, 1));
+        PluginDescriptorValidator.validateHostServicesContractOrThrow(d, 2);
     }
 
     private static PluginDescriptor minimalDescriptor(String id, String ver, int min, Integer max) {

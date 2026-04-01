@@ -12,6 +12,12 @@ public final class PluginDescriptorValidator {
     private static final Pattern SEMVER_LIGHT = Pattern.compile("^\\d+\\.\\d+\\.\\d+([.-]\\S+)?$");
     private static final Pattern ID_PATTERN =
             Pattern.compile("^[a-zA-Z0-9][a-zA-Z0-9_.-]*(\\.[a-zA-Z0-9][a-zA-Z0-9_.-]*)+$");
+    private static final Pattern TABLE_PREFIX_PATTERN =
+            Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]{0,62}_$");
+    private static final Pattern FINGERPRINT_SHA256 = Pattern.compile("^[0-9a-fA-F]{64}$");
+    private static final Pattern DATA_TABLE_REL_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]*$");
+    private static final int MIN_EPHEMERAL_PORT = 1024;
+    private static final int MAX_USER_PORT = 65535;
 
     private PluginDescriptorValidator() {
     }
@@ -61,7 +67,83 @@ public final class PluginDescriptorValidator {
                 i++;
             }
         }
+        validateRuntimeModeBlock(d, errors);
+        if (d.getHostServicesContractVersion() != null) {
+            int v = d.getHostServicesContractVersion();
+            if (v < 1) {
+                errors.add("hostServicesContractVersion 必须 >= 1");
+            }
+            if (v > 999) {
+                errors.add("hostServicesContractVersion 超出合理范围");
+            }
+        }
+        if (d.getPluginTablePrefix() != null && !d.getPluginTablePrefix().isBlank()) {
+            String p = d.getPluginTablePrefix().trim();
+            if (!TABLE_PREFIX_PATTERN.matcher(p).matches()) {
+                errors.add("pluginTablePrefix 需匹配 [a-zA-Z][a-zA-Z0-9_]{0,62}_ ，当前: " + p);
+            }
+        }
+        if (d.getDependencyFingerprintSha256() != null && !d.getDependencyFingerprintSha256().isBlank()) {
+            if (!FINGERPRINT_SHA256.matcher(d.getDependencyFingerprintSha256().trim()).matches()) {
+                errors.add("dependencyFingerprintSha256 须为 64 位十六进制 SHA-256");
+            }
+        }
+        if (d.getPluginDataTables() != null && !d.getPluginDataTables().isEmpty()) {
+            if (d.getPluginTablePrefix() == null || d.getPluginTablePrefix().isBlank()) {
+                errors.add("声明 pluginDataTables 时必须同时配置 pluginTablePrefix");
+            }
+            int j = 0;
+            for (String rel : d.getPluginDataTables()) {
+                if (rel == null || rel.isBlank()) {
+                    errors.add("pluginDataTables[" + j + "] 不能为空");
+                } else if (!DATA_TABLE_REL_PATTERN.matcher(rel.trim()).matches()) {
+                    errors.add("pluginDataTables[" + j + "] 须匹配 [a-zA-Z][a-zA-Z0-9_]* ，当前: " + rel);
+                }
+                j++;
+            }
+        }
         return errors;
+    }
+
+    private static void validateRuntimeModeBlock(PluginDescriptor d, List<String> errors) {
+        PluginRuntimeMode mode = d.runtimeModeOrDefault();
+        Integer port = d.getIndependentPort();
+        String main = d.getMainClass() == null ? null : d.getMainClass().trim();
+
+        switch (mode) {
+            case SPI_ONLY, HOST_MVC -> {
+                if (port != null) {
+                    errors.add("runtimeMode=" + mode + " 时不应声明 independentPort");
+                }
+                if (main != null && !main.isEmpty()) {
+                    errors.add("runtimeMode=" + mode + " 时不应声明 mainClass（独立进程请用 INDEPENDENT_PROCESS）");
+                }
+            }
+            case INDEPENDENT_PROCESS -> {
+                if (port == null) {
+                    errors.add("runtimeMode=INDEPENDENT_PROCESS 时必须声明 independentPort（或由后续版本支持宿主分配时放宽）");
+                } else if (port < MIN_EPHEMERAL_PORT || port > MAX_USER_PORT) {
+                    errors.add("independentPort 需在 " + MIN_EPHEMERAL_PORT + "–" + MAX_USER_PORT + " 内: " + port);
+                }
+                if (main == null || main.isEmpty()) {
+                    errors.add("runtimeMode=INDEPENDENT_PROCESS 时必须声明 mainClass（独立进程入口）");
+                }
+            }
+        }
+    }
+
+    /**
+     * 校验插件声明的 {@link HostServices} 契约版本不高于宿主实现。
+     *
+     * @param hostImplementedContractVersion 宿主 {@link HostServices#hostImplementedContractVersion()}
+     */
+    public static void validateHostServicesContractOrThrow(PluginDescriptor d, int hostImplementedContractVersion) {
+        int required = d.requiredHostServicesContractVersionOrDefault();
+        if (hostImplementedContractVersion < required) {
+            throw new PluginException(
+                    "插件 " + d.getId() + " 需要 hostServicesContractVersion>=" + required + "，宿主当前实现为 "
+                            + hostImplementedContractVersion);
+        }
     }
 
     /**

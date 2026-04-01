@@ -8,6 +8,8 @@ public record PluginEntrySummary(
         String version,
         String name,
         String state,
-        String detail
+        String detail,
+        /** {@link com.sxpcwlkj.plugin.PluginRuntimeMode} 名称，如 HOST_MVC。 */
+        String runtimeMode
 ) {
 }

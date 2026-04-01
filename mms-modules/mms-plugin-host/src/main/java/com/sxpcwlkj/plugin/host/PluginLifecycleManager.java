@@ -1,5 +1,6 @@
 package com.sxpcwlkj.plugin.host;
 
+import com.sxpcwlkj.plugin.HostServices;
 import com.sxpcwlkj.plugin.MmsPlugin;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginDescriptorReader;
@@ -9,8 +10,22 @@ import com.sxpcwlkj.plugin.PluginHealthContributor;
 import com.sxpcwlkj.plugin.PluginConstants;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
 import com.sxpcwlkj.plugin.PluginKind;
+import com.sxpcwlkj.plugin.PluginRuntimeMode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sxpcwlkj.plugin.host.internal.DefaultPluginBeanRegistrar;
 import com.sxpcwlkj.plugin.host.internal.DefaultPluginRuntimeContext;
 import com.sxpcwlkj.plugin.host.internal.LoadedPluginInstance;
+import com.sxpcwlkj.plugin.host.internal.PluginSpringBeanAttachment;
+import com.sxpcwlkj.plugin.host.internal.NoopHostServices;
+import com.sxpcwlkj.plugin.host.internal.PluginDependencySort;
+import com.sxpcwlkj.plugin.host.internal.PluginDescriptorProbe;
+import com.sxpcwlkj.plugin.host.internal.PluginMdc;
+import com.sxpcwlkj.plugin.host.internal.PluginReflectionSupport;
+import com.sxpcwlkj.plugin.host.internal.PluginSubprocessManager;
+import com.sxpcwlkj.plugin.host.internal.PortLeaseTracker;
+import com.sxpcwlkj.plugin.host.internal.PortManager;
+import com.sxpcwlkj.plugin.host.web.PluginMvcExecutorRegistry;
+import com.sxpcwlkj.plugin.host.web.PluginMvcRegistrar;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
@@ -25,13 +40,17 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.ServiceLoader;
-import java.util.Comparator;
 import java.util.Set;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 /**
@@ -42,19 +61,42 @@ public class PluginLifecycleManager {
 
     private final PluginHostProperties properties;
     private final ObjectProvider<PluginHostDbBridge> dbBridgeProvider;
+    private final ObjectProvider<HostServices> hostServicesProvider;
+    private final ObjectProvider<PluginMvcRegistrar> pluginMvcRegistrarProvider;
+    private final ObjectProvider<PluginSpringBeanAttachment> pluginSpringBeanAttachmentProvider;
+    private final ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistryProvider;
     @Getter
     private final Map<String, LoadedPluginInstance> loadedPlugins = new ConcurrentHashMap<>();
 
-    public PluginLifecycleManager(PluginHostProperties properties, ObjectProvider<PluginHostDbBridge> dbBridgeProvider) {
+    private final PluginSubprocessManager subprocessManager = new PluginSubprocessManager();
+    private final PortLeaseTracker portLeases = new PortLeaseTracker();
+
+    public PluginLifecycleManager(
+            PluginHostProperties properties,
+            ObjectProvider<PluginHostDbBridge> dbBridgeProvider,
+            ObjectProvider<HostServices> hostServicesProvider,
+            ObjectProvider<PluginMvcRegistrar> pluginMvcRegistrarProvider,
+            ObjectProvider<PluginSpringBeanAttachment> pluginSpringBeanAttachmentProvider,
+            ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistryProvider) {
         this.properties = properties;
         this.dbBridgeProvider = dbBridgeProvider;
+        this.hostServicesProvider = hostServicesProvider;
+        this.pluginMvcRegistrarProvider = pluginMvcRegistrarProvider;
+        this.pluginSpringBeanAttachmentProvider = pluginSpringBeanAttachmentProvider;
+        this.pluginMvcExecutorRegistryProvider = pluginMvcExecutorRegistryProvider;
     }
 
     public List<PluginEntrySummary> listSummaries() {
         List<PluginEntrySummary> list = new ArrayList<>();
         for (LoadedPluginInstance lp : loadedPlugins.values()) {
             PluginDescriptor d = lp.getDescriptor();
-            list.add(new PluginEntrySummary(d.getId(), d.getVersion(), d.getName(), "LOADED", null));
+            list.add(new PluginEntrySummary(
+                    d.getId(),
+                    d.getVersion(),
+                    d.getName(),
+                    "LOADED",
+                    null,
+                    d.runtimeModeOrDefault().name()));
         }
         list.sort((a, b) -> a.pluginId().compareToIgnoreCase(b.pluginId()));
         return Collections.unmodifiableList(list);
@@ -73,10 +115,116 @@ public class PluginLifecycleManager {
                     d.getName(),
                     d.getDescription(),
                     d.getKind(),
-                    d.getFrontend()));
+                    d.getFrontend(),
+                    d.runtimeModeOrDefault()));
         }
         list.sort((a, b) -> a.id().compareToIgnoreCase(b.id()));
         return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * 超级管理员 HTTP 反射调用（args 经 {@link ObjectMapper#convertValue(Object, Class)} 按目标方法形参转换）。
+     */
+    public Optional<Object> invokePluginMethodForOps(
+            String pluginId, String versionOrNull, String methodName, List<?> args, ObjectMapper objectMapper) {
+        Object[] arr = args == null ? new Object[0] : args.toArray();
+        return PluginReflectionSupport.invokeOnLoaded(
+                loadedPlugins, pluginId, versionOrNull, methodName, arr, objectMapper);
+    }
+
+    public List<PluginSubprocessSnapshot> listSubprocessSnapshots() {
+        List<PluginSubprocessSnapshot> raw = subprocessManager.listSnapshots();
+        List<PluginSubprocessSnapshot> out = new ArrayList<>(raw.size());
+        for (PluginSubprocessSnapshot s : raw) {
+            out.add(enrichSubprocessSnapshot(s));
+        }
+        return Collections.unmodifiableList(out);
+    }
+
+    public PluginSubprocessSnapshot subprocessSnapshotFor(String pluginId, String version) {
+        PluginSubprocessSnapshot s = subprocessManager.snapshotFor(pluginId, version);
+        return s == null ? null : enrichSubprocessSnapshot(s);
+    }
+
+    private PluginSubprocessSnapshot enrichSubprocessSnapshot(PluginSubprocessSnapshot s) {
+        Integer leased = portLeases.getLeasedPortForKey(s.pluginKey());
+        int hostLeased = leased != null ? leased : 0;
+        Boolean tcpBound = null;
+        int port = s.effectivePort();
+        if (port > 0) {
+            tcpBound = !PortManager.isTcpPortAvailable(port);
+        }
+        return new PluginSubprocessSnapshot(
+                s.pluginKey(),
+                s.pluginId(),
+                s.version(),
+                port,
+                s.pid(),
+                s.alive(),
+                s.lastError(),
+                hostLeased,
+                tcpBound);
+    }
+
+    /**
+     * 卸载某插件 id 下所有已加载版本（端口租约、子进程、HOST_MVC、隔离线程池一并释放）。
+     */
+    public synchronized void unloadAllVersionsOfPlugin(String pluginId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return;
+        }
+        String prefix = pluginId.trim() + "@";
+        List<String> keys = loadedPlugins.keySet().stream()
+                .filter(k -> k.regionMatches(true, 0, prefix, 0, prefix.length()))
+                .toList();
+        for (String key : keys) {
+            unloadOneKey(key);
+        }
+    }
+
+    /**
+     * 激活版本切换后仅重载指定插件版本（不保证依赖拓扑；见 {@link PluginHostProperties#getActivateVersionReloadScope()}）。
+     */
+    public synchronized void reloadSingleActivated(String pluginId, String version) {
+        if (pluginId == null || pluginId.isBlank() || version == null || version.isBlank()) {
+            return;
+        }
+        String springVer = SpringBootVersion.getVersion();
+        Path root = resolveRoot();
+        if (!ensurePluginsRoot(root)) {
+            log.warn("reloadSingleActivated: 插件根不可用");
+            return;
+        }
+        String dirId = PluginInstallationLayout.safeSegment(pluginId.trim());
+        String dirVer = PluginInstallationLayout.safeSegment(version.trim());
+        Path verDir = root.resolve(dirId).resolve(dirVer);
+        if (!Files.isDirectory(verDir)) {
+            log.warn("reloadSingleActivated: 磁盘无该版本目录 {}", verDir);
+            return;
+        }
+        unloadAllVersionsOfPlugin(pluginId.trim());
+        try {
+            tryLoadOne(dirId, dirVer, verDir, springVer);
+        } catch (Exception e) {
+            log.warn("reloadSingleActivated 加载失败 {}@{}: {}", pluginId, version, e.getMessage());
+        }
+    }
+
+    private void unloadOneKey(String key) {
+        LoadedPluginInstance lp = loadedPlugins.remove(key);
+        if (lp == null) {
+            return;
+        }
+        portLeases.releaseForPluginKey(key);
+        subprocessManager.stop(key, properties);
+        String pid = lp.getDescriptor().getId();
+        pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(pid));
+        pluginMvcExecutorRegistryProvider.ifAvailable(reg -> reg.shutdownForPlugin(pid));
+        try {
+            lp.close();
+        } catch (Exception e) {
+            log.warn("卸载插件失败: {}", key, e);
+        }
     }
 
     public synchronized void reload() {
@@ -117,21 +265,18 @@ public class PluginLifecycleManager {
 
     /** 磁盘上「库中无任何版本行」的插件目录：仍按全版本扫描，兼容旧数据。 */
     private void loadOrphanDiskPlugins(Path root, Set<String> managedPluginIds, String springVer) {
+        List<PluginDependencySort.PluginLoadSlot> batch = new ArrayList<>();
         try (Stream<Path> idDirs = Files.list(root)) {
             idDirs.filter(Files::isDirectory).sorted().forEach(idDir -> {
                 String folderId = idDir.getFileName().toString();
                 if (managedPluginIds.contains(folderId)) {
                     return;
                 }
-                log.info("插件目录未纳入库表，按磁盘全版本加载: {}", folderId);
+                log.info("插件目录未纳入库表，参与磁盘批处理加载: {}", folderId);
                 try (Stream<Path> versionDirs = Files.list(idDir)) {
-                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
-                        try {
-                            tryLoadOne(folderId, verDir.getFileName().toString(), verDir, springVer);
-                        } catch (Exception e) {
-                            log.warn("插件目录加载失败 {} : {}", verDir.toAbsolutePath(), e.getMessage());
-                        }
-                    });
+                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> batch.add(
+                            new PluginDependencySort.PluginLoadSlot(
+                                    folderId, verDir.getFileName().toString(), verDir)));
                 } catch (IOException e) {
                     log.warn("列举版本目录失败: {}", idDir, e);
                 }
@@ -139,30 +284,74 @@ public class PluginLifecycleManager {
         } catch (IOException e) {
             log.warn("列举插件根目录失败: {}", root, e);
         }
+        loadSlotsInDependencyOrder(batch, springVer);
     }
 
     private void scanAllDiskVersions(Path root, String springVer) {
+        List<PluginDependencySort.PluginLoadSlot> batch = new ArrayList<>();
         try (Stream<Path> pluginIdDirs = Files.list(root)) {
             pluginIdDirs.filter(Files::isDirectory).sorted().forEach(idDir -> {
                 try (Stream<Path> versionDirs = Files.list(idDir)) {
-                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
-                        try {
-                            tryLoadOne(idDir.getFileName().toString(), verDir.getFileName().toString(), verDir, springVer);
-                        } catch (Exception e) {
-                            log.warn("插件目录加载失败 {} : {}", verDir.toAbsolutePath(), e.getMessage());
-                        }
-                    });
+                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> batch.add(
+                            new PluginDependencySort.PluginLoadSlot(
+                                    idDir.getFileName().toString(),
+                                    verDir.getFileName().toString(),
+                                    verDir)));
                 } catch (IOException e) {
                     log.warn("列举版本目录失败: {}", idDir, e);
                 }
             });
         } catch (IOException e) {
             log.warn("列举插件根目录失败: {}", root, e);
+        }
+        loadSlotsInDependencyOrder(batch, springVer);
+    }
+
+    private void loadSlotsInDependencyOrder(List<PluginDependencySort.PluginLoadSlot> slots, String springVer) {
+        if (slots.isEmpty()) {
+            return;
+        }
+        List<PluginDependencySort.PluginLoadSlot> ordered = new ArrayList<>();
+        try {
+            ordered.addAll(PluginDependencySort.sortDiskSlots(slots));
+        } catch (Exception e) {
+            log.warn("磁盘插件依赖拓扑排序失败，按目录字典序加载: {}", e.getMessage());
+        }
+        Set<PluginDependencySort.PluginLoadSlot> seen = new LinkedHashSet<>(ordered);
+        if (ordered.isEmpty()) {
+            ordered.addAll(slots);
+            ordered.sort(Comparator.comparing(PluginDependencySort.PluginLoadSlot::folderPluginId, String.CASE_INSENSITIVE_ORDER)
+                    .thenComparing(PluginDependencySort.PluginLoadSlot::folderVersion, String.CASE_INSENSITIVE_ORDER));
+        } else {
+            for (PluginDependencySort.PluginLoadSlot s : slots) {
+                if (!seen.contains(s)) {
+                    ordered.add(s);
+                }
+            }
+        }
+        for (PluginDependencySort.PluginLoadSlot s : ordered) {
+            try {
+                tryLoadOne(s.folderPluginId(), s.folderVersion(), s.versionDir(), springVer);
+            } catch (Exception e) {
+                log.warn("插件目录加载失败 {} : {}", s.versionDir().toAbsolutePath(), e.getMessage());
+            }
         }
     }
 
     private void loadCoordinates(Path root, List<PluginVersionCoordinate> coords, String springVer) {
+        List<PluginVersionCoordinate> ordered = new ArrayList<>();
+        try {
+            ordered.addAll(PluginDependencySort.sortCoordinates(root, coords));
+        } catch (Exception e) {
+            log.warn("插件依赖拓扑排序失败，按列表原序加载: {}", e.getMessage());
+        }
+        Set<PluginVersionCoordinate> seen = new LinkedHashSet<>(ordered);
         for (PluginVersionCoordinate c : coords) {
+            if (c.pluginId() != null && c.version() != null && !seen.contains(c)) {
+                ordered.add(c);
+            }
+        }
+        for (PluginVersionCoordinate c : ordered) {
             if (c.pluginId() == null || c.version() == null) {
                 continue;
             }
@@ -195,26 +384,45 @@ public class PluginLifecycleManager {
         if (jars.isEmpty()) {
             return;
         }
-        PluginDescriptor descriptor = null;
-        Path descriptorJar = null;
-        for (Path jar : jars) {
-            try {
-                descriptor = PluginDescriptorReader.readFromJar(jar);
-                descriptorJar = jar;
-                break;
-            } catch (PluginException ignored) {
-                // 尝试下一个 jar
-            }
-        }
-        if (descriptor == null) {
+        var probeOpt = PluginDescriptorProbe.tryRead(versionDir);
+        if (probeOpt.isEmpty()) {
             log.debug("目录下未找到含 plugin.json 的 jar: {}", libDir);
             return;
         }
-        PluginDescriptorValidator.validateStructureOrThrow(descriptor);
-        if (!PluginDescriptorValidator.satisfiesHost(descriptor, properties.getHostMmsRevision(), springVer)) {
-            throw new PluginException("插件与宿主版本不兼容: " + descriptor.getId() + " requiresMms 与当前 revision / Spring Boot 不匹配");
+        final PluginDescriptor desc = probeOpt.get().descriptor();
+        final Path descJar = probeOpt.get().descriptorJar();
+        PluginDescriptorValidator.validateStructureOrThrow(desc);
+        PluginCompatibilityChecker.verifyDependencyFingerprintOrThrow(descJar, desc);
+        if (!PluginDescriptorValidator.satisfiesHost(desc, properties.getHostMmsRevision(), springVer)) {
+            throw new PluginException("插件与宿主版本不兼容: " + desc.getId() + " requiresMms 与当前 revision / Spring Boot 不匹配");
         }
-        String key = descriptor.getId() + "@" + descriptor.getVersion();
+        HostServices hostServices = hostServicesProvider.getIfAvailable();
+        if (hostServices == null) {
+            hostServices = NoopHostServices.INSTANCE;
+        }
+        PluginDescriptorValidator.validateHostServicesContractOrThrow(desc, hostServices.hostImplementedContractVersion());
+        String key = desc.getId() + "@" + desc.getVersion();
+        int subprocessEffectivePort = 0;
+        boolean subprocessPortLeased = false;
+        if (properties.isSubprocessLaunchEnabled()
+                && desc.runtimeModeOrDefault() == PluginRuntimeMode.INDEPENDENT_PROCESS) {
+            if (desc.getMainClass() == null || desc.getMainClass().isBlank()) {
+                throw new PluginException(
+                        "INDEPENDENT_PROCESS 且开启子进程启动时须配置 mainClass: " + desc.getId());
+            }
+            portLeases.releaseForPluginKey(key);
+            Integer decl = desc.getIndependentPort();
+            if (decl == null || decl <= 0) {
+                subprocessEffectivePort = portLeases.leaseInRange(
+                        properties.getSubprocessPortRangeMin(),
+                        properties.getSubprocessPortRangeMax(),
+                        key);
+            } else {
+                subprocessEffectivePort = portLeases.leaseExplicit(decl, key);
+            }
+            subprocessPortLeased = true;
+        }
+        // INDEPENDENT_PROCESS：onLoad 仍在宿主 JVM 执行；子进程仅附加运行时，详见 MmsPlugin 说明。
         URL[] urls = toUrls(jars);
         ClassLoader parent = Thread.currentThread().getContextClassLoader();
         URLClassLoader ucl = new URLClassLoader("mms-plugin:" + key, urls, parent);
@@ -232,26 +440,102 @@ public class PluginLifecycleManager {
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
-        if (descriptor.getKind() == PluginKind.EXTENSION && entries.isEmpty()) {
+        if (desc.getKind() == PluginKind.EXTENSION && entries.isEmpty()) {
             ucl.close();
+            if (subprocessPortLeased) {
+                portLeases.releaseForPluginKey(key);
+            }
             throw new PluginException("插件声明为 extension 但未发现 SPI 实现: " + key + "，请检查 " + "META-INF/services/com.sxpcwlkj.plugin.MmsPlugin");
         }
-        DefaultPluginRuntimeContext ctx = new DefaultPluginRuntimeContext(properties.getHostMmsRevision(), springVer, versionDir.toAbsolutePath());
+        String loadSessionId = UUID.randomUUID().toString();
+        PluginSpringBeanAttachment springAttach = pluginSpringBeanAttachmentProvider.getIfAvailable();
+        DefaultPluginBeanRegistrar pluginBeanRegistrar = new DefaultPluginBeanRegistrar(springAttach, loadSessionId);
+        DefaultPluginRuntimeContext ctx = new DefaultPluginRuntimeContext(
+                properties.getHostMmsRevision(),
+                springVer,
+                versionDir.toAbsolutePath(),
+                desc,
+                hostServices,
+                pluginBeanRegistrar,
+                this::invokePeerPluginOnPeer);
         Files.createDirectories(ctx.pluginDataDirectory());
         Files.createDirectories(ctx.pluginTemporaryDirectory());
-        for (MmsPlugin p : entries) {
-            p.onLoad(ctx);
-        }
-        LoadedPluginInstance loaded = new LoadedPluginInstance(descriptor, ucl, entries, healthEntries);
-        LoadedPluginInstance previous = loadedPlugins.put(key, loaded);
-        if (previous != null) {
+        List<Runnable> unloadHooks;
+        try {
+            Runnable popMdc = PluginMdc.pushPluginContext(desc.getId(), desc.getVersion());
             try {
-                previous.close();
+                for (MmsPlugin p : entries) {
+                    p.onLoad(ctx);
+                }
+            } finally {
+                popMdc.run();
+            }
+            unloadHooks = ctx.takeUnloadHooksSnapshot();
+        } catch (Exception e) {
+            if (springAttach != null) {
+                springAttach.releaseSession(loadSessionId);
+            }
+            if (subprocessPortLeased) {
+                portLeases.releaseForPluginKey(key);
+            }
+            try {
+                ucl.close();
+            } catch (Exception ignored) {
+                // ignore
+            }
+            throw e;
+        }
+        if (desc.runtimeModeOrDefault() == PluginRuntimeMode.HOST_MVC) {
+            pluginMvcRegistrarProvider.ifAvailable(
+                    r -> {
+                        try {
+                            r.registerMvc(desc, ucl);
+                        } catch (Exception ex) {
+                            log.warn("插件 HOST_MVC 路由注册失败 {}: {}", key, ex.getMessage());
+                        }
+                    });
+        } else {
+            pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(desc.getId()));
+        }
+        Runnable releasePluginSpringBeans =
+                () -> {
+                    if (springAttach != null) {
+                        springAttach.releaseSession(loadSessionId);
+                    }
+                };
+        LoadedPluginInstance loaded =
+                new LoadedPluginInstance(desc, ucl, entries, healthEntries, unloadHooks, releasePluginSpringBeans);
+        LoadedPluginInstance previousLoaded = loadedPlugins.put(key, loaded);
+        if (previousLoaded != null) {
+            String prevKey =
+                    previousLoaded.getDescriptor().getId() + "@" + previousLoaded.getDescriptor().getVersion();
+            portLeases.releaseForPluginKey(prevKey);
+            subprocessManager.stop(prevKey, properties);
+            try {
+                previousLoaded.close();
             } catch (Exception e) {
                 log.warn("替换插件时关闭旧 ClassLoader 失败: {}", key, e);
             }
+            if (properties.getSubprocessRollingStopDelayMillis() > 0) {
+                try {
+                    Thread.sleep(properties.getSubprocessRollingStopDelayMillis());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
-        log.info("插件已加载: {} (descriptor from {})", key, descriptorJar.getFileName());
+        subprocessManager.startIfEnabled(properties, desc, versionDir.toAbsolutePath(), key, subprocessEffectivePort);
+        log.info("插件已加载: {} (descriptor from {})", key, descJar.getFileName());
+    }
+
+    private Optional<Object> invokePeerPluginOnPeer(String targetPluginId, String methodName, Object[] args) {
+        return PluginReflectionSupport.invokeOnLoaded(
+                loadedPlugins,
+                targetPluginId,
+                null,
+                methodName,
+                args != null ? args : new Object[0],
+                null);
     }
 
     /**
@@ -412,6 +696,7 @@ public class PluginLifecycleManager {
     public PluginDescriptor installJarFromUpload(Path tempJarFile) throws Exception {
         PluginDescriptor d = PluginDescriptorReader.readFromJar(tempJarFile);
         PluginDescriptorValidator.validateStructureOrThrow(d);
+        PluginCompatibilityChecker.verifyDependencyFingerprintOrThrow(tempJarFile, d);
         String springVer = SpringBootVersion.getVersion();
         if (!PluginDescriptorValidator.satisfiesHost(d, properties.getHostMmsRevision(), springVer)) {
             throw new PluginException("插件与宿主版本不兼容: " + d.getId());
@@ -430,8 +715,17 @@ public class PluginLifecycleManager {
         return d;
     }
 
+    /**
+     * 顺序：停全部子进程 → 释放端口租约 → 注销 HOST_MVC 路由 → 各插件 {@link LoadedPluginInstance#close()}（onUnload → 钩子 → CL）。
+     */
     private void unloadAllQuietly() {
-        for (LoadedPluginInstance lp : loadedPlugins.values()) {
+        subprocessManager.stopAll(properties);
+        pluginMvcExecutorRegistryProvider.ifAvailable(PluginMvcExecutorRegistry::shutdownAll);
+        List<LoadedPluginInstance> snap = new ArrayList<>(loadedPlugins.values());
+        for (LoadedPluginInstance lp : snap) {
+            String k = lp.getDescriptor().getId() + "@" + lp.getDescriptor().getVersion();
+            portLeases.releaseForPluginKey(k);
+            pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(lp.getDescriptor().getId()));
             try {
                 lp.close();
             } catch (Exception e) {

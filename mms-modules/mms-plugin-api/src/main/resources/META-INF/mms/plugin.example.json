@@ -10,6 +10,9 @@
   },
   "entryClass": "com.example.mms.comments.CommentsPlugin",
   "kind": "extension",
+  "runtimeMode": "SPI_ONLY",
+  "hostServicesContractVersion": 1,
+  "pluginTablePrefix": "plugin_example_",
   "dependencies": [
     {
       "id": "com.example.mms.user-api",

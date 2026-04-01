@@ -58,4 +58,24 @@ public class PluginMarketCardVo {
      * 为 null 时表示未发现布局问题（含根目录正常且无需探测的版本）。
      */
     private String diskLayoutWarning;
+
+    /** 与配置项 {@code mms.plugin.subprocess-launch-enabled} 一致。 */
+    private Boolean subprocessLaunchEnabled;
+
+    /** 独立子进程有效端口（仅 INDEPENDENT_PROCESS 且已 fork 时有值）。 */
+    private Integer subprocessPort;
+
+    /** 宿主 {@link com.sxpcwlkj.plugin.host.internal.PortLeaseTracker} 登记端口（可与 effectivePort 对照抢驻）。 */
+    private Integer subprocessHostLeasedPort;
+
+    /**
+     * 回环 TCP 探测：无法绑定该端口则通常为 true（已有监听）；用于与子进程声明端口对齐验收。
+     */
+    private Boolean subprocessTcpPortAppearsBound;
+
+    private Boolean subprocessAlive;
+
+    private Long subprocessPid;
+
+    private String subprocessLastError;
 }

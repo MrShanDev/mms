@@ -97,12 +97,37 @@
         <appender-ref ref="file_error"/>
     </appender>
 
+    <!-- 插件上下文 MDC（pluginKey）按插件拆分滚动日志；无 MDC 时不写入（见 PluginOnlySiftingAppender） -->
+    <appender name="plugin_sift" class="com.sxpcwlkj.plugin.host.logging.PluginOnlySiftingAppender">
+        <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
+            <key>pluginKey</key>
+            <defaultValue>unused</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="plugin_file-${pluginKey}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${log.path}/plugins/${pluginKey}.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${log.path}/plugins/${pluginKey}.%d{yyyy-MM-dd}.log</fileNamePattern>
+                    <maxHistory>14</maxHistory>
+                </rollingPolicy>
+                <encoder>
+                    <pattern>${log.pattern}</pattern>
+                    <charset>utf-8</charset>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                    <level>INFO</level>
+                </filter>
+            </appender>
+        </sift>
+    </appender>
+
     <!--系统操作日志-->
     <root level="info">
         <appender-ref ref="console" />
         <appender-ref ref="async_info" />
         <appender-ref ref="async_error" />
         <appender-ref ref="file_console" />
+        <appender-ref ref="plugin_sift" />
         <!--        <appender-ref ref="sky_log"/>-->
     </root>
 

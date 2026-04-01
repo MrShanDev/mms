@@ -59,4 +59,54 @@ public class PluginDescriptor {
      * 可选：面向前端的模块说明（占位，供 mms-ui 动态路由与联邦模块对接）。
      */
     private PluginFrontendHint frontend;
+
+    /**
+     * 运行模式；未声明时视为 {@link PluginRuntimeMode#SPI_ONLY}（兼容旧插件）。
+     */
+    private PluginRuntimeMode runtimeMode;
+
+    /**
+     * 插件依赖的宿主 {@link HostServices} 最低契约版本；未声明视为 1。
+     */
+    private Integer hostServicesContractVersion;
+
+    /**
+     * 独立进程模式下的对外端口（1024–65535）；仅对 {@link PluginRuntimeMode#INDEPENDENT_PROCESS} 有意义。
+     */
+    private Integer independentPort;
+
+    /**
+     * 独立进程主类全限定名；{@link PluginRuntimeMode#INDEPENDENT_PROCESS} 时必填。
+     */
+    private String mainClass;
+
+    /**
+     * 插件自有表/SQL 前缀建议（如 {@code plugin_xxx_}），供宿主白名单校验使用。
+     */
+    private String pluginTablePrefix;
+
+    /**
+     * 可选：{@link PluginConstants#DEPS_FINGERPRINT_MANIFEST} 文件内容的 SHA-256（64 位十六进制，大小写有皆可比对）。
+     */
+    private String dependencyFingerprintSha256;
+
+    /**
+     * 可选：插件数据表相对名（不加前缀），与 {@link #pluginTablePrefix} 拼接成物理表名；
+     * 非空时 {@link PluginDataAccess} 仅允许 SQL 中出现这些完整表名（及前缀匹配校验）。
+     */
+    private List<String> pluginDataTables = new ArrayList<>();
+
+    /**
+     * 未声明 {@link #runtimeMode} 时的默认行为。
+     */
+    public PluginRuntimeMode runtimeModeOrDefault() {
+        return runtimeMode != null ? runtimeMode : PluginRuntimeMode.SPI_ONLY;
+    }
+
+    /**
+     * 未声明 {@link #hostServicesContractVersion} 时按契约版本 1 处理（与首版宿主对齐）。
+     */
+    public int requiredHostServicesContractVersionOrDefault() {
+        return hostServicesContractVersion != null ? hostServicesContractVersion : 1;
+    }
 }

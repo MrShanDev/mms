@@ -52,6 +52,11 @@
             <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-plugin-host</artifactId>
         </dependency>
+        <!--插件契约 DTO/HostDataService（桥接实现见 pluginhost 包，不依赖本模块反向引用宿主）-->
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-plugin-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

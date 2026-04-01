@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.sxpcwlkj.plugin.host.DiskPluginSlot;
 import com.sxpcwlkj.plugin.host.PluginHealthRow;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
+import com.sxpcwlkj.plugin.PluginRuntimeMode;
 import com.sxpcwlkj.plugin.host.PluginJarLocationStatus;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
+import com.sxpcwlkj.plugin.host.PluginSubprocessSnapshot;
 import com.sxpcwlkj.plugin.host.PluginManifestView;
 import com.sxpcwlkj.system.entity.SysPlugin;
 import com.sxpcwlkj.system.entity.SysPluginVersion;
@@ -101,6 +103,8 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
                     hostEnabled, rootHint, activeVer, recorded);
             PluginJarLocationStatus diskWarn = resolveDiskLayoutWarning(rootReady, pluginId, activeVer, slotsForPlugin);
             card.setDiskLayoutWarning(diskWarn == PluginJarLocationStatus.OK ? null : diskWarn.name());
+            card.setSubprocessLaunchEnabled(pluginHostProperties.isSubprocessLaunchEnabled());
+            mergeSubprocessRuntime(card, manifestByPlugin.get(pluginId), hostEnabled);
             out.add(card);
         }
         return out;
@@ -254,5 +258,24 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             }
         }
         return null;
+    }
+
+    private void mergeSubprocessRuntime(PluginMarketCardVo card, PluginManifestView manifest, boolean hostEnabled) {
+        if (!hostEnabled
+                || !Boolean.TRUE.equals(card.getSubprocessLaunchEnabled())
+                || manifest == null
+                || manifest.runtimeMode() != PluginRuntimeMode.INDEPENDENT_PROCESS) {
+            return;
+        }
+        PluginSubprocessSnapshot snap = pluginLifecycleManager.subprocessSnapshotFor(manifest.id(), manifest.version());
+        if (snap == null) {
+            return;
+        }
+        card.setSubprocessPort(snap.effectivePort() > 0 ? snap.effectivePort() : null);
+        card.setSubprocessHostLeasedPort(snap.hostLeasedPort() > 0 ? snap.hostLeasedPort() : null);
+        card.setSubprocessTcpPortAppearsBound(snap.tcpPortAppearsBound());
+        card.setSubprocessAlive(snap.alive());
+        card.setSubprocessPid(snap.pid());
+        card.setSubprocessLastError(snap.lastError());
     }
 }
