@@ -15,18 +15,23 @@ import com.sxpcwlkj.plugin.host.web.PluginMvcExecutionGuard;
 import com.sxpcwlkj.plugin.host.web.PluginMvcExecutorRegistry;
 import com.sxpcwlkj.plugin.host.web.PluginMvcRegistrar;
 import com.sxpcwlkj.plugin.host.web.PluginMvcRegistry;
+import com.sxpcwlkj.plugin.host.web.PluginWebMvcHandlerRegistrar;
+import com.sxpcwlkj.plugin.doc.web.DocSiteTokenBridgeFilter;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
-
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import javax.sql.DataSource;
+import java.util.EnumSet;
 
 /**
  * 自动装配插件宿主 Bean（由 Spring Boot 导入列表加载）。
@@ -59,14 +64,36 @@ public class PluginHostAutoConfiguration {
         return new PluginMvcRegistrar(pluginMvcRegistry);
     }
 
+    /**
+     * 文档插件 {@code /doc/v1} 的 docToken→Authorization 桥接；须在容器启动期注册（插件 onLoad 时无法再 addFilter）。
+     */
+    @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public FilterRegistrationBean<DocSiteTokenBridgeFilter> docSiteTokenBridgeFilterRegistration() {
+        FilterRegistrationBean<DocSiteTokenBridgeFilter> reg = new FilterRegistrationBean<>();
+        reg.setFilter(new DocSiteTokenBridgeFilter());
+        reg.setName(DocSiteTokenBridgeFilter.SERVLET_REGISTRATION_NAME);
+        reg.addUrlPatterns("/doc/v1", "/doc/v1/*");
+        reg.setDispatcherTypes(EnumSet.of(DispatcherType.REQUEST));
+        return reg;
+    }
+
     @Bean
     public PluginMvcExecutorRegistry pluginMvcExecutorRegistry(PluginHostProperties pluginHostProperties) {
         return new PluginMvcExecutorRegistry(pluginHostProperties);
     }
 
     @Bean
-    public PluginSpringBeanAttachment pluginSpringBeanAttachment(ConfigurableApplicationContext applicationContext) {
-        return new PluginSpringBeanAttachment(applicationContext);
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+    public PluginWebMvcHandlerRegistrar pluginWebMvcHandlerRegistrar(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+        return new PluginWebMvcHandlerRegistrar(requestMappingHandlerMapping);
+    }
+
+    @Bean
+    public PluginSpringBeanAttachment pluginSpringBeanAttachment(
+            ConfigurableApplicationContext applicationContext,
+            ObjectProvider<PluginWebMvcHandlerRegistrar> pluginWebMvcHandlerRegistrar) {
+        return new PluginSpringBeanAttachment(applicationContext, pluginWebMvcHandlerRegistrar.getIfAvailable());
     }
 
     @Bean

@@ -6,6 +6,8 @@ import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
 import com.sxpcwlkj.system.entity.bo.PluginMarketRemoveBo;
 import com.sxpcwlkj.system.entity.vo.PluginMarketCardVo;
 import com.sxpcwlkj.system.service.SysPluginMarketService;
+import com.sxpcwlkj.system.service.SysPluginVersionService;
+import com.sxpcwlkj.system.service.impl.PluginHostDbBridgeImpl;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -26,6 +29,7 @@ import java.util.List;
 public class PluginMarketController {
 
     private final SysPluginMarketService sysPluginMarketService;
+    private final SysPluginVersionService sysPluginVersionService;
     private final PluginLifecycleManager pluginLifecycleManager;
 
     @SaCheckRole("super_admin")
@@ -35,7 +39,7 @@ public class PluginMarketController {
     }
 
     /**
-     * 移除库表市场登记与版本记录并重载；不删除磁盘（与 uninstall 区分）。
+     * 移除库表市场登记与版本记录并重载；不删除磁盘（与 {@link #purge} 区分）。
      */
     @SaCheckRole("super_admin")
     @PostMapping("/removeCatalog")
@@ -49,6 +53,45 @@ public class PluginMarketController {
             return R.success();
         } catch (IllegalArgumentException ex) {
             return R.fail(ex.getMessage());
+        }
+    }
+
+    /**
+     * 停用：将该插件所有版本的「激活」标记清零并重载；不删磁盘、不删市场登记，便于稍后重新激活或升级。
+     */
+    @SaCheckRole("super_admin")
+    @PostMapping("/deactivate")
+    public R<Void> pluginDeactivate(@RequestBody PluginMarketRemoveBo body) {
+        if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
+            return R.fail("pluginId 不能为空");
+        }
+        try {
+            sysPluginVersionService.deactivateAllVersionsForPlugin(
+                    body.getPluginId(), PluginHostDbBridgeImpl.PLUGIN_REGISTRY_TENANT);
+            pluginLifecycleManager.reload();
+            return R.success();
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        }
+    }
+
+    /**
+     * 删除：清空该插件磁盘安装目录与库表（版本 + 市场行）后重载。
+     */
+    @SaCheckRole("super_admin")
+    @PostMapping("/purge")
+    public R<Void> purge(@RequestBody PluginMarketRemoveBo body) {
+        if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
+            return R.fail("pluginId 不能为空");
+        }
+        try {
+            sysPluginMarketService.purgePluginDiskAndCatalog(body.getPluginId());
+            pluginLifecycleManager.reload();
+            return R.success();
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        } catch (IOException ex) {
+            return R.fail("删除磁盘失败: " + ex.getMessage());
         }
     }
 }

@@ -21,6 +21,12 @@ public class PluginHostProperties {
     private String rootDir;
 
     /**
+     * 插件按 MDC 拆分的日志目录（与 mms-admin {@code logback.xml} 中 {@code logs/plugins} 一致）。
+     * 为空时使用 {@code user.dir}/logs/plugins。
+     */
+    private String pluginLogDir;
+
+    /**
      * 与主工程 pom {@code revision} 及 {@link com.sxpcwlkj.plugin.PluginDescriptor} 校验一致。
      */
     private int hostMmsRevision = 21;

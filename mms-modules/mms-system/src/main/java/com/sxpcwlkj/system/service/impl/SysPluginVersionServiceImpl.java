@@ -150,6 +150,15 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
                         .orderByDesc(SysPluginVersion::getCreatedTime));
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deactivateAllVersionsForPlugin(String pluginId, String tenantId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            throw new IllegalArgumentException("pluginId 不能为空");
+        }
+        deactivateAllForPlugin(pluginId.trim(), normalizeTenant(tenantId));
+    }
+
     private void deactivateAllForPlugin(String pluginId, String tenantId) {
         sysPluginVersionMapper.update(
                 null,

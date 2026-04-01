@@ -18,7 +18,7 @@ class PluginSpringBeanAttachmentTest {
     void registerReleaseAndDisposable() throws Exception {
         try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
             ctx.refresh();
-            PluginSpringBeanAttachment att = new PluginSpringBeanAttachment(ctx);
+            PluginSpringBeanAttachment att = new PluginSpringBeanAttachment(ctx, null);
             String sid = "sess-1";
             AtomicBoolean destroyed = new AtomicBoolean();
             att.registerSingleton(
@@ -42,7 +42,7 @@ class PluginSpringBeanAttachmentTest {
     void duplicateLogicalNameInSessionFails() {
         try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
             ctx.refresh();
-            PluginSpringBeanAttachment att = new PluginSpringBeanAttachment(ctx);
+            PluginSpringBeanAttachment att = new PluginSpringBeanAttachment(ctx, null);
             String sid = "sess-2";
             att.registerSingleton(sid, "a", new Object());
             assertThrows(PluginException.class, () -> att.registerSingleton(sid, "a", new Object()));

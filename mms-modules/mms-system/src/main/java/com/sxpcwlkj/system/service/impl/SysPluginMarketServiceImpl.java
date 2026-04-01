@@ -13,12 +13,14 @@ import com.sxpcwlkj.system.entity.SysPlugin;
 import com.sxpcwlkj.system.entity.SysPluginVersion;
 import com.sxpcwlkj.system.entity.vo.PluginMarketCardVo;
 import com.sxpcwlkj.system.mapper.SysPluginMapper;
+import com.sxpcwlkj.plugin.host.PluginHostDbBridge;
 import com.sxpcwlkj.system.service.SysPluginMarketService;
 import com.sxpcwlkj.system.service.SysPluginVersionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +41,7 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
     private final SysPluginVersionService sysPluginVersionService;
     private final PluginLifecycleManager pluginLifecycleManager;
     private final PluginHostProperties pluginHostProperties;
+    private final PluginHostDbBridge pluginHostDbBridge;
 
     @Override
     public List<PluginMarketCardVo> listMarketCards() {
@@ -146,6 +149,18 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
                 .eq(SysPlugin::getPluginId, pid)
                 .eq(SysPlugin::getTenantId, tid));
         // 全量重载由 Controller 在事务提交后触发，避免读到未提交的库表
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void purgePluginDiskAndCatalog(String pluginId) throws IOException {
+        if (pluginId == null || pluginId.isBlank()) {
+            throw new IllegalArgumentException("pluginId 不能为空");
+        }
+        String pid = pluginId.trim();
+        pluginLifecycleManager.uninstallFromDisk(pid, null);
+        pluginHostDbBridge.onUninstallDiskFinished(pid, null);
+        removeCatalogEntry(pid);
     }
 
     private static PluginMarketCardVo buildCard(

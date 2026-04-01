@@ -463,11 +463,14 @@ public class PluginLifecycleManager {
         List<Runnable> unloadHooks;
         try {
             Runnable popMdc = PluginMdc.pushPluginContext(desc.getId(), desc.getVersion());
+            ClassLoader oldTccl = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(ucl);
             try {
                 for (MmsPlugin p : entries) {
                     p.onLoad(ctx);
                 }
             } finally {
+                Thread.currentThread().setContextClassLoader(oldTccl);
                 popMdc.run();
             }
             unloadHooks = ctx.takeUnloadHooksSnapshot();

@@ -21,12 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * 插件宿主运维接口（仅超级管理员；动态 Controller 注册属后续阶段）。
@@ -114,6 +116,114 @@ public class PluginHostController {
     @GetMapping("/manifests")
     public R<List<PluginManifestView>> manifests() {
         return R.success(pluginLifecycleManager.listManifests());
+    }
+
+    /**
+     * 读取插件独立日志尾部（{@code logback} {@code plugin_sift} → {@code logs/plugins/{pluginId}@{version}.log}）。
+     * 仅收录在插件 MDC（{@code pluginKey}）下输出的 <strong>INFO 及以上</strong> 日志；宿主其它日志不在此文件。
+     */
+    @SaCheckRole("super_admin")
+    @GetMapping("/pluginLogTail")
+    public R<PluginLogTailVo> pluginLogTail(
+            @RequestParam String pluginId,
+            @RequestParam(required = false) String version,
+            @RequestParam(required = false) Integer maxBytes) {
+        int cap = maxBytes == null ? 131072 : Math.min(Math.max(maxBytes, 1024), 2_097_152);
+        Optional<String> verOpt = tryResolvePluginLogVersion(pluginId, version);
+        if (verOpt.isEmpty()) {
+            return R.fail("请指定 version，或先加载该插件（便于自动解析版本）");
+        }
+        String ver = verOpt.get();
+        Path dir = pluginLogsDirectory();
+        try {
+            String key = PluginLogFileSupport.buildPluginKey(pluginId, ver);
+            Path logFile = PluginLogFileSupport.resolveLogFile(dir, key);
+            if (!Files.isRegularFile(logFile)) {
+                return R.success(
+                        new PluginLogTailVo(
+                                key,
+                                logFile.toString(),
+                                "暂无该日志文件。请确认进程工作目录下已生成 logs/plugins，且插件在 MDC 上下文中输出过日志（如 onLoad、HOST_MVC 请求、反射调用等）。",
+                                false,
+                                true));
+            }
+            PluginLogFileSupport.TailResult tail = PluginLogFileSupport.readTailUtf8(logFile, cap);
+            String text = tail.text();
+            if (text.isBlank()) {
+                text = "(日志文件为空)";
+            }
+            return R.success(new PluginLogTailVo(key, logFile.toString(), text, tail.truncated(), false));
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        } catch (IOException ex) {
+            return R.fail("读取日志失败: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * 截断清空插件独立日志文件（0 字节）；不影响 logback 后续继续写入同一文件。
+     */
+    @SaCheckRole("super_admin")
+    @PostMapping("/pluginLogClear")
+    public R<PluginLogTailVo> pluginLogClear(@RequestBody PluginLogClearRequest body) {
+        if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
+            return R.fail("pluginId 不能为空");
+        }
+        Optional<String> verOpt = tryResolvePluginLogVersion(body.pluginId(), body.version());
+        if (verOpt.isEmpty()) {
+            return R.fail("请指定 version，或先加载该插件（便于自动解析版本）");
+        }
+        String ver = verOpt.get();
+        Path dir = pluginLogsDirectory();
+        try {
+            String key = PluginLogFileSupport.buildPluginKey(body.pluginId(), ver);
+            Path logFile = PluginLogFileSupport.resolveLogFile(dir, key);
+            PluginLogFileSupport.truncateLogFile(logFile);
+            return R.success(
+                    new PluginLogTailVo(
+                            key,
+                            logFile.toString(),
+                            "(已清空，新日志将继续写入此文件)",
+                            false,
+                            false));
+        } catch (IllegalArgumentException ex) {
+            return R.fail(ex.getMessage());
+        } catch (IOException ex) {
+            return R.fail("清空日志失败: " + ex.getMessage());
+        }
+    }
+
+    private Path pluginLogsDirectory() {
+        String rawDir = pluginHostProperties.getPluginLogDir();
+        if (rawDir != null && !rawDir.isBlank()) {
+            return Path.of(rawDir.trim()).toAbsolutePath().normalize();
+        }
+        return PluginLogFileSupport.defaultPluginsLogDirectory();
+    }
+
+    private Optional<String> tryResolvePluginLogVersion(String pluginId, String versionOrNull) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return Optional.empty();
+        }
+        String ver = versionOrNull;
+        if (ver == null || ver.isBlank()) {
+            ver = pluginLifecycleManager.listManifests().stream()
+                    .filter(m -> pluginId.equals(m.id()))
+                    .map(PluginManifestView::version)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (ver == null || ver.isBlank()) {
+            ver = pluginLifecycleManager.listSummaries().stream()
+                    .filter(s -> pluginId.equals(s.pluginId()))
+                    .map(PluginEntrySummary::version)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (ver == null || ver.isBlank()) {
+            return Optional.empty();
+        }
+        return Optional.of(ver.trim());
     }
 
     @SaCheckRole("super_admin")

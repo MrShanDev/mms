@@ -24,4 +24,13 @@ public final class DefaultPluginBeanRegistrar implements PluginBeanRegistrar {
         }
         attachment.registerSingleton(loadSessionId, logicalName, bean);
     }
+
+    @Override
+    public void registerInitializedSingleton(String logicalName, Object bean) {
+        if (attachment == null) {
+            throw new PluginException(
+                    "宿主未装配 PluginSpringBeanAttachment（非 ConfigurableApplicationContext？），无法 registerInitializedSingleton");
+        }
+        attachment.registerInitializedSingleton(loadSessionId, logicalName, bean);
+    }
 }
