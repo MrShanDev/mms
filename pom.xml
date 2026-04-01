@@ -689,6 +689,7 @@
     <modules>
         <module>mms-api-admin</module>
         <module>mms-modules</module>
+        <module>mms-plugins</module>
         <module>mms-zoom</module>
     </modules>
 

@@ -245,7 +245,8 @@ tenant:
 mms:
   plugin:
     enabled: true
-    root-dir: ${user.dir}/plugins
+    # 固定放在用户主目录下，避免随 IDE 工作目录变化（与 user.dir 无关）
+    root-dir: ${user.home}/mms/plugins
     host-mms-revision: ${revision}
 
 --- # websocket

@@ -27,4 +27,4 @@ description: 脚手架分阶段路线（缺陷排查、性能、文档、技能�
 ## 5. JAR 插件（P0 / P1）
 
 - **`mms-plugin-api`（P0）**：`plugin.json`、`MmsPlugin`、SPI、`PluginInstallationLayout`。
-- **`mms-plugin-host`（P1）**：`mms.plugin.*`、扫描 `lib/*.jar`、**`/status` `/health` `/install`（multipart）`/reload`**（`super_admin`）；示例 JAR **`mms-plugin-sample-health`**（`mvn -pl mms-modules/mms-plugin-sample-health package`）。完整阶段表见 [JAR 插件分阶段](https://mmsadmin.cn/mms-admin/plugin-jar-phases.html)。
+- **`mms-plugin-host`（P1）**：`mms.plugin.*`、扫描 `lib/*.jar`、**`/status` `/health` `/install`（multipart）`/reload`**（`super_admin`）；示例 JAR **`mms-plugin-sample-health`**（`mvn -pl mms-plugins/mms-plugin-sample-health package`）。完整阶段表见 [JAR 插件分阶段](https://mmsadmin.cn/mms-admin/plugin-jar-phases.html)。

@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sxpcwlkj</groupId>
-        <artifactId>mms-modules</artifactId>
+        <artifactId>mms-plugins</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>jar</packaging>
     <artifactId>mms-plugin-sample-health</artifactId>

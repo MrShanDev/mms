@@ -90,8 +90,8 @@ public class PluginLifecycleManager {
             return;
         }
         Path root = resolveRoot();
-        if (!Files.isDirectory(root)) {
-            log.info("插件根目录不存在或不是目录: {}，跳过加载", root.toAbsolutePath());
+        if (!ensurePluginsRoot(root)) {
+            log.warn("插件根目录不可用: {}，跳过加载", root.toAbsolutePath());
             return;
         }
         String springVer = SpringBootVersion.getVersion();
@@ -285,7 +285,7 @@ public class PluginLifecycleManager {
      * 当前解析后的插件根目录是否为已存在目录（否则市场页应提示无法扫描磁盘）。
      */
     public boolean isPluginsRootDirectory() {
-        return Files.isDirectory(resolveRoot());
+        return ensurePluginsRoot(resolveRoot());
     }
 
     /**
@@ -293,7 +293,7 @@ public class PluginLifecycleManager {
      */
     public PluginJarLocationStatus probeVersionLayout(String pluginId, String version) {
         Path root = resolveRoot();
-        if (!Files.isDirectory(root)) {
+        if (!ensurePluginsRoot(root)) {
             return PluginJarLocationStatus.ROOT_NOT_DIRECTORY;
         }
         if (pluginId == null || pluginId.isBlank() || version == null || version.isBlank()) {
@@ -322,7 +322,7 @@ public class PluginLifecycleManager {
     public List<DiskPluginSlot> listDiskSlots() {
         Path root = resolveRoot();
         List<DiskPluginSlot> list = new ArrayList<>();
-        if (!Files.isDirectory(root)) {
+        if (!ensurePluginsRoot(root)) {
             return list;
         }
         try (Stream<Path> idDirs = Files.list(root)) {
@@ -446,6 +446,27 @@ public class PluginLifecycleManager {
             return Path.of(properties.getRootDir().trim()).toAbsolutePath().normalize();
         }
         return Path.of(System.getProperty("user.dir", "."), "mms-plugins").toAbsolutePath().normalize();
+    }
+
+    /**
+     * 若插件根路径不存在则创建目录；已存在且非目录则无法使用，返回 false。
+     */
+    private boolean ensurePluginsRoot(Path root) {
+        try {
+            if (Files.exists(root)) {
+                if (!Files.isDirectory(root)) {
+                    log.warn("插件根路径已存在但不是目录: {}", root.toAbsolutePath());
+                    return false;
+                }
+                return true;
+            }
+            Files.createDirectories(root);
+            log.info("已自动创建插件根目录: {}", root.toAbsolutePath());
+            return true;
+        } catch (IOException e) {
+            log.warn("无法创建插件根目录 {}: {}", root.toAbsolutePath(), e.getMessage());
+            return false;
+        }
     }
 
     private static URL[] toUrls(List<Path> jars) throws MalformedURLException {

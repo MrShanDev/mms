@@ -105,7 +105,7 @@ description: MMS JAR 插件（mms-plugin-api / mms-plugin-host）、插件市场
 ## 引用 mms-modules 的开发边界
 
 - **类加载**：插件 JAR 由宿主 **`URLClassLoader`** 加载，**父加载器一般为应用主 ClassLoader**，因此主程序已加载的类（如 **`mms-common`** 中已在宿主 classpath 的类）可被插件 **以同一类型** 使用 —— 前提是 **插件不要重复打包同名冲突版本**。
-- **Maven**：对 **`mms-plugin-api`**（及仅需编译期类型的 **`mms-common`** 等）常用 **`provided`**，避免Fat JAR 与宿主版本漂移；具体以示例 `mms-plugin-sample-health/pom.xml` 为准。
+- **Maven**：对 **`mms-plugin-api`**（及仅需编译期类型的 **`mms-common`** 等）常用 **`provided`**，避免Fat JAR 与宿主版本漂移；具体以示例 `mms-plugins/mms-plugin-sample-health/pom.xml` 为准。
 - **不建议**：插件直接依赖并调用 **`mms-system` 的 Spring Bean / Service / Mapper**（无 Spring 注入、生命周期与事务边界不清）。需要系统能力时优先 **HTTP 调用管理端已有接口**，或后续由官方扩展 **受控宿主 API**。
 - **可复用**：纯工具类、DTO、常量等 **无状态且 ABI 稳定** 的 API；注意 **双向兼容性**（宿主升级后插件仍应能通过 `requiresMms` 校验）。
 
