@@ -323,7 +323,7 @@ dromara:
     default-platform: ${OSS_DEFAULT_PLATFORM:}
     aliyun-oss: []
 
---- #MmsAi
+--- # mms.ai 推理与对话接入
 server:
   compression:
     enabled: true # 启用响应压缩
@@ -332,8 +332,8 @@ server:
 mms:
   ai:
     type: Document # Ollama / DeepSeek / Document
-    url: https://wss.lke.cloud.tencent.com/v1/qbot/chat/sse # Ollama默认地址 http://localhost:11434/api/generate  https://api.deepseek.com/v1/chat/completions （对话补全）  https://wss.lke.cloud.tencent.com/v1/qbot/chat/sse (腾讯云-大模型知识引擎)
-    model: '' # 使用的模型名称，ollama list 查看全名 deepseek-r1:latest   deepseek-chat  （即可调用 DeepSeek-V3）  (腾讯云-大模型知识引擎):为空
+    url: https://wss.lke.cloud.tencent.com/v1/qbot/chat/sse # Ollama默认地址 http://localhost:11434/api/generate  https://api.deepseek.com/v1/chat/completions （对话补全）  https://wss.lke.cloud.tencent.com/v1/qbot/chat/sse (腾讯云知识引擎 LKE)
+    model: '' # 使用的模型名称，ollama list 查看全名 deepseek-r1:latest   deepseek-chat  （即可调用 DeepSeek-V3）  (腾讯云 LKE 场景):可为空按厂商约定
     key: pjJLWvfdzAOdYINoefNLLjtmwNELHGtdFIESwJGtuCagfMGBQgudSrKgmPfdrlXDxAEwZuYsHkGxBhIVXKGBUAriwbEGhZPxyxkhuzxksXDeQcKDyijXDkAUOYmkNiFD
     context:
       max-turns: 5 #// 默认保留5轮对话

@@ -11,12 +11,12 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 
 0. 若用户要求 **更新 / 同步 mms-doc 在线文档**，优先阅读并遵循 **`.cursor/skills/mms-doc-sync/SKILL.md`**（同级 `mms-doc` 仓库、`docs/` 正文、`docs/.vitepress/config.mts` 菜单与 `docs/log/index.md` 修订记录）。  
 0b. **JAR 插件、plugin.json、插件市场 / 宿主 API、SPI 与 ClassLoader**：见 **`.cursor/skills/mms-plugin/SKILL.md`**。
-0a. **模块地图 / 多租户 / 分阶段脚手架**：见 **`.cursor/skills/mms-modules-map/SKILL.md`**、**`mms-tenant-saas/SKILL.md`**、**`mms-scaffold-phases/SKILL.md`**；**依赖 DAG、冒烟、压测基线** 见主仓 **`version/v1-20260331-脚手架回归与扩展基线.md`**（与 `mms-doc` 中 `index/scaffold-capability-matrix`、`mms-admin/modules-map`、`plugin-jar-phases`、`mms-ui/plugin-route-protocol` 等交叉维护）。
+0a. **模块地图 / 多租户 / 分阶段脚手架 / 能力矩阵**：见 **`.cursor/skills/mms-modules-map/SKILL.md`**、**`mms-tenant-saas/SKILL.md`**、**`mms-scaffold-phases/SKILL.md`**（含 **§7 能力矩阵**）；**依赖 DAG、冒烟、压测基线** 见主仓 **`version/v1-20260331-脚手架回归与扩展基线.md`**。对外文档对齐 **`mms-doc`** 的 `index/introduction`（子模块表）、`plugin-jar-phases`、`plugin-develop`、`mms-ui/plugin-route-protocol` 等。
 1. 先确定流量入口：**管理端（mms-api-admin + mms-ui）** 还是 **开放端（mms-servers*）**  
 2. 按本规范统一 **响应结构 / 分页 / 错误码 / 权限 / 日志 / 配置**  
 3. 对外回调、SSE、下载等特殊接口保持原样  
 4. 若涉及业务流程或页面逻辑变更，**先更新本项目的版本需求文档（`version/` 目录）**，再开始编码（以项目 `.cursor/rules` 为准）  
-5. 在与用户的对话中，**所有 AI 分析与回答一律使用简体中文输出**  
+5. 在与用户的对话中，**所有分析与回答一律使用简体中文输出**  
 
 ## 仓库与架构布局（当前 monorepo）
 
@@ -36,7 +36,7 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 - **主干（管理端最小闭环）**：`mms-common` → `mms-redis` / `mms-authority` → `mms-datasource` → `mms-framework` → `mms-log` → **`mms-gen` + `mms-system`**（`mms-api-admin` 聚合）。
 - **插件链**：`mms-plugin-api`（契约）← `mms-plugin-host`（宿主）；**`mms-plugin-sample-health`** 为示例 JAR，独立 `package`。细节与运维路径见 **`mms-plugin`** skill。
 - **可选集成**：`mms-oss`、`mms-sms`、`mms-email`、`mms-wx`、`mms-mq`、`mms-websocket`、`mms-aliyun`、`mms-ai`、`mms-thymeleaf`、`mms-demo` 等，按需引入。
-- **完整 Mermaid、ClassLoader vs 进程级评审、冒烟表、压测接口**：见 **`version/v1-20260331-脚手架回归与扩展基线.md`**；在线 **脚手架能力矩阵**：[脚手架能力矩阵](https://mmsadmin.cn/index/scaffold-capability-matrix.html)。
+- **完整 Mermaid、ClassLoader vs 进程级评审、冒烟表、压测接口**：见 **`version/v1-20260331-脚手架回归与扩展基线.md`**；**能力矩阵（表格式）** 见 **`mms-scaffold-phases/SKILL.md` §7**（已不从文档站发布）。
 
 ## mms-gen 代码生成：业务流程与排查要点
 
@@ -130,7 +130,7 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 - **多租户**：`TenantLineInnerInterceptor` 的 `getTenantId()` 依赖 **`LoginObject.getLoginTenant()`**；无登录用户时依赖 **`getLoginId()`** 返回 `null` 后回退 **`"000000"`**。若在**应用就绪、定时任务等无 Sa-Token 上下文**的线程中访问 `StpUtil`，可能抛 **`SaTokenContextException`**（需在进入 `getLoginTenant()` 前由 **`getLoginId()`** 吞掉，见 **`mms-authority` `LoginObject`**、**`.cursor/skills/mms-plugin/SKILL.md`**「启动加载与多租户」）。其它业务若在异步线程 / 就绪回调中跑 Mapper，需同理或 `@InterceptorIgnore` / 显式租户。  
 - **限流**：`@RateLimit` 仅进程内；集群需网关或 Redis 限流。
 
-## 功能开发速查清单（AI 与人类共用）
+## 功能开发速查清单（协作共用）
 
 ```
 - [ ] 表结构 + 索引 + 租户/软删除字段是否与 BaseEntity 一致
@@ -142,13 +142,13 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 - [ ] 开放端是否需单独 Controller 与鉴权，不可直接暴露管理接口
 ```
 
-## AI 分析与回答约定
+## 分析与回答约定
 
-- 助手在分析需求、设计数据结构、接口、表结构或任何业务逻辑时，应先用**简体中文**说明自己的理解和推理过程，再给出结论或代码建议。  
+- 协作助手在分析需求、设计数据结构、接口、表结构或任何业务逻辑时，应先用**简体中文**说明自己的理解和推理过程，再给出结论或代码建议。  
 - 若存在多种可选方案，需用简体中文对比优劣，并明确推荐理由。  
 - 如因外部文档/代码为英文而引用示例，允许在代码或字段名中保留英文，但解释和讨论仍需使用简体中文。  
 
-## mms-servers-api 功能清单（对 nuxt-ai 暴露的后端能力）
+## mms-servers-api 功能清单（对 Nuxt 等多端前端暴露的后端能力）
 
 > 模块位置：主仓 `mms-api-unix`（原 `mms-mobile-api` 已移除，移动端/开放接口统一由此启动），应用入口 `MmsMobileApiApplication`。  
 > 以下按 Controller 维度梳理主要对外功能，便于在分析页面需求或接口时快速定位。
@@ -188,7 +188,7 @@ description: MMS 架构与仓库布局、mms-gen 生成流程与排查、mms-ui 
 - **App 版本 `/api/app/v1`（`ApiAppVersionController`）**  
   - `GET /upgrade-check`：平台类型（1 iOS / 2 Android）查询最新版本列表（版本号、更新说明、下载地址、是否强更）。  
 
-## 版本需求文档规范（nuxt-ai 前端）
+## 版本需求文档规范（Nuxt 等多端前端）
 
 - 目录：项目根下 `version/`，用于存放本项目的「版本需求文档」。  
 - 命名规范：`vX-YYYYMMDD-说明.md`，例如：`v1-20260209-登录与数据建模.md`。  

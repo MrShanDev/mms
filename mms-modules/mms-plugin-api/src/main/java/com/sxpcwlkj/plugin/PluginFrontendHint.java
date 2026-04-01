@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 插件声明的前端片段（P0 仅 JSON 契约；实际加载在后续阶段与 mms-ui 约定）。
+ * 插件声明的前端片段（JSON 契约；实际加载与 mms-ui 另行约定）。
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -21,7 +21,7 @@ public class PluginFrontendHint {
     private String modulePackage;
 
     /**
-     * 兼容的 mms-ui 大版本或 git tag 要求（文案/semver 均可，P0 不强制解析）。
+     * 兼容的 mms-ui 大版本或 git tag 要求（文案/semver 均可，宿主可不解析）。
      */
     private String compatibleMmsUi;
 

@@ -115,12 +115,14 @@ description: MMS JAR 插件（mms-plugin-api / mms-plugin-host）、插件市场
 
 ## 文档（mms-doc）
 
+**新手阅读顺序**（在线站路径）：[JAR 开发指南 §0 闭环](https://mmsadmin.cn/mms-admin/plugin-develop.html#plugin-first-run) → [JAR 插件入门](https://mmsadmin.cn/mms-admin/plugin-jar-phases.html) → [JAR 开发指南](https://mmsadmin.cn/mms-admin/plugin-develop.html) 全文 → 进阶 [JAR 插件路由协议](https://mmsadmin.cn/mms-ui/plugin-route-protocol.html)。后端未跑通前先 [项目导入与启动](https://mmsadmin.cn/index/mmsAdmin.html)。
+
 优先保持与代码一致；站点路径（VitePress）：
 
 - [插件体系介绍](/mms-admin/plugin-overview)
-- [插件开发指南](/mms-admin/plugin-developer-guide)
-- [JAR 插件分阶段](/mms-admin/plugin-jar-phases)
-- 前端路由协议：[插件与动态路由协议](/mms-ui/plugin-route-protocol)
+- [JAR 开发指南](/mms-admin/plugin-develop)（**[§0](/mms-admin/plugin-develop#plugin-first-run)**）
+- [JAR 插件入门](/mms-admin/plugin-jar-phases)
+- 前端路由协议：[JAR 插件路由协议](/mms-ui/plugin-route-protocol)
 
 同步菜单与 **`docs/log/index.md`** 见 **`mms-doc-sync`**。
 

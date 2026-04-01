@@ -2,7 +2,7 @@
   "id": "com.example.mms.comments",
   "version": "1.0.0",
   "name": "评论插件",
-  "description": "示例：P0 仅描述契约，宿主加载逻辑在后续阶段实现。",
+  "description": "示例：本文件仅描述契约；宿主加载逻辑由 mms-plugin-host 实现。",
   "requiresMms": {
     "revisionMin": 21,
     "revisionMax": 21,

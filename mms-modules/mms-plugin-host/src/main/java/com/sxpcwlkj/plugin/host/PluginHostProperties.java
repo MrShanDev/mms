@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 插件宿主行为开关与路径（P1）。
+ * 插件宿主行为开关与路径。
  */
 @Data
 @ConfigurationProperties(prefix = "mms.plugin")

@@ -3,7 +3,7 @@ package com.sxpcwlkj.plugin;
 import java.nio.file.Path;
 
 /**
- * 宿主在调用 {@link MmsPlugin#onLoad} 时注入的运行环境（P0 接口；宿主实现类在后续模块提供）。
+ * 宿主在调用 {@link MmsPlugin#onLoad} 时注入的运行环境（接口由宿主模块实现）。
  */
 public interface PluginRuntimeContext {
 

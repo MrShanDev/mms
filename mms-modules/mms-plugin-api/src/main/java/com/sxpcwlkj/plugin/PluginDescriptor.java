@@ -56,7 +56,7 @@ public class PluginDescriptor {
     private List<PluginDependencyDescriptor> dependencies = new ArrayList<>();
 
     /**
-     * 可选：面向前端的模块说明（P0 占位，供 mms-ui 动态路由与联邦模块对接）。
+     * 可选：面向前端的模块说明（占位，供 mms-ui 动态路由与联邦模块对接）。
      */
     private PluginFrontendHint frontend;
 }

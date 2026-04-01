@@ -23,7 +23,7 @@ public class RequiresMmsDescriptor {
     private Integer revisionMax;
 
     /**
-     * 可选：要求的 Spring Boot 主版本前缀或精确版本，例如 {@code 3.5.8}。宿主可做字符串匹配或语义化比较（P0 仅约定字段）。
+     * 可选：要求的 Spring Boot 主版本前缀或精确版本，例如 {@code 3.5.8}。宿主可做字符串匹配或语义化比较（本字段仅约定格式，匹配策略由宿主实现）。
      */
     private String springBoot;
 }

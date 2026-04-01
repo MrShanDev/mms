@@ -20,10 +20,10 @@ description: 当用户要求更新/同步 mms-doc 在线文档时使用。解析
 | `docs/index.md` | 站点首页 |
 | `docs/index/*.md` | Admin 导览区（introduction、mmsAdmin、mmsAdmin-ui、deploy 等） |
 | `docs/mms-api-admin/*.md` | 后端 / 管理端能力说明 |
-| `docs/mms-admin/modules-map.md`、`scaffold-evolution.md` | `mms-modules` 子模块速查、分阶段质量与插件路线 |
-| `docs/mms-admin/saas-tenant-gap.md`、`plugin-jar-phases.md`、`plugin-overview.md`、`plugin-developer-guide.md` | SaaS 缺口；JAR 插件阶段（P0～P4）；插件体系介绍与开发指南 |
-| `docs/index/scaffold-capability-matrix.md`、`docs/mms-ui/plugin-route-protocol.md` | 脚手架能力矩阵、插件与 mms-ui 动态路由协议 |
-| 主仓 `mms-ui/src/views/system/pluginMarket/` | 插件市场页：与 `plugin-overview` / `plugin-developer-guide` / `plugin-jar-phases` 叙述一致时，同步文档中的**操作说明**（详情入口、安装/卸载/删除语义、运行中隐藏安装与删除、`pluginsRootReady` 与列表「磁盘」标记等） |
+| `docs/index/introduction.md`（§ **Maven 子模块职责**） | `mms-modules` 子模块对外速查表；维护者另见 **`mms-modules-map`** 技能 |
+| `docs/mms-admin/saas-tenant-gap.md`、`plugin-jar-phases.md`、`plugin-develop.md` 等 | SaaS 缺口；**JAR 插件**维护约定：**新手阅读顺序**见 `plugin-develop` 文首 tip 与 `plugin-jar-phases`「新手从哪读起」（锚点 `#plugin-first-run`） |
+| `docs/mms-ui/plugin-route-protocol.md` | **JAR 插件路由协议**（`frontend` / 菜单与 mms-ui 协作；**进阶**，文内有「阅读顺序」提示；**能力矩阵**已迁入主仓 **`mms-scaffold-phases` 技能 §7**，不在文档站展示） |
+| 主仓 `mms-ui/src/views/system/pluginMarket/` | 插件市场页：与 `plugin-jar-phases`、`plugin-develop` 叙述一致时，同步文档中的**操作说明**（详情入口、安装/卸载/删除语义、运行中隐藏安装与删除、`pluginsRootReady` 与列表「磁盘」标记等） |
 | `docs/mms-ui/**/*.md` | 管理端前端（MMS-UI）说明 |
 | `docs/.vitepress/config.mts` | **站点菜单**：`themeConfig.nav`（顶栏）、`themeConfig.sidebar`（侧栏） |
 

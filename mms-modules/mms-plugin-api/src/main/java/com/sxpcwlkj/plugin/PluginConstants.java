@@ -1,7 +1,7 @@
 package com.sxpcwlkj.plugin;
 
 /**
- * MMS 插件在 JAR 与安装目录中的固定路径约定（P0）。
+ * JAR 插件：插件 JAR 与安装目录中的固定路径约定。
  */
 public final class PluginConstants {
 

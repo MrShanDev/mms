@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * {@link PluginDescriptor} 结构与宿主版本的兼容性校验（P0）。
+ * {@link PluginDescriptor} 结构与宿主版本的兼容性校验。
  */
 public final class PluginDescriptorValidator {
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 /**
- * 插件间依赖（P0 仅元数据；解析版本区间由宿主在 P1+ 实现）。
+ * 插件间依赖（仅元数据；版本区间解析由宿主实现）。
  */
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)

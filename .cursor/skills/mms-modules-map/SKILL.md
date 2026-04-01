@@ -5,13 +5,13 @@ description: mms-modules 子模块职责与落点速查；新增业务、排查�
 
 # mms-modules 模块地图
 
-权威列表以主仓 **`mms-modules/pom.xml`** 的 `<modules>` 为准。**依赖 DAG、冒烟用例、压测接口清单** 见 **`version/v1-20260331-脚手架回归与扩展基线.md`**。以下为开发时常用对照（与在线文档 [mms-modules 模块说明](https://mmsadmin.cn/mms-admin/modules-map.html) 同步维护）。
+权威列表以主仓 **`mms-modules/pom.xml`** 的 `<modules>` 为准。**依赖 DAG、冒烟用例、压测接口清单** 见 **`version/v1-20260331-脚手架回归与扩展基线.md`**。以下为开发时常用对照；**对外同步**表文在 `mms-doc` [项目简介 — 子模块速览](https://mmsadmin.cn/index/introduction.html#mms-modules-map)。
 
 | 模块 | 落点提示 |
 |------|----------|
 | `mms-common` | 通用属性（如 `TenantProperties`）、工具、枚举 |
-| `mms-plugin-api` | 扩展插件 P0：`plugin.json`、`MmsPlugin` SPI、安装路径工具类 |
-| `mms-plugin-host` | 扩展插件 P1：扫描 `lib`、ClassLoader、SPI、`/system/pluginHost` |
+| `mms-plugin-api` | JAR 插件契约：`plugin.json`、`MmsPlugin` SPI、安装路径工具类 |
+| `mms-plugin-host` | JAR 插件宿主：扫描 `lib`、ClassLoader、SPI、`/system/pluginHost` |
 | `mms-framework` | `BaseServiceImpl` 等与框架协作的基类 |
 | `mms-datasource` | MyBatis-Plus、多数据源、**租户拦截器**、`BaseEntity` 填充 |
 | `mms-authority` | `LoginObject`、登录态与租户 Redis 读取 |
