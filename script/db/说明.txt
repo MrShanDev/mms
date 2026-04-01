@@ -3,3 +3,4 @@ test-sql：测试数据
 mms.pdma.json:元数建模源文件 http://www.pdmaner.com/
 mms.sql：主数据库
 mms.gen.sql：代码生产
+开放端 / mms-servers 相关 SQL：见 mms-plus 仓库 script/db/servers/
