@@ -41,6 +41,12 @@ import java.util.EnumSet;
 @EnableConfigurationProperties(PluginHostProperties.class)
 public class PluginHostAutoConfiguration {
 
+    /**
+     * 须早于 Sa-Token Servlet 上下文的 {@code SaTokenContextFilterForJakartaServlet}（@Order(-104)），
+     * 否则 Sa-Token 已按无 {@code Authorization} 解析请求，此后桥接包装 request 无效。
+     */
+    private static final int DOC_SITE_TOKEN_BRIDGE_FILTER_ORDER = -105;
+
     @Bean
     @ConditionalOnMissingBean(HostServices.class)
     public HostServices hostServices(
@@ -75,6 +81,7 @@ public class PluginHostAutoConfiguration {
         reg.setName(DocSiteTokenBridgeFilter.SERVLET_REGISTRATION_NAME);
         reg.addUrlPatterns("/doc/v1", "/doc/v1/*");
         reg.setDispatcherTypes(EnumSet.of(DispatcherType.REQUEST));
+        reg.setOrder(DOC_SITE_TOKEN_BRIDGE_FILTER_ORDER);
         return reg;
     }
 

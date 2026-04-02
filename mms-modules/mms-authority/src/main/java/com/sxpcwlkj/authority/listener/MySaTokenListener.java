@@ -33,11 +33,15 @@ public class MySaTokenListener implements SaTokenListener {
     @Override
     public void doLogout(String loginType, Object loginId, String tokenValue) {
         String device = StpUtil.getLoginDeviceTypeByToken(tokenValue);
-        if(DeviceEnum.MOBILE.getType().equals(device)){
-            RedisUtil.deleteObject(RedisConstant.MOBILE_KEY+loginId.toString());
-        }
-        if (DeviceEnum.ADMIN.getType().equals(device)){
-            RedisUtil.deleteObject(RedisConstant.ADMIN_KEY+loginId.toString());
+        String idPart = loginId.toString();
+        if (DeviceEnum.MOBILE.getType().equals(device)) {
+            RedisUtil.deleteObject(RedisConstant.MOBILE_KEY + idPart);
+        } else if (DeviceEnum.ADMIN.getType().equals(device)) {
+            RedisUtil.deleteObject(RedisConstant.ADMIN_KEY + idPart);
+        } else if (DeviceEnum.DOC.getType().equals(device)) {
+            RedisUtil.deleteObject(RedisConstant.DOC_KEY + idPart);
+        } else if (DeviceEnum.PC.getType().equals(device)) {
+            RedisUtil.deleteObject(RedisConstant.PC_KEY + idPart);
         }
 
     }

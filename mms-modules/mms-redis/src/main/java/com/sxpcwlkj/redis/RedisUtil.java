@@ -1,9 +1,13 @@
 package com.sxpcwlkj.redis;
 
 import cn.hutool.extra.spring.SpringUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.redisson.api.*;
+import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
 
 import java.time.Duration;
@@ -226,6 +230,56 @@ public class RedisUtil {
     public static <T> T getCacheObject(final String key) {
         RBucket<T> rBucket = CLIENT.getBucket(key);
         return rBucket.get();
+    }
+
+    /**
+     * 将桶内 JSON 以纯文本读出再解析为 Map，不经过 Redisson 默认 {@code JsonJacksonCodec} 的类型反查。
+     * <p>用于宿主进程读取「插件里写入的、带 {@code @class} 的」等业务对象历史数据：避免 ClassLoader 无该类时解码失败。</p>
+     *
+     * @param key Redis 键
+     * @return Map；键不存在或解析失败返回 {@code null}
+     */
+    public static Map<String, Object> getCacheJsonObjectAsMap(final String key) {
+        try {
+            RBucket<String> bucket = CLIENT.getBucket(key, StringCodec.INSTANCE);
+            String raw = bucket.get();
+            if (raw == null || raw.isBlank()) {
+                return null;
+            }
+            ObjectMapper om = new ObjectMapper();
+            om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            LinkedHashMap<String, Object> map = om.readValue(raw, new TypeReference<LinkedHashMap<String, Object>>() {});
+            map.remove("@class");
+            return map;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 登录会话缓存：先按纯 JSON 文本解析（兼容历史带 @class）；失败则再走默认 Codec（新写入的 Map 无插件类型时常能直接反序列化为 Map）。
+     */
+    public static Map<String, Object> getLoginSessionMap(final String key) {
+        Map<String, Object> fromText = getCacheJsonObjectAsMap(key);
+        if (fromText != null) {
+            return fromText;
+        }
+        try {
+            Object raw = getCacheObject(key);
+            if (raw instanceof Map<?, ?> m) {
+                LinkedHashMap<String, Object> sm = new LinkedHashMap<>();
+                for (Map.Entry<?, ?> e : m.entrySet()) {
+                    if (e.getKey() != null) {
+                        sm.put(e.getKey().toString(), e.getValue());
+                    }
+                }
+                sm.remove("@class");
+                return sm;
+            }
+        } catch (Exception ignored) {
+            // 旧数据为 DocUser 等多态类型时，Codec 仍可能失败
+        }
+        return null;
     }
 
     /**

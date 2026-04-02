@@ -18,13 +18,17 @@ public enum DeviceEnum {
      */
     ADMIN("ADMIN"),
     /**
-     * 移动端
+     * 移动端（如 mms-api-unix 当前默认会员登录端）
      */
     MOBILE("MOBILE"),
     /**
-     * PC端
+     * PC 端：mms-unix 等场景下的 {@code store_member} 会员（与文档站 {@link #DOC} 区分）
      */
-    PC("PC");
+    PC("PC"),
+    /**
+     * MMS-DOC 文档站付费/扫码用户（Redis {@code doc:member:}，非 {@code store_member}）
+     */
+    DOC("DOC");
 
     private final String type;
 

@@ -73,7 +73,7 @@ public class GlobalException {
                                                HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址{},权限校验失败{}", requestUrl, e.getMessage());
-        return R.fail(HttpStatus.FORBIDDEN.value(), "没有权限，请联系管理员授权");
+        return R.fail(ErrorCodeEnum.FORBIDDEN.getKey(), ErrorCodeEnum.FORBIDDEN.getValue());
     }
 
     /**
@@ -187,7 +187,7 @@ public class GlobalException {
     public R<Void> handleNotPermissionException(NotPermissionException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',权限码校验失败'{}'", requestUrl, e.getMessage());
-        return R.fail(cn.hutool.http.HttpStatus.HTTP_FORBIDDEN, "没有访问权限，请联系管理员授权");
+        return R.fail(ErrorCodeEnum.FORBIDDEN.getKey(), ErrorCodeEnum.FORBIDDEN.getValue());
     }
 
     /**
@@ -197,7 +197,7 @@ public class GlobalException {
     public R<Void> handleNotRoleException(NotRoleException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',角色权限校验失败'{}'", requestUrl, e.getMessage());
-        return R.fail(cn.hutool.http.HttpStatus.HTTP_FORBIDDEN, "没有访问权限，请联系管理员授权");
+        return R.fail(ErrorCodeEnum.FORBIDDEN.getKey(), ErrorCodeEnum.FORBIDDEN.getValue());
     }
 
     /**
@@ -207,7 +207,7 @@ public class GlobalException {
     public R<Void> handleNotLoginException(NotLoginException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',认证失败'{}',无法访问系统资源", requestUrl, e.getMessage());
-        return R.fail(cn.hutool.http.HttpStatus.HTTP_UNAUTHORIZED, "认证失败，无法访问系统资源");
+        return R.fail(ErrorCodeEnum.USER_NOT_LOGIN.getKey(), "认证失败，无法访问系统资源");
     }
 
     /**
@@ -248,7 +248,7 @@ public class GlobalException {
             return R.fail("未找到数据源，请联系管理员确认");
         }
         log.error("请求地址'{}', Mybatis系统异常", requestUrl, e);
-        return R.fail(message);
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), message != null ? message : ErrorCodeEnum.INTERNAL_ERROR.getValue());
     }
 
     // 3. 处理数据访问异常
@@ -264,7 +264,7 @@ public class GlobalException {
 
         // 3.2 其他数据访问异常
         log.error("数据访问异常", e);
-        return R.fail(500200, "数据库访问错误");
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "数据库访问错误");
     }
 
     // 4. 处理PersistenceException
@@ -280,7 +280,7 @@ public class GlobalException {
 
         // 4.2 其他持久化异常
         log.error("MyBatis持久化异常", e);
-        return R.fail(500300, "持久化操作失败");
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "持久化操作失败");
     }
 
 
@@ -291,7 +291,8 @@ public class GlobalException {
     public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生未知异常.", requestUrl, e);
-        return R.fail(e.getMessage());
+        String msg = e.getMessage() != null ? e.getMessage() : ErrorCodeEnum.INTERNAL_ERROR.getValue();
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), msg);
     }
 
 
@@ -354,7 +355,7 @@ public class GlobalException {
                                                 HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
-        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "数据库异常！");
     }
 
     /**
@@ -365,7 +366,7 @@ public class GlobalException {
                                                          HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
-        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "数据库异常！");
     }
 
     /**
@@ -376,7 +377,7 @@ public class GlobalException {
                                                    HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生数据库异常.", requestUrl, e);
-        return R.fail(HttpStatus.TEMPORARY_REDIRECT.value(), "数据库异常！");
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "数据库异常！");
     }
 
     /**
@@ -399,7 +400,8 @@ public class GlobalException {
     public R<Void> handleException(Exception e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生系统异常.", requestUrl, e);
-        return R.fail(e.getMessage());
+        String msg = e.getMessage() != null ? e.getMessage() : ErrorCodeEnum.INTERNAL_ERROR.getValue();
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), msg);
     }
 
 

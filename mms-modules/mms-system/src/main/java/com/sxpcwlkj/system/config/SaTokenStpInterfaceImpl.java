@@ -1,7 +1,6 @@
 package com.sxpcwlkj.system.config;
 
 import cn.dev33.satoken.stp.StpInterface;
-import cn.hutool.core.lang.Console;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.system.entity.vo.SysRoleVo;
@@ -35,11 +34,10 @@ public class SaTokenStpInterfaceImpl implements StpInterface {
         SysUserVo sysUserVo = LoginObject.getLoginObject(SysUserVo.class);
         assert sysUserVo != null;
         List<SysRoleVo> roleVoList = sysUserVo.getRoleVoList();
-        for (SysRoleVo r:roleVoList) {
+        for (SysRoleVo r : roleVoList) {
             list.addAll(Arrays.asList(r.getPermissions()));
         }
 
-        Console.log(list.toString());
         return list;
     }
 
