@@ -1,9 +1,21 @@
-# 演示模式配置
+# =============================================================================
+# mms-admin · prod 环境（叠加 application.yml；同名键覆盖主配置）
+# 分段：demo → powerjob → Spring Boot Admin → Actuator → 数据源/Redis →
+#       redisson → websocket → mms.cors → swagger/springdoc → 日志 →
+#       mybatis-plus → spring.config.import（外置机密，最后加载）
+# =============================================================================
+
+# 演示模式（完整项见主配置 application.yml；与 script/config 约定一致）
 demo:
   mode:
-    enabled: false # 默认开启演示模式
+    enabled: false                        # 生产关闭；主配置默认为 true
 
---- # powerjob 配置
+# spring.config.import（application-prod-secret.yml）在文件末尾加载，可覆盖上文数据源/Redis 等默认值
+
+# ---------------------------------------------------------------------------
+# PowerJob Worker
+# ---------------------------------------------------------------------------
+--- # PowerJob Worker
 powerjob:
   worker:
     # 如何开启调度中心请查看文档教程
@@ -12,177 +24,190 @@ powerjob:
     app-name: mms
     max-appended-wf-context-length: 4096
     max-result-length: 4096
-    # 28080 端口 随着主应用端口飘逸 避免集群冲突
+    # 端口 = 字符 2 + 主应用 server.port（如 8080 → 28080），避免集群与主端口冲突
     port: 2${server.port}
     protocol: http
     server-address: 127.0.0.1:7700
     store-strategy: disk
 
---- # Spring Boot Admin
+# ---------------------------------------------------------------------------
+# Spring Boot Admin（Client）
+# ---------------------------------------------------------------------------
+--- # Spring Boot Admin（Client）
 spring:
   boot:
     admin:
       client:
-        enabled: false                 #启用/禁用
+        enabled: false                    # 启用 / 禁用 Client
         instance:
           service-host-type: IP
-        # Spring Boot Admin
-        url: http://localhost:9001    #监控服务器端地址
-        username: admin               #账号
-        password: ${SPRING_BOOT_ADMIN_PASSWORD:}              #密码
+        # client.password 等可放在 application-prod-secret.yml（由文末 import 覆盖）
+        url: http://localhost:9001        # 监控服务端地址
+        username: admin                   # 账号
+        password: ""                      # 密码占位；外置机密可覆盖
 
-#配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
---- # 数据源配置
-spring:
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    dynamic:
-      # 性能分析插件(有性能损耗 不建议生产环境使用)
-      p6spy: false
-      # 设置默认的数据源或者数据源组,默认值即为 master
-      primary: master
-      # 严格模式 匹配不到数据源则报错
-      strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJpocwyy7m8F8tAUeMgn6GOU404nYeL+yRnKG3JL7IZghb4N9ew9v5O6hJ+gZFlXnGiMjlo5dx5/tpArvtbRwGkCAwEAAQ==
-      # 账号密码
-      datasource:
-        # 主库数据源
-        master:
-          type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: root
-          # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ${SPRING_DATASOURCE_PASSWORD:}
-        # 从库数据源
-#        slave:
-#          lazy: true
-#          type: ${spring.datasource.type}
-#          driverClassName: com.mysql.cj.jdbc.Driver
-#          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-#          username: mms
-#          password: ENC(SV7sBbRzULy65Z5fvGhhVVemMPaWRBlu3Dq6mqr+GdKO/oDMp/ZksT4i4Z4vymZ2yAmkyWSo7n/hn8FgSm/xEQ==)
-      #        oracle:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: oracle.jdbc.OracleDriver
-      #          url: jdbc:oracle:thin:@//localhost:1521/XE
-      #          username: ROOT
-      #          password: root
-      #          hikari:
-      #            connectionTestQuery: SELECT 1 FROM DUAL
-      #        postgres:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: org.postgresql.Driver
-      #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-      #          username: root
-      #          password: root
-      #        sqlserver:
-      #          type: ${spring.datasource.type}
-      #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-      #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
-      #          username: SA
-      #          password: root
-      hikari:
-        # 最大连接池数量
-        maxPoolSize: ${DB_MAX_POOL_SIZE:40}
-        # 最小空闲线程数量
-        minIdle: ${DB_MIN_IDLE:10}
-        # 配置获取连接等待超时的时间
-        connectionTimeout: ${DB_CONNECTION_TIMEOUT:10000}
-        # 校验超时时间
-        validationTimeout: 5000
-        # 空闲连接存活最大时间，默认10分钟
-        idleTimeout: 600000
-        # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认30分钟
-        maxLifetime: 1800000
-        # 连接测试query（配置检测连接是否有效）
-        connectionTestQuery: SELECT 1
-        # 多久检查一次连接的活性
-        keepaliveTime: 30000
-        # 连接泄漏检测（毫秒，0 表示关闭）
-        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
-
---- # Redis配置
-spring:
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      database: 2
-      password: ${SPRING_REDIS_PASSWORD:}
-      timeout: 100s
-      ssl:
-        enabled: false
-
---- # Redis 扩展工具
-redisson:
-  # redis key前缀
-  keyPrefix:
-  # 线程池数量
-  threads: 4
-  # Netty线程池数量
-  nettyThreads: 8
-  # 单节点配置
-  singleServerConfig:
-    # 客户端名称
-    clientName: ${sxpcwlkj.name}
-    # 最小空闲连接数
-    connectionMinimumIdleSize: 8
-    # 连接池大小
-    connectionPoolSize: 32
-    # 连接空闲超时，单位：毫秒
-    idleConnectionTimeout: 10000
-    # 命令等待超时，单位：毫秒
-    timeout: 3000
-    # 发布和订阅连接池大小
-    subscriptionConnectionPoolSize: 50
-
---- # websocket
-websocket:
-  allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:}
-
---- # CORS 配置
-mms:
-  cors:
-    allowed-origins: ${MMS_CORS_ALLOWED_ORIGINS:}
-    allowed-headers: ${MMS_CORS_ALLOWED_HEADERS:*}
-    allowed-methods: ${MMS_CORS_ALLOWED_METHODS:*}
-    allow-credentials: ${MMS_CORS_ALLOW_CREDENTIALS:true}
-    max-age: ${MMS_CORS_MAX_AGE:1800}
-
---- # Actuator 监控端点的配置项
+# ---------------------------------------------------------------------------
+# Actuator（生产仅暴露必要端点）
+# ---------------------------------------------------------------------------
+--- # Actuator
 management:
   endpoints:
-    enabled-by-default: true #暴露所有端点信息
+    enabled-by-default: true              # 暴露端点元数据
     web:
       exposure:
-        include: health,info
+        include: health,info              # 生产收窄暴露范围
   endpoint:
     health:
       show-details: ALWAYS
     logfile:
       external-file: ./logs/sys-console.log
 
+# ---------------------------------------------------------------------------
+# 动态数据源（dynamic-datasource）
+# 参考：https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
+# ---------------------------------------------------------------------------
+--- # 动态数据源（dynamic-datasource）
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    dynamic:
+      # 生产关闭 p6spy，避免额外开销
+      p6spy: false
+      primary: master
+      strict: true
+      # 占位：无外置 config 时生效；存在 application-prod-secret.yml 时由 import 覆盖同名字段
+      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJpocwyy7m8F8tAUeMgn6GOU404nYeL+yRnKG3JL7IZghb4N9ew9v5O6hJ+gZFlXnGiMjlo5dx5/tpArvtbRwGkCAwEAAQ==
+      datasource:
+        master:
+          type: com.zaxxer.hikari.HikariDataSource
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+          username: root
+          password: ""
+        # 从库示例（按需取消注释）
+#        slave:
+#          lazy: true
+#          type: com.zaxxer.hikari.HikariDataSource
+#          driverClassName: com.mysql.cj.jdbc.Driver
+#          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
+#          username: mms
+#          password: ENC(SV7sBbRzULy65Z5fvGhhVVemMPaWRBlu3Dq6mqr+GdKO/oDMp/ZksT4i4Z4vymZ2yAmkyWSo7n/hn8FgSm/xEQ==)
+#        oracle:
+#          type: com.zaxxer.hikari.HikariDataSource
+#          driverClassName: oracle.jdbc.OracleDriver
+#          url: jdbc:oracle:thin:@//localhost:1521/XE
+#          username: ROOT
+#          password: root
+#          hikari:
+#            connectionTestQuery: SELECT 1 FROM DUAL
+#        postgres:
+#          type: com.zaxxer.hikari.HikariDataSource
+#          driverClassName: org.postgresql.Driver
+#          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+#          username: root
+#          password: root
+#        sqlserver:
+#          type: com.zaxxer.hikari.HikariDataSource
+#          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
+#          username: SA
+#          password: root
+      hikari:
+        maxPoolSize: 40
+        minIdle: 10
+        connectionTimeout: 10000
+        validationTimeout: 5000
+        idleTimeout: 600000
+        maxLifetime: 1800000
+        connectionTestQuery: SELECT 1
+        keepaliveTime: 30000
+        leakDetectionThreshold: 0
+
+  # Redis（占位；application-prod-secret.yml 可覆盖 host/password 等）
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 2
+      password: ""
+      timeout: 100s
+      ssl:
+        enabled: false
+
+# ---------------------------------------------------------------------------
+# Redisson
+# ---------------------------------------------------------------------------
+--- # Redisson
+redisson:
+  keyPrefix:
+  threads: 4
+  nettyThreads: 8
+  singleServerConfig:
+    clientName: mmsAdmin
+    connectionMinimumIdleSize: 8
+    connectionPoolSize: 32
+    idleConnectionTimeout: 10000
+    timeout: 3000
+    subscriptionConnectionPoolSize: 50
+
+# ---------------------------------------------------------------------------
+# WebSocket
+# ---------------------------------------------------------------------------
+--- # WebSocket
+websocket:
+  allowed-origins: "*"
+
+# ---------------------------------------------------------------------------
+# MMS CORS
+# ---------------------------------------------------------------------------
+--- # MMS CORS
+mms:
+  cors:
+    allowed-origins: "*"
+    allowed-headers: "*"
+    allowed-methods: "*"
+    allow-credentials: true
+    max-age: 1800
+
+# ---------------------------------------------------------------------------
+# Swagger / springdoc（生产关闭对外文档）
+# ---------------------------------------------------------------------------
 --- # Swagger 开关
 swagger:
   enabled: false
 
---- # Spring Boot Admin
-spring:
-  boot:
-    admin:
-      client:
-        url: http://localhost:9001    # Spring Boot Admin 监控服务器端地址
+--- # springdoc（与 swagger.enabled: false 对齐）
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
---- # 日志配置
+# ---------------------------------------------------------------------------
+# 日志
+# ---------------------------------------------------------------------------
+--- # 日志
 logging:
   level:
-    com.sxpcwlkj: @logging.level@
+    com.sxpcwlkj: warn
     org.springframework: warn
   config: classpath:logback.xml
 
---- # MyBatisPlus 生产日志
+# ---------------------------------------------------------------------------
+# MyBatis-Plus（生产关闭 SQL 标准输出）
+# ---------------------------------------------------------------------------
+--- # MyBatis-Plus（生产）
 mybatis-plus:
   configuration:
     logImpl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
+# ---------------------------------------------------------------------------
+# 外置机密（最后加载，覆盖上文同名项）
+# ---------------------------------------------------------------------------
+--- # 外置机密（spring.config.import）
+# 文件路径：运行目录 ./config/application-prod-secret.yml（optional：不存在则跳过）
+# 模板参考：script/config/application-prod-secret.example.yml → 复制为 application-prod-secret.yml
+# 典型内容：数据源、Redis、Spring Boot Admin 密码等
+spring:
+  config:
+    import: optional:file:./config/application-prod-secret.yml

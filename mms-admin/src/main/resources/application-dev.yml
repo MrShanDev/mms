@@ -1,4 +1,20 @@
---- # powerjob 配置
+# =============================================================================
+# mms-admin · dev 环境（叠加 application.yml；同名键覆盖主配置）
+# 分段：demo → powerjob → Spring Boot Admin → management → 数据源/Redis →
+#       redisson → logging → spring.config.import（外置机密，最后加载）
+# =============================================================================
+
+# 演示模式（与 script/config 约定一致）
+demo:
+  mode:
+    enabled: false
+
+# spring.config.import（application-dev-secret.yml）在文件末尾加载，可覆盖上文数据源等默认值
+
+# ---------------------------------------------------------------------------
+# PowerJob Worker
+# ---------------------------------------------------------------------------
+--- # PowerJob Worker
 powerjob:
   worker:
     # 如何开启调度中心请查看文档教程
@@ -7,58 +23,78 @@ powerjob:
     app-name: mms
     max-appended-wf-context-length: 4096
     max-result-length: 4096
-    # 28080 端口 随着主应用端口飘逸 避免集群冲突
+    # 端口 = 字符 2 + 主应用 server.port（如 8080 → 28080），避免集群与主端口冲突
     port: 2${server.port}
     protocol: http
     server-address: 127.0.0.1:7700
     store-strategy: disk
 
---- # Spring Boot Admin
+# ---------------------------------------------------------------------------
+# Spring Boot Admin（Client）
+# ---------------------------------------------------------------------------
+--- # Spring Boot Admin（Client）
 spring:
   boot:
     admin:
       client:
-        enabled: false                 #启用/禁用
+        enabled: false                    # 启用 / 禁用 Client
         instance:
           service-host-type: IP
-        # Spring Boot Admin
-        url: http://localhost:9001    #监控服务器端地址
-        username: admin               #账号
-        password: 123456              #密码
+        # client.password 可放在 application-dev-secret.yml（由文末 import 加载）
+        url: http://localhost:9001        # 监控服务端地址
+        username: admin                   # 账号
+        password: 123456                  # 密码（示例；生产勿提交真实密码）
 
---- #配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
---- # 数据源配置
+# ---------------------------------------------------------------------------
+# Actuator
+# ---------------------------------------------------------------------------
+--- # Actuator
+management:
+  endpoints:
+    enabled-by-default: true              # 暴露端点元数据
+    web:
+      exposure:
+        include: '*'                      # 以 Web 方式暴露的端点集合
+  endpoint:
+    health:
+      show-details: ALWAYS
+    logfile:
+      external-file: ./logs/sys-console.log
+
+# ---------------------------------------------------------------------------
+# 动态数据源（dynamic-datasource）
+# 参考：https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
+# ---------------------------------------------------------------------------
+--- # 动态数据源（dynamic-datasource）
 spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     dynamic:
-      # 性能分析插件(有性能损耗 不建议生产环境使用)
+      # 性能分析插件（有损耗，不建议生产长期开启）
       p6spy: true
-      # 设置默认的数据源或者数据源组,默认值即为 master
+      # 默认数据源或数据源组名
       primary: master
-      # 严格模式 匹配不到数据源则报错
+      # 严格模式：匹配不到数据源则报错
       strict: true
-      public-key: MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJpocwyy7m8F8tAUeMgn6GOU404nYeL+yRnKG3JL7IZghb4N9ew9v5O6hJ+gZFlXnGiMjlo5dx5/tpArvtbRwGkCAwEAAQ==
-      # 账号密码
+      # 公钥、master.url / username / password 等敏感项可迁至 application-dev-secret.yml
+      public-key: "公钥==密钥"
       datasource:
-        # 主库数据源
         master:
-          type: ${spring.datasource.type}
+          type: com.zaxxer.hikari.HikariDataSource
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
-          username: root
-          # 由GeneratePassword.java 生成， public-key 和 password 要匹配
-          password: ENC(bOk3dciU9b7DePoU9figF1HAFz+BcAtoW9IvCDqQm8S8HwwwX/4LRhBWX9rAfCEA9iehbZvqfZEC1F1BCa9pgA==)
-#          # 从库数据源
+          username: ENC(用户名)
+          password: ENC(密钥)
+#          # 从库示例（按需取消注释）
 #        slave:
 #          lazy: true
-#          type: ${spring.datasource.type}
+#          type: com.zaxxer.hikari.HikariDataSource
 #          driverClassName: com.mysql.cj.jdbc.Driver
 #          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
 #          username: root
 #          password: 123456
 #        oracle:
-#          type: ${spring.datasource.type}
+#          type: com.zaxxer.hikari.HikariDataSource
 #          driverClassName: oracle.jdbc.OracleDriver
 #          url: jdbc:oracle:thin:@//localhost:1521/XE
 #          username: ROOT
@@ -66,112 +102,84 @@ spring:
 #          hikari:
 #            connectionTestQuery: SELECT 1 FROM DUAL
 #        postgres:
-#          type: ${spring.datasource.type}
+#          type: com.zaxxer.hikari.HikariDataSource
 #          driverClassName: org.postgresql.Driver
 #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
 #          username: root
 #          password: root
 #        sqlserver:
-#          type: ${spring.datasource.type}
+#          type: com.zaxxer.hikari.HikariDataSource
 #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
 #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
 #          username: SA
 #          password: root
       hikari:
         # 最大连接池数量
-        maxPoolSize: ${DB_MAX_POOL_SIZE:20}
-        # 最小空闲线程数量
-        minIdle: ${DB_MIN_IDLE:10}
-        # 配置获取连接等待超时的时间
-        connectionTimeout: ${DB_CONNECTION_TIMEOUT:30000}
-        # 校验超时时间
+        maxPoolSize: 20
+        # 最小空闲连接数
+        minIdle: 10
+        # 获取连接等待超时（毫秒）
+        connectionTimeout: 30000
+        # 校验超时（毫秒）
         validationTimeout: 5000
-        # 空闲连接存活最大时间，默认10分钟
+        # 空闲连接最大存活（毫秒，默认约 10 分钟）
         idleTimeout: 600000
-        # 此属性控制池中连接的最长生命周期，值0表示无限生命周期，默认30分钟
+        # 连接最长生命周期（毫秒，0 表示不限制；默认约 30 分钟）
         maxLifetime: 1800000
-        # 连接测试query（配置检测连接是否有效）
+        # 连接探活 SQL
         connectionTestQuery: SELECT 1
-        # 多久检查一次连接的活性
+        # 探活间隔（毫秒）
         keepaliveTime: 30000
-        # 连接泄漏检测（毫秒，0 表示关闭）
-        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
+        # 连接泄漏检测（毫秒，0 关闭）
+        leakDetectionThreshold: 0
 
---- # Redis配置
-spring:
+  # Redis（单机示例；与 secret 外置文件可二选一或叠加覆盖）
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       database: 0
-      password: 123456
+      password: "123456"
       timeout: 100s
       ssl:
         enabled: false
 
---- # Redis 扩展工具
+# ---------------------------------------------------------------------------
+# Redisson
+# ---------------------------------------------------------------------------
+--- # Redisson
 redisson:
-  # redis key前缀
+  # Redis key 前缀（空则不加前缀）
   keyPrefix:
-  # 线程池数量
   threads: 4
-  # Netty线程池数量
   nettyThreads: 8
-  # 单节点配置
   singleServerConfig:
-    # 客户端名称
-    clientName: ${sxpcwlkj.name}
-    # 最小空闲连接数
+    clientName: mmsAdmin
     connectionMinimumIdleSize: 8
-    # 连接池大小
     connectionPoolSize: 32
-    # 连接空闲超时，单位：毫秒
     idleConnectionTimeout: 10000
-    # 命令等待超时，单位：毫秒
     timeout: 3000
-    # 发布和订阅连接池大小
     subscriptionConnectionPoolSize: 50
 
---- # CORS 配置
-mms:
-  cors:
-    allowed-origins: "*"
-    allowed-headers: "*"
-    allowed-methods: "*"
-    allow-credentials: true
-    max-age: 1800
-
---- # Actuator 监控端点的配置项
-management:
-  endpoints:
-    enabled-by-default: true #暴露所有端点信息
-    web:
-      exposure:
-        include: '*' #以web方式暴露
-  endpoint:
-    health:
-      show-details: ALWAYS
-    logfile:
-      external-file: ./logs/sys-console.log
-
---- # Spring Boot Admin
-spring:
-  boot:
-    admin:
-      client:
-        url: http://localhost:9001    # Spring Boot Admin 监控服务器端地址
-
---- # 日志配置
+# ---------------------------------------------------------------------------
+# 日志
+# ---------------------------------------------------------------------------
+--- # 日志
 logging:
   level:
-    com.sxpcwlkj: @logging.level@
+    # 业务包：开发常用 info；联调 SQL / 框架细节时可改为 debug（日志量显著增加）
+    com.sxpcwlkj: info
     org.springframework: warn
+  # 使用 classpath 内 logback.xml（与仓库 resources 中文件一致）
   config: classpath:logback.xml
 
-
-# 企业微信机器人配置
-wechat:
-  bot:
-    enabled: true  # 是否启用微信机器人
-    webhook-url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_WEBHOOK_KEY"
-    msg-type: "markdown"  # 消息类型：text 或 markdown
+# ---------------------------------------------------------------------------
+# 外置机密（最后加载，覆盖上文同名项）
+# ---------------------------------------------------------------------------
+--- # 外置机密（spring.config.import）
+# 文件路径：运行目录 ./config/application-dev-secret.yml（optional：不存在则跳过）
+# 模板参考：script/config/application-dev-secret.example.yml → 复制为 application-dev-secret.yml
+# 典型内容：数据源公钥与连接、Spring Boot Admin client.password、其它不得入库的键
+spring:
+  config:
+    import: optional:file:./config/application-dev-secret.yml

@@ -1,3 +1,8 @@
+# 演示模式配置（与 script/config 约定一致，覆盖主配置 application.yml）
+demo:
+  mode:
+    enabled: true
+
 --- # powerjob 配置
 powerjob:
   worker:
@@ -8,7 +13,7 @@ powerjob:
     max-appended-wf-context-length: 4096
     max-result-length: 4096
     # 28080 端口 随着主应用端口飘逸 避免集群冲突
-    port: 2${server.port}
+    port: 28080
     protocol: http
     server-address: 127.0.0.1:7700
     store-strategy: disk
@@ -21,10 +26,9 @@ spring:
         enabled: false                 #启用/禁用
         instance:
           service-host-type: IP
-        # Spring Boot Admin
         url: http://localhost:9001    #监控服务器端地址
         username: admin               #账号
-        password: 123456              #密码
+        password: 123456              #密码（本地 profile 不外置 import，直接写在此处）
 
 --- #配置项目的数据源 https://www.kancloud.cn/tracy5546/dynamic-datasource/2344619
 --- # 数据源配置
@@ -38,25 +42,24 @@ spring:
       primary: master
       # 严格模式 匹配不到数据源则报错
       strict: true
-      # 账号密码
+      # 本地：明文连接，不使用 ENC（勿提交真实生产密码）
       datasource:
-        # 主库数据源
         master:
-          type: ${spring.datasource.type}
+          type: com.zaxxer.hikari.HikariDataSource
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
           username: root
           password: 123456
-        # 从库数据源
+#          # 从库数据源
 #        slave:
 #          lazy: true
-#          type: ${spring.datasource.type}
+#          type: com.zaxxer.hikari.HikariDataSource
 #          driverClassName: com.mysql.cj.jdbc.Driver
 #          url: jdbc:mysql://localhost:3306/mms?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true
 #          username: root
 #          password: 123456
       #        oracle:
-      #          type: ${spring.datasource.type}
+      #          type: com.zaxxer.hikari.HikariDataSource
       #          driverClassName: oracle.jdbc.OracleDriver
       #          url: jdbc:oracle:thin:@//localhost:1521/XE
       #          username: ROOT
@@ -64,24 +67,24 @@ spring:
       #          hikari:
       #            connectionTestQuery: SELECT 1 FROM DUAL
       #        postgres:
-      #          type: ${spring.datasource.type}
+      #          type: com.zaxxer.hikari.HikariDataSource
       #          driverClassName: org.postgresql.Driver
       #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
       #          username: root
       #          password: root
       #        sqlserver:
-      #          type: ${spring.datasource.type}
+      #          type: com.zaxxer.hikari.HikariDataSource
       #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
       #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
       #          username: SA
       #          password: root
       hikari:
         # 最大连接池数量
-        maxPoolSize: ${DB_MAX_POOL_SIZE:20}
+        maxPoolSize: 20
         # 最小空闲线程数量
-        minIdle: ${DB_MIN_IDLE:10}
+        minIdle: 10
         # 配置获取连接等待超时的时间
-        connectionTimeout: ${DB_CONNECTION_TIMEOUT:30000}
+        connectionTimeout: 30000
         # 校验超时时间
         validationTimeout: 5000
         # 空闲连接存活最大时间，默认10分钟
@@ -93,16 +96,16 @@ spring:
         # 多久检查一次连接的活性
         keepaliveTime: 30000
         # 连接泄漏检测（毫秒，0 表示关闭）
-        leakDetectionThreshold: ${DB_LEAK_DETECTION_THRESHOLD:0}
+        leakDetectionThreshold: 0
 
---- # Redis配置
+--- # Redis配置（本地写在本文件；与 script/config/application-dev-secret.yml 可对照）
 spring:
   data:
     redis:
       host: 127.0.0.1
       port: 6379
       database: 0
-      password: 123456
+      password: "123456"
       timeout: 100s
       ssl:
         enabled: false
@@ -118,7 +121,7 @@ redisson:
   # 单节点配置
   singleServerConfig:
     # 客户端名称
-    clientName: ${sxpcwlkj.name}
+    clientName: mmsAdmin
     # 最小空闲连接数
     connectionMinimumIdleSize: 8
     # 连接池大小
@@ -152,11 +155,24 @@ management:
     logfile:
       external-file: ./logs/sys-console.log
 
+--- # Spring Boot Admin
+spring:
+  boot:
+    admin:
+      client:
+        url: http://localhost:9001    # Spring Boot Admin 监控服务器端地址
+
 --- # 日志配置
 logging:
   level:
-    com.sxpcwlkj: @logging.level@
+    com.sxpcwlkj: info
     org.springframework: warn
   config: classpath:logback.xml
 
 
+# 企业微信机器人配置
+wechat:
+  bot:
+    enabled: true  # 是否启用微信机器人
+    webhook-url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_WEBHOOK_KEY"
+    msg-type: "markdown"  # 消息类型：text 或 markdown
