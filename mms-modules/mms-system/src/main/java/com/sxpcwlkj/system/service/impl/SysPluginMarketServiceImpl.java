@@ -158,6 +158,8 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             throw new IllegalArgumentException("pluginId 不能为空");
         }
         String pid = pluginId.trim();
+        // 先卸载内存中的 ClassLoader / 子进程 / 路由，再删磁盘，避免运行中删除 JAR 失败（尤其 Windows）
+        pluginLifecycleManager.unloadAllVersionsOfPlugin(pid);
         pluginLifecycleManager.uninstallFromDisk(pid, null);
         pluginHostDbBridge.onUninstallDiskFinished(pid, null);
         removeCatalogEntry(pid);

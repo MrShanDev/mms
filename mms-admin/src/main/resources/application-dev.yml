@@ -177,9 +177,14 @@ logging:
 # 外置机密（最后加载，覆盖上文同名项）
 # ---------------------------------------------------------------------------
 --- # 外置机密（spring.config.import）
-# 文件路径：运行目录 ./config/application-dev-secret.yml（optional：不存在则跳过）
-# 模板参考：script/config/application-dev-secret.example.yml → 复制为 application-dev-secret.yml
-# 典型内容：数据源公钥与连接、Spring Boot Admin client.password、其它不得入库的键
+# 路径均相对「进程工作目录」；optional：不存在则跳过。按顺序加载，后者覆盖前者同名键。
+# - 聚合仓根启动：./mms/mms-admin/config/application-dev-secret.yml
+# - mms 子目录启动：./mms-admin/config/application-dev-secret.yml
+# - 与 jar 同级惯例：./config/application-dev-secret.yml（放最后，便于本地覆盖）
+# 模板：script/config/application-dev-secret.example.yml
 spring:
   config:
-    import: optional:file:./config/application-dev-secret.yml
+    import:
+      - optional:file:./mms/mms-admin/config/application-dev-secret.yml
+      - optional:file:./mms-admin/config/application-dev-secret.yml
+      - optional:file:./config/application-dev-secret.yml

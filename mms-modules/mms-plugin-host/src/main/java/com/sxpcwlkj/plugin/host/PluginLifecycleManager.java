@@ -263,7 +263,12 @@ public class PluginLifecycleManager {
         loadOrphanDiskPlugins(root, managed, springVer);
     }
 
-    /** 磁盘上「库中无任何版本行」的插件目录：仍按全版本扫描，兼容旧数据。 */
+    /**
+     * 磁盘上「按目录名不在库表 plugin_id 集合」的版本：仍按磁盘批处理，兼容旧数据。
+     * <p>
+     * 若目录名与 plugin.json 的 id 不一致（例如历史上传临时目录名），仅按目录名比对会把「库表已登记的插件」误判为孤儿，
+     * 在停用后仍走本批加载。此处探测 descriptor：逻辑 id 已在库表登记则跳过，仅真正未登记 id 的目录才参与孤儿加载。
+     */
     private void loadOrphanDiskPlugins(Path root, Set<String> managedPluginIds, String springVer) {
         List<PluginDependencySort.PluginLoadSlot> batch = new ArrayList<>();
         try (Stream<Path> idDirs = Files.list(root)) {
@@ -272,13 +277,39 @@ public class PluginLifecycleManager {
                 if (managedPluginIds.contains(folderId)) {
                     return;
                 }
-                log.info("插件目录未纳入库表，参与磁盘批处理加载: {}", folderId);
+                List<PluginDependencySort.PluginLoadSlot> fromFolder = new ArrayList<>();
                 try (Stream<Path> versionDirs = Files.list(idDir)) {
-                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> batch.add(
-                            new PluginDependencySort.PluginLoadSlot(
-                                    folderId, verDir.getFileName().toString(), verDir)));
+                    versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
+                        try {
+                            var probeOpt = PluginDescriptorProbe.tryRead(verDir);
+                            if (probeOpt.isPresent()) {
+                                String logicalId = probeOpt.get().descriptor().getId();
+                                if (logicalId != null
+                                        && managedPluginIds.contains(logicalId.trim())) {
+                                    log.debug(
+                                            "跳过孤儿磁盘加载（库表已登记该 plugin_id）: folder={} logicalId={} version={}",
+                                            folderId,
+                                            logicalId.trim(),
+                                            verDir.getFileName());
+                                    return;
+                                }
+                            }
+                        } catch (Exception e) {
+                            log.debug(
+                                    "孤儿目录探测 plugin.json 失败，仍参与磁盘加载: {} {}",
+                                    verDir,
+                                    e.getMessage());
+                        }
+                        fromFolder.add(
+                                new PluginDependencySort.PluginLoadSlot(
+                                        folderId, verDir.getFileName().toString(), verDir));
+                    });
                 } catch (IOException e) {
                     log.warn("列举版本目录失败: {}", idDir, e);
+                }
+                if (!fromFolder.isEmpty()) {
+                    log.info("插件目录未纳入库表（按目录名），参与磁盘批处理加载: {}", folderId);
+                    batch.addAll(fromFolder);
                 }
             });
         } catch (IOException e) {
@@ -370,6 +401,55 @@ public class PluginLifecycleManager {
         }
     }
 
+    /**
+     * 库表存在该 plugin_id 的任一条版本行时，仅当 descriptor 与「当前激活坐标」一致才允许加载；
+     * 无库表桥接或库表无任何版本行时，保持纯磁盘全量扫描兼容。
+     */
+    private boolean isAllowedToLoadByDatabase(PluginDescriptor desc) {
+        PluginHostDbBridge bridge = dbBridgeProvider.getIfAvailable();
+        if (bridge == null) {
+            return true;
+        }
+        Set<String> managed = bridge.pluginIdsManagedInDatabase();
+        if (managed == null || managed.isEmpty()) {
+            return true;
+        }
+        String pid = desc.getId();
+        if (pid == null || pid.isBlank()) {
+            return false;
+        }
+        String pidTrim = pid.trim();
+        boolean inManaged = false;
+        for (String m : managed) {
+            if (m != null && pidTrim.equalsIgnoreCase(m.trim())) {
+                inManaged = true;
+                break;
+            }
+        }
+        if (!inManaged) {
+            return true;
+        }
+        List<PluginVersionCoordinate> active = bridge.activeVersionsForStartup();
+        if (active == null || active.isEmpty()) {
+            return false;
+        }
+        String ver = desc.getVersion();
+        if (ver == null || ver.isBlank()) {
+            return false;
+        }
+        String verTrim = ver.trim();
+        for (PluginVersionCoordinate c : active) {
+            if (c.pluginId() == null || c.version() == null) {
+                continue;
+            }
+            if (pidTrim.equalsIgnoreCase(c.pluginId().trim())
+                    && verTrim.equalsIgnoreCase(c.version().trim())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void tryLoadOne(String dirPluginId, String dirVersion, Path versionDir, String springVer) throws Exception {
         Path libDir = versionDir.resolve("lib");
         if (!Files.isDirectory(libDir)) {
@@ -401,6 +481,15 @@ public class PluginLifecycleManager {
             hostServices = NoopHostServices.INSTANCE;
         }
         PluginDescriptorValidator.validateHostServicesContractOrThrow(desc, hostServices.hostImplementedContractVersion());
+        if (!isAllowedToLoadByDatabase(desc)) {
+            log.info(
+                    "跳过加载（库表未激活该坐标）: {}@{}，磁盘目录={}@{}",
+                    desc.getId(),
+                    desc.getVersion(),
+                    dirPluginId,
+                    dirVersion);
+            return;
+        }
         String key = desc.getId() + "@" + desc.getVersion();
         int subprocessEffectivePort = 0;
         boolean subprocessPortLeased = false;
