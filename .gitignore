@@ -67,6 +67,8 @@ node_modules/
 # ----- mms-admin 外置机密（spring.config.import；真值勿入库，模板见 script/config/*.example.yml）-----
 mms-admin/config/application-prod-secret.yml
 mms-admin/config/application-dev-secret.yml
+# GeneratePassword 生成的 RSA 密钥对（与 script/config 同名约定）
+mms-admin/config/dynamic-datasource-rsa.keys
 
 npm-debug.log*
 yarn-debug.log*
