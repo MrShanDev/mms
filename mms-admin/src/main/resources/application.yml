@@ -248,6 +248,8 @@ mms:
     # 固定放在用户主目录下，避免随 IDE 工作目录变化（与 user.dir 无关）
     root-dir: ${user.home}/mms/plugins
     host-mms-revision: ${revision}
+    # HOST_MVC：0=在 Tomcat 请求线程同步执行（推荐，与 Sa-Token、HttpServletRequest 一致）；>0 为每插件独立池（跨线程易致 token 校验异常）
+    plugin-mvc-per-plugin-pool-size: 0
 
 --- # websocket
 websocket:

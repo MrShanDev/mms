@@ -124,8 +124,11 @@ public class PluginHostProperties {
 
     /**
      * HOST_MVC 每 pluginId 隔离线程池大小；≤0 则在请求线程同步执行。
+     * <p>默认 0：在独立线程池执行时，{@link jakarta.servlet.http.HttpServletRequest} 与 Sa-Token/Spring
+     * {@link org.springframework.web.context.request.RequestContextHolder} 的语义与 Tomcat 请求线程绑定，
+     * 跨线程易导致 token 校验异常或请求访问不安全；除非插件控制器完全不依赖请求线程，否则请保持 0。</p>
      */
-    private int pluginMvcPerPluginPoolSize = 4;
+    private int pluginMvcPerPluginPoolSize = 0;
 
     /**
      * 上述线程池队列长度。
