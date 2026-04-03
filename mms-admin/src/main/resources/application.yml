@@ -336,14 +336,3 @@ dromara:
     default-platform: ""
     aliyun-oss: []
 
-# ---------------------------------------------------------------------------
-# 企业微信机器人（群通知、告警等）
-# ---------------------------------------------------------------------------
---- # 企业微信机器人
-wechat:
-  bot:
-    enabled: true
-    # 在企业微信后台创建机器人后替换 key；勿将真实 key 提交到公开仓库
-    webhook-url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=YOUR_WEBHOOK_KEY"
-    # text 或 markdown
-    msg-type: "markdown"

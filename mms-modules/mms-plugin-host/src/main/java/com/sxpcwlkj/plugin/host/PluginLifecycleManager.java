@@ -51,6 +51,7 @@ import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
@@ -65,6 +66,7 @@ public class PluginLifecycleManager {
     private final ObjectProvider<PluginMvcRegistrar> pluginMvcRegistrarProvider;
     private final ObjectProvider<PluginSpringBeanAttachment> pluginSpringBeanAttachmentProvider;
     private final ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistryProvider;
+    private final ObjectProvider<PluginLifecycleEventListener> pluginLifecycleEventListeners;
     @Getter
     private final Map<String, LoadedPluginInstance> loadedPlugins = new ConcurrentHashMap<>();
 
@@ -77,13 +79,38 @@ public class PluginLifecycleManager {
             ObjectProvider<HostServices> hostServicesProvider,
             ObjectProvider<PluginMvcRegistrar> pluginMvcRegistrarProvider,
             ObjectProvider<PluginSpringBeanAttachment> pluginSpringBeanAttachmentProvider,
-            ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistryProvider) {
+            ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistryProvider,
+            ObjectProvider<PluginLifecycleEventListener> pluginLifecycleEventListeners) {
         this.properties = properties;
         this.dbBridgeProvider = dbBridgeProvider;
         this.hostServicesProvider = hostServicesProvider;
         this.pluginMvcRegistrarProvider = pluginMvcRegistrarProvider;
         this.pluginSpringBeanAttachmentProvider = pluginSpringBeanAttachmentProvider;
         this.pluginMvcExecutorRegistryProvider = pluginMvcExecutorRegistryProvider;
+        this.pluginLifecycleEventListeners = pluginLifecycleEventListeners;
+    }
+
+    /**
+     * 供宿主外（如 mms-system 市场删除）发布插件生命周期事件。
+     */
+    public void publishPluginLifecycleEvent(PluginLifecycleEvent event) {
+        dispatchPluginLifecycleEvent(event);
+    }
+
+    private void dispatchPluginLifecycleEvent(PluginLifecycleEvent event) {
+        if (!properties.isEnabled()) {
+            return;
+        }
+        pluginLifecycleEventListeners.orderedStream()
+                .forEach(
+                        l -> CompletableFuture.runAsync(
+                                () -> {
+                                    try {
+                                        l.onPluginLifecycleEvent(event);
+                                    } catch (Throwable t) {
+                                        log.debug("PluginLifecycleEventListener 失败: {}", t.getMessage());
+                                    }
+                                }));
     }
 
     public List<PluginEntrySummary> listSummaries() {
@@ -206,7 +233,14 @@ public class PluginLifecycleManager {
         try {
             tryLoadOne(dirId, dirVer, verDir, springVer);
         } catch (Exception e) {
-            log.warn("reloadSingleActivated 加载失败 {}@{}: {}", pluginId, version, e.getMessage());
+            log.warn("reloadSingleActivated 加载失败 {}@{}: {}", pluginId, version, e.getMessage(), e);
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(
+                            PluginLifecycleEventType.PLUGIN_RELOAD_TARGET_FAILED,
+                            pluginId.trim(),
+                            version.trim(),
+                            e.getMessage(),
+                            e));
         }
     }
 
@@ -220,10 +254,27 @@ public class PluginLifecycleManager {
         String pid = lp.getDescriptor().getId();
         pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(pid));
         pluginMvcExecutorRegistryProvider.ifAvailable(reg -> reg.shutdownForPlugin(pid));
+        String ver = lp.getDescriptor().getVersion();
         try {
             lp.close();
+            Runnable popOk = PluginMdc.pushPluginContext(pid, ver);
+            try {
+                log.info("插件已卸载: {}", key);
+            } finally {
+                popOk.run();
+            }
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_UNLOADED, lp.getDescriptor(), "unloadOneKey", null));
         } catch (Exception e) {
-            log.warn("卸载插件失败: {}", key, e);
+            Runnable popErr = PluginMdc.pushPluginContext(pid, ver);
+            try {
+                log.error("卸载插件失败: {}", key, e);
+            } finally {
+                popErr.run();
+            }
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(
+                            PluginLifecycleEventType.PLUGIN_UNLOAD_FAILED, lp.getDescriptor(), e.getMessage(), e));
         }
     }
 
@@ -558,12 +609,25 @@ public class PluginLifecycleManager {
                 for (MmsPlugin p : entries) {
                     p.onLoad(ctx);
                 }
+                log.info(
+                        "插件 onLoad 成功: {} (MmsPlugin 入口 {} 个, PluginHealthContributor {} 个)",
+                        key,
+                        entries.size(),
+                        healthEntries.size());
+                if (healthEntries.isEmpty()) {
+                    log.warn("插件未注册 PluginHealthContributor SPI，建议补充健康探针: {}", key);
+                }
+            } catch (Exception ex) {
+                log.error("插件 onLoad 失败: {}", key, ex);
+                throw ex;
             } finally {
                 Thread.currentThread().setContextClassLoader(oldTccl);
                 popMdc.run();
             }
             unloadHooks = ctx.takeUnloadHooksSnapshot();
         } catch (Exception e) {
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_LOAD_FAILED, desc, e.getMessage(), e));
             if (springAttach != null) {
                 springAttach.releaseSession(loadSessionId);
             }
@@ -577,47 +641,79 @@ public class PluginLifecycleManager {
             }
             throw e;
         }
-        if (desc.runtimeModeOrDefault() == PluginRuntimeMode.HOST_MVC) {
-            pluginMvcRegistrarProvider.ifAvailable(
-                    r -> {
-                        try {
-                            r.registerMvc(desc, ucl);
-                        } catch (Exception ex) {
-                            log.warn("插件 HOST_MVC 路由注册失败 {}: {}", key, ex.getMessage());
-                        }
-                    });
-        } else {
-            pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(desc.getId()));
-        }
-        Runnable releasePluginSpringBeans =
-                () -> {
-                    if (springAttach != null) {
-                        springAttach.releaseSession(loadSessionId);
-                    }
-                };
-        LoadedPluginInstance loaded =
-                new LoadedPluginInstance(desc, ucl, entries, healthEntries, unloadHooks, releasePluginSpringBeans);
-        LoadedPluginInstance previousLoaded = loadedPlugins.put(key, loaded);
-        if (previousLoaded != null) {
-            String prevKey =
-                    previousLoaded.getDescriptor().getId() + "@" + previousLoaded.getDescriptor().getVersion();
-            portLeases.releaseForPluginKey(prevKey);
-            subprocessManager.stop(prevKey, properties);
-            try {
-                previousLoaded.close();
-            } catch (Exception e) {
-                log.warn("替换插件时关闭旧 ClassLoader 失败: {}", key, e);
+        try {
+            if (desc.runtimeModeOrDefault() == PluginRuntimeMode.HOST_MVC) {
+                pluginMvcRegistrarProvider.ifAvailable(
+                        r -> {
+                            try {
+                                r.registerMvc(desc, ucl);
+                            } catch (Exception ex) {
+                                throw new PluginException("HOST_MVC 路由注册失败: " + key, ex);
+                            }
+                        });
+            } else {
+                pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(desc.getId()));
             }
-            if (properties.getSubprocessRollingStopDelayMillis() > 0) {
+            Runnable releasePluginSpringBeans =
+                    () -> {
+                        if (springAttach != null) {
+                            springAttach.releaseSession(loadSessionId);
+                        }
+                    };
+            LoadedPluginInstance loaded =
+                    new LoadedPluginInstance(desc, ucl, entries, healthEntries, unloadHooks, releasePluginSpringBeans);
+            LoadedPluginInstance previousLoaded = loadedPlugins.put(key, loaded);
+            if (previousLoaded != null) {
+                String prevKey =
+                        previousLoaded.getDescriptor().getId() + "@" + previousLoaded.getDescriptor().getVersion();
+                portLeases.releaseForPluginKey(prevKey);
+                subprocessManager.stop(prevKey, properties);
                 try {
-                    Thread.sleep(properties.getSubprocessRollingStopDelayMillis());
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
+                    previousLoaded.close();
+                } catch (Exception e) {
+                    String prevId = previousLoaded.getDescriptor().getId();
+                    String prevVer = previousLoaded.getDescriptor().getVersion();
+                    Runnable popPrev = PluginMdc.pushPluginContext(prevId, prevVer);
+                    try {
+                        log.error("替换插件时关闭旧 ClassLoader 失败: {}", prevKey, e);
+                    } finally {
+                        popPrev.run();
+                    }
+                }
+                if (properties.getSubprocessRollingStopDelayMillis() > 0) {
+                    try {
+                        Thread.sleep(properties.getSubprocessRollingStopDelayMillis());
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
+            subprocessManager.startIfEnabled(properties, desc, versionDir.toAbsolutePath(), key, subprocessEffectivePort);
+            Runnable popReady = PluginMdc.pushPluginContext(desc.getId(), desc.getVersion());
+            try {
+                String subPort =
+                        subprocessEffectivePort > 0 ? String.valueOf(subprocessEffectivePort) : "—";
+                log.info(
+                        "插件就绪: {} runtimeMode={} 子进程监听端口={} descriptor={}",
+                        key,
+                        desc.runtimeModeOrDefault(),
+                        subPort,
+                        descJar.getFileName());
+            } finally {
+                popReady.run();
+            }
+            log.info("插件已加载: {} (descriptor from {})", key, descJar.getFileName());
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(
+                            PluginLifecycleEventType.PLUGIN_LOADED,
+                            desc,
+                            "descriptor=" + descJar.getFileName(),
+                            null));
+        } catch (Exception e) {
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_LOAD_FAILED, desc, e.getMessage(), e));
+            throw e;
         }
-        subprocessManager.startIfEnabled(properties, desc, versionDir.toAbsolutePath(), key, subprocessEffectivePort);
-        log.info("插件已加载: {} (descriptor from {})", key, descJar.getFileName());
     }
 
     private Optional<Object> invokePeerPluginOnPeer(String targetPluginId, String methodName, Object[] args) {
@@ -639,6 +735,7 @@ public class PluginLifecycleManager {
             String pid = lp.getDescriptor().getId();
             String ver = lp.getDescriptor().getVersion();
             if (lp.getHealthContributors().isEmpty()) {
+                log.debug("插件未注册 PluginHealthContributor SPI: {}@{}", pid, ver);
                 rows.add(new PluginHealthRow(pid, ver, null, "NO_HEALTH_SPI"));
                 continue;
             }
@@ -646,6 +743,7 @@ public class PluginLifecycleManager {
                 try {
                     rows.add(new PluginHealthRow(pid, ver, h.health(), "OK"));
                 } catch (Exception e) {
+                    log.warn("插件健康探针异常: {}@{} — {}", pid, ver, e.toString());
                     rows.add(new PluginHealthRow(pid, ver, e.getMessage(), "ERROR"));
                 }
             }
@@ -735,6 +833,17 @@ public class PluginLifecycleManager {
      * 从磁盘卸载：{@code version} 为空则删除该 {@code pluginId} 下所有版本目录。
      */
     public synchronized void uninstallFromDisk(String pluginId, String versionOrNull) throws IOException {
+        uninstallFromDisk(pluginId, versionOrNull, true);
+    }
+
+    /**
+     * 从磁盘卸载：{@code version} 为空则删除该 {@code pluginId} 下所有版本目录。
+     *
+     * @param publishDiskUninstalledEvent 为 false 时不发 {@link PluginLifecycleEventType#PLUGIN_DISK_UNINSTALLED}
+     *                                    （例如市场「删除」将另行发 {@link PluginLifecycleEventType#PLUGIN_PURGED}）。
+     */
+    public synchronized void uninstallFromDisk(String pluginId, String versionOrNull, boolean publishDiskUninstalledEvent)
+            throws IOException {
         if (pluginId == null || pluginId.isBlank()) {
             throw new PluginException("pluginId 不能为空");
         }
@@ -745,6 +854,15 @@ public class PluginLifecycleManager {
         }
         if (versionOrNull == null || versionOrNull.isBlank()) {
             deleteRecursive(base);
+            if (publishDiskUninstalledEvent) {
+                dispatchPluginLifecycleEvent(
+                        PluginLifecycleEvent.of(
+                                PluginLifecycleEventType.PLUGIN_DISK_UNINSTALLED,
+                                pluginId.trim(),
+                                null,
+                                "已从插件根目录删除该插件全部版本目录",
+                                null));
+            }
             return;
         }
         Path ver = base.resolve(PluginInstallationLayout.safeSegment(versionOrNull));
@@ -755,6 +873,15 @@ public class PluginLifecycleManager {
             }
         } catch (IOException ignored) {
             // ignore
+        }
+        if (publishDiskUninstalledEvent) {
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(
+                            PluginLifecycleEventType.PLUGIN_DISK_UNINSTALLED,
+                            pluginId.trim(),
+                            versionOrNull,
+                            "已从插件根目录删除对应安装目录",
+                            null));
         }
     }
 
@@ -816,12 +943,31 @@ public class PluginLifecycleManager {
         List<LoadedPluginInstance> snap = new ArrayList<>(loadedPlugins.values());
         for (LoadedPluginInstance lp : snap) {
             String k = lp.getDescriptor().getId() + "@" + lp.getDescriptor().getVersion();
+            String pid = lp.getDescriptor().getId();
+            String ver = lp.getDescriptor().getVersion();
             portLeases.releaseForPluginKey(k);
             pluginMvcRegistrarProvider.ifAvailable(r -> r.unregister(lp.getDescriptor().getId()));
             try {
                 lp.close();
+                Runnable popOk = PluginMdc.pushPluginContext(pid, ver);
+                try {
+                    log.info("插件已卸载: {}", k);
+                } finally {
+                    popOk.run();
+                }
+                dispatchPluginLifecycleEvent(
+                        PluginLifecycleEvent.of(
+                                PluginLifecycleEventType.PLUGIN_UNLOADED, lp.getDescriptor(), "reload/uninstallAll 批量卸载", null));
             } catch (Exception e) {
-                log.warn("卸载插件失败: {}", lp.getDescriptor().getId(), e);
+                Runnable popErr = PluginMdc.pushPluginContext(pid, ver);
+                try {
+                    log.error("卸载插件失败: {}", k, e);
+                } finally {
+                    popErr.run();
+                }
+                dispatchPluginLifecycleEvent(
+                        PluginLifecycleEvent.of(
+                                PluginLifecycleEventType.PLUGIN_UNLOAD_FAILED, lp.getDescriptor(), e.getMessage(), e));
             }
         }
         loadedPlugins.clear();

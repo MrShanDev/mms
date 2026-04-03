@@ -2,8 +2,10 @@ package com.sxpcwlkj.plugin.host.config;
 
 import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
+import com.sxpcwlkj.plugin.PluginSysConfigOperations;
 import com.sxpcwlkj.plugin.host.PluginHostDbBridge;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
+import com.sxpcwlkj.plugin.host.PluginLifecycleEventListener;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
 import com.sxpcwlkj.plugin.host.internal.DefaultHostServices;
 import com.sxpcwlkj.plugin.host.internal.PluginSpringBeanAttachment;
@@ -54,9 +56,15 @@ public class PluginHostAutoConfiguration {
             ObjectProvider<HostDataService> hostDataService,
             ObjectProvider<DataSource> dataSource,
             ObjectProvider<PlatformTransactionManager> transactionManager,
+            ObjectProvider<PluginSysConfigOperations> pluginSysConfigOperations,
             PluginHostProperties pluginHostProperties) {
         return new DefaultHostServices(
-                stringRedisTemplate, hostDataService, dataSource, transactionManager, pluginHostProperties);
+                stringRedisTemplate,
+                hostDataService,
+                dataSource,
+                transactionManager,
+                pluginSysConfigOperations,
+                pluginHostProperties);
     }
 
     @Bean
@@ -110,14 +118,16 @@ public class PluginHostAutoConfiguration {
             ObjectProvider<HostServices> hostServices,
             ObjectProvider<PluginMvcRegistrar> pluginMvcRegistrar,
             ObjectProvider<PluginSpringBeanAttachment> pluginSpringBeanAttachment,
-            ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistry) {
+            ObjectProvider<PluginMvcExecutorRegistry> pluginMvcExecutorRegistry,
+            ObjectProvider<PluginLifecycleEventListener> pluginLifecycleEventListeners) {
         return new PluginLifecycleManager(
                 properties,
                 dbBridge,
                 hostServices,
                 pluginMvcRegistrar,
                 pluginSpringBeanAttachment,
-                pluginMvcExecutorRegistry);
+                pluginMvcExecutorRegistry,
+                pluginLifecycleEventListeners);
     }
 
     @Bean

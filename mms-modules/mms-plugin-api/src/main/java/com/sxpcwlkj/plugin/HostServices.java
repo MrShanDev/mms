@@ -1,11 +1,14 @@
 package com.sxpcwlkj.plugin;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * 宿主向插件暴露的受控能力门面（无 Spring 类型，便于 {@code mms-plugin-api} 零 Spring 依赖）。
  * <p>契约版本：插件在 {@code plugin.json} 中声明 {@code hostServicesContractVersion}（最低要求），
  * 宿主通过 {@link #hostImplementedContractVersion()} 声明实现版本；仅当宿主实现版本不低于插件要求时才允许加载。</p>
+ * <p><b>版本 3</b>：增加 {@link #pluginSysConfigGet} / {@link #pluginSysConfigPut} / {@link #pluginSysConfigList}，
+ * 读写 {@code sys_config} 中键前缀为 {@link PluginSysConfigKeys#PREFIX} 的插件专属配置（持久化）。</p>
  */
 public interface HostServices {
 
@@ -49,4 +52,20 @@ public interface HostServices {
      * 当前 Web 会话是否具备指定权限码（与管理端 Sa-Token 权限列表一致）；未登录或校验失败返回 {@code false}。
      */
     boolean hasWebPermission(String permissionCode);
+
+    /**
+     * 读取当前租户下插件专属配置；键由 {@link PluginSysConfigKeys#fullKey(String, String)} 拼接。
+     * 无登录上下文时租户按 {@code 000000} 与 {@link HostDataService#tryCurrentTenantId()} 回退规则处理。
+     */
+    Optional<String> pluginSysConfigGet(PluginDescriptor plugin, String keySuffix);
+
+    /**
+     * 插入或更新插件专属配置；{@code configName} 可为展示名（如「企微 Webhook」）。
+     */
+    void pluginSysConfigPut(PluginDescriptor plugin, String keySuffix, String configName, String value);
+
+    /**
+     * 列出当前租户下该插件前缀下全部配置项。
+     */
+    List<PluginSysConfigRow> pluginSysConfigList(PluginDescriptor plugin);
 }

@@ -8,6 +8,9 @@ import com.sxpcwlkj.plugin.HostServices;
 import com.sxpcwlkj.plugin.PluginDataAccess;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.PluginSysConfigKeys;
+import com.sxpcwlkj.plugin.PluginSysConfigOperations;
+import com.sxpcwlkj.plugin.PluginSysConfigRow;
 import com.sxpcwlkj.plugin.data.EmptyHostDataService;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +21,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -31,14 +36,15 @@ import java.util.concurrent.TimeUnit;
 public final class DefaultHostServices implements HostServices {
 
     /**
-     * 与当前代码实现一致；破坏性变更时递增并在发行说明中说明（2：事务与 hasWebPermission）。
+     * 与当前代码实现一致；破坏性变更时递增并在发行说明中说明（2：事务与 hasWebPermission；3：pluginSysConfig*）。
      */
-    public static final int HOST_IMPLEMENTED_CONTRACT_VERSION = 2;
+    public static final int HOST_IMPLEMENTED_CONTRACT_VERSION = 3;
 
     private final ObjectProvider<StringRedisTemplate> stringRedisTemplate;
     private final ObjectProvider<HostDataService> hostDataService;
     private final ObjectProvider<DataSource> dataSource;
     private final ObjectProvider<PlatformTransactionManager> transactionManager;
+    private final ObjectProvider<PluginSysConfigOperations> pluginSysConfigOperations;
     private final PluginHostProperties pluginHostProperties;
 
     @Override
@@ -163,5 +169,48 @@ public final class DefaultHostServices implements HostServices {
         } catch (NotLoginException | NotPermissionException e) {
             return false;
         }
+    }
+
+    @Override
+    public Optional<String> pluginSysConfigGet(PluginDescriptor plugin, String keySuffix) {
+        requirePlugin(plugin);
+        PluginSysConfigOperations op = pluginSysConfigOperations.getIfAvailable();
+        if (op == null) {
+            return Optional.empty();
+        }
+        String full = PluginSysConfigKeys.fullKey(plugin.getId(), keySuffix);
+        return op.get(resolveTenantForPluginConfig(), full);
+    }
+
+    @Override
+    public void pluginSysConfigPut(PluginDescriptor plugin, String keySuffix, String configName, String value) {
+        requirePlugin(plugin);
+        PluginSysConfigOperations op = pluginSysConfigOperations.getIfAvailable();
+        if (op == null) {
+            throw new PluginException("宿主未装配 PluginSysConfigOperations，无法读写 sys_config");
+        }
+        String full = PluginSysConfigKeys.fullKey(plugin.getId(), keySuffix);
+        String name = configName != null && !configName.isBlank() ? configName.trim() : keySuffix.trim();
+        op.upsert(resolveTenantForPluginConfig(), name, full, value == null ? "" : value);
+    }
+
+    @Override
+    public List<PluginSysConfigRow> pluginSysConfigList(PluginDescriptor plugin) {
+        requirePlugin(plugin);
+        PluginSysConfigOperations op = pluginSysConfigOperations.getIfAvailable();
+        if (op == null) {
+            return Collections.emptyList();
+        }
+        return op.listForPlugin(resolveTenantForPluginConfig(), plugin.getId());
+    }
+
+    private static void requirePlugin(PluginDescriptor plugin) {
+        if (plugin == null || plugin.getId() == null || plugin.getId().isBlank()) {
+            throw new PluginException("pluginDescriptor.id 不能为空");
+        }
+    }
+
+    private String resolveTenantForPluginConfig() {
+        return hostData().tryCurrentTenantId().orElse("000000");
     }
 }

@@ -74,6 +74,15 @@ class PluginDescriptorValidatorTest {
         PluginDescriptorValidator.validateHostServicesContractOrThrow(d, 2);
     }
 
+    @Test
+    void hostServicesContractVersion3RequiresHost3() {
+        PluginDescriptor d = minimalDescriptor("com.acme.x", "1.0.0", 21, 21);
+        d.setHostServicesContractVersion(3);
+        assertThrows(PluginException.class, () ->
+                PluginDescriptorValidator.validateHostServicesContractOrThrow(d, 2));
+        PluginDescriptorValidator.validateHostServicesContractOrThrow(d, 3);
+    }
+
     private static PluginDescriptor minimalDescriptor(String id, String ver, int min, Integer max) {
         PluginDescriptor d = new PluginDescriptor();
         d.setId(id);

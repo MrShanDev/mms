@@ -5,8 +5,11 @@ import com.sxpcwlkj.plugin.HostServices;
 import com.sxpcwlkj.plugin.PluginDataAccess;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.PluginSysConfigRow;
 import com.sxpcwlkj.plugin.data.EmptyHostDataService;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -55,5 +58,20 @@ public enum NoopHostServices implements HostServices {
     @Override
     public boolean hasWebPermission(String permissionCode) {
         return false;
+    }
+
+    @Override
+    public Optional<String> pluginSysConfigGet(PluginDescriptor plugin, String keySuffix) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void pluginSysConfigPut(PluginDescriptor plugin, String keySuffix, String configName, String value) {
+        throw new PluginException("未装配宿主 HostServices：无法使用 pluginSysConfigPut");
+    }
+
+    @Override
+    public List<PluginSysConfigRow> pluginSysConfigList(PluginDescriptor plugin) {
+        return Collections.emptyList();
     }
 }
