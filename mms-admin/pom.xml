@@ -27,6 +27,11 @@
 
         <dependency>
             <groupId>com.sxpcwlkj</groupId>
+            <artifactId>mms-plugin-server</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sxpcwlkj</groupId>
             <artifactId>mms-plugin-host</artifactId>
         </dependency>
 

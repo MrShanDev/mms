@@ -1,4 +1,4 @@
-package com.sxpcwlkj.system.pluginhost;
+package com.sxpcwlkj.plugin.server;
 
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.plugin.HostDataService;

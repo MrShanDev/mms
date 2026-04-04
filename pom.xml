@@ -518,6 +518,11 @@
             </dependency>
             <dependency>
                 <groupId>com.sxpcwlkj</groupId>
+                <artifactId>mms-plugin-server</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sxpcwlkj</groupId>
                 <artifactId>mms-plugin-sample-health</artifactId>
                 <version>${revision}</version>
             </dependency>
