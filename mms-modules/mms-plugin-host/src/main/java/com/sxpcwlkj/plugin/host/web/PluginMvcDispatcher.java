@@ -1,5 +1,9 @@
 package com.sxpcwlkj.plugin.host.web;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotPermissionException;
+import com.sxpcwlkj.common.enums.ErrorCodeEnum;
+import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.plugin.host.internal.PluginMdc;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +133,12 @@ public class PluginMvcDispatcher {
             executionGuard.afterSuccessfulInvoke(pluginId);
             return ResponseEntity.ok(out);
         } catch (Exception e) {
+            Throwable root = unwrapDispatchException(e);
+            ResponseEntity<?> auth = mapSaAuthResponse(root);
+            if (auth != null) {
+                executionGuard.afterFailedInvoke(pluginId, e);
+                return auth;
+            }
             executionGuard.afterFailedInvoke(pluginId, e);
             log.warn("插件 MVC 调用失败 pluginId={} {} {}", pluginId, httpMethod, subPath, e);
             throw e;
@@ -153,5 +164,38 @@ public class PluginMvcDispatcher {
             }
         }
         return out;
+    }
+
+    /**
+     * 反射调用与线程池会把真实异常包在 {@link InvocationTargetException} / {@link ExecutionException} 中。
+     */
+    private static Throwable unwrapDispatchException(Throwable t) {
+        for (;;) {
+            if (t instanceof InvocationTargetException ite && ite.getCause() != null) {
+                t = ite.getCause();
+            } else if (t instanceof ExecutionException ee && ee.getCause() != null) {
+                t = ee.getCause();
+            } else {
+                break;
+            }
+        }
+        return t;
+    }
+
+    /**
+     * 未登录 401、无权限 403，与全局异常 {@link com.sxpcwlkj.framework.exception.GlobalException} 语义对齐。
+     */
+    private static ResponseEntity<?> mapSaAuthResponse(Throwable root) {
+        if (root instanceof NotLoginException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(R.fail(ErrorCodeEnum.USER_NOT_LOGIN.getKey(), "未登录"));
+        }
+        if (root instanceof NotPermissionException) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(R.fail(ErrorCodeEnum.FORBIDDEN.getKey(), "无权限"));
+        }
+        return null;
     }
 }

@@ -3,6 +3,7 @@ package com.sxpcwlkj.plugin.host.web;
 import com.sxpcwlkj.plugin.PluginController;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.host.internal.PluginMdc;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -43,8 +44,21 @@ public class PluginMvcRegistrar {
     }
 
     public void registerMvc(PluginDescriptor descriptor, URLClassLoader ucl) throws Exception {
+        Runnable popMdc = PluginMdc.pushPluginContext(descriptor.getId(), descriptor.getVersion());
+        try {
+            registerMvcInner(descriptor, ucl);
+        } catch (Exception ex) {
+            log.error("插件 HOST_MVC 路由注册失败: {}@{}", descriptor.getId(), descriptor.getVersion(), ex);
+            throw ex;
+        } finally {
+            popMdc.run();
+        }
+    }
+
+    private void registerMvcInner(PluginDescriptor descriptor, URLClassLoader ucl) throws Exception {
         String entry = descriptor.getEntryClass();
         if (entry == null || entry.isBlank()) {
+            log.info("插件 HOST_MVC 跳过扫描（未配置 entryClass）: {}@{}", descriptor.getId(), descriptor.getVersion());
             return;
         }
         Class<?> entryClass = Class.forName(entry.trim(), false, ucl);
@@ -76,7 +90,7 @@ public class PluginMvcRegistrar {
             }
         }
         registry.registerRoutes(descriptor.getId(), routes);
-        log.info("插件 HOST_MVC 路由已注册: {} 条 (pluginId={})", routes.size(), descriptor.getId());
+        log.info("插件 HOST_MVC 路由已注册: {} 条", routes.size());
     }
 
     private static void collectMethodRoutes(

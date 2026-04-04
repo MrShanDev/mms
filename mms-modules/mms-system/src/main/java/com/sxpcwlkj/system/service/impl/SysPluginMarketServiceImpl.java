@@ -6,6 +6,8 @@ import com.sxpcwlkj.plugin.host.PluginHealthRow;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
 import com.sxpcwlkj.plugin.PluginRuntimeMode;
 import com.sxpcwlkj.plugin.host.PluginJarLocationStatus;
+import com.sxpcwlkj.plugin.host.PluginLifecycleEvent;
+import com.sxpcwlkj.plugin.host.PluginLifecycleEventType;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
 import com.sxpcwlkj.plugin.host.PluginSubprocessSnapshot;
 import com.sxpcwlkj.plugin.host.PluginManifestView;
@@ -158,9 +160,18 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             throw new IllegalArgumentException("pluginId 不能为空");
         }
         String pid = pluginId.trim();
-        pluginLifecycleManager.uninstallFromDisk(pid, null);
+        // 先卸载内存中的 ClassLoader / 子进程 / 路由，再删磁盘，避免运行中删除 JAR 失败（尤其 Windows）
+        pluginLifecycleManager.unloadAllVersionsOfPlugin(pid);
+        pluginLifecycleManager.uninstallFromDisk(pid, null, false);
         pluginHostDbBridge.onUninstallDiskFinished(pid, null);
         removeCatalogEntry(pid);
+        pluginLifecycleManager.publishPluginLifecycleEvent(
+                PluginLifecycleEvent.of(
+                        PluginLifecycleEventType.PLUGIN_PURGED,
+                        pid,
+                        null,
+                        "市场「删除」：已卸载内存、删除磁盘安装目录并移除库表登记",
+                        null));
     }
 
     private static PluginMarketCardVo buildCard(

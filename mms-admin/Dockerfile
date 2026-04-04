@@ -12,12 +12,15 @@ RUN mkdir -p /sxpcwlkj/mms-admin/logs \
 
 WORKDIR /sxpcwlkj/mms-admin
 
-# 设置环境变量（插件目录可挂卷覆盖；需其它 profile 时运行加 -e SPRING_PROFILES_ACTIVE=xxx）
-# 文档站微信 payNotify 完整 URL，须为外网 HTTPS 且与网关 path 一致；生产请 -e MMS_DOC_PAY_NOTIFY_URL=实际地址
+# 构建：--build-arg SPRING_PROFILES_ACTIVE=dev --build-arg MMS_DOC_PAY_NOTIFY_URL=...
+# 运行：-e SPRING_PROFILES_ACTIVE=local（prod / dev / local 均可）
+# 插件目录与 docker-compose 卷、application.yml mms.plugin.root-dir 一致；可 -e MMS_PLUGIN_ROOT_DIR= 覆盖
+ARG SPRING_PROFILES_ACTIVE=prod
+ARG MMS_DOC_PAY_NOTIFY_URL=https://demo.mmsadmin.cn/prod-api/doc/v1/payNotify
 ENV SERVER_PORT=8080 LANG=C.UTF-8 LC_ALL=C.UTF-8 JAVA_OPTS="" \
     MMS_PLUGIN_ROOT_DIR=/sxpcwlkj/mms-admin/plugins \
-    SPRING_PROFILES_ACTIVE=prod \
-    MMS_DOC_PAY_NOTIFY_URL=https://demo.mmsadmin.cn/prod-api/doc/v1/payNotify
+    SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
+    MMS_DOC_PAY_NOTIFY_URL=${MMS_DOC_PAY_NOTIFY_URL}
 
 EXPOSE ${SERVER_PORT}
 
