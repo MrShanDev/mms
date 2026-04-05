@@ -132,7 +132,7 @@ CREATE TABLE `sys_plugin_version` (
 
 LOCK TABLES `sys_plugin_version` WRITE;
 /*!40000 ALTER TABLE `sys_plugin_version` DISABLE KEYS */;
-INSERT INTO `sys_plugin_version` VALUES ('2039008727211421698','com.sxpcwlkj.plugin.sample.health','1.0.0',1,'000000','1',NULL,0,0,'1','2026-03-31 23:55:38','1','2026-03-31 23:55:38');
+INSERT INTO `sys_plugin_version` VALUES ('2039008727211421698','mms.plugin.sample-health','1.0.0',1,'000000','1',NULL,0,0,'1','2026-03-31 23:55:38','1','2026-03-31 23:55:38');
 /*!40000 ALTER TABLE `sys_plugin_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -440,7 +440,7 @@ CREATE TABLE `sys_plugins` (
 
 LOCK TABLES `sys_plugins` WRITE;
 /*!40000 ALTER TABLE `sys_plugins` DISABLE KEYS */;
-INSERT INTO `sys_plugins` VALUES ('2039008727282724866','com.sxpcwlkj.plugin.sample.health','示例健康插件','','联调 mms-plugin-host：SPI + PluginHealthContributor','000000','1',NULL,1,100,'1','2026-03-31 23:55:38','1','2026-03-31 23:55:38');
+INSERT INTO `sys_plugins` VALUES ('2039008727282724866','mms.plugin.sample-health','示例健康插件','','联调 mms-plugin-host：SPI + PluginHealthContributor','000000','1',NULL,1,100,'1','2026-03-31 23:55:38','1','2026-03-31 23:55:38');
 /*!40000 ALTER TABLE `sys_plugins` ENABLE KEYS */;
 UNLOCK TABLES;
 

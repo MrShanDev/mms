@@ -19,6 +19,7 @@ import com.sxpcwlkj.plugin.host.internal.PluginSpringBeanAttachment;
 import com.sxpcwlkj.plugin.host.internal.NoopHostServices;
 import com.sxpcwlkj.plugin.host.internal.PluginDependencySort;
 import com.sxpcwlkj.plugin.host.internal.PluginDescriptorProbe;
+import com.sxpcwlkj.plugin.host.internal.PluginLoadedPeerDependencyValidator;
 import com.sxpcwlkj.plugin.host.internal.PluginMdc;
 import com.sxpcwlkj.plugin.host.internal.PluginReflectionSupport;
 import com.sxpcwlkj.plugin.host.internal.PluginSubprocessManager;
@@ -540,6 +541,20 @@ public class PluginLifecycleManager {
                     dirPluginId,
                     dirVersion);
             return;
+        }
+        try {
+            PluginLoadedPeerDependencyValidator.validateOrThrow(desc, loadedPlugins);
+        } catch (PluginException e) {
+            Runnable popWarn = PluginMdc.pushPluginContext(desc.getId(), desc.getVersion());
+            try {
+                log.warn("插件依赖未满足，跳过装入: {} — {}", desc.getId() + "@" + desc.getVersion(), e.getMessage());
+            } finally {
+                popWarn.run();
+            }
+            dispatchPluginLifecycleEvent(
+                    PluginLifecycleEvent.of(
+                            PluginLifecycleEventType.PLUGIN_DEPENDENCY_MISSING, desc, e.getMessage(), e));
+            throw e;
         }
         String key = desc.getId() + "@" + desc.getVersion();
         int subprocessEffectivePort = 0;

@@ -9,6 +9,8 @@ import java.util.Optional;
  * 宿主通过 {@link #hostImplementedContractVersion()} 声明实现版本；仅当宿主实现版本不低于插件要求时才允许加载。</p>
  * <p><b>版本 3</b>：增加 {@link #pluginSysConfigGet} / {@link #pluginSysConfigPut} / {@link #pluginSysConfigList}，
  * 读写 {@code sys_config} 中键前缀为 {@link PluginSysConfigKeys#PREFIX} 的插件专属配置（持久化）。</p>
+ * <p><b>版本 4</b>：增加 {@link #pluginSchemaAccess(PluginDescriptor)}，提供本插件前缀下的受限 DDL 与表列举（见 {@link PluginSchemaAccess}）。</p>
+ * <p><b>版本 5</b>：增加 {@link #pluginBackupAccess(PluginDescriptor)}（仅当插件描述 {@code backupOperator=true}），见 {@link PluginBackupAccess}。</p>
  */
 public interface HostServices {
 
@@ -36,6 +38,17 @@ public interface HostServices {
      * 基于当前插件描述符的受控 JDBC；需在 {@link PluginDescriptor#getPluginTablePrefix()} 声明前缀。
      */
     PluginDataAccess pluginDataAccess(PluginDescriptor forPlugin);
+
+    /**
+     * 本插件前缀下的受限 DDL / 表列举；须在 {@code plugin.json} 声明 {@code pluginTablePrefix}，且插件要求的
+     * {@link PluginDescriptor#getHostServicesContractVersion()} 不得超过宿主 {@link #hostImplementedContractVersion()}。
+     */
+    PluginSchemaAccess pluginSchemaAccess(PluginDescriptor forPlugin);
+
+    /**
+     * 库级逻辑备份/还原；{@link PluginDescriptor#getBackupOperator()} 须为 {@link Boolean#TRUE}。
+     */
+    PluginBackupAccess pluginBackupAccess(PluginDescriptor forPlugin);
 
     /**
      * 在宿主已配置事务管理器时，以可写事务边界执行（传播行为与默认 {@code TransactionTemplate} 一致）。

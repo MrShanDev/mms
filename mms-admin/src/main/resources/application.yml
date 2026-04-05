@@ -226,7 +226,7 @@ tenant:
     # 不排除时租户插件会追加「当前登录租户」，与 000000 叠加导致 UPDATE/SELECT 命中 0 行，停用无效并可能走全磁盘扫描重载。
     - sys_plugin_version
     - sys_plugins
-    # mms-doc（mms-servers/mms-doc，@TableName）
+    # 文档站业务表（mms-plugin-doc，@TableName）
     - doc_user
     - doc_order
     - doc_product

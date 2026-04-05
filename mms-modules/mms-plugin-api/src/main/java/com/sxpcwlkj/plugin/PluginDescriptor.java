@@ -97,6 +97,12 @@ public class PluginDescriptor {
     private List<String> pluginDataTables = new ArrayList<>();
 
     /**
+     * 为 true 时宿主可提供 {@link HostServices#pluginBackupAccess(PluginDescriptor)}（全库/指定表逻辑备份与还原）。
+     * 宜仅赋给受控运维类插件；默认 null/false。
+     */
+    private Boolean backupOperator;
+
+    /**
      * 未声明 {@link #runtimeMode} 时的默认行为。
      */
     public PluginRuntimeMode runtimeModeOrDefault() {

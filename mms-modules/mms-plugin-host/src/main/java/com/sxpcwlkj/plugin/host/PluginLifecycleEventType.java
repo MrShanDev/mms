@@ -8,6 +8,8 @@ public enum PluginLifecycleEventType {
     PLUGIN_LOADED("插件加载成功"),
     /** 校验、onLoad、HOST_MVC 注册等任一步失败 */
     PLUGIN_LOAD_FAILED("插件加载失败"),
+    /** plugin.json 声明的非 optional 依赖未在宿主中加载或版本区间不匹配（早于 ClassLoader/onLoad） */
+    PLUGIN_DEPENDENCY_MISSING("插件依赖未就绪"),
     /** 已从内存卸载（含替换版本时卸载旧版） */
     PLUGIN_UNLOADED("插件已卸载"),
     /** 卸载钩子或关闭 ClassLoader 异常 */

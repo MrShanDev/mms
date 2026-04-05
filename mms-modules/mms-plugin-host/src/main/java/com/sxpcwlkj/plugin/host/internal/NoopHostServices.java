@@ -2,9 +2,11 @@ package com.sxpcwlkj.plugin.host.internal;
 
 import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
+import com.sxpcwlkj.plugin.PluginBackupAccess;
 import com.sxpcwlkj.plugin.PluginDataAccess;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.PluginSchemaAccess;
 import com.sxpcwlkj.plugin.PluginSysConfigRow;
 import com.sxpcwlkj.plugin.data.EmptyHostDataService;
 
@@ -41,6 +43,16 @@ public enum NoopHostServices implements HostServices {
     @Override
     public PluginDataAccess pluginDataAccess(PluginDescriptor forPlugin) {
         throw new PluginException("未装配宿主 HostServices：无法使用 pluginDataAccess");
+    }
+
+    @Override
+    public PluginSchemaAccess pluginSchemaAccess(PluginDescriptor forPlugin) {
+        throw new PluginException("未装配宿主 HostServices：无法使用 pluginSchemaAccess");
+    }
+
+    @Override
+    public PluginBackupAccess pluginBackupAccess(PluginDescriptor forPlugin) {
+        throw new PluginException("未装配宿主 HostServices：无法使用 pluginBackupAccess");
     }
 
     @Override

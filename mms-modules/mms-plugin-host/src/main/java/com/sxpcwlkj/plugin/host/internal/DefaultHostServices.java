@@ -5,9 +5,11 @@ import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.stp.StpUtil;
 import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
+import com.sxpcwlkj.plugin.PluginBackupAccess;
 import com.sxpcwlkj.plugin.PluginDataAccess;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.PluginSchemaAccess;
 import com.sxpcwlkj.plugin.PluginSysConfigKeys;
 import com.sxpcwlkj.plugin.PluginSysConfigOperations;
 import com.sxpcwlkj.plugin.PluginSysConfigRow;
@@ -36,9 +38,9 @@ import java.util.concurrent.TimeUnit;
 public final class DefaultHostServices implements HostServices {
 
     /**
-     * 与当前代码实现一致；破坏性变更时递增并在发行说明中说明（2：事务与 hasWebPermission；3：pluginSysConfig*）。
+     * 与当前代码实现一致；破坏性变更时递增并在发行说明中说明（2：事务与 hasWebPermission；3：pluginSysConfig*；4：pluginSchemaAccess；5：pluginBackupAccess）。
      */
-    public static final int HOST_IMPLEMENTED_CONTRACT_VERSION = 3;
+    public static final int HOST_IMPLEMENTED_CONTRACT_VERSION = 5;
 
     private final ObjectProvider<StringRedisTemplate> stringRedisTemplate;
     private final ObjectProvider<HostDataService> hostDataService;
@@ -100,6 +102,56 @@ public final class DefaultHostServices implements HostServices {
                 autoTenant,
                 tenantCol,
                 tenant);
+    }
+
+    @Override
+    public PluginSchemaAccess pluginSchemaAccess(PluginDescriptor forPlugin) {
+        if (forPlugin == null) {
+            throw new PluginException("pluginDescriptor 不能为空");
+        }
+        String prefix = forPlugin.getPluginTablePrefix();
+        if (prefix == null || prefix.isBlank()) {
+            throw new PluginException("使用 pluginSchemaAccess 须在 plugin.json 声明 pluginTablePrefix");
+        }
+        DataSource ds = dataSource.getIfAvailable();
+        if (ds == null) {
+            throw new PluginException("宿主未配置 DataSource，无法使用 pluginSchemaAccess");
+        }
+        JdbcTemplate jt = new JdbcTemplate(ds);
+        int tmo = pluginHostProperties != null ? pluginHostProperties.getDataAccessQueryTimeoutSeconds() : 0;
+        boolean audit =
+                pluginHostProperties == null || pluginHostProperties.isPluginDataAccessAuditLogEnabled();
+        if (tmo > 0) {
+            jt.setQueryTimeout(tmo);
+        }
+        return new JdbcPluginSchemaAccess(
+                jt,
+                forPlugin.getId(),
+                forPlugin.getVersion(),
+                prefix.trim(),
+                audit);
+    }
+
+    @Override
+    public PluginBackupAccess pluginBackupAccess(PluginDescriptor forPlugin) {
+        if (forPlugin == null) {
+            throw new PluginException("pluginDescriptor 不能为空");
+        }
+        if (!Boolean.TRUE.equals(forPlugin.getBackupOperator())) {
+            throw new PluginException("须在 plugin.json 声明 backupOperator=true 方可使用 pluginBackupAccess");
+        }
+        DataSource ds = dataSource.getIfAvailable();
+        if (ds == null) {
+            throw new PluginException("宿主未配置 DataSource，无法使用 pluginBackupAccess");
+        }
+        JdbcTemplate jt = new JdbcTemplate(ds);
+        int tmo = pluginHostProperties != null ? pluginHostProperties.getDataAccessQueryTimeoutSeconds() : 0;
+        boolean audit =
+                pluginHostProperties == null || pluginHostProperties.isPluginDataAccessAuditLogEnabled();
+        if (tmo > 0) {
+            jt.setQueryTimeout(tmo);
+        }
+        return new JdbcPluginBackupAccess(jt, audit, forPlugin.getId(), forPlugin.getVersion());
     }
 
     @Override

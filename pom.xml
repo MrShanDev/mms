@@ -629,52 +629,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <!-- 服务模块-->
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-servers</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-member</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-base</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-bbs</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-ad</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-article</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-app</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-open</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sxpcwlkj</groupId>
-                <artifactId>mms-cms</artifactId>
-                <version>${revision}</version>
-            </dependency>
             <dependency>
                 <groupId>com.sxpcwlkj</groupId>
                 <artifactId>mms-game</artifactId>

@@ -56,10 +56,15 @@ public class LoginObject<T> {
     public static Boolean isLogin() {
         try {
             return StpUtil.isLogin();
-        }catch (Exception e){
-            log.error("获取登录状态失败！");
+        } catch (NotWebContextException | SaTokenContextException e) {
+            // 非请求线程（如插件生命周期监听 CompletableFuture.runAsync、定时任务）无 Sa-Token Web 上下文
+            return false;
+        } catch (NotLoginException e) {
+            return false;
+        } catch (Exception e) {
+            log.error("获取登录状态失败！", e);
+            return false;
         }
-        return false;
     }
 
     /**

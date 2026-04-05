@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class WechatPluginLifecycleNotifier implements PluginLifecycleEventListener {
 
-    private static final String WECHAT_PLUGIN_ID = "com.sxpcwlkj.plugin.wechatbot";
+    private static final String WECHAT_PLUGIN_ID = "mms.plugin.wechat-bot";
 
     private static final DateTimeFormatter TIME_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());

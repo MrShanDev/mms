@@ -18,7 +18,7 @@ public enum DeviceEnum {
      */
     ADMIN("ADMIN"),
     /**
-     * 移动端（如 mms-api-unix 当前默认会员登录端）
+     * 移动端（对外开放全端 API 进程 mms-open-api.jar / mms-plugin-open-api 模块，默认会员登录端）
      */
     MOBILE("MOBILE"),
     /**
