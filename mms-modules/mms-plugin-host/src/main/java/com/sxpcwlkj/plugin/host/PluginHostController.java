@@ -6,7 +6,10 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
+import com.sxpcwlkj.plugin.BundledPluginSchemaExecutor;
 import com.sxpcwlkj.plugin.PluginDescriptor;
+import com.sxpcwlkj.plugin.PluginDescriptorReader;
+import com.sxpcwlkj.plugin.PluginDescriptorValidator;
 import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.host.web.PluginMvcExecutionGuard;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,6 +52,10 @@ public class PluginHostController {
     private final ObjectProvider<HostServices> hostServicesProvider;
     private final ObjectProvider<HostDataService> hostDataServiceProvider;
     private final PluginMvcExecutionGuard pluginMvcExecutionGuard;
+    private final ObjectProvider<BundledPluginSchemaExecutor> bundledPluginSchemaExecutor;
+    private final ObjectProvider<JdbcTemplate> jdbcTemplate;
+
+    private static final int BUNDLED_SCHEMA_PREVIEW_MAX_CHARS = 128_000;
 
     /**
      * 读取插件 JAR 内 {@code META-INF/mms/logo.png}；浏览器 {@code img} 请求不带鉴权，须匿名可读。
@@ -103,6 +111,24 @@ public class PluginHostController {
     @GetMapping("/health")
     public R<List<PluginHealthRow>> health() {
         return R.success(pluginLifecycleManager.collectHealth());
+    }
+
+    /**
+     * 插件安装向导第一步：数据源与宿主侧能力探测（不读上传文件）。
+     */
+    @SaCheckRole("super_admin")
+    @GetMapping("/installReadiness")
+    public R<Map<String, Object>> installReadiness() {
+        Map<String, Object> body = new HashMap<>();
+        Path resolvedRoot = pluginLifecycleManager.getPluginsRoot();
+        body.put("resolvedPluginsRoot", resolvedRoot.toString());
+        body.put("pluginsRootReady", Files.isDirectory(resolvedRoot));
+        body.put("pluginHostEnabled", pluginHostProperties.isEnabled());
+        body.put("hostMmsRevision", pluginHostProperties.getHostMmsRevision());
+        body.put("bundledSchemaExecutorAvailable", bundledPluginSchemaExecutor.getIfAvailable() != null);
+        body.put("jdbcAvailable", jdbcTemplate.getIfAvailable() != null);
+        body.put("pluginDbBridgeAvailable", pluginHostDbBridge.getIfAvailable() != null);
+        return R.success(body);
     }
 
     /**
@@ -383,10 +409,14 @@ public class PluginHostController {
 
     /**
      * 上传 JAR：先校验 {@code plugin.json} 结构与宿主兼容性，写入磁盘成功后写入库表激活版本，再全量重载。
+     * <p>若 {@code skipBundledSchemaExecution=false} 且 JAR 内含 {@code META-INF/mms/schema.sql}，则先执行该 DDL（仅超级管理员、白名单语句），再落盘安装。</p>
      */
     @SaCheckRole("super_admin")
     @PostMapping(value = "/install", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<List<PluginEntrySummary>> install(@RequestParam("file") MultipartFile file) throws Exception {
+    public R<Map<String, Object>> install(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "skipBundledSchemaExecution", defaultValue = "true") boolean skipBundledSchemaExecution)
+            throws Exception {
         if (file == null || file.isEmpty()) {
             return R.fail("file 不能为空");
         }
@@ -398,6 +428,22 @@ public class PluginHostController {
         PluginDescriptor installed = null;
         try {
             file.transferTo(temp);
+            List<String> schemaLog = null;
+            if (!skipBundledSchemaExecution) {
+                Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(temp);
+                if (schemaOpt.isPresent() && !schemaOpt.get().isBlank()) {
+                    BundledPluginSchemaExecutor executor = bundledPluginSchemaExecutor.getIfAvailable();
+                    if (executor == null) {
+                        return R.fail(
+                                "JAR 内含 schema.sql，但当前环境未启用 BundledPluginSchemaExecutor（需 mms-system + JdbcTemplate）。请改用跳过 DDL 安装，或手工执行 SQL。");
+                    }
+                    try {
+                        schemaLog = executor.executeBundledSchema(schemaOpt.get());
+                    } catch (Exception ddlEx) {
+                        return R.fail("执行 schema.sql 失败: " + ddlEx.getMessage());
+                    }
+                }
+            }
             try {
                 installed = pluginLifecycleManager.installJarFromUpload(temp);
             } catch (PluginException ex) {
@@ -418,7 +464,70 @@ public class PluginHostController {
                 return R.fail("已回滚磁盘写入。入库失败: " + ex.getMessage());
             }
             pluginLifecycleManager.reload();
-            return R.success(pluginLifecycleManager.listSummaries());
+            Map<String, Object> body = new HashMap<>();
+            body.put("summaries", pluginLifecycleManager.listSummaries());
+            body.put("bundledSchemaExecutionLog", schemaLog);
+            return R.success(body);
+        } finally {
+            Files.deleteIfExists(temp);
+        }
+    }
+
+    /**
+     * 安装前预览：读取 JAR 内 {@code META-INF/mms/schema.sql} 全文（过长则截断），不写入磁盘、不执行 SQL。
+     */
+    @SaCheckRole("super_admin")
+    @PostMapping(value = "/bundledSchemaPreview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<Map<String, Object>> bundledSchemaPreview(@RequestParam("file") MultipartFile file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            return R.fail("file 不能为空");
+        }
+        String orig = file.getOriginalFilename();
+        if (orig == null || !orig.toLowerCase(Locale.ROOT).endsWith(".jar")) {
+            return R.fail("仅支持 .jar 插件包");
+        }
+        Path temp = Files.createTempFile("mms-plugin-schema-preview-", ".jar");
+        try {
+            file.transferTo(temp);
+            PluginDescriptor d;
+            try {
+                d = PluginDescriptorReader.readFromJar(temp);
+                PluginDescriptorValidator.validateStructureOrThrow(d);
+            } catch (PluginException ex) {
+                return R.fail("插件包未通过校验: " + ex.getMessage());
+            } catch (Exception ex) {
+                return R.fail("插件包解析失败: " + ex.getMessage());
+            }
+            Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(temp);
+            Map<String, Object> body = new HashMap<>();
+            body.put("pluginId", d.getId());
+            body.put("version", d.getVersion());
+            body.put("hasSchema", schemaOpt.isPresent() && !schemaOpt.get().isBlank());
+            if (schemaOpt.isEmpty() || schemaOpt.get().isBlank()) {
+                body.put("schemaSql", "");
+                body.put("truncated", false);
+                body.put("byteLength", 0);
+            } else {
+                String sql = schemaOpt.get();
+                body.put("byteLength", sql.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+                boolean truncated = sql.length() > BUNDLED_SCHEMA_PREVIEW_MAX_CHARS;
+                body.put("truncated", truncated);
+                body.put("schemaSql", truncated ? sql.substring(0, BUNDLED_SCHEMA_PREVIEW_MAX_CHARS) : sql);
+            }
+            body.put("bundledSchemaExecutorAvailable", bundledPluginSchemaExecutor.getIfAvailable() != null);
+            body.put("name", d.getName());
+            body.put("description", d.getDescription());
+            body.put("runtimeMode", d.runtimeModeOrDefault().name());
+            body.put("dependencies", d.getDependencies());
+            body.put(
+                    "hasMenuBootstrap",
+                    d.getMenuBootstrap() != null
+                            && d.getMenuBootstrap().getItems() != null
+                            && !d.getMenuBootstrap().getItems().isEmpty());
+            body.put(
+                    "requiresMmsRevisionMin",
+                    d.getRequiresMms() != null ? d.getRequiresMms().getRevisionMin() : null);
+            return R.success(body);
         } finally {
             Files.deleteIfExists(temp);
         }

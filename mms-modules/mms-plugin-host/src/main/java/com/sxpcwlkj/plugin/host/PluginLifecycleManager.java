@@ -34,6 +34,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.SpringBootVersion;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.net.MalformedURLException;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -847,6 +848,39 @@ public class PluginLifecycleManager {
             }
         } catch (Exception e) {
             log.debug("readBundledLogoPng {}@{}: {}", pid, ver, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private static final int MAX_BUNDLED_SCHEMA_BYTES = 2_000_000;
+
+    /**
+     * 读取 JAR 内 {@link PluginConstants#SCHEMA_PATH_IN_JAR}（UTF-8），供安装前预览或安装时执行。
+     */
+    public Optional<String> readBundledSchemaSql(Path jarFile) {
+        if (jarFile == null || !Files.isRegularFile(jarFile)) {
+            return Optional.empty();
+        }
+        try (JarFile jf = new JarFile(jarFile.toFile(), false)) {
+            JarEntry ent = jf.getJarEntry(PluginConstants.SCHEMA_PATH_IN_JAR);
+            if (ent == null || ent.isDirectory()) {
+                return Optional.empty();
+            }
+            long size = ent.getSize();
+            if (size > MAX_BUNDLED_SCHEMA_BYTES) {
+                throw new PluginException("schema.sql 超过 2MB，拒绝读取");
+            }
+            try (var in = jf.getInputStream(ent)) {
+                byte[] bytes = in.readAllBytes();
+                if (bytes.length == 0) {
+                    return Optional.empty();
+                }
+                return Optional.of(new String(bytes, StandardCharsets.UTF_8));
+            }
+        } catch (PluginException e) {
+            throw e;
+        } catch (Exception e) {
+            log.debug("readBundledSchemaSql: {}", e.getMessage());
             return Optional.empty();
         }
     }

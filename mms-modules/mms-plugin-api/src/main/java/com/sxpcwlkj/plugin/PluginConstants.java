@@ -19,6 +19,12 @@ public final class PluginConstants {
     public static final String LOGO_PATH_IN_JAR = "META-INF/mms/logo.png";
 
     /**
+     * 可选：随插件 JAR 打包的业务表 DDL（UTF-8）；安装前可在市场页预览，并可选择在安装时由超级管理员执行。
+     * <p>构建时由模块 {@code script/schema.sql} 复制到本路径（见各插件 {@code pom.xml} {@code resources}）。</p>
+     */
+    public static final String SCHEMA_PATH_IN_JAR = "META-INF/mms/schema.sql";
+
+    /**
      * 可选：依赖指纹清单路径（JAR 内 UTF-8 文本）。
      * <p><b>GAV 生成规范</b>：每行一条 Maven 坐标 {@code groupId:artifactId:version}（无多余空格），
      * 按字典序排序整文件后写入；{@link PluginDescriptor#getDependencyFingerprintSha256()} 为该文件<strong>原始字节</strong>
