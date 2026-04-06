@@ -1,5 +1,7 @@
 package com.sxpcwlkj.plugin;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -44,7 +46,8 @@ public final class PluginSysConfigKeys {
     }
 
     /**
-     * 校验 {@code fullConfigKey} 是否属于指定插件（前缀一致）。
+     * 校验 {@code fullConfigKey} 是否以该插件键前缀开头（仅前缀，不处理点分 pluginId 互为前缀时的歧义）。
+     * <p>列举/删除等需判「归属哪一插件」时，请用 {@link #resolveOwningPluginId(String, Collection)}。</p>
      */
     public static boolean belongsToPlugin(String fullConfigKey, String pluginId) {
         if (fullConfigKey == null || pluginId == null) {
@@ -52,6 +55,34 @@ public final class PluginSysConfigKeys {
         }
         String p = keyPrefix(pluginId);
         return fullConfigKey.startsWith(p);
+    }
+
+    /**
+     * 在已登记（如 {@code sys_plugins}）的 pluginId 集合中，选取与 {@code fullConfigKey} 前缀匹配的最长 pluginId，
+     * 以正确区分 {@code com.foo} 与 {@code com.foo.bar} 等同源键。
+     */
+    public static Optional<String> resolveOwningPluginId(
+            String fullConfigKey, Collection<String> registeredPluginIds) {
+        if (fullConfigKey == null || registeredPluginIds == null || registeredPluginIds.isEmpty()) {
+            return Optional.empty();
+        }
+        if (!fullConfigKey.startsWith(PREFIX)) {
+            return Optional.empty();
+        }
+        String best = null;
+        int bestLen = -1;
+        for (String raw : registeredPluginIds) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String pid = raw.trim();
+            String pref = keyPrefix(pid);
+            if (fullConfigKey.startsWith(pref) && pid.length() > bestLen) {
+                bestLen = pid.length();
+                best = pid;
+            }
+        }
+        return Optional.ofNullable(best);
     }
 
     /** 从完整键解析出 suffix；不属于该插件前缀时返回空串。 */

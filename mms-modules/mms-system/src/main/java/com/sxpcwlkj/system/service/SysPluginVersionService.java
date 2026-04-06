@@ -26,4 +26,7 @@ public interface SysPluginVersionService {
     void deactivateAllVersionsForPlugin(String pluginId, String tenantId);
 
     List<SysPluginVersion> listVersionsForPlugin(String pluginId, String tenantId);
+
+    /** registry 租户下该插件是否仍有版本登记行 */
+    boolean hasVersionRowsForPlugin(String pluginId, String tenantId);
 }

@@ -1,7 +1,10 @@
 package com.sxpcwlkj.plugin;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -18,6 +21,21 @@ public final class PluginDescriptorValidator {
     private static final Pattern DATA_TABLE_REL_PATTERN = Pattern.compile("^[a-zA-Z][a-zA-Z0-9_]*$");
     private static final int MIN_EPHEMERAL_PORT = 1024;
     private static final int MAX_USER_PORT = 65535;
+
+    private static final Set<String> SYS_CONFIG_VALUE_TYPES =
+            Set.of(
+                    "text",
+                    "textarea",
+                    "password",
+                    "number",
+                    "switch",
+                    "select",
+                    "multiselect",
+                    "json",
+                    "file",
+                    "image",
+                    "color",
+                    "date");
 
     private PluginDescriptorValidator() {
     }
@@ -65,6 +83,48 @@ public final class PluginDescriptorValidator {
                     errors.add("dependencies[" + i + "].id 不能为空");
                 }
                 i++;
+            }
+        }
+        if (d.getSysConfig() != null && !d.getSysConfig().isEmpty()) {
+            Set<String> seen = new HashSet<>();
+            int si = 0;
+            for (PluginSysConfigDef entry : d.getSysConfig()) {
+                if (entry == null) {
+                    errors.add("sysConfig[" + si + "] 不能为空");
+                } else if (entry.getKeySuffix() == null || entry.getKeySuffix().isBlank()) {
+                    errors.add("sysConfig[" + si + "].keySuffix 不能为空");
+                } else {
+                    try {
+                        PluginSysConfigKeys.validateSuffix(entry.getKeySuffix());
+                    } catch (PluginException ex) {
+                        errors.add("sysConfig[" + si + "]: " + ex.getMessage());
+                    }
+                    if (!seen.add(entry.getKeySuffix().trim())) {
+                        errors.add("sysConfig 中 keySuffix 重复: " + entry.getKeySuffix().trim());
+                    }
+                    String vtEffective;
+                    if (entry.getValueType() != null && !entry.getValueType().isBlank()) {
+                        String vt = entry.getValueType().trim().toLowerCase(Locale.ROOT);
+                        vtEffective = vt;
+                        if (!SYS_CONFIG_VALUE_TYPES.contains(vt)) {
+                            errors.add(
+                                    "sysConfig["
+                                            + si
+                                            + "].valueType 非法，允许: "
+                                            + SYS_CONFIG_VALUE_TYPES
+                                            + "，当前: "
+                                            + entry.getValueType());
+                        } else {
+                            if ("select".equals(vt) || "multiselect".equals(vt)) {
+                                validateSysConfigOptions(errors, si, entry);
+                            }
+                        }
+                    } else {
+                        vtEffective = "text";
+                    }
+                    validateSysConfigCardinality(errors, si, entry, vtEffective);
+                }
+                si++;
             }
         }
         validateRuntimeModeBlock(d, errors);
@@ -129,6 +189,71 @@ public final class PluginDescriptorValidator {
                     errors.add("runtimeMode=INDEPENDENT_PROCESS 时必须声明 mainClass（独立进程入口）");
                 }
             }
+        }
+    }
+
+    private static void validateSysConfigCardinality(
+            List<String> errors, int si, PluginSysConfigDef entry, String vtEffective) {
+        String vt = vtEffective != null ? vtEffective.toLowerCase(Locale.ROOT) : "text";
+        final String card;
+        try {
+            if ("multiselect".equals(vt)) {
+                if (entry.getValueCardinality() != null && !entry.getValueCardinality().isBlank()) {
+                    String c = PluginSysConfigValueShapes.normalizeDeclaredCardinality(entry.getValueCardinality());
+                    if (!PluginSysConfigValueShapes.LIST.equals(c)) {
+                        errors.add(
+                                "sysConfig["
+                                        + si
+                                        + "]: valueType=multiselect 时 valueCardinality 仅能为 list（可省略）");
+                    }
+                }
+                return;
+            }
+            card = PluginSysConfigValueShapes.normalizeDeclaredCardinality(entry.getValueCardinality());
+        } catch (PluginException ex) {
+            errors.add("sysConfig[" + si + "]: " + ex.getMessage());
+            return;
+        }
+        if (PluginSysConfigValueShapes.OBJECT.equals(card)) {
+            if (!("json".equals(vt) || "textarea".equals(vt))) {
+                errors.add(
+                        "sysConfig["
+                                + si
+                                + "]: valueCardinality=object 时 valueType 仅宜为 json 或 textarea");
+            }
+        }
+        if (PluginSysConfigValueShapes.LIST.equals(card)) {
+            if ("switch".equals(vt)
+                    || "select".equals(vt)
+                    || "color".equals(vt)
+                    || "date".equals(vt)
+                    || "number".equals(vt)) {
+                errors.add(
+                        "sysConfig["
+                                + si
+                                + "]: 当前 valueType 与 valueCardinality=list 不兼容");
+            }
+        }
+    }
+
+    private static void validateSysConfigOptions(List<String> errors, int si, PluginSysConfigDef entry) {
+        List<PluginSysConfigOption> opts = entry.getOptions();
+        if (opts == null || opts.isEmpty()) {
+            errors.add("sysConfig[" + si + "]: valueType 为 select/multiselect 时 options 不能为空");
+            return;
+        }
+        Set<String> values = new HashSet<>();
+        int oi = 0;
+        for (PluginSysConfigOption o : opts) {
+            if (o == null) {
+                errors.add("sysConfig[" + si + "].options[" + oi + "] 不能为空");
+            } else if (o.getValue() == null || o.getValue().isBlank()) {
+                errors.add("sysConfig[" + si + "].options[" + oi + "].value 不能为空");
+            } else if (!values.add(o.getValue().trim())) {
+                errors.add(
+                        "sysConfig[" + si + "].options 中 value 重复: " + o.getValue().trim());
+            }
+            oi++;
         }
     }
 

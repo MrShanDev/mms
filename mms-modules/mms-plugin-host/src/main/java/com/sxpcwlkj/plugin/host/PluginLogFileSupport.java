@@ -10,7 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.regex.Pattern;
 
 /**
- * 读取与 {@code logback.xml} 中 {@code plugin_sift} 一致的 {@code logs/plugins/{pluginKey}.log}。
+ * 读取与 {@code logback-spring.xml} 中 {@code plugin_sift} 一致的 {@code logs/plugins/{pluginKey}.log}。
  */
 public final class PluginLogFileSupport {
 

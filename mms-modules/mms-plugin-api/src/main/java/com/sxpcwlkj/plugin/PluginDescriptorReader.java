@@ -70,6 +70,9 @@ public final class PluginDescriptorReader {
         if (d.getDependencies() == null) {
             d.setDependencies(new java.util.ArrayList<>());
         }
+        if (d.getSysConfig() == null) {
+            d.setSysConfig(new java.util.ArrayList<>());
+        }
         if (d.getFrontend() != null && d.getFrontend().getRoutePrefixes() == null) {
             d.getFrontend().setRoutePrefixes(new java.util.ArrayList<>());
         }

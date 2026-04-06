@@ -16,12 +16,13 @@ public class PluginHostProperties {
     private boolean enabled = false;
 
     /**
-     * 插件根目录；默认可由配置覆盖，为空时使用 user.dir/mms-plugins。
+     * 插件根目录；由 {@code mms.plugin.root-dir} 注入（常为有 {@code MMS_PLUGIN_ROOT_DIR} / {@code dir.root}/plugins
+     * 等默认值），为空时 {@link com.sxpcwlkj.plugin.host.PluginLifecycleManager} 仍回退 {@code user.dir}/mms-plugins。
      */
     private String rootDir;
 
     /**
-     * 插件按 MDC 拆分的日志目录（与 mms-admin {@code logback.xml} 中 {@code logs/plugins} 一致）。
+     * 插件按 MDC 拆分的日志目录（与 mms-admin {@code logback-spring.xml} 中 {@code logs/plugins} 一致）。
      * 为空时使用 {@code user.dir}/logs/plugins。
      */
     private String pluginLogDir;

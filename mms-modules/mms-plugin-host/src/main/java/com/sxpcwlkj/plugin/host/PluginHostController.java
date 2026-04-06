@@ -11,7 +11,9 @@ import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.host.web.PluginMvcExecutionGuard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +31,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 插件宿主运维接口（仅超级管理员；动态 Controller 注册属后续阶段）。
@@ -45,6 +48,32 @@ public class PluginHostController {
     private final ObjectProvider<HostServices> hostServicesProvider;
     private final ObjectProvider<HostDataService> hostDataServiceProvider;
     private final PluginMvcExecutionGuard pluginMvcExecutionGuard;
+
+    /**
+     * 读取插件 JAR 内 {@code META-INF/mms/logo.png}；浏览器 {@code img} 请求不带鉴权，须匿名可读。
+     */
+    @SaIgnore
+    @GetMapping(value = "/pluginLogo", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> pluginLogo(
+            @RequestParam String pluginId, @RequestParam(required = false) String version) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        String pid = pluginId.trim();
+        if (pid.length() > 200 || pid.contains("..")) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (version != null && (version.length() > 120 || version.contains(".."))) {
+            return ResponseEntity.badRequest().build();
+        }
+        Optional<byte[]> logo = pluginLifecycleManager.readBundledLogoPng(pid, version);
+        if (logo.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePublic())
+                .body(logo.get());
+    }
 
     @SaCheckRole("super_admin")
     @GetMapping("/status")
@@ -341,6 +370,9 @@ public class PluginHostController {
         } catch (IllegalArgumentException | IllegalStateException ex) {
             return R.fail(ex.getMessage());
         }
+        pluginLifecycleManager
+                .readInstalledDescriptor(body.pluginId(), body.version())
+                .ifPresent(bridge::syncMenuBootstrapFromDescriptor);
         if (pluginHostProperties.getActivateVersionReloadScope() == ActivateVersionReloadScope.SINGLE_TARGET) {
             pluginLifecycleManager.reloadSingleActivated(body.pluginId(), body.version());
         } else {

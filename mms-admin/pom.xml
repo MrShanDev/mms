@@ -11,7 +11,7 @@
 
     <packaging>jar</packaging>
     <artifactId>mms-admin</artifactId>
-    <description>后台系统模块</description>
+    <description>后台系统模块（管理端与插件运维；全端开放 API 由 mms-plugin-open-api 8060 进程承载）</description>
 
     <dependencies>
         <!-- 低代码生产 -->

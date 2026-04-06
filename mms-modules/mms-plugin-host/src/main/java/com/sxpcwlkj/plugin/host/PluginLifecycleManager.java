@@ -11,6 +11,7 @@ import com.sxpcwlkj.plugin.PluginConstants;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
 import com.sxpcwlkj.plugin.PluginKind;
 import com.sxpcwlkj.plugin.PluginRuntimeMode;
+import com.sxpcwlkj.plugin.PluginSysConfigDef;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sxpcwlkj.plugin.host.internal.DefaultPluginBeanRegistrar;
 import com.sxpcwlkj.plugin.host.internal.DefaultPluginRuntimeContext;
@@ -34,6 +35,8 @@ import org.springframework.boot.SpringBootVersion;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -137,6 +140,7 @@ public class PluginLifecycleManager {
         List<PluginManifestView> list = new ArrayList<>();
         for (LoadedPluginInstance lp : loadedPlugins.values()) {
             PluginDescriptor d = lp.getDescriptor();
+            List<PluginSysConfigDef> sc = d.getSysConfig();
             list.add(new PluginManifestView(
                     d.getId(),
                     d.getVersion(),
@@ -144,7 +148,8 @@ public class PluginLifecycleManager {
                     d.getDescription(),
                     d.getKind(),
                     d.getFrontend(),
-                    d.runtimeModeOrDefault()));
+                    d.runtimeModeOrDefault(),
+                    sc == null || sc.isEmpty() ? List.of() : List.copyOf(sc)));
         }
         list.sort((a, b) -> a.id().compareToIgnoreCase(b.id()));
         return Collections.unmodifiableList(list);
@@ -290,6 +295,14 @@ public class PluginLifecycleManager {
             return;
         }
         Path root = resolveRoot();
+        String envRoot = System.getenv("MMS_PLUGIN_ROOT_DIR");
+        log.info(
+                "插件根目录(解析): {}；mms.plugin.root-dir={}；环境变量 MMS_PLUGIN_ROOT_DIR={}",
+                root.toAbsolutePath(),
+                properties.getRootDir() != null && !properties.getRootDir().isBlank()
+                        ? properties.getRootDir()
+                        : "（空则回退 user.dir/mms-plugins）",
+                envRoot != null && !envRoot.isBlank() ? envRoot : "（未设置）");
         if (!ensurePluginsRoot(root)) {
             log.warn("插件根目录不可用: {}，跳过加载", root.toAbsolutePath());
             return;
@@ -333,7 +346,7 @@ public class PluginLifecycleManager {
                 try (Stream<Path> versionDirs = Files.list(idDir)) {
                     versionDirs.filter(Files::isDirectory).sorted().forEach(verDir -> {
                         try {
-                            var probeOpt = PluginDescriptorProbe.tryRead(verDir);
+                            var probeOpt = PluginDescriptorProbe.tryReadForPlugin(verDir, folderId);
                             if (probeOpt.isPresent()) {
                                 String logicalId = probeOpt.get().descriptor().getId();
                                 if (logicalId != null
@@ -516,7 +529,7 @@ public class PluginLifecycleManager {
         if (jars.isEmpty()) {
             return;
         }
-        var probeOpt = PluginDescriptorProbe.tryRead(versionDir);
+        var probeOpt = PluginDescriptorProbe.tryReadForPlugin(versionDir, dirPluginId);
         if (probeOpt.isEmpty()) {
             log.debug("目录下未找到含 plugin.json 的 jar: {}", libDir);
             return;
@@ -780,6 +793,84 @@ public class PluginLifecycleManager {
     /**
      * 探测某插件版本的安装布局是否具备可加载的 JAR（与加载逻辑中 lib 扫描一致）。
      */
+    /**
+     * 从主描述符 JAR 内读取 {@link PluginConstants#LOGO_PATH_IN_JAR}（PNG），供市场封面等匿名 GET。
+     * <p>{@code version} 为空时：优先已加载实例版本，否则取磁盘上该 {@code pluginId} 下「有 lib JAR」的最新版本目录（与
+     * {@link #resolveSysConfigSchema} 策略一致）。</p>
+     */
+    public Optional<byte[]> readBundledLogoPng(String pluginId, String versionOrNull) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return Optional.empty();
+        }
+        String pid = pluginId.trim();
+        Path root = resolveRoot();
+        if (!ensurePluginsRoot(root)) {
+            return Optional.empty();
+        }
+        Optional<String> verOpt = resolveBundledLogoProbeVersion(pid, versionOrNull);
+        if (verOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        String ver = verOpt.get();
+        Path verDir = PluginInstallationLayout.pluginRoot(root, pid, ver);
+        if (!Files.isDirectory(verDir)) {
+            return Optional.empty();
+        }
+        try {
+            Optional<PluginDescriptorProbe.ProbeResult> pr = PluginDescriptorProbe.tryReadForPlugin(verDir, pid);
+            if (pr.isEmpty()) {
+                return Optional.empty();
+            }
+            Path jar = pr.get().descriptorJar();
+            if (!Files.isRegularFile(jar)) {
+                return Optional.empty();
+            }
+            Path normalizedJar = jar.normalize().toAbsolutePath();
+            Path normalizedRoot = root.normalize().toAbsolutePath();
+            if (!normalizedJar.startsWith(normalizedRoot)) {
+                log.warn("readBundledLogoPng: 拒绝读取插件根之外的 JAR: {}", normalizedJar);
+                return Optional.empty();
+            }
+            try (JarFile jf = new JarFile(normalizedJar.toFile(), false)) {
+                JarEntry ent = jf.getJarEntry(PluginConstants.LOGO_PATH_IN_JAR);
+                if (ent == null || ent.isDirectory()) {
+                    return Optional.empty();
+                }
+                long size = ent.getSize();
+                if (size > 5_000_000L) {
+                    return Optional.empty();
+                }
+                try (var in = jf.getInputStream(ent)) {
+                    byte[] bytes = in.readAllBytes();
+                    return bytes.length == 0 ? Optional.empty() : Optional.of(bytes);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("readBundledLogoPng {}@{}: {}", pid, ver, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> resolveBundledLogoProbeVersion(String pluginId, String versionOrNull) {
+        String v = versionOrNull;
+        if (v != null && !v.isBlank()) {
+            return Optional.of(v.trim());
+        }
+        for (PluginManifestView m : listManifests()) {
+            if (pluginId.equals(m.id())) {
+                return Optional.of(m.version());
+            }
+        }
+        List<DiskPluginSlot> candidates = listDiskSlots().stream()
+                .filter(s -> pluginId.equals(s.pluginId()) && s.libHasJars())
+                .sorted(Comparator.comparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER.reversed()))
+                .toList();
+        if (candidates.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(candidates.get(0).version());
+    }
+
     public PluginJarLocationStatus probeVersionLayout(String pluginId, String version) {
         Path root = resolveRoot();
         if (!ensurePluginsRoot(root)) {
@@ -842,6 +933,59 @@ public class PluginLifecycleManager {
         list.sort(Comparator.comparing(DiskPluginSlot::pluginId, String.CASE_INSENSITIVE_ORDER)
                 .thenComparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER));
         return Collections.unmodifiableList(list);
+    }
+
+    /**
+     * 从已加载描述符或磁盘安装包解析 {@code plugin.json} 中的 {@code sysConfig} 声明（供市场页固定配置行）。
+     */
+    public List<PluginSysConfigDef> resolveSysConfigSchema(String pluginId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return List.of();
+        }
+        String pid = pluginId.trim();
+        // 同一 pluginId 可能有多版本槽位（Map 键为 id@version）；扫全表并优先返回非空 sysConfig，避免先命中空描述符即提前结束
+        for (LoadedPluginInstance lp : loadedPlugins.values()) {
+            if (!pid.equals(lp.getDescriptor().getId())) {
+                continue;
+            }
+            List<PluginSysConfigDef> sc = lp.getDescriptor().getSysConfig();
+            if (sc != null && !sc.isEmpty()) {
+                return List.copyOf(sc);
+            }
+        }
+        List<DiskPluginSlot> candidates = listDiskSlots().stream()
+                .filter(s -> pid.equals(s.pluginId()) && s.libHasJars())
+                .sorted(Comparator.comparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER.reversed()))
+                .toList();
+        for (DiskPluginSlot slot : candidates) {
+            List<PluginSysConfigDef> fromDisk = probeSysConfigDefsFromDisk(pid, slot.version());
+            if (!fromDisk.isEmpty()) {
+                return fromDisk;
+            }
+        }
+        return List.of();
+    }
+
+    private List<PluginSysConfigDef> probeSysConfigDefsFromDisk(String pluginId, String version) {
+        try {
+            Path root = resolveRoot();
+            if (!ensurePluginsRoot(root)) {
+                return List.of();
+            }
+            Path verDir = PluginInstallationLayout.pluginRoot(root, pluginId, version);
+            if (!Files.isDirectory(verDir)) {
+                return List.of();
+            }
+            Optional<PluginDescriptorProbe.ProbeResult> pr = PluginDescriptorProbe.tryReadForPlugin(verDir, pluginId);
+            if (pr.isEmpty()) {
+                return List.of();
+            }
+            List<PluginSysConfigDef> sc = pr.get().descriptor().getSysConfig();
+            return sc == null || sc.isEmpty() ? List.of() : List.copyOf(sc);
+        } catch (Exception e) {
+            log.debug("probeSysConfigDefsFromDisk {}@{}: {}", pluginId, version, e.getMessage());
+            return List.of();
+        }
     }
 
     /**
@@ -927,6 +1071,24 @@ public class PluginLifecycleManager {
      *
      * @return 已校验通过的描述符（与磁盘写入一致）
      */
+    /**
+     * 从已安装目录读取指定版本的 {@code plugin.json}（不切库、不重载）；供版本切换后补写菜单等。
+     */
+    public Optional<PluginDescriptor> readInstalledDescriptor(String pluginId, String version) {
+        if (pluginId == null || pluginId.isBlank() || version == null || version.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            Path root = resolveRoot();
+            Path verDir = PluginInstallationLayout.pluginRoot(root, pluginId.trim(), version.trim());
+            return PluginDescriptorProbe.tryReadForPlugin(verDir, pluginId.trim())
+                    .map(PluginDescriptorProbe.ProbeResult::descriptor);
+        } catch (Exception e) {
+            log.warn("readInstalledDescriptor {}@{}: {}", pluginId, version, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public PluginDescriptor installJarFromUpload(Path tempJarFile) throws Exception {
         PluginDescriptor d = PluginDescriptorReader.readFromJar(tempJarFile);
         PluginDescriptorValidator.validateStructureOrThrow(d);

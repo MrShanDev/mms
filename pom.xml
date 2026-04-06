@@ -97,7 +97,8 @@
             <properties>
                 <!-- 环境标识，需要与配置文件的名称相对应 -->
                 <profiles.active>local</profiles.active>
-                <logging.level>info</logging.level>
+                <!-- 业务包日志尽量详细（写入 application-*.yml 中 com.sxpcwlkj） -->
+                <logging.level>debug</logging.level>
             </properties>
             <activation>
                 <!-- 默认环境 -->
@@ -109,13 +110,14 @@
             <properties>
                 <!-- 环境标识，需要与配置文件的名称相对应 -->
                 <profiles.active>dev</profiles.active>
-                <logging.level>info</logging.level>
+                <logging.level>debug</logging.level>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
             <properties>
                 <profiles.active>prod</profiles.active>
+                <!-- 生产收紧业务包日志，只保留 warn 及以上 -->
                 <logging.level>warn</logging.level>
             </properties>
         </profile>

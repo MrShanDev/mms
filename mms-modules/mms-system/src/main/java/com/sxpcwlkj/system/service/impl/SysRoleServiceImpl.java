@@ -39,6 +39,7 @@ import java.util.List;
 @Slf4j
 public class SysRoleServiceImpl implements SysRoleService {
 
+    private final AdminLoginPermissionCacheService adminLoginPermissionCacheService;
     private final SysRoleMapper baseMapper;
     private final SysFunctionMapper sysFunctionMapper;
     private final SysRoleFunctionMapper sysRoleFunctionMapper;
@@ -140,6 +141,7 @@ public class SysRoleServiceImpl implements SysRoleService {
         SysRole base = MapstructUtil.convert(bo, SysRole.class);
         row = baseMapper.updateById(base);
         if (row > 0) {
+            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
             return Boolean.TRUE;
         }
         throw new MmsException("操作失败");
@@ -176,6 +178,7 @@ public class SysRoleServiceImpl implements SysRoleService {
         SysRole base = MapstructUtil.convert(bo, SysRole.class);
         row = baseMapper.insert(base);
         if (row > 0) {
+            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
             return Boolean.TRUE;
         }
         throw new MmsException("操作失败");
@@ -201,6 +204,7 @@ public class SysRoleServiceImpl implements SysRoleService {
             rows = baseMapper.deleteById(id);
         }
         if (rows > 0) {
+            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
             return Boolean.TRUE;
         }
         throw new MmsException("操作失败");

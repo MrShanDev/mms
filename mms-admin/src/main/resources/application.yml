@@ -1,7 +1,7 @@
 # =============================================================================
 # mms-admin 主配置（各 profile 通过 application-{profile}.yml 叠加覆盖）
 # 分段速览：sxpcwlkj / demo → captcha → server → spring → sa-token →
-#          mybatis-plus → tenant → mms（plugin、cors、ai）→ websocket →
+#          mybatis-plus → tenant → mms（plugin、cors、ai）→ websocket（默认关）→
 #          springdoc → encryption → sms → dromara.x-file-storage → wechat.bot
 # =============================================================================
 
@@ -84,7 +84,8 @@ spring:
   messages:
     basename: i18n/messages
   profiles:
-    active: dev
+    # 构建期由 Maven 按父 POM 的 profiles.active 写入具体 profile（默认 Maven -P 为 local；可用 -P dev、-P prod）。IDE 直接跑源码若未替换占位符，请先 mvn process-resources 或指定运行参数 --spring.profiles.active。
+    active: @profiles.active@
   servlet:
     multipart:
       # 插件 JAR 安装（如 /system/pluginHost/install）shade 包可达百余 MB
@@ -240,10 +241,11 @@ tenant:
 --- # MMS 扩展（mms-plugin-host 等；磁盘布局见在线文档「JAR 插件」）
 mms:
   plugin:
+    # 路线 A：与 mms-open-api（8060）共用 root-dir；对外 API 在该进程装载插件。本进程仅做安装/卸载/切版本等运维（写盘+库表），不在此 JVM 装载 JAR，避免与 8060 双装载。
     enabled: true
-    # 优先 MMS_PLUGIN_ROOT_DIR；未设置则 ${user.home}/mms/plugins
-    root-dir: ${MMS_PLUGIN_ROOT_DIR:${user.home}/mms/plugins}
-    # 与父 POM revision、插件描述符校验一致；可用 MMS_PLUGIN_HOST_MMS_REVISION
+    # 优先 MMS_PLUGIN_ROOT_DIR；未设置时默认 ${user.dir}/plugins（JVM 工作目录）；须与 mms-plugin-open-api 一致
+    root-dir: ${MMS_PLUGIN_ROOT_DIR:${user.dir}/plugins}
+    # 与父 POM revision、插件描述符校验一致；可用 MMS_PLUGIN_HOST_MMS_REVISION（须与 8060 宿主一致）
     host-mms-revision: ${MMS_PLUGIN_HOST_MMS_REVISION:21}
     # 0：在 Tomcat 请求线程执行 HOST_MVC（推荐）；>0：每插件独立池（易与 Sa-Token 线程语义冲突）
     plugin-mvc-per-plugin-pool-size: 0
@@ -267,9 +269,9 @@ mms:
 # ---------------------------------------------------------------------------
 # WebSocket
 # ---------------------------------------------------------------------------
---- # WebSocket
+--- # WebSocket（全端推送由 mms-open-api 进程承载时可关闭）
 websocket:
-  enable: true
+  enable: false
   allowed-origins: "*"
 
 # ---------------------------------------------------------------------------

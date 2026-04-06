@@ -167,11 +167,15 @@ redisson:
 --- # 日志
 logging:
   level:
-    # 业务包：开发常用 info；联调 SQL / 框架细节时可改为 debug（日志量显著增加）
-    com.sxpcwlkj: info
+    # 业务包随父 POM logging.level（local/dev 默认 debug，prod 为 warn）；可按需在外置 yml 覆盖
+    com.sxpcwlkj: @logging.level@
+    com.sxpcwlkj.plugin: debug
     org.springframework: warn
-  # 使用 classpath 内 logback.xml（与仓库 resources 中文件一致）
-  config: classpath:logback.xml
+  config: classpath:logback-spring.xml
+
+mms:
+  logging:
+    plugin-sift-min-level: DEBUG
 
 # ---------------------------------------------------------------------------
 # 外置机密（最后加载，覆盖上文同名项）

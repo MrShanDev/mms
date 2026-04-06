@@ -1,5 +1,6 @@
 package com.sxpcwlkj.system.entity.vo;
 
+import com.sxpcwlkj.plugin.PluginSysConfigDef;
 import com.sxpcwlkj.plugin.host.PluginManifestView;
 import lombok.Data;
 
@@ -50,6 +51,11 @@ public class PluginMarketCardVo {
     private String diskVersionsLine;
 
     private PluginManifestView manifest;
+
+    /**
+     * 与 {@link PluginManifestView#sysConfig()} 同源：来自 {@code plugin.json}，未加载插件时由磁盘探测填充。
+     */
+    private List<PluginSysConfigDef> sysConfigSchema;
 
     private String healthBody;
 

@@ -63,7 +63,7 @@ public final class PluginDependencySort {
             if (!Files.isDirectory(verDir)) {
                 continue;
             }
-            var probe = PluginDescriptorProbe.tryRead(verDir);
+            var probe = PluginDescriptorProbe.tryReadForPlugin(verDir, c.pluginId().trim());
             if (probe.isEmpty()) {
                 continue;
             }
@@ -101,7 +101,7 @@ public final class PluginDependencySort {
         Map<String, PluginDescriptor> descByKey = new LinkedHashMap<>();
         Map<String, PluginLoadSlot> slotByKey = new LinkedHashMap<>();
         for (PluginLoadSlot s : slots) {
-            var probe = PluginDescriptorProbe.tryRead(s.versionDir());
+            var probe = PluginDescriptorProbe.tryReadForPlugin(s.versionDir(), s.folderPluginId());
             if (probe.isEmpty()) {
                 continue;
             }

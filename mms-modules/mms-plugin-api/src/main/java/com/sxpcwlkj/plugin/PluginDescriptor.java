@@ -103,6 +103,19 @@ public class PluginDescriptor {
     private Boolean backupOperator;
 
     /**
+     * 可选：声明本插件在 {@code sys_config} 中的可配置项（键为 {@code mms.plugin.{id}.{keySuffix}}）；
+     * 每项可含 {@link PluginSysConfigDef#getValueType()} / {@link PluginSysConfigDef#getOptions()} 驱动管理端表单；
+     * 市场页按此固定行展示，仅支持改值与保存。未声明时仅允许更新库中已有键。
+     */
+    private List<PluginSysConfigDef> sysConfig = new ArrayList<>();
+
+    /**
+     * 可选：安装成功时在各租户下幂等写入 {@code sys_function}（固定主键、{@code remark = "plugin:{id}"}）；
+     * 插件从库表彻底卸载时由宿主删除对应行及 {@code sys_role_function}。
+     */
+    private PluginMenuBootstrapDef menuBootstrap;
+
+    /**
      * 未声明 {@link #runtimeMode} 时的默认行为。
      */
     public PluginRuntimeMode runtimeModeOrDefault() {

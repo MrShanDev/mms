@@ -4,21 +4,30 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.sxpcwlkj.plugin.PluginDescriptor;
+import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
+import com.sxpcwlkj.plugin.PluginSysConfigDef;
+import com.sxpcwlkj.plugin.PluginSysConfigKeys;
+import com.sxpcwlkj.plugin.PluginSysConfigOperations;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
 import com.sxpcwlkj.plugin.host.PluginVersionCoordinate;
 import com.sxpcwlkj.system.entity.SysPlugin;
 import com.sxpcwlkj.system.entity.SysPluginVersion;
+import com.sxpcwlkj.system.entity.SysTenant;
 import com.sxpcwlkj.system.mapper.SysPluginMapper;
 import com.sxpcwlkj.system.mapper.SysPluginVersionMapper;
+import com.sxpcwlkj.system.mapper.SysTenantMapper;
+import com.sxpcwlkj.system.service.PluginOwnedMenuBootstrapService;
 import com.sxpcwlkj.system.service.SysPluginVersionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -31,7 +40,10 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
 
     private final SysPluginVersionMapper sysPluginVersionMapper;
     private final SysPluginMapper sysPluginMapper;
+    private final SysTenantMapper sysTenantMapper;
     private final PluginHostProperties pluginHostProperties;
+    private final ObjectProvider<PluginSysConfigOperations> pluginSysConfigOperations;
+    private final ObjectProvider<PluginOwnedMenuBootstrapService> pluginOwnedMenuBootstrapService;
 
     @Override
     public List<PluginVersionCoordinate> listActiveCoordinatesForTenant(String tenantId) {
@@ -87,6 +99,8 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
             sysPluginVersionMapper.updateById(existing);
         }
         upsertMarketCatalog(descriptor, tid);
+        seedPluginSysConfigKeysIfAbsent(descriptor, tid);
+        pluginOwnedMenuBootstrapService.ifAvailable(s -> s.syncOnInstall(descriptor));
     }
 
     @Override
@@ -151,6 +165,19 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
     }
 
     @Override
+    public boolean hasVersionRowsForPlugin(String pluginId, String tenantId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return false;
+        }
+        String tid = normalizeTenant(tenantId);
+        Long c = sysPluginVersionMapper.selectCount(
+                new LambdaQueryWrapper<SysPluginVersion>()
+                        .eq(SysPluginVersion::getPluginId, pluginId.trim())
+                        .eq(SysPluginVersion::getTenantId, tid));
+        return c != null && c > 0;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void deactivateAllVersionsForPlugin(String pluginId, String tenantId) {
         if (pluginId == null || pluginId.isBlank()) {
@@ -194,6 +221,52 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
             latest.setIsActive(1);
             sysPluginVersionMapper.updateById(latest);
         }
+    }
+
+    /**
+     * 安装成功时：对 {@code plugin.json} 中 {@code sysConfig} 声明的每项，在<strong>插件登记租户</strong>及
+     * {@code sys_tenant} 中<strong>每一租户</strong>下，若 {@code sys_config} 尚无对应 {@code config_key} 则插入
+     *（名称与默认值来自描述符）；已存在则跳过，不覆盖运维已改过的值。
+     * <p>卸载时清理插件专属配置由宿主 {@link com.sxpcwlkj.plugin.host.PluginHostDbBridge} 编排，不在此直接删库。</p>
+     */
+    private void seedPluginSysConfigKeysIfAbsent(PluginDescriptor descriptor, String tenantId) {
+        pluginSysConfigOperations.ifAvailable(ops -> {
+            List<PluginSysConfigDef> defs = descriptor.getSysConfig();
+            if (defs == null || defs.isEmpty()) {
+                return;
+            }
+            String pid = descriptor.getId();
+            Set<String> tenantIds = new LinkedHashSet<>();
+            tenantIds.add(normalizeTenant(tenantId));
+            List<SysTenant> tenants = sysTenantMapper.selectList(new LambdaQueryWrapper<>());
+            if (tenants != null) {
+                for (SysTenant st : tenants) {
+                    if (st != null && st.getTenantId() != null && !st.getTenantId().isBlank()) {
+                        tenantIds.add(st.getTenantId().trim());
+                    }
+                }
+            }
+            for (String tid : tenantIds) {
+                for (PluginSysConfigDef def : defs) {
+                    if (def == null || def.getKeySuffix() == null || def.getKeySuffix().isBlank()) {
+                        continue;
+                    }
+                    try {
+                        PluginSysConfigKeys.validateSuffix(def.getKeySuffix());
+                    } catch (PluginException ex) {
+                        throw new IllegalStateException(
+                                "插件 " + pid + " 的 sysConfig 项非法: " + ex.getMessage(), ex);
+                    }
+                    String suffix = def.getKeySuffix().trim();
+                    String name =
+                            def.getConfigName() != null && !def.getConfigName().isBlank()
+                                    ? def.getConfigName().trim()
+                                    : suffix;
+                    String val = def.getDefaultValue() != null ? def.getDefaultValue() : "";
+                    ops.insertIfAbsent(tid, pid, name, suffix, val);
+                }
+            }
+        });
     }
 
     private void upsertMarketCatalog(PluginDescriptor d, String tenantId) {

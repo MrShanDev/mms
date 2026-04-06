@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- 插件按 MDC 拆分文件时的最低级别（application-*.yml：mms.logging.plugin-sift-min-level） -->
+    <springProperty name="PLUGIN_SIFT_MIN_LEVEL" source="mms.logging.plugin-sift-min-level" defaultValue="INFO"/>
     <property name="log.path" value="./logs"/>
     <property name="console.log.pattern"
               value="%red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{36}%n) - %msg%n"/>
@@ -115,7 +117,7 @@
                     <charset>utf-8</charset>
                 </encoder>
                 <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                    <level>INFO</level>
+                    <level>${PLUGIN_SIFT_MIN_LEVEL}</level>
                 </filter>
             </appender>
         </sift>

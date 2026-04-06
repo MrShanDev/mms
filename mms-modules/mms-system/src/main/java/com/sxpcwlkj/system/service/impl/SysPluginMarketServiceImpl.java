@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -110,6 +112,7 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             card.setDiskLayoutWarning(diskWarn == PluginJarLocationStatus.OK ? null : diskWarn.name());
             card.setSubprocessLaunchEnabled(pluginHostProperties.isSubprocessLaunchEnabled());
             mergeSubprocessRuntime(card, manifestByPlugin.get(pluginId), hostEnabled);
+            card.setSysConfigSchema(pluginLifecycleManager.resolveSysConfigSchema(pluginId));
             out.add(card);
         }
         return out;
@@ -146,7 +149,7 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         }
         String tid = PLUGIN_REGISTRY_TENANT;
         String pid = pluginId.trim();
-        sysPluginVersionService.afterUninstallFromDisk(pid, null, tid);
+        pluginHostDbBridge.onUninstallDiskFinished(pid, null);
         sysPluginMapper.delete(Wrappers.<SysPlugin>lambdaQuery()
                 .eq(SysPlugin::getPluginId, pid)
                 .eq(SysPlugin::getTenantId, tid));
@@ -163,7 +166,6 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         // 先卸载内存中的 ClassLoader / 子进程 / 路由，再删磁盘，避免运行中删除 JAR 失败（尤其 Windows）
         pluginLifecycleManager.unloadAllVersionsOfPlugin(pid);
         pluginLifecycleManager.uninstallFromDisk(pid, null, false);
-        pluginHostDbBridge.onUninstallDiskFinished(pid, null);
         removeCatalogEntry(pid);
         pluginLifecycleManager.publishPluginLifecycleEvent(
                 PluginLifecycleEvent.of(
@@ -195,6 +197,12 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             vo.setName(catalog.getName());
             vo.setIconUrl(catalog.getIconUrl());
             vo.setDescription(catalog.getDescription());
+        }
+        String icon = vo.getIconUrl();
+        if (icon == null || icon.isBlank()) {
+            vo.setIconUrl(
+                    "/system/pluginHost/pluginLogo?pluginId="
+                            + URLEncoder.encode(pluginId, StandardCharsets.UTF_8));
         }
         if (vo.getName() == null || vo.getName().isBlank()) {
             vo.setName(manifest != null && manifest.name() != null && !manifest.name().isBlank()

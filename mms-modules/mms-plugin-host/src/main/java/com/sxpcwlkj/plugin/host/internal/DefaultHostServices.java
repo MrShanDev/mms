@@ -10,7 +10,6 @@ import com.sxpcwlkj.plugin.PluginDataAccess;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.PluginSchemaAccess;
-import com.sxpcwlkj.plugin.PluginSysConfigKeys;
 import com.sxpcwlkj.plugin.PluginSysConfigOperations;
 import com.sxpcwlkj.plugin.PluginSysConfigRow;
 import com.sxpcwlkj.plugin.data.EmptyHostDataService;
@@ -230,8 +229,7 @@ public final class DefaultHostServices implements HostServices {
         if (op == null) {
             return Optional.empty();
         }
-        String full = PluginSysConfigKeys.fullKey(plugin.getId(), keySuffix);
-        return op.get(resolveTenantForPluginConfig(), full);
+        return op.get(resolveTenantForPluginConfig(), plugin.getId(), keySuffix);
     }
 
     @Override
@@ -241,9 +239,13 @@ public final class DefaultHostServices implements HostServices {
         if (op == null) {
             throw new PluginException("宿主未装配 PluginSysConfigOperations，无法读写 sys_config");
         }
-        String full = PluginSysConfigKeys.fullKey(plugin.getId(), keySuffix);
         String name = configName != null && !configName.isBlank() ? configName.trim() : keySuffix.trim();
-        op.upsert(resolveTenantForPluginConfig(), name, full, value == null ? "" : value);
+        op.upsert(
+                resolveTenantForPluginConfig(),
+                plugin.getId(),
+                name,
+                keySuffix,
+                value == null ? "" : value);
     }
 
     @Override

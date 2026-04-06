@@ -165,9 +165,17 @@ spring:
 --- # 日志配置
 logging:
   level:
-    com.sxpcwlkj: info
+    # 与父 POM logging.level 一致（local 默认 debug；注释中勿写过滤占位符以免被 Maven 替换）
+    com.sxpcwlkj: @logging.level@
+    # 插件 API / 宿主 / server：安装与生命周期排错（比业务包更细）
+    com.sxpcwlkj.plugin: trace
     org.springframework: warn
-  config: classpath:logback.xml
+  config: classpath:logback-spring.xml
+
+mms:
+  logging:
+    # 插件按 MDC 写入 logs/plugins/*.log 时的 Threshold（local 放宽，便于看 DEBUG）
+    plugin-sift-min-level: DEBUG
 
 
 # 企业微信机器人配置

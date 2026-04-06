@@ -78,7 +78,7 @@ public interface HostServices {
     void pluginSysConfigPut(PluginDescriptor plugin, String keySuffix, String configName, String value);
 
     /**
-     * 列出当前租户下该插件前缀下全部配置项。
+     * 列出当前租户下归属本插件的配置项（与库表登记的 pluginId 做最长前缀匹配，避免点分 id 父子前缀混淆）。
      */
     List<PluginSysConfigRow> pluginSysConfigList(PluginDescriptor plugin);
 }

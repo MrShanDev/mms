@@ -189,9 +189,13 @@ springdoc:
 --- # 日志
 logging:
   level:
-    com.sxpcwlkj: warn
+    com.sxpcwlkj: @logging.level@
     org.springframework: warn
-  config: classpath:logback.xml
+  config: classpath:logback-spring.xml
+
+mms:
+  logging:
+    plugin-sift-min-level: INFO
 
 # ---------------------------------------------------------------------------
 # MyBatis-Plus（生产关闭 SQL 标准输出）

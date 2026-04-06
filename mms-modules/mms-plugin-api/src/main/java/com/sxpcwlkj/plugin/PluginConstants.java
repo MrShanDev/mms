@@ -14,6 +14,11 @@ public final class PluginConstants {
     public static final String DESCRIPTOR_PATH_IN_JAR = "META-INF/mms/plugin.json";
 
     /**
+     * 插件默认封面图在 JAR 内的约定路径（PNG）；与 {@link #DESCRIPTOR_PATH_IN_JAR} 同包打入主 JAR。
+     */
+    public static final String LOGO_PATH_IN_JAR = "META-INF/mms/logo.png";
+
+    /**
      * 可选：依赖指纹清单路径（JAR 内 UTF-8 文本）。
      * <p><b>GAV 生成规范</b>：每行一条 Maven 坐标 {@code groupId:artifactId:version}（无多余空格），
      * 按字典序排序整文件后写入；{@link PluginDescriptor#getDependencyFingerprintSha256()} 为该文件<strong>原始字节</strong>
