@@ -164,7 +164,6 @@ public class SysFunctionServiceImpl implements SysFunctionService {
             menu.setPath(child.getPath());
             menu.setName(child.getName());
             menu.setComponent(child.getComponent());
-            menu.setRedirect(child.getComponentName());
 
             // 菜单名称
 //                private String title;
@@ -201,6 +200,12 @@ public class SysFunctionServiceImpl implements SysFunctionService {
             // 递归构建子树
             List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
             menu.setChildren(grandchildren);
+            if (!grandchildren.isEmpty()) {
+                AdminMenuTree first = grandchildren.get(0);
+                if (first != null && StringUtil.isNotEmpty(first.getPath())) {
+                    menu.setRedirect(first.getPath());
+                }
+            }
 
             result.add(menu);
         }

@@ -547,7 +547,6 @@ public class SysUserServiceImpl implements SysUserService {
             menu.setPath(child.getPath());
             menu.setName(child.getName());
             menu.setComponent(child.getComponent());
-            menu.setRedirect(child.getComponentName());
 
             Map<String, Object> meta = new HashMap<>();
 
@@ -566,6 +565,13 @@ public class SysUserServiceImpl implements SysUserService {
             // 递归构建子树
             List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
             menu.setChildren(grandchildren);
+            // 勿用 component_name 作为 redirect：若误填中文标题，Vue Router 会按相对路径解析成 /父路径/中文，导致 404
+            if (!grandchildren.isEmpty()) {
+                AdminMenuTree first = grandchildren.get(0);
+                if (first != null && StringUtil.isNotEmpty(first.getPath())) {
+                    menu.setRedirect(first.getPath());
+                }
+            }
             result.add(menu);
         }
 

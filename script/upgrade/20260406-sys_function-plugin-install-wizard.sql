@@ -8,7 +8,7 @@ INSERT INTO `sys_function` (
   `keep_alive`, `always_show`, `is_fast`, `remark`, `tenant_id`, `revision`,
   `created_by`, `created_time`, `updated_by`, `updated_time`
 ) VALUES (
-  2030310000000000002, '3', '/system/pluginInstallWizard', '插件安装向导', 'system/pluginInstallWizard/index', NULL, NULL, '插件安装向导',
+  2030310000000000002, '3', '/system/pluginInstallWizard', '插件安装向导', 'system/pluginInstallWizard/index', NULL, '插件安装向导', NULL,
   'super_admin', 1, 98, 'iconfont icon-Upload', 1, -1, -1, -1, '',
   1, -1, 0, NULL, '000000', 1,
   '1', NOW(), '1', NOW()
