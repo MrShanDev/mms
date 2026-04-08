@@ -117,13 +117,16 @@ public class SysUserServiceImpl implements SysUserService {
     public SysUserVo selectVoById(String userId) {
         // 等级过滤：等级低的用户，不能查看比他等级高的用户
         if (!LoginObject.getLoginSuper()) {
-            // 1. 禁止非超级管理员查看超级管理员(ID=1)详情
-            if (LoginObject.SUPER_ID.equals(userId)) {
+            List<SysRoleVo> targetRoles = sysRoleMapper.selectByUserIdList(userId);
+            // 1. 禁止非超级管理员查看拥有 super_admin 角色的账号详情
+            if (targetRoles.stream()
+                .filter(Objects::nonNull)
+                .map(SysRoleVo::getCode)
+                .anyMatch(SystemCommonEnum.SUPER_ADMIN.getCode()::equals)) {
                 return null;
             }
 
             Integer minLevel = getCurrentUserMinLevel();
-            List<SysRoleVo> targetRoles = sysRoleMapper.selectByUserIdList(userId);
             // 2. 如果目标用户拥有任何职级高于当前用户(level更小)的角色，则禁止查看
             boolean hasHigherLevel = targetRoles.stream()
                 .anyMatch(r -> r.getLevel() != null && r.getLevel() < minLevel);
@@ -190,8 +193,7 @@ public class SysUserServiceImpl implements SysUserService {
         String[] array = DataUtil.getCatStr(ids, ",");
         int rows = 0;
         for (String id:array){
-            //超级管理员不能删除
-            if (id.equals(LoginObject.SUPER_ID)) {
+            if (userHasSuperAdminRole(id)) {
                 throw new MmsException("超级管理员不能删除!");
             }
             SysUser sysUser = baseMapper.selectById(id);
@@ -231,8 +233,10 @@ public class SysUserServiceImpl implements SysUserService {
         // 等级过滤：等级低的用户，看不到比他等级高的用户 (等级值越小，职级越高)
         if (!LoginObject.getLoginSuper()) {
             Integer minLevel = getCurrentUserMinLevel();
-            // 1. 显式排除超级管理员 (ID='1')
-            wrapper.ne("u.user_id", LoginObject.SUPER_ID);
+            // 1. 排除拥有 super_admin 角色的用户
+            wrapper.apply(
+                "NOT EXISTS (SELECT 1 FROM sys_user_role sur_sa JOIN sys_role sr_sa ON sur_sa.role_id = sr_sa.id WHERE sur_sa.user_id = u.user_id AND sr_sa.code = {0})",
+                SystemCommonEnum.SUPER_ADMIN.getCode());
             // 2. 排除掉 拥有 “比当前用户最高职级(minLevel) 还要高(level < minLevel)” 的角色的用户
             wrapper.apply("NOT EXISTS (SELECT 1 FROM sys_user_role sur JOIN sys_role sr ON sur.role_id = sr.id WHERE sur.user_id = u.user_id AND sr.level < {0})", minLevel);
         }
@@ -307,17 +311,30 @@ public class SysUserServiceImpl implements SysUserService {
             userVo.setRoleCodes(sysRoleVos.stream().map(SysRoleVo::getCode).toArray(String[]::new));
             //资源集
             userVo.setButCodes(list.toArray(String[]::new));
-            //===================超级管理员拥有所有==========================
-            if (userVo.getUserId().equals(SystemCommonEnum.SUPER_ADMIN.getValue().toString())) {
+            //===================具备 super_admin 角色的账号拉全量启用菜单（不按 user_id / 登录名）==========================
+            boolean loginIsSuperAdmin =
+                sysRoleVos.stream()
+                    .filter(Objects::nonNull)
+                    .map(SysRoleVo::getCode)
+                    .filter(Objects::nonNull)
+                    .anyMatch(SystemCommonEnum.SUPER_ADMIN.getCode()::equals);
+            if (loginIsSuperAdmin) {
                 sysRoles = sysRoleMapper.selectList(new LambdaQueryWrapper<SysRole>()
                     .eq(SysRole::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-                    .like(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode())
+                    .eq(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode())
                     .orderByAsc(SysRole::getSort).last("LIMIT 1"));
                 sysRoleVos = BeanCopyUtil.convert(sysRoles, SysRoleVo.class);
+                if (sysRoleVos == null || sysRoleVos.isEmpty()) {
+                    log.warn("未找到启用的 super_admin 角色行，使用占位角色装配全量菜单 userId={}", userVo.getUserId());
+                    SysRoleVo holder = new SysRoleVo();
+                    holder.setCode(SystemCommonEnum.SUPER_ADMIN.getCode());
+                    holder.setName("超级管理员");
+                    sysRoleVos = new ArrayList<>();
+                    sysRoleVos.add(holder);
+                }
 
                 List<SysFunction> functionList = sysFunctionMapper.selectList(new LambdaQueryWrapper<SysFunction>().eq(SysFunction::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysFunction::getSort));
                 List<SysFunctionVo> roleFunctionVoList = BeanCopyUtil.convert(functionList, SysFunctionVo.class);
-                assert sysRoleVos != null;
                 sysRoleVos.get(0).setSysFunctionVoList(roleFunctionVoList);
                 assert roleFunctionVoList != null;
                 list = new ArrayList<>();
@@ -624,5 +641,17 @@ public class SysUserServiceImpl implements SysUserService {
         return result;
     }
 
+    /** 目标用户是否拥有 {@link SystemCommonEnum#SUPER_ADMIN} 角色（与菜单全量、删除保护等口径一致）。 */
+    private boolean userHasSuperAdminRole(String userId) {
+        List<SysRoleVo> roles = sysRoleMapper.selectByUserIdList(userId);
+        if (roles == null || roles.isEmpty()) {
+            return false;
+        }
+        return roles.stream()
+            .filter(Objects::nonNull)
+            .map(SysRoleVo::getCode)
+            .filter(Objects::nonNull)
+            .anyMatch(SystemCommonEnum.SUPER_ADMIN.getCode()::equals);
+    }
 
 }

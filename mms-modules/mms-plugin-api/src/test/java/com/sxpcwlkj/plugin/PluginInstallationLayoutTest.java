@@ -14,6 +14,7 @@ class PluginInstallationLayoutTest {
         Path pr = PluginInstallationLayout.pluginRoot(root, "com.acme.a", "1.0.0");
         assertEquals(Path.of("/tmp/plugins/com.acme.a/1.0.0"), pr);
         assertEquals(pr.resolve("lib"), PluginInstallationLayout.libDirectory(root, "com.acme.a", "1.0.0"));
+        assertEquals(pr.resolve("web"), PluginInstallationLayout.webDirectory(root, "com.acme.a", "1.0.0"));
     }
 
     @Test

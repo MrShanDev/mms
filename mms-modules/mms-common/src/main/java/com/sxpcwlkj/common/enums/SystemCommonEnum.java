@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum SystemCommonEnum implements IEnum<Integer> {
 
     /**
-     * 超级管理员 ID   code
+     * 超级管理员：以 {@code code = super_admin} 为唯一能力标识（菜单全量、{@code LoginObject#getLoginSuper} 等）；{@code value = 1} 仅为历史种子内置主键提示，业务勿再按主键判定。
      */
     SUPER_ADMIN(1, "super_admin","超级管理员ID/CODE"),
 

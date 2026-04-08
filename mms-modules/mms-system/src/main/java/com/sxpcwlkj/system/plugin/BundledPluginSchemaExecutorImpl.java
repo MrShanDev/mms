@@ -33,10 +33,12 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
     public BundledInstallSqlResult executeBundledInstallSql(String sql) {
         List<String> lines = new ArrayList<>();
         List<String> insertedFunctionIds = new ArrayList<>();
+        List<String> insertedDictIds = new ArrayList<>();
+        List<String> insertedDictDataIds = new ArrayList<>();
         List<String> stmts = BundledPluginSqlSplitter.splitStatements(sql);
         if (stmts.isEmpty()) {
             lines.add("（install.sql 无有效 SQL 语句，跳过）");
-            return new BundledInstallSqlResult(lines, insertedFunctionIds);
+            return new BundledInstallSqlResult(lines, insertedFunctionIds, insertedDictIds, insertedDictDataIds);
         }
         if (stmts.size() > MAX_STATEMENTS) {
             throw new IllegalArgumentException("install.sql 语句条数超过上限 " + MAX_STATEMENTS);
@@ -68,15 +70,44 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
                 }
                 BundledPluginInstallSqlGuard.assertStatementAllowed(unit);
                 n++;
-                String fid = BundledInstallSqlSupport.extractFirstFunctionIdFromInsert(unit);
-                if (fid != null && !fid.isBlank() && sysFunctionIdExists(fid.trim())) {
-                    lines.add(
-                            String.format(
-                                    Locale.ROOT,
-                                    "[SKIP] #%d sys_function.id 已存在，已跳过 — %s",
-                                    n,
-                                    preview(unit)));
-                    continue;
+                BundledInstallSqlSupport.InstallSqlInsertKind kind =
+                        BundledInstallSqlSupport.classifyInstallInsert(unit);
+                if (kind == BundledInstallSqlSupport.InstallSqlInsertKind.UNSUPPORTED) {
+                    throw new IllegalArgumentException("install.sql 含不支持的 INSERT（仅允许 sys_function/sys_dict/sys_dict_data）");
+                }
+                String rowId = BundledInstallSqlSupport.extractFirstInsertRowId(unit);
+                if (rowId != null && !rowId.isBlank()) {
+                    String idTrim = rowId.trim();
+                    String skipWhat = null;
+                    switch (kind) {
+                        case SYS_FUNCTION -> {
+                            if (sysFunctionIdExists(idTrim)) {
+                                skipWhat = "sys_function.id";
+                            }
+                        }
+                        case SYS_DICT -> {
+                            if (sysDictIdExists(idTrim)) {
+                                skipWhat = "sys_dict.id";
+                            }
+                        }
+                        case SYS_DICT_DATA -> {
+                            if (sysDictDataIdExists(idTrim)) {
+                                skipWhat = "sys_dict_data.id";
+                            }
+                        }
+                        default -> {
+                        }
+                    }
+                    if (skipWhat != null) {
+                        lines.add(
+                                String.format(
+                                        Locale.ROOT,
+                                        "[SKIP] #%d %s 已存在，已跳过 — %s",
+                                        n,
+                                        skipWhat,
+                                        preview(unit)));
+                        continue;
+                    }
                 }
                 long t0 = System.currentTimeMillis();
                 try {
@@ -87,8 +118,15 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
                         return null;
                     });
                     lines.add(String.format(Locale.ROOT, "[OK] #%d (%d ms) %s", n, System.currentTimeMillis() - t0, preview(unit)));
-                    if (fid != null && !fid.isBlank()) {
-                        insertedFunctionIds.add(fid.trim());
+                    if (rowId != null && !rowId.isBlank()) {
+                        String idTrim = rowId.trim();
+                        switch (kind) {
+                            case SYS_FUNCTION -> insertedFunctionIds.add(idTrim);
+                            case SYS_DICT -> insertedDictIds.add(idTrim);
+                            case SYS_DICT_DATA -> insertedDictDataIds.add(idTrim);
+                            default -> {
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     if (isDuplicateKeyException(e)) {
@@ -99,13 +137,15 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
                     throw new BundledInstallSqlExecutionException(
                             new ArrayList<>(lines),
                             new ArrayList<>(insertedFunctionIds),
+                            new ArrayList<>(insertedDictIds),
+                            new ArrayList<>(insertedDictDataIds),
                             "install.sql 第 " + n + " 条失败: " + e.getMessage(),
                             e);
                 }
             }
         }
         lines.add("install.sql 共处理 " + n + " 条插入（含按主键预检跳过与重复键跳过）。");
-        return new BundledInstallSqlResult(lines, insertedFunctionIds);
+        return new BundledInstallSqlResult(lines, insertedFunctionIds, insertedDictIds, insertedDictDataIds);
     }
 
     private boolean sysFunctionIdExists(String id) {
@@ -113,6 +153,27 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
             Number c =
                     jdbcTemplate.queryForObject(
                             "SELECT COUNT(*) FROM sys_function WHERE id = ?", Number.class, id);
+            return c != null && c.longValue() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean sysDictIdExists(String id) {
+        try {
+            Number c =
+                    jdbcTemplate.queryForObject("SELECT COUNT(*) FROM sys_dict WHERE id = ?", Number.class, id);
+            return c != null && c.longValue() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean sysDictDataIdExists(String id) {
+        try {
+            Number c =
+                    jdbcTemplate.queryForObject(
+                            "SELECT COUNT(*) FROM sys_dict_data WHERE id = ?", Number.class, id);
             return c != null && c.longValue() > 0;
         } catch (Exception e) {
             return false;

@@ -25,6 +25,7 @@ import com.sxpcwlkj.plugin.host.internal.PluginLoadedPeerDependencyValidator;
 import com.sxpcwlkj.plugin.host.internal.PluginMdc;
 import com.sxpcwlkj.plugin.host.internal.PluginReflectionSupport;
 import com.sxpcwlkj.plugin.host.internal.PluginSubprocessManager;
+import com.sxpcwlkj.plugin.host.internal.PluginWebBundleExtractor;
 import com.sxpcwlkj.plugin.host.internal.PortLeaseTracker;
 import com.sxpcwlkj.plugin.host.internal.PortManager;
 import com.sxpcwlkj.plugin.host.web.PluginMvcExecutorRegistry;
@@ -918,22 +919,23 @@ public class PluginLifecycleManager {
     }
 
     /**
-     * 卸载磁盘前：从仍存在的安装目录读取各版本主 JAR 内 {@code script/install.sql}，合并解析出的 {@code sys_function.id}（去重）。
+     * 卸载磁盘前：从仍存在的安装目录读取各版本主 JAR 内 {@code script/install.sql}，合并解析出的白名单 INSERT 主键（去重）。
      *
      * @param versionOrNull 非空时仅处理该版本目录
      */
-    public List<String> collectBundledInstallSqlFunctionIds(String pluginId, String versionOrNull) {
+    public BundledInstallSqlSupport.DeclaredInstallSqlIds collectBundledInstallSqlDeclaredIds(
+            String pluginId, String versionOrNull) {
         if (pluginId == null || pluginId.isBlank()) {
-            return List.of();
+            return new BundledInstallSqlSupport.DeclaredInstallSqlIds(List.of(), List.of(), List.of());
         }
         String pid = pluginId.trim();
         Path root = resolveRoot();
         if (!ensurePluginsRoot(root)) {
-            return List.of();
+            return new BundledInstallSqlSupport.DeclaredInstallSqlIds(List.of(), List.of(), List.of());
         }
         Path base = root.resolve(PluginInstallationLayout.safeSegment(pid));
         if (!Files.isDirectory(base)) {
-            return List.of();
+            return new BundledInstallSqlSupport.DeclaredInstallSqlIds(List.of(), List.of(), List.of());
         }
         List<String> versions = new ArrayList<>();
         if (versionOrNull != null && !versionOrNull.isBlank()) {
@@ -944,11 +946,13 @@ public class PluginLifecycleManager {
                         .sorted()
                         .forEach(p -> versions.add(p.getFileName().toString()));
             } catch (IOException e) {
-                log.debug("collectBundledInstallSqlFunctionIds 列举版本失败: {}", e.getMessage());
-                return List.of();
+                log.debug("collectBundledInstallSqlDeclaredIds 列举版本失败: {}", e.getMessage());
+                return new BundledInstallSqlSupport.DeclaredInstallSqlIds(List.of(), List.of(), List.of());
             }
         }
-        LinkedHashSet<String> ids = new LinkedHashSet<>();
+        LinkedHashSet<String> functionIds = new LinkedHashSet<>();
+        LinkedHashSet<String> dictIds = new LinkedHashSet<>();
+        LinkedHashSet<String> dictDataIds = new LinkedHashSet<>();
         for (String ver : versions) {
             try {
                 Path verDir = PluginInstallationLayout.pluginRoot(root, pid, ver);
@@ -960,12 +964,27 @@ public class PluginLifecycleManager {
                     continue;
                 }
                 readBundledInstallSql(probeOpt.get().descriptorJar())
-                        .ifPresent(sql -> ids.addAll(BundledInstallSqlSupport.collectAllFunctionIds(sql)));
+                        .ifPresent(
+                                sql -> {
+                                    BundledInstallSqlSupport.DeclaredInstallSqlIds d =
+                                            BundledInstallSqlSupport.collectAllDeclaredIds(sql);
+                                    functionIds.addAll(d.sysFunctionIds());
+                                    dictIds.addAll(d.sysDictIds());
+                                    dictDataIds.addAll(d.sysDictDataIds());
+                                });
             } catch (Exception e) {
-                log.debug("collectBundledInstallSqlFunctionIds {}@{}: {}", pid, ver, e.getMessage());
+                log.debug("collectBundledInstallSqlDeclaredIds {}@{}: {}", pid, ver, e.getMessage());
             }
         }
-        return List.copyOf(ids);
+        return new BundledInstallSqlSupport.DeclaredInstallSqlIds(
+                List.copyOf(functionIds), List.copyOf(dictIds), List.copyOf(dictDataIds));
+    }
+
+    /**
+     * @see #collectBundledInstallSqlDeclaredIds
+     */
+    public List<String> collectBundledInstallSqlFunctionIds(String pluginId, String versionOrNull) {
+        return collectBundledInstallSqlDeclaredIds(pluginId, versionOrNull).sysFunctionIds();
     }
 
     private Optional<String> resolveBundledLogoProbeVersion(String pluginId, String versionOrNull) {
@@ -1225,6 +1244,13 @@ public class PluginLifecycleManager {
         Files.copy(tempJarFile, target, StandardCopyOption.REPLACE_EXISTING);
         Files.createDirectories(PluginInstallationLayout.dataDirectory(root, d.getId(), d.getVersion()));
         Files.createDirectories(PluginInstallationLayout.temporaryDirectory(root, d.getId(), d.getVersion()));
+        Path webRoot = PluginInstallationLayout.webDirectory(root, d.getId(), d.getVersion());
+        try {
+            PluginWebBundleExtractor.extractFromJar(tempJarFile, webRoot);
+            log.info("插件联邦静态资源目录已同步: {}@{} -> {}", d.getId(), d.getVersion(), webRoot);
+        } catch (IOException e) {
+            throw new PluginException("解压插件联邦前端失败: " + e.getMessage(), e);
+        }
         return d;
     }
 

@@ -12,6 +12,7 @@ import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
 import com.sxpcwlkj.plugin.BundledInstallSqlExecutionException;
 import com.sxpcwlkj.plugin.BundledInstallSqlResult;
+import com.sxpcwlkj.plugin.BundledInstallSqlSupport;
 import com.sxpcwlkj.plugin.BundledPluginSchemaExecutor;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginDescriptorReader;
@@ -384,8 +385,14 @@ public class PluginHostController {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
             return R.fail("pluginId 不能为空");
         }
-        List<String> installSqlIds = pluginLifecycleManager.collectBundledInstallSqlFunctionIds(body.pluginId(), body.version());
-        pluginHostDbBridge.ifAvailable(b -> b.removeInstallSqlSysFunctionRows(installSqlIds));
+        BundledInstallSqlSupport.DeclaredInstallSqlIds installIds =
+                pluginLifecycleManager.collectBundledInstallSqlDeclaredIds(body.pluginId(), body.version());
+        pluginHostDbBridge.ifAvailable(
+                b ->
+                        b.removeBundledInstallSqlInsertRows(
+                                installIds.sysFunctionIds(),
+                                installIds.sysDictIds(),
+                                installIds.sysDictDataIds()));
         pluginLifecycleManager.uninstallFromDisk(body.pluginId(), body.version());
         pluginHostDbBridge.ifAvailable(b -> b.onUninstallDiskFinished(body.pluginId(), body.version()));
         pluginLifecycleManager.reload();
@@ -428,7 +435,7 @@ public class PluginHostController {
     /**
      * 上传 JAR：先校验 {@code plugin.json} 结构与宿主兼容性，写入磁盘成功后写入库表激活版本，再全量重载。
      * <p>若 {@code skipBundledSchemaExecution=false}（默认），则依次自动执行 JAR 内 {@code META-INF/mms/schema.sql}（白名单 DDL）、
-     * {@code script/install.sql}（仅允许 {@code INSERT INTO sys_function}，主键重复则跳过该条），再落盘安装。</p>
+     * {@code script/install.sql}（白名单：{@code INSERT [IGNORE] INTO sys_function | sys_dict | sys_dict_data}；主键已存在则跳过），再落盘安装。</p>
      */
     @SaCheckRole("super_admin")
     @PostMapping(value = "/install", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -603,17 +610,30 @@ public class PluginHostController {
     }
 
     /**
-     * install.sql 经 JdbcTemplate 逐条自动提交，与磁盘/入库不在同一事务；安装后续失败时需按 id 删除本次实际插入的菜单行。
+     * install.sql 经 JdbcTemplate 逐条自动提交，与磁盘/入库不在同一事务；安装后续失败时需按主键删除本次实际插入的字典与菜单行。
      */
-    private void rollbackBundledInstallSqlMenuRows(List<String> insertedSysFunctionIds, ProgressEmitter progress) {
-        if (insertedSysFunctionIds == null || insertedSysFunctionIds.isEmpty()) {
+    private void rollbackBundledInstallSqlInsertedRows(
+            List<String> insertedSysFunctionIds,
+            List<String> insertedSysDictIds,
+            List<String> insertedSysDictDataIds,
+            ProgressEmitter progress) {
+        boolean any =
+                (insertedSysDictDataIds != null && !insertedSysDictDataIds.isEmpty())
+                        || (insertedSysDictIds != null && !insertedSysDictIds.isEmpty())
+                        || (insertedSysFunctionIds != null && !insertedSysFunctionIds.isEmpty());
+        if (!any) {
             return;
         }
-        pluginHostDbBridge.ifAvailable(b -> b.removeInstallSqlSysFunctionRows(insertedSysFunctionIds));
+        pluginHostDbBridge.ifAvailable(
+                b ->
+                        b.removeBundledInstallSqlInsertRows(
+                                insertedSysFunctionIds, insertedSysDictIds, insertedSysDictDataIds));
         if (progress != null) {
-            progress.line(
-                    "info",
-                    "安装失败：已删除本次 install.sql 实际插入的 sys_function（共 " + insertedSysFunctionIds.size() + " 条）");
+            int n =
+                    (insertedSysDictDataIds != null ? insertedSysDictDataIds.size() : 0)
+                            + (insertedSysDictIds != null ? insertedSysDictIds.size() : 0)
+                            + (insertedSysFunctionIds != null ? insertedSysFunctionIds.size() : 0);
+            progress.line("info", "安装失败：已回滚本次 install.sql 实际插入的行（共 " + n + " 条主键）");
         }
     }
 
@@ -632,8 +652,10 @@ public class PluginHostController {
         emit.accept("info", "已接收插件包，开始安装流程…");
         List<String> schemaLog = null;
         List<String> installSqlLog = null;
-        /** 本次 install.sql 实际 INSERT 成功的 sys_function.id，后续步骤失败时用于删行回滚 */
-        List<String> installSqlInsertedIds = List.of();
+        /** 本次 install.sql 实际 INSERT 成功的主键，后续步骤失败时用于删行回滚 */
+        List<String> installSqlInsertedFunctionIds = List.of();
+        List<String> installSqlInsertedDictIds = List.of();
+        List<String> installSqlInsertedDictDataIds = List.of();
         if (!skipBundledSchemaExecution) {
             Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(tempJar);
             Optional<String> installOpt = pluginLifecycleManager.readBundledInstallSql(tempJar);
@@ -676,7 +698,9 @@ public class PluginHostController {
                         BundledInstallSqlResult installOutcome =
                                 executor.executeBundledInstallSql(installOpt.get());
                         installSqlLog = installOutcome.logLines();
-                        installSqlInsertedIds = installOutcome.insertedSysFunctionIds();
+                        installSqlInsertedFunctionIds = installOutcome.insertedSysFunctionIds();
+                        installSqlInsertedDictIds = installOutcome.insertedSysDictIds();
+                        installSqlInsertedDictDataIds = installOutcome.insertedSysDictDataIds();
                         emit.accept("info", "菜单 SQL：install.sql 已处理完成");
                         if (installSqlLog != null) {
                             for (String line : installSqlLog) {
@@ -687,7 +711,9 @@ public class PluginHostController {
                         }
                     } catch (BundledInstallSqlExecutionException partial) {
                         installSqlLog = partial.getLogLines();
-                        installSqlInsertedIds = partial.getInsertedFunctionIds();
+                        installSqlInsertedFunctionIds = partial.getInsertedFunctionIds();
+                        installSqlInsertedDictIds = partial.getInsertedDictIds();
+                        installSqlInsertedDictDataIds = partial.getInsertedDictDataIds();
                         if (installSqlLog != null) {
                             for (String line : installSqlLog) {
                                 if (line != null && !line.isBlank()) {
@@ -695,7 +721,11 @@ public class PluginHostController {
                                 }
                             }
                         }
-                        rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+                        rollbackBundledInstallSqlInsertedRows(
+                                installSqlInsertedFunctionIds,
+                                installSqlInsertedDictIds,
+                                installSqlInsertedDictDataIds,
+                                progress);
                         emit.accept("error", "install.sql：执行失败 — " + partial.getMessage());
                         return InstallRunResult.failure(
                                 PluginInstallStreamResultCode.INSTALL_SQL_EXECUTION_FAILED,
@@ -722,12 +752,20 @@ public class PluginHostController {
             installed = pluginLifecycleManager.installJarFromUpload(tempJar);
             emit.accept("info", "JAR 已落盘：" + installed.getId() + " @ " + installed.getVersion());
         } catch (PluginException ex) {
-            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            rollbackBundledInstallSqlInsertedRows(
+                    installSqlInsertedFunctionIds,
+                    installSqlInsertedDictIds,
+                    installSqlInsertedDictDataIds,
+                    progress);
             emit.accept("error", "磁盘安装失败 — " + ex.getMessage());
             return InstallRunResult.failure(
                     PluginInstallStreamResultCode.JAR_VALIDATION_FAILED, "插件包未通过校验: " + ex.getMessage());
         } catch (Exception ex) {
-            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            rollbackBundledInstallSqlInsertedRows(
+                    installSqlInsertedFunctionIds,
+                    installSqlInsertedDictIds,
+                    installSqlInsertedDictDataIds,
+                    progress);
             emit.accept("error", "磁盘安装失败 — " + ex.getMessage());
             return InstallRunResult.failure(
                     PluginInstallStreamResultCode.JAR_INSTALL_FAILED, "插件包解析或校验失败: " + ex.getMessage());
@@ -748,10 +786,14 @@ public class PluginHostController {
                 pluginLifecycleManager.uninstallFromDisk(installed.getId(), installed.getVersion());
             } catch (Exception ignored) {
             }
-            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            rollbackBundledInstallSqlInsertedRows(
+                    installSqlInsertedFunctionIds,
+                    installSqlInsertedDictIds,
+                    installSqlInsertedDictDataIds,
+                    progress);
             return InstallRunResult.failure(
                     PluginInstallStreamResultCode.DATABASE_REGISTRATION_FAILED,
-                    "已回滚磁盘与本次 install.sql 菜单行。入库失败: " + ex.getMessage());
+                    "已回滚磁盘与本次 install.sql 写入。入库失败: " + ex.getMessage());
         }
 
         emit.accept("info", "正在全量重载插件（类加载、路由、联邦资源等）…");

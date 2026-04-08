@@ -166,8 +166,11 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         }
         String pid = pluginId.trim();
         try {
-            List<String> installIds = pluginLifecycleManager.collectBundledInstallSqlFunctionIds(pid, null);
-            pluginHostDbBridge.removeInstallSqlSysFunctionRows(installIds);
+            var installDeclared = pluginLifecycleManager.collectBundledInstallSqlDeclaredIds(pid, null);
+            pluginHostDbBridge.removeBundledInstallSqlInsertRows(
+                    installDeclared.sysFunctionIds(),
+                    installDeclared.sysDictIds(),
+                    installDeclared.sysDictDataIds());
         } catch (Exception e) {
             log.warn("市场删除插件：按 install.sql 清理 sys_function 失败（继续卸载磁盘） pluginId={} — {}", pid, e.getMessage());
         }

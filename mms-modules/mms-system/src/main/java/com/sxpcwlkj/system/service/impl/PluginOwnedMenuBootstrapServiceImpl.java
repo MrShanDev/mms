@@ -4,9 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginMenuBootstrapDef;
 import com.sxpcwlkj.plugin.PluginMenuItemDef;
+import com.sxpcwlkj.system.entity.SysDict;
+import com.sxpcwlkj.system.entity.SysDictData;
 import com.sxpcwlkj.system.entity.SysFunction;
 import com.sxpcwlkj.system.entity.SysTenant;
 import com.sxpcwlkj.system.mapper.PluginOwnedMenuTenantFreeMapper;
+import com.sxpcwlkj.system.mapper.SysDictDataMapper;
+import com.sxpcwlkj.system.mapper.SysDictMapper;
 import com.sxpcwlkj.system.mapper.SysFunctionMapper;
 import com.sxpcwlkj.system.mapper.SysRoleFunctionMapper;
 import com.sxpcwlkj.system.mapper.SysTenantMapper;
@@ -35,6 +39,8 @@ public class PluginOwnedMenuBootstrapServiceImpl implements PluginOwnedMenuBoots
     private final SysFunctionMapper sysFunctionMapper;
     private final SysRoleFunctionMapper sysRoleFunctionMapper;
     private final SysTenantMapper sysTenantMapper;
+    private final SysDictMapper sysDictMapper;
+    private final SysDictDataMapper sysDictDataMapper;
 
     static String remarkFor(String pluginId) {
         return "plugin:" + pluginId.trim();
@@ -225,6 +231,36 @@ public class PluginOwnedMenuBootstrapServiceImpl implements PluginOwnedMenuBoots
                 sysRoleFunctionMapper.deleteByFunctionIdAndTenant(id, tid.trim());
                 sysFunctionMapper.deleteByIdAndTenant(id, tid.trim());
             }
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeSysDictDataRowsByIds(List<String> dictDataIds) {
+        if (dictDataIds == null || dictDataIds.isEmpty()) {
+            return;
+        }
+        for (String raw : dictDataIds) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String id = raw.trim();
+            sysDictDataMapper.delete(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getId, id));
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeSysDictRowsByIds(List<String> dictIds) {
+        if (dictIds == null || dictIds.isEmpty()) {
+            return;
+        }
+        for (String raw : dictIds) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String id = raw.trim();
+            sysDictMapper.delete(new LambdaQueryWrapper<SysDict>().eq(SysDict::getId, id));
         }
     }
 }

@@ -26,7 +26,7 @@ public enum DeviceEnum {
      */
     PC("PC"),
     /**
-     * MMS-DOC 文档站付费/扫码用户（Redis {@code doc:member:}，非 {@code store_member}）
+     * MMS-DOC 文档站付费/扫码用户（Redis {@code doc:member:}）；登录 id 与 {@code store_member.id} 对齐，会话体为 Map/VO 非 ORM 实体
      */
     DOC("DOC");
 

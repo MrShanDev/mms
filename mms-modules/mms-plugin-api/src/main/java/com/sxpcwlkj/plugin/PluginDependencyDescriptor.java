@@ -26,4 +26,9 @@ public class PluginDependencyDescriptor {
      * 是否必选；默认 true。
      */
     private Boolean optional;
+
+    /**
+     * 给人看的说明（不参与依赖解析）；用于描述本依赖与可选/必选的产品策略，避免误读为「全平台唯一规则」。
+     */
+    private String remark;
 }

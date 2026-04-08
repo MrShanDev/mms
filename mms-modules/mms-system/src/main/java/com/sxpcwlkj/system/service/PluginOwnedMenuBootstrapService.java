@@ -23,4 +23,10 @@ public interface PluginOwnedMenuBootstrapService {
      * 卸载时按 {@code script/install.sql} 解析出的主键 id 删除菜单及角色绑定（各租户；不限 remark）。
      */
     void removeSysFunctionRowsByIds(List<String> sysFunctionIds);
+
+    /** 按主键删除 {@code sys_dict}（安装失败回滚或卸载 install.sql 声明行）。 */
+    void removeSysDictRowsByIds(List<String> dictIds);
+
+    /** 按主键删除 {@code sys_dict_data}（须先于 {@link #removeSysDictRowsByIds} 调用）。 */
+    void removeSysDictDataRowsByIds(List<String> dictDataIds);
 }

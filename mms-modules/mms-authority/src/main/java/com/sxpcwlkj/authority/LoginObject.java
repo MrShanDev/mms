@@ -9,6 +9,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.lang.Console;
 import com.sxpcwlkj.common.enums.DeviceEnum;
 import com.sxpcwlkj.common.enums.ErrorCodeEnum;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.LoginException;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.MapstructUtil;
@@ -42,6 +43,7 @@ public class LoginObject<T> {
 
     private Class<T> clazz;
 
+    /** 历史种子库内置超管主键，仅作文档/兼容引用；超管能力以角色代码 {@code super_admin} 为准。 */
     public final static String SUPER_ID = "1";
 
     /** Redis 会话多为 Map，未必有 MapStruct 声明；convertValue 与 doc 等 VO 字段名对齐即可 */
@@ -99,14 +101,21 @@ public class LoginObject<T> {
     }
 
     /**
-     * 当前登录对象是否超级管理员
+     * 当前登录对象是否超级管理员（具备 Sa-Token 角色 {@code super_admin}，与菜单全量拉取口径一致；不按用户主键或登录名判定）。
      * @return 当前登录对象是否超级管理员
      */
     public static Boolean getLoginSuper() {
-        if (Objects.equals(getLoginId(), "1")) {
-            return Boolean.TRUE;
+        try {
+            if (!StpUtil.isLogin()) {
+                return Boolean.FALSE;
+            }
+            return StpUtil.hasRole(SystemCommonEnum.SUPER_ADMIN.getCode());
+        } catch (NotWebContextException | SaTokenContextException e) {
+            return Boolean.FALSE;
+        } catch (Exception e) {
+            log.debug("getLoginSuper: {}", e.getMessage());
+            return Boolean.FALSE;
         }
-        return Boolean.FALSE;
     }
 
 
@@ -120,21 +129,9 @@ public class LoginObject<T> {
         if (isLogin()) {
             try {
                 if (getLoginId() != null) {
-                    Object object = null;
                     String device = StpUtil.getLoginDeviceType();
-                    // 须与写入 Redis 时一致；登录 id 可能为 UUID 字符串，不能用 getLoginIdAsLong()
                     String loginIdKey = String.valueOf(StpUtil.getLoginId());
-                    if (DeviceEnum.MOBILE.getType().equals(device)) {
-                        object = RedisUtil.getCacheObject(RedisConstant.MOBILE_KEY + loginIdKey);
-                    } else if (DeviceEnum.ADMIN.getType().equals(device)) {
-                        object = RedisUtil.getCacheObject(RedisConstant.ADMIN_KEY + loginIdKey);
-                    } else if (DeviceEnum.DOC.getType().equals(device)) {
-                        object = RedisUtil.getLoginSessionMap(RedisConstant.DOC_KEY + loginIdKey);
-                    } else if (DeviceEnum.PC.getType().equals(device)) {
-                        object = RedisUtil.getLoginSessionMap(RedisConstant.PC_KEY + loginIdKey);
-                    } else {
-                        log.info("[mms-doc LoginObject] unknown device type for session cache: device={} loginIdKey={}", device, loginIdKey);
-                    }
+                    Object object = loadRedisSessionForDevice(loginIdKey, device);
 
                     if (object == null) {
                         if (DeviceEnum.DOC.getType().equals(device)) {
@@ -144,41 +141,7 @@ public class LoginObject<T> {
                         }
                         return null;
                     }
-                    if (object instanceof Map<?, ?> raw) {
-                        Map<String, Object> sm = new LinkedHashMap<>();
-                        for (Map.Entry<?, ?> e : raw.entrySet()) {
-                            if (e.getKey() != null) {
-                                sm.put(e.getKey().toString(), e.getValue());
-                            }
-                        }
-                        coerceEpochMillisToDate(sm, "ctime", "mtime", "createdTime", "updatedTime");
-                        T converted = convertMapSessionToBean(sm, clazz, device);
-                        if (converted == null) {
-                            log.warn("[mms-doc LoginObject] map to {} null device={} mapKeys={}", clazz.getSimpleName(), device, sm.keySet());
-                        }
-                        return converted;
-                    }
-                    T converted;
-                    try {
-                        converted = MapstructUtil.convert(object, clazz);
-                    } catch (Exception e) {
-                        if (object instanceof Map<?, ?> m2) {
-                            Map<String, Object> sm2 = new LinkedHashMap<>();
-                            for (Map.Entry<?, ?> e2 : m2.entrySet()) {
-                                if (e2.getKey() != null) {
-                                    sm2.put(e2.getKey().toString(), e2.getValue());
-                                }
-                            }
-                            coerceEpochMillisToDate(sm2, "ctime", "mtime", "createdTime", "updatedTime");
-                            converted = convertMapSessionToBean(sm2, clazz, device);
-                        } else {
-                            throw e;
-                        }
-                    }
-                    if (converted == null) {
-                        log.warn("[mms-doc LoginObject] object to {} null device={} objType={}", clazz.getSimpleName(), device, object.getClass().getName());
-                    }
-                    return converted;
+                    return deserializeRedisSessionToLoginObject(object, clazz, device);
                 }
             } catch (Exception ex) {
                 String dev = null;
@@ -196,6 +159,145 @@ public class LoginObject<T> {
         //请先登录
           throw new MmsException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(),ErrorCodeEnum.USER_NOT_LOGIN.getKey());
 //        throw new NotLoginException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(), DeviceEnum.MOBILE.getType(), "0");
+    }
+
+    /**
+     * 当前请求会话所属域（系统管理端 / 会员 PC / 会员移动端 / 文档站）。未登录或无设备信息时返回 null。
+     */
+    public static LoginRealm getCurrentLoginRealm() {
+        if (!isLogin()) {
+            return null;
+        }
+        try {
+            return LoginRealm.fromDeviceType(StpUtil.getLoginDeviceType());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 不经当前请求上下文，按 token 解析登录 id（与 {@link StpUtil#getLoginIdByToken} 一致）。
+     */
+    public static String getLoginIdByToken(String tokenValue) {
+        if (tokenValue == null || tokenValue.isBlank()) {
+            return null;
+        }
+        try {
+            Object id = StpUtil.getLoginIdByToken(tokenValue.trim());
+            return id != null ? String.valueOf(id) : null;
+        } catch (Exception e) {
+            log.debug("[LoginObject] getLoginIdByToken: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 按 token 解析 {@link StpUtil#getLoginDeviceTypeByToken}，用于与 {@link #getLoginIdByToken} 组合判断会话类型。
+     */
+    public static String getLoginDeviceTypeByToken(String tokenValue) {
+        if (tokenValue == null || tokenValue.isBlank()) {
+            return null;
+        }
+        try {
+            return StpUtil.getLoginDeviceTypeByToken(tokenValue.trim());
+        } catch (Exception e) {
+            log.debug("[LoginObject] getLoginDeviceTypeByToken: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    public static LoginRealm getLoginRealmByToken(String tokenValue) {
+        return LoginRealm.fromDeviceType(getLoginDeviceTypeByToken(tokenValue));
+    }
+
+    /**
+     * 按 token 从 Redis 读取与 {@link #getLoginObject(Class)} 相同规则的会话体并反序列化。
+     * <p>注意：{@code ADMIN} 对应 {@code SysUserVo} 等管理端对象；{@code DOC}/{@code PC}/{@code MOBILE} 对应会员/文档站会话，勿与系统用户类型混用。</p>
+     *
+     * @return 无效 token、未登录映射或反序列化失败时返回 null（不抛未登录异常）
+     */
+    public static <T> T getLoginObjectByToken(Class<T> clazz, String tokenValue) {
+        if (clazz == null || tokenValue == null || tokenValue.isBlank()) {
+            return null;
+        }
+        try {
+            String loginIdKey = getLoginIdByToken(tokenValue);
+            if (loginIdKey == null) {
+                return null;
+            }
+            String device = getLoginDeviceTypeByToken(tokenValue);
+            Object object = loadRedisSessionForDevice(loginIdKey, device);
+            if (object == null) {
+                return null;
+            }
+            return deserializeRedisSessionToLoginObject(object, clazz, device);
+        } catch (Exception e) {
+            log.debug("[LoginObject] getLoginObjectByToken clazz={} err={}", clazz.getSimpleName(), e.getMessage());
+            return null;
+        }
+    }
+
+    /** 与写入 Redis 时一致；登录 id 可能为 UUID 字符串 */
+    private static Object loadRedisSessionForDevice(String loginIdKey, String device) {
+        if (loginIdKey == null || device == null) {
+            return null;
+        }
+        if (DeviceEnum.MOBILE.getType().equals(device)) {
+            return RedisUtil.getCacheObject(RedisConstant.MOBILE_KEY + loginIdKey);
+        }
+        if (DeviceEnum.ADMIN.getType().equals(device)) {
+            return RedisUtil.getCacheObject(RedisConstant.ADMIN_KEY + loginIdKey);
+        }
+        if (DeviceEnum.DOC.getType().equals(device)) {
+            return RedisUtil.getLoginSessionMap(RedisConstant.DOC_KEY + loginIdKey);
+        }
+        if (DeviceEnum.PC.getType().equals(device)) {
+            return RedisUtil.getLoginSessionMap(RedisConstant.PC_KEY + loginIdKey);
+        }
+        log.info("[mms-doc LoginObject] unknown device type for session cache: device={} loginIdKey={}", device, loginIdKey);
+        return null;
+    }
+
+    private static <T> T deserializeRedisSessionToLoginObject(Object object, Class<T> clazz, String device) {
+        if (object instanceof Map<?, ?> raw) {
+            Map<String, Object> sm = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> e : raw.entrySet()) {
+                if (e.getKey() != null) {
+                    sm.put(e.getKey().toString(), e.getValue());
+                }
+            }
+            coerceEpochMillisToDate(sm, "ctime", "mtime", "createdTime", "updatedTime");
+            T converted = convertMapSessionToBean(sm, clazz, device);
+            if (converted == null) {
+                log.warn("[mms-doc LoginObject] map to {} null device={} mapKeys={}", clazz.getSimpleName(), device, sm.keySet());
+            }
+            return converted;
+        }
+        T converted;
+        try {
+            converted = MapstructUtil.convert(object, clazz);
+        } catch (Exception e) {
+            if (object instanceof Map<?, ?> m2) {
+                Map<String, Object> sm2 = new LinkedHashMap<>();
+                for (Map.Entry<?, ?> e2 : m2.entrySet()) {
+                    if (e2.getKey() != null) {
+                        sm2.put(e2.getKey().toString(), e2.getValue());
+                    }
+                }
+                coerceEpochMillisToDate(sm2, "ctime", "mtime", "createdTime", "updatedTime");
+                converted = convertMapSessionToBean(sm2, clazz, device);
+            } else {
+                throw e;
+            }
+        }
+        if (converted == null) {
+            log.warn(
+                    "[mms-doc LoginObject] object to {} null device={} objType={}",
+                    clazz.getSimpleName(),
+                    device,
+                    object.getClass().getName());
+        }
+        return converted;
     }
 
     /**

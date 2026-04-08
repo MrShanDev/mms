@@ -29,6 +29,13 @@ public final class PluginInstallationLayout {
         return pluginRoot(pluginsRoot, pluginId, pluginVersion).resolve(PluginConstants.SUBDIR_TMP);
     }
 
+    /**
+     * 联邦前端静态文件根目录（{@code remoteEntry.js} 与 chunk 等）。
+     */
+    public static Path webDirectory(Path pluginsRoot, String pluginId, String pluginVersion) {
+        return pluginRoot(pluginsRoot, pluginId, pluginVersion).resolve(PluginConstants.SUBDIR_WEB);
+    }
+
     public static Path descriptorCopy(Path pluginsRoot, String pluginId, String pluginVersion) {
         return pluginRoot(pluginsRoot, pluginId, pluginVersion).resolve(PluginConstants.DESCRIPTOR_FILE_NAME);
     }

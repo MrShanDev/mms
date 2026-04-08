@@ -17,9 +17,10 @@ public interface BundledPluginSchemaExecutor {
 
     /**
      * 执行 JAR 内 {@link PluginConstants#INSTALL_SQL_PATH_IN_JAR} 拆句后的语句（安装流程自动调用）。
-     * <p>白名单较 schema 更宽：仅允许对 {@code sys_function} 的 INSERT；主键冲突时跳过该条并记日志。</p>
-     * <p>返回结果中的 {@link BundledInstallSqlResult#insertedSysFunctionIds()} 为<strong>本次实际执行成功</strong>的
-     * 主键 id，供安装后续步骤失败时回滚 {@code sys_function}（与磁盘回滚配套）。</p>
+     * <p>白名单：{@code INSERT [IGNORE] INTO sys_function | sys_dict | sys_dict_data}；字典 {@code field_name} 须带
+     * {@code mms_plugin_} 前缀；主键已存在时预检跳过或重复键跳过并记日志。</p>
+     * <p>返回结果中各 {@code inserted*} 列表为<strong>本次实际执行成功</strong>的主键 id；安装后续步骤失败时按
+     * 「字典数据 → 字典类型 → 菜单」删除回滚（与磁盘回滚配套）。</p>
      *
      * @throws BundledInstallSqlExecutionException 某条语句失败且此前已有成功插入时，携带已写入日志与已插入 id
      */

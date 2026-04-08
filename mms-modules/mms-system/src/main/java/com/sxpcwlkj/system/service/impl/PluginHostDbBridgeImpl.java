@@ -92,11 +92,27 @@ public class PluginHostDbBridgeImpl implements PluginHostDbBridge {
     }
 
     @Override
-    public void removeInstallSqlSysFunctionRows(List<String> sysFunctionIds) {
-        if (sysFunctionIds == null || sysFunctionIds.isEmpty()) {
+    public void removeBundledInstallSqlInsertRows(
+            List<String> sysFunctionIds, List<String> sysDictIds, List<String> sysDictDataIds) {
+        boolean any =
+                (sysDictDataIds != null && !sysDictDataIds.isEmpty())
+                        || (sysDictIds != null && !sysDictIds.isEmpty())
+                        || (sysFunctionIds != null && !sysFunctionIds.isEmpty());
+        if (!any) {
             return;
         }
-        pluginOwnedMenuBootstrapService.ifAvailable(s -> s.removeSysFunctionRowsByIds(sysFunctionIds));
+        pluginOwnedMenuBootstrapService.ifAvailable(
+                s -> {
+                    if (sysDictDataIds != null && !sysDictDataIds.isEmpty()) {
+                        s.removeSysDictDataRowsByIds(sysDictDataIds);
+                    }
+                    if (sysDictIds != null && !sysDictIds.isEmpty()) {
+                        s.removeSysDictRowsByIds(sysDictIds);
+                    }
+                    if (sysFunctionIds != null && !sysFunctionIds.isEmpty()) {
+                        s.removeSysFunctionRowsByIds(sysFunctionIds);
+                    }
+                });
         adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
     }
 }

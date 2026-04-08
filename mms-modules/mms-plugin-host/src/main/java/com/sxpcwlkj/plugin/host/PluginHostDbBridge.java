@@ -59,10 +59,18 @@ public interface PluginHostDbBridge {
     }
 
     /**
-     * 卸载磁盘前：按 JAR 内 {@code script/install.sql} 解析出的 {@code sys_function.id} 删除菜单及角色绑定。
+     * 卸载磁盘前：按 JAR 内 {@code script/install.sql} 解析出的主键删除本次安装写入的数据。
+     * <p>删除顺序：{@code sys_dict_data} → {@code sys_dict} → {@code sys_function}（含角色绑定）。</p>
      * <p>不处理 {@code schema.sql} 建表，由运维手工维护。</p>
      */
+    default void removeBundledInstallSqlInsertRows(
+            List<String> sysFunctionIds, List<String> sysDictIds, List<String> sysDictDataIds) {}
+
+    /**
+     * 仅删除 {@code sys_function} 及角色绑定；等价于 {@link #removeBundledInstallSqlInsertRows} 且字典两表传空列表。
+     */
     default void removeInstallSqlSysFunctionRows(List<String> sysFunctionIds) {
-        /* 无库表桥接或未实现时忽略 */
+        removeBundledInstallSqlInsertRows(
+                sysFunctionIds == null ? List.of() : sysFunctionIds, List.of(), List.of());
     }
 }

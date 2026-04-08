@@ -25,9 +25,11 @@ public final class PluginConstants {
     public static final String SCHEMA_PATH_IN_JAR = "META-INF/mms/schema.sql";
 
     /**
-     * 可选：菜单/权限等 SQL 脚本（UTF-8），与源码树 {@code script/install.sql} 对应；构建时打入 JAR。
+     * 可选：字典 + 菜单/权限等 SQL 脚本（UTF-8），与源码树 {@code script/install.sql} 对应；构建时打入 JAR。
      * <p>宿主在安装流程中（{@code skipBundledSchemaExecution=false} 时）会<strong>自动</strong>按条执行，白名单为
-     * {@code INSERT INTO sys_function}；主键重复则跳过该条。与 {@code plugin.json} {@code menuBootstrap} 可并存。</p>
+     * {@code INSERT [IGNORE] INTO sys_function | sys_dict | sys_dict_data}；主键已存在则预检跳过或重复键跳过。
+     * 安装后续步骤失败时按「字典数据 → 字典类型 → 菜单」回滚本次成功插入；卸载时按 JAR 内脚本解析主键删除。
+     * 与 {@code plugin.json} {@code menuBootstrap} 可并存。</p>
      */
     public static final String INSTALL_SQL_PATH_IN_JAR = "script/install.sql";
 
@@ -73,4 +75,15 @@ public final class PluginConstants {
      * 临时文件，宿主可定期清理。
      */
     public static final String SUBDIR_TMP = "tmp";
+
+    /**
+     * 联邦前端构建产物根目录（与 JAR 内 {@link #WEB_BUNDLE_PREFIX_IN_JAR} 解压后一一对应）。
+     */
+    public static final String SUBDIR_WEB = "web";
+
+    /**
+     * 插件 JAR 内嵌前端静态资源的目录前缀（UTF-8 路径，以 {@code /} 结尾）。
+     * <p>安装时宿主应将其下文件解压到安装目录 {@link #SUBDIR_WEB}。</p>
+     */
+    public static final String WEB_BUNDLE_PREFIX_IN_JAR = "META-INF/mms/web/";
 }

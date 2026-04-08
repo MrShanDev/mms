@@ -8,16 +8,109 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 解析 {@code script/install.sql} 中 {@code INSERT INTO sys_function}，供安装前跳过已存在主键、卸载时按 id 清理。
+ * 解析 {@code script/install.sql} 中白名单 INSERT（{@code sys_function}、{@code sys_dict}、{@code sys_dict_data}），供安装前跳过已存在主键、卸载时按 id 清理。
  */
 public final class BundledInstallSqlSupport {
 
     private static final Pattern INSERT_SYS_FUNCTION_HEAD =
-            Pattern.compile("^\\s*INSERT\\s+INTO\\s+[`\"]?sys_function[`\"]?\\s*\\(", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+            Pattern.compile(
+                    "^\\s*INSERT\\s+(IGNORE\\s+)?INTO\\s+[`\"]?sys_function[`\"]?\\s*\\(",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern INSERT_SYS_DICT_HEAD =
+            Pattern.compile(
+                    "^\\s*INSERT\\s+(IGNORE\\s+)?INTO\\s+[`\"]?sys_dict[`\"]?\\s*\\(",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern INSERT_SYS_DICT_DATA_HEAD =
+            Pattern.compile(
+                    "^\\s*INSERT\\s+(IGNORE\\s+)?INTO\\s+[`\"]?sys_dict_data[`\"]?\\s*\\(",
+                    Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static final Pattern VALUES_KW = Pattern.compile("\\bVALUES\\b", Pattern.CASE_INSENSITIVE);
 
     private BundledInstallSqlSupport() {}
+
+    /** 卸载/预览：从 install.sql 解析出的三类主键（去重、保序）。 */
+    public record DeclaredInstallSqlIds(
+            List<String> sysFunctionIds, List<String> sysDictIds, List<String> sysDictDataIds) {
+        public DeclaredInstallSqlIds {
+            sysFunctionIds = sysFunctionIds == null ? List.of() : List.copyOf(sysFunctionIds);
+            sysDictIds = sysDictIds == null ? List.of() : List.copyOf(sysDictIds);
+            sysDictDataIds = sysDictDataIds == null ? List.of() : List.copyOf(sysDictDataIds);
+        }
+    }
+
+    public static DeclaredInstallSqlIds collectAllDeclaredIds(String fullSql) {
+        return new DeclaredInstallSqlIds(
+                collectAllFunctionIds(fullSql), collectAllSysDictIds(fullSql), collectAllSysDictDataIds(fullSql));
+    }
+
+    public enum InstallSqlInsertKind {
+        SYS_FUNCTION,
+        SYS_DICT,
+        SYS_DICT_DATA,
+        UNSUPPORTED
+    }
+
+    /** 单条 INSERT 语句（单行 VALUES）所属表类型。 */
+    public static InstallSqlInsertKind classifyInstallInsert(String singleOrMultiRowInsert) {
+        if (singleOrMultiRowInsert == null) {
+            return InstallSqlInsertKind.UNSUPPORTED;
+        }
+        String s = singleOrMultiRowInsert.trim();
+        if (INSERT_SYS_FUNCTION_HEAD.matcher(s).lookingAt()) {
+            return InstallSqlInsertKind.SYS_FUNCTION;
+        }
+        if (INSERT_SYS_DICT_HEAD.matcher(s).lookingAt()) {
+            return InstallSqlInsertKind.SYS_DICT;
+        }
+        if (INSERT_SYS_DICT_DATA_HEAD.matcher(s).lookingAt()) {
+            return InstallSqlInsertKind.SYS_DICT_DATA;
+        }
+        return InstallSqlInsertKind.UNSUPPORTED;
+    }
+
+    /**
+     * 从单条 {@code INSERT ... VALUES (...)} 解析首列主键 {@code id}（与三表白名单列顺序一致）。
+     */
+    public static String extractFirstInsertRowId(String singleRowInsert) {
+        return extractFirstFunctionIdFromInsert(singleRowInsert);
+    }
+
+    /**
+     * 从整段 install.sql 脚本收集所有 {@code sys_dict.id}（去重、保序）。
+     */
+    public static List<String> collectAllSysDictIds(String fullSql) {
+        return collectIdsMatchingHead(fullSql, INSERT_SYS_DICT_HEAD);
+    }
+
+    /**
+     * 从整段 install.sql 脚本收集所有 {@code sys_dict_data.id}（去重、保序）。
+     */
+    public static List<String> collectAllSysDictDataIds(String fullSql) {
+        return collectIdsMatchingHead(fullSql, INSERT_SYS_DICT_DATA_HEAD);
+    }
+
+    private static List<String> collectIdsMatchingHead(String fullSql, Pattern head) {
+        if (fullSql == null || fullSql.isBlank()) {
+            return List.of();
+        }
+        Set<String> seen = new LinkedHashSet<>();
+        for (String raw : BundledPluginSqlSplitter.splitStatements(fullSql)) {
+            String stmt = raw.trim();
+            if (stmt.isEmpty() || !head.matcher(stmt).find()) {
+                continue;
+            }
+            for (String unit : expandToSingleRowInserts(stmt)) {
+                String id = extractFirstFunctionIdFromInsert(unit);
+                if (id != null && !id.isBlank()) {
+                    seen.add(id.trim());
+                }
+            }
+        }
+        return List.copyOf(seen);
+    }
 
     /**
      * 从整段 install.sql 脚本收集所有目标菜单主键 id（去重、保序）。
