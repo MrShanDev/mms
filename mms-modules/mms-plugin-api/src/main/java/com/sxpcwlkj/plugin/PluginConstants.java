@@ -25,6 +25,13 @@ public final class PluginConstants {
     public static final String SCHEMA_PATH_IN_JAR = "META-INF/mms/schema.sql";
 
     /**
+     * 可选：菜单/权限等 SQL 脚本（UTF-8），与源码树 {@code script/install.sql} 对应；构建时打入 JAR。
+     * <p>宿主在安装流程中（{@code skipBundledSchemaExecution=false} 时）会<strong>自动</strong>按条执行，白名单为
+     * {@code INSERT INTO sys_function}；主键重复则跳过该条。与 {@code plugin.json} {@code menuBootstrap} 可并存。</p>
+     */
+    public static final String INSTALL_SQL_PATH_IN_JAR = "script/install.sql";
+
+    /**
      * 可选：依赖指纹清单路径（JAR 内 UTF-8 文本）。
      * <p><b>GAV 生成规范</b>：每行一条 Maven 坐标 {@code groupId:artifactId:version}（无多余空格），
      * 按字典序排序整文件后写入；{@link PluginDescriptor#getDependencyFingerprintSha256()} 为该文件<strong>原始字节</strong>

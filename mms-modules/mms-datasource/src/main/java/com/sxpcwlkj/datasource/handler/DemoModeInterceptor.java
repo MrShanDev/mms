@@ -1,8 +1,11 @@
 package com.sxpcwlkj.datasource.handler;
 
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import com.sxpcwlkj.authority.LoginObject;
+import com.sxpcwlkj.common.context.DemoModeContextHolder;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.DemoModeException;
 import com.sxpcwlkj.common.properties.DemoModeProperties;
 import org.apache.ibatis.executor.Executor;
@@ -39,41 +42,63 @@ public class DemoModeInterceptor implements InnerInterceptor {
         if (!demoModeProperties.isEnabled()) {
             return true;
         }
-        // 2. 检查超级管理员放行
-        if(LoginObject.isLogin()){
-            if(LoginObject.getLoginSuper()){
+        // 2. 请求入口已绑定到当前线程的主体（Servlet 异步 / 线程池无 Sa Web 上下文时，与下面同步规则等价）
+        if (Boolean.TRUE.equals(DemoModeContextHolder.getPropagatedSuperAdmin())) {
+            return true;
+        }
+        String propagatedUser = DemoModeContextHolder.getPropagatedUsername();
+        if (propagatedUser != null
+                && !propagatedUser.isBlank()
+                && demoModeProperties.isAllowedUser(propagatedUser)) {
+            return true;
+        }
+        // 3. 可信编排显式关闭（慎用）
+        if (Boolean.TRUE.equals(DemoModeContextHolder.isDemoModeDisabled())) {
+            return true;
+        }
+        // 4. 超级管理员放行：内置 admin（id=1）或与插件安装等接口一致的 Sa-Token super_admin 角色
+        if (LoginObject.isLogin()) {
+            if (Boolean.TRUE.equals(LoginObject.getLoginSuper())) {
                 return true;
             }
-            if(demoModeProperties.isAllowedUser(LoginObject.getLoginUserName())){
+            try {
+                if (StpUtil.isLogin() && StpUtil.hasRole(SystemCommonEnum.SUPER_ADMIN.getCode())) {
+                    return true;
+                }
+            } catch (Exception ex) {
+                // 例如 getRoleList 曾 NPE、非 Web 线程无 Sa 上下文等，避免静默误判为未放行
+                logger.debug("演示模式：Sa-Token super_admin 判定未通过: {}", ex.getMessage());
+            }
+            if (demoModeProperties.isAllowedUser(LoginObject.getLoginUserName())) {
                 return true;
             }
         }
 
-        // 3.如果是白名单方法，允许执行
-        if (demoModeProperties.isAllowedMethod(getMethodName(ms.getId()))) {
+        // 5. 白名单语句：含「.」按 MappedStatement 全 id / 后缀匹配；否则仅方法短名（影响全库同名方法）
+        if (demoModeProperties.isAllowedMappedStatement(ms.getId())) {
             return true;
         }
 
-        // 4. 特殊处理：忽略日志表的操作（日志应该在演示模式下也能正常记录）
+        // 6. 特殊处理：忽略日志表的操作（日志应该在演示模式下也能正常记录）
         String entityName = getEntityName(ms.getId());
         if ("SysLog".equals(entityName) || "SysOperLog".equals(entityName)) {
             return true;
         }
 
-        // 5. 检查是否是修改操作
+        // 7. 检查是否是修改操作
         if (!isModifyOperation(ms)) {
             return true;
         }
 
-        // 6. 生成详细错误信息
+        // 8. 生成详细错误信息
         String errorMessage = generateErrorMessage(ms);
 
-        // 7. 记录拦截日志
+        // 9. 记录拦截日志
         logger.warn("拦截演示模式下的修改操作: [{}] {}",
             ms.getSqlCommandType(),
             ms.getId());
 
-        // 8. 抛出自定义异常
+        // 10. 抛出自定义异常
         throw new DemoModeException(403100, errorMessage);
     }
 

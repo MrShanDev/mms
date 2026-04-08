@@ -65,6 +65,10 @@ public class SysFunctionBo extends BaseEntity {
      */
     private String component;
     /**
+     * 默认跳转（纯目录无组件时填写）
+     */
+    private String redirectPath;
+    /**
      * 组件名
      */
     private String componentName;

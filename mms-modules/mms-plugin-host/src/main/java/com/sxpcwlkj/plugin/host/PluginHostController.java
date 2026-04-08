@@ -3,20 +3,29 @@ package com.sxpcwlkj.plugin.host;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.stp.StpUtil;
+import com.sxpcwlkj.authority.LoginObject;
+import com.sxpcwlkj.common.context.DemoModeContextHolder;
+import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.plugin.HostDataService;
 import com.sxpcwlkj.plugin.HostServices;
+import com.sxpcwlkj.plugin.BundledInstallSqlExecutionException;
+import com.sxpcwlkj.plugin.BundledInstallSqlResult;
 import com.sxpcwlkj.plugin.BundledPluginSchemaExecutor;
 import com.sxpcwlkj.plugin.PluginDescriptor;
 import com.sxpcwlkj.plugin.PluginDescriptorReader;
 import com.sxpcwlkj.plugin.PluginDescriptorValidator;
 import com.sxpcwlkj.plugin.PluginException;
+import com.sxpcwlkj.plugin.PluginInstallStreamResultCode;
+import com.sxpcwlkj.plugin.PluginSysConfigDef;
 import com.sxpcwlkj.plugin.host.web.PluginMvcExecutionGuard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,14 +37,19 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 /**
  * 插件宿主运维接口（仅超级管理员；动态 Controller 注册属后续阶段）。
@@ -56,6 +70,8 @@ public class PluginHostController {
     private final ObjectProvider<JdbcTemplate> jdbcTemplate;
 
     private static final int BUNDLED_SCHEMA_PREVIEW_MAX_CHARS = 128_000;
+
+    private static final MediaType NDJSON_UTF8 = MediaType.parseMediaType("application/x-ndjson;charset=UTF-8");
 
     /**
      * 读取插件 JAR 内 {@code META-INF/mms/logo.png}；浏览器 {@code img} 请求不带鉴权，须匿名可读。
@@ -368,6 +384,8 @@ public class PluginHostController {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
             return R.fail("pluginId 不能为空");
         }
+        List<String> installSqlIds = pluginLifecycleManager.collectBundledInstallSqlFunctionIds(body.pluginId(), body.version());
+        pluginHostDbBridge.ifAvailable(b -> b.removeInstallSqlSysFunctionRows(installSqlIds));
         pluginLifecycleManager.uninstallFromDisk(body.pluginId(), body.version());
         pluginHostDbBridge.ifAvailable(b -> b.onUninstallDiskFinished(body.pluginId(), body.version()));
         pluginLifecycleManager.reload();
@@ -409,13 +427,14 @@ public class PluginHostController {
 
     /**
      * 上传 JAR：先校验 {@code plugin.json} 结构与宿主兼容性，写入磁盘成功后写入库表激活版本，再全量重载。
-     * <p>若 {@code skipBundledSchemaExecution=false} 且 JAR 内含 {@code META-INF/mms/schema.sql}，则先执行该 DDL（仅超级管理员、白名单语句），再落盘安装。</p>
+     * <p>若 {@code skipBundledSchemaExecution=false}（默认），则依次自动执行 JAR 内 {@code META-INF/mms/schema.sql}（白名单 DDL）、
+     * {@code script/install.sql}（仅允许 {@code INSERT INTO sys_function}，主键重复则跳过该条），再落盘安装。</p>
      */
     @SaCheckRole("super_admin")
     @PostMapping(value = "/install", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Map<String, Object>> install(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "skipBundledSchemaExecution", defaultValue = "true") boolean skipBundledSchemaExecution)
+            @RequestParam(value = "skipBundledSchemaExecution", defaultValue = "false") boolean skipBundledSchemaExecution)
             throws Exception {
         if (file == null || file.isEmpty()) {
             return R.fail("file 不能为空");
@@ -425,51 +444,366 @@ public class PluginHostController {
             return R.fail("仅支持 .jar 插件包");
         }
         Path temp = Files.createTempFile("mms-plugin-upload-", ".jar");
-        PluginDescriptor installed = null;
         try {
             file.transferTo(temp);
-            List<String> schemaLog = null;
-            if (!skipBundledSchemaExecution) {
-                Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(temp);
-                if (schemaOpt.isPresent() && !schemaOpt.get().isBlank()) {
-                    BundledPluginSchemaExecutor executor = bundledPluginSchemaExecutor.getIfAvailable();
-                    if (executor == null) {
-                        return R.fail(
-                                "JAR 内含 schema.sql，但当前环境未启用 BundledPluginSchemaExecutor（需 mms-system + JdbcTemplate）。请改用跳过 DDL 安装，或手工执行 SQL。");
-                    }
-                    try {
-                        schemaLog = executor.executeBundledSchema(schemaOpt.get());
-                    } catch (Exception ddlEx) {
-                        return R.fail("执行 schema.sql 失败: " + ddlEx.getMessage());
-                    }
-                }
+            InstallRunResult r = runPluginInstall(temp, skipBundledSchemaExecution, null);
+            if (!r.ok()) {
+                return R.fail(r.message());
             }
-            try {
-                installed = pluginLifecycleManager.installJarFromUpload(temp);
-            } catch (PluginException ex) {
-                return R.fail("插件包未通过校验: " + ex.getMessage());
-            } catch (Exception ex) {
-                return R.fail("插件包解析或校验失败: " + ex.getMessage());
-            }
-            try {
-                PluginHostDbBridge bridge = pluginHostDbBridge.getIfAvailable();
-                if (bridge != null) {
-                    bridge.onInstallSuccess(installed);
-                }
-            } catch (Exception ex) {
-                try {
-                    pluginLifecycleManager.uninstallFromDisk(installed.getId(), installed.getVersion());
-                } catch (Exception ignored) {
-                }
-                return R.fail("已回滚磁盘写入。入库失败: " + ex.getMessage());
-            }
-            pluginLifecycleManager.reload();
-            Map<String, Object> body = new HashMap<>();
-            body.put("summaries", pluginLifecycleManager.listSummaries());
-            body.put("bundledSchemaExecutionLog", schemaLog);
-            return R.success(body);
+            return R.success(r.body());
         } finally {
             Files.deleteIfExists(temp);
+        }
+    }
+
+    /**
+     * 与 {@link #install} 等价，但以 NDJSON 流式输出安装过程（每行一个 JSON 对象），便于前端实时展示。
+     * <p>行格式：</p>
+     * <ul>
+     *   <li>{@code {"type":"line","level":"info|warn|error","text":"..."}}</li>
+     *   <li>{@code {"type":"done","ok":true,"code":"PLUGIN_INSTALL_SUCCESS","data":{...}}} 与 {@code /install} 成功体一致（含 summaries、bundledSchemaExecutionLog、bundledInstallSqlExecutionLog、pluginId、version）</li>
+     *   <li>{@code {"type":"done","ok":false,"code":"PLUGIN_INSTALL_...","msg":"..."}} — {@code code} 见 {@link PluginInstallStreamResultCode}</li>
+     * </ul>
+     * <p><b>鉴权</b>：{@link StreamingResponseBody} 会触发 Servlet 异步二次派发，{@code @SaCheckRole} 在派发线程上无 Sa-Token 上下文；
+     * 故本接口使用 {@link SaIgnore} 交由拦截器跳过，并在方法入口 {@link StpUtil#checkRole(String...)}（仅首线程执行）。</p>
+     * <p><b>演示模式</b>：在派发线程写库前，将当前登录主体传入 {@link DemoModeContextHolder#setPropagatedDemoPrincipal}，
+     * 使 {@code DemoModeInterceptor} 与同步请求一致地识别 {@code demo.mode.allowed-users} 与 {@code super_admin}。</p>
+     */
+    @SaIgnore
+    @PostMapping(value = "/installStream", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = "application/x-ndjson;charset=UTF-8")
+    public ResponseEntity<StreamingResponseBody> installStream(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "skipBundledSchemaExecution", defaultValue = "false") boolean skipBundledSchemaExecution) {
+        StpUtil.checkRole("super_admin");
+        if (file == null || file.isEmpty()) {
+            return badNdjsonDone(PluginInstallStreamResultCode.REQUEST_FILE_EMPTY, "file 不能为空");
+        }
+        String orig = file.getOriginalFilename();
+        if (orig == null || !orig.toLowerCase(Locale.ROOT).endsWith(".jar")) {
+            return badNdjsonDone(PluginInstallStreamResultCode.REQUEST_NOT_JAR, "仅支持 .jar 插件包");
+        }
+        Path temp;
+        try {
+            temp = Files.createTempFile("mms-plugin-upload-stream-", ".jar");
+            file.transferTo(temp);
+        } catch (Exception e) {
+            return badNdjsonDone(
+                    PluginInstallStreamResultCode.REQUEST_UPLOAD_FAILED, "接收上传失败: " + e.getMessage());
+        }
+        Path tempFinal = temp;
+        final String demoPropagateUser = captureDemoModeUsernameForPropagate();
+        final boolean demoPropagateSuper = captureDemoModeSuperForPropagate();
+        StreamingResponseBody stream = outputStream -> {
+            DemoModeContextHolder.setPropagatedDemoPrincipal(demoPropagateUser, demoPropagateSuper);
+            try {
+                try {
+                    ProgressEmitter pe =
+                            (level, text) -> {
+                                try {
+                                    writeNdjsonLine(outputStream, level, text);
+                                } catch (IOException e) {
+                                    throw new UncheckedIOException(e);
+                                }
+                            };
+                    InstallRunResult r = runPluginInstall(tempFinal, skipBundledSchemaExecution, pe);
+                    if (r.ok()) {
+                        Map<String, Object> done = new HashMap<>();
+                        done.put("type", "done");
+                        done.put("ok", true);
+                        done.put("code", r.code());
+                        done.put("data", r.body());
+                        writeNdjsonRaw(outputStream, done);
+                    } else {
+                        Map<String, Object> done = new HashMap<>();
+                        done.put("type", "done");
+                        done.put("ok", false);
+                        done.put("code", r.code());
+                        done.put("msg", r.message());
+                        writeNdjsonRaw(outputStream, done);
+                    }
+                } catch (UncheckedIOException e) {
+                    try {
+                        Map<String, Object> done = new HashMap<>();
+                        done.put("type", "done");
+                        done.put("ok", false);
+                        done.put("code", PluginInstallStreamResultCode.STREAM_IO_FAILED);
+                        done.put("msg", e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+                        writeNdjsonRaw(outputStream, done);
+                    } catch (IOException ignored) {
+                    }
+                } catch (Exception e) {
+                    try {
+                        Map<String, Object> done = new HashMap<>();
+                        done.put("type", "done");
+                        done.put("ok", false);
+                        done.put("code", PluginInstallStreamResultCode.STREAM_INTERNAL_ERROR);
+                        done.put("msg", e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
+                        writeNdjsonRaw(outputStream, done);
+                    } catch (IOException ignored) {
+                    }
+                } finally {
+                    try {
+                        Files.deleteIfExists(tempFinal);
+                    } catch (IOException ignored) {
+                    }
+                    try {
+                        outputStream.flush();
+                    } catch (IOException ignored) {
+                    }
+                }
+            } finally {
+                DemoModeContextHolder.clearPropagatedDemoPrincipal();
+            }
+        };
+        return ResponseEntity.ok().contentType(NDJSON_UTF8).body(stream);
+    }
+
+    private ResponseEntity<StreamingResponseBody> badNdjsonDone(String code, String msg) {
+        StreamingResponseBody stream = os -> {
+            try {
+                Map<String, Object> done = new HashMap<>();
+                done.put("type", "done");
+                done.put("ok", false);
+                done.put("code", code);
+                done.put("msg", msg);
+                writeNdjsonRaw(os, done);
+            } catch (IOException ignored) {
+            }
+        };
+        return ResponseEntity.badRequest().contentType(NDJSON_UTF8).body(stream);
+    }
+
+    private void writeNdjsonLine(OutputStream os, String level, String text) throws IOException {
+        Map<String, Object> m = new HashMap<>();
+        m.put("type", "line");
+        m.put("level", level);
+        m.put("text", text);
+        writeNdjsonRaw(os, m);
+    }
+
+    private void writeNdjsonRaw(OutputStream os, Map<String, Object> payload) throws IOException {
+        os.write(objectMapper.writeValueAsString(payload).getBytes(StandardCharsets.UTF_8));
+        os.write('\n');
+        os.flush();
+    }
+
+    @FunctionalInterface
+    private interface ProgressEmitter {
+        void line(String level, String text);
+    }
+
+    private record InstallRunResult(boolean ok, String code, String message, Map<String, Object> body) {
+        static InstallRunResult success(Map<String, Object> body) {
+            return new InstallRunResult(true, PluginInstallStreamResultCode.SUCCESS, null, body);
+        }
+
+        static InstallRunResult failure(String code, String message) {
+            return new InstallRunResult(false, code, message, null);
+        }
+    }
+
+    /**
+     * install.sql 经 JdbcTemplate 逐条自动提交，与磁盘/入库不在同一事务；安装后续失败时需按 id 删除本次实际插入的菜单行。
+     */
+    private void rollbackBundledInstallSqlMenuRows(List<String> insertedSysFunctionIds, ProgressEmitter progress) {
+        if (insertedSysFunctionIds == null || insertedSysFunctionIds.isEmpty()) {
+            return;
+        }
+        pluginHostDbBridge.ifAvailable(b -> b.removeInstallSqlSysFunctionRows(insertedSysFunctionIds));
+        if (progress != null) {
+            progress.line(
+                    "info",
+                    "安装失败：已删除本次 install.sql 实际插入的 sys_function（共 " + insertedSysFunctionIds.size() + " 条）");
+        }
+    }
+
+    /**
+     * 与历史 {@code /install} 行为一致；{@code progress} 非空时输出分步说明（用于 {@code /installStream}）。
+     */
+    private InstallRunResult runPluginInstall(
+            Path tempJar, boolean skipBundledSchemaExecution, ProgressEmitter progress) {
+        BiConsumer<String, String> emit =
+                (level, text) -> {
+                    if (progress != null) {
+                        progress.line(level, text);
+                    }
+                };
+
+        emit.accept("info", "已接收插件包，开始安装流程…");
+        List<String> schemaLog = null;
+        List<String> installSqlLog = null;
+        /** 本次 install.sql 实际 INSERT 成功的 sys_function.id，后续步骤失败时用于删行回滚 */
+        List<String> installSqlInsertedIds = List.of();
+        if (!skipBundledSchemaExecution) {
+            Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(tempJar);
+            Optional<String> installOpt = pluginLifecycleManager.readBundledInstallSql(tempJar);
+            boolean hasSchema = schemaOpt.isPresent() && !schemaOpt.get().isBlank();
+            boolean hasInstallSql = installOpt.isPresent() && !installOpt.get().isBlank();
+            if (hasSchema || hasInstallSql) {
+                BundledPluginSchemaExecutor executor = bundledPluginSchemaExecutor.getIfAvailable();
+                if (executor == null) {
+                    emit.accept(
+                            "error",
+                            "JAR 内含 schema.sql 或 script/install.sql，但未启用 BundledPluginSchemaExecutor，无法自动执行");
+                    return InstallRunResult.failure(
+                            PluginInstallStreamResultCode.SCHEMA_EXECUTOR_MISSING,
+                            "JAR 内含包内 SQL，但当前环境未启用 BundledPluginSchemaExecutor（需 mms-system + JdbcTemplate）。可设置 skipBundledSchemaExecution=true 跳过后再装，或手工执行 SQL。");
+                }
+                if (hasSchema) {
+                    emit.accept("info", "建表：正在执行 META-INF/mms/schema.sql…");
+                    try {
+                        schemaLog = executor.executeBundledSchema(schemaOpt.get());
+                        emit.accept("info", "建表：schema.sql 已执行完成");
+                        if (schemaLog != null) {
+                            for (String line : schemaLog) {
+                                if (line != null && !line.isBlank()) {
+                                    emit.accept("info", "[DDL] " + line.trim());
+                                }
+                            }
+                        }
+                    } catch (Exception ddlEx) {
+                        emit.accept("error", "建表：执行 schema.sql 失败 — " + ddlEx.getMessage());
+                        return InstallRunResult.failure(
+                                PluginInstallStreamResultCode.SCHEMA_EXECUTION_FAILED,
+                                "执行 schema.sql 失败: " + ddlEx.getMessage());
+                    }
+                } else {
+                    emit.accept("info", "建表：已跳过（JAR 内无 schema.sql）");
+                }
+                if (hasInstallSql) {
+                    emit.accept("info", "菜单 SQL：正在执行 script/install.sql…");
+                    try {
+                        BundledInstallSqlResult installOutcome =
+                                executor.executeBundledInstallSql(installOpt.get());
+                        installSqlLog = installOutcome.logLines();
+                        installSqlInsertedIds = installOutcome.insertedSysFunctionIds();
+                        emit.accept("info", "菜单 SQL：install.sql 已处理完成");
+                        if (installSqlLog != null) {
+                            for (String line : installSqlLog) {
+                                if (line != null && !line.isBlank()) {
+                                    emit.accept("info", "[INSTALL] " + line.trim());
+                                }
+                            }
+                        }
+                    } catch (BundledInstallSqlExecutionException partial) {
+                        installSqlLog = partial.getLogLines();
+                        installSqlInsertedIds = partial.getInsertedFunctionIds();
+                        if (installSqlLog != null) {
+                            for (String line : installSqlLog) {
+                                if (line != null && !line.isBlank()) {
+                                    emit.accept("info", "[INSTALL] " + line.trim());
+                                }
+                            }
+                        }
+                        rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+                        emit.accept("error", "install.sql：执行失败 — " + partial.getMessage());
+                        return InstallRunResult.failure(
+                                PluginInstallStreamResultCode.INSTALL_SQL_EXECUTION_FAILED,
+                                "执行 script/install.sql 失败: " + partial.getMessage());
+                    } catch (Exception sqlEx) {
+                        emit.accept("error", "install.sql：执行失败 — " + sqlEx.getMessage());
+                        return InstallRunResult.failure(
+                                PluginInstallStreamResultCode.INSTALL_SQL_EXECUTION_FAILED,
+                                "执行 script/install.sql 失败: " + sqlEx.getMessage());
+                    }
+                } else {
+                    emit.accept("info", "install.sql：已跳过（JAR 内无 script/install.sql）");
+                }
+            } else {
+                emit.accept("info", "包内 SQL：无 schema.sql 与 install.sql，跳过执行步骤");
+            }
+        } else {
+            emit.accept("info", "已跳过 JAR 内 schema.sql 与 script/install.sql（skipBundledSchemaExecution=true）");
+        }
+
+        PluginDescriptor installed;
+        try {
+            emit.accept("info", "正在校验 plugin.json、宿主兼容性与依赖指纹，并写入插件目录…");
+            installed = pluginLifecycleManager.installJarFromUpload(tempJar);
+            emit.accept("info", "JAR 已落盘：" + installed.getId() + " @ " + installed.getVersion());
+        } catch (PluginException ex) {
+            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            emit.accept("error", "磁盘安装失败 — " + ex.getMessage());
+            return InstallRunResult.failure(
+                    PluginInstallStreamResultCode.JAR_VALIDATION_FAILED, "插件包未通过校验: " + ex.getMessage());
+        } catch (Exception ex) {
+            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            emit.accept("error", "磁盘安装失败 — " + ex.getMessage());
+            return InstallRunResult.failure(
+                    PluginInstallStreamResultCode.JAR_INSTALL_FAILED, "插件包解析或校验失败: " + ex.getMessage());
+        }
+
+        try {
+            PluginHostDbBridge bridge = pluginHostDbBridge.getIfAvailable();
+            if (bridge != null) {
+                emit.accept("info", "正在写入数据库版本登记，并同步菜单/配置（若 plugin.json 已声明）…");
+                bridge.onInstallSuccess(installed);
+                emit.accept("info", "数据库登记与同步已完成");
+            } else {
+                emit.accept("warn", "未启用插件库表桥接：跳过数据库登记（仅完成磁盘安装）");
+            }
+        } catch (Exception ex) {
+            emit.accept("error", "数据库登记失败，正在回滚磁盘 — " + ex.getMessage());
+            try {
+                pluginLifecycleManager.uninstallFromDisk(installed.getId(), installed.getVersion());
+            } catch (Exception ignored) {
+            }
+            rollbackBundledInstallSqlMenuRows(installSqlInsertedIds, progress);
+            return InstallRunResult.failure(
+                    PluginInstallStreamResultCode.DATABASE_REGISTRATION_FAILED,
+                    "已回滚磁盘与本次 install.sql 菜单行。入库失败: " + ex.getMessage());
+        }
+
+        emit.accept("info", "正在全量重载插件（类加载、路由、联邦资源等）…");
+        pluginLifecycleManager.reload();
+        emit.accept("info", "插件安装已完成");
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("summaries", pluginLifecycleManager.listSummaries());
+        body.put("bundledSchemaExecutionLog", schemaLog);
+        body.put("bundledInstallSqlExecutionLog", installSqlLog);
+        body.put("pluginId", installed.getId());
+        body.put("version", installed.getVersion());
+        return InstallRunResult.success(body);
+    }
+
+    /**
+     * 在仍有 Sa Web 上下文的线程调用（如 installStream 入口）：供演示模式拦截器在异步线程匹配 {@code demo.mode.allowed-users}。
+     */
+    private static String captureDemoModeUsernameForPropagate() {
+        try {
+            String u = LoginObject.getLoginUserName();
+            if (u != null && !u.isBlank()) {
+                return u.trim();
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            if (StpUtil.isLogin()) {
+                Object id = StpUtil.getLoginId();
+                if (id != null) {
+                    String s = id.toString().trim();
+                    if (!s.isEmpty()) {
+                        return s;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private static boolean captureDemoModeSuperForPropagate() {
+        try {
+            if (Boolean.TRUE.equals(LoginObject.getLoginSuper())) {
+                return true;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            return StpUtil.isLogin() && StpUtil.hasRole(SystemCommonEnum.SUPER_ADMIN.getCode());
+        } catch (Exception ignored) {
+            return false;
         }
     }
 
@@ -499,6 +833,7 @@ public class PluginHostController {
                 return R.fail("插件包解析失败: " + ex.getMessage());
             }
             Optional<String> schemaOpt = pluginLifecycleManager.readBundledSchemaSql(temp);
+            Optional<String> installOpt = pluginLifecycleManager.readBundledInstallSql(temp);
             Map<String, Object> body = new HashMap<>();
             body.put("pluginId", d.getId());
             body.put("version", d.getVersion());
@@ -514,6 +849,19 @@ public class PluginHostController {
                 body.put("truncated", truncated);
                 body.put("schemaSql", truncated ? sql.substring(0, BUNDLED_SCHEMA_PREVIEW_MAX_CHARS) : sql);
             }
+            boolean hasInstallSql = installOpt.isPresent() && !installOpt.get().isBlank();
+            body.put("hasBundledInstallSql", hasInstallSql);
+            if (!hasInstallSql) {
+                body.put("installSql", "");
+                body.put("installSqlTruncated", false);
+                body.put("installSqlByteLength", 0);
+            } else {
+                String isql = installOpt.get();
+                body.put("installSqlByteLength", isql.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+                boolean instTrunc = isql.length() > BUNDLED_SCHEMA_PREVIEW_MAX_CHARS;
+                body.put("installSqlTruncated", instTrunc);
+                body.put("installSql", instTrunc ? isql.substring(0, BUNDLED_SCHEMA_PREVIEW_MAX_CHARS) : isql);
+            }
             body.put("bundledSchemaExecutorAvailable", bundledPluginSchemaExecutor.getIfAvailable() != null);
             body.put("name", d.getName());
             body.put("description", d.getDescription());
@@ -524,6 +872,22 @@ public class PluginHostController {
                     d.getMenuBootstrap() != null
                             && d.getMenuBootstrap().getItems() != null
                             && !d.getMenuBootstrap().getItems().isEmpty());
+            List<String> sysConfigConfigNames = new ArrayList<>();
+            if (d.getSysConfig() != null) {
+                for (PluginSysConfigDef row : d.getSysConfig()) {
+                    if (row == null) {
+                        continue;
+                    }
+                    String suffix = row.getKeySuffix();
+                    if (suffix == null || suffix.isBlank()) {
+                        continue;
+                    }
+                    String cn = row.getConfigName();
+                    sysConfigConfigNames.add(
+                            cn != null && !cn.isBlank() ? cn.trim() : suffix.trim());
+                }
+            }
+            body.put("sysConfigConfigNames", sysConfigConfigNames);
             body.put(
                     "requiresMmsRevisionMin",
                     d.getRequiresMms() != null ? d.getRequiresMms().getRevisionMin() : null);

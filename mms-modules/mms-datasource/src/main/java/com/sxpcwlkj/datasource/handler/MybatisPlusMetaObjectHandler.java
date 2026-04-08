@@ -1,5 +1,7 @@
 package com.sxpcwlkj.datasource.handler;
 
+import cn.dev33.satoken.exception.NotWebContextException;
+import cn.dev33.satoken.exception.SaTokenContextException;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpStatus;
@@ -25,7 +27,17 @@ import java.util.Date;
 @Component
 public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
 
-
+    /**
+     * Servlet 异步线程（如 {@code StreamingResponseBody}）、线程池任务等场景无 Sa-Token Web 上下文，
+     * {@link StpUtil#isLogin()} 会抛 {@link SaTokenContextException}；与 {@link com.sxpcwlkj.authority.LoginObject#isLogin()} 对齐，视为未登录并跳过按登录态填充。
+     */
+    private static boolean isLoginWithWebContext() {
+        try {
+            return StpUtil.isLogin();
+        } catch (NotWebContextException | SaTokenContextException e) {
+            return false;
+        }
+    }
 
     @Override
     public void insertFill(MetaObject metaObject) {
@@ -42,7 +54,7 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
                     baseEntity.setSort(0);
                 }
                 baseEntity.setRevision(1L);
-                if (StpUtil.isLogin()) {
+                if (isLoginWithWebContext()) {
                     Long userId = ObjectUtil.isNotNull(baseEntity.getCreatedBy()) ? baseEntity.getCreatedBy() : StpUtil.getLoginIdAsLong();
                     // 当前已登录 且 创建人为空 则填充
                     baseEntity.setCreatedBy(userId);
@@ -71,7 +83,7 @@ public class MybatisPlusMetaObjectHandler implements MetaObjectHandler {
                 // 更新时间填充(不管为不为空)
                 baseEntity.setUpdatedTime(current);
                 // 当前已登录 更新人填充(不管为不为空)
-                if (StpUtil.isLogin()) {
+                if (isLoginWithWebContext()) {
                     baseEntity.setUpdatedBy(StpUtil.getLoginIdAsLong());
                 }
             }

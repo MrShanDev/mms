@@ -6,7 +6,7 @@ import com.alibaba.ttl.TransmittableThreadLocal;
 import com.sxpcwlkj.common.utils.JsonUtil;
 import com.sxpcwlkj.common.utils.SpringUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
-import com.sxpcwlkj.datasource.handler.DemoModeContextHolder;
+import com.sxpcwlkj.common.context.DemoModeContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

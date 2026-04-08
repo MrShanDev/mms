@@ -63,6 +63,14 @@ public class PluginOwnedMenuBootstrapServiceImpl implements PluginOwnedMenuBoots
                     log.warn("plugin menuBootstrap 跳过缺少 parentId 的项 pluginId={} id={}", pid, item.getId());
                     continue;
                 }
+                int menuType = item.getType() != null ? item.getType() : 1;
+                if (menuType == 1 && (item.getPath() == null || item.getPath().isBlank())) {
+                    log.warn(
+                            "plugin menuBootstrap 跳过 type=1 但缺少 path 的项（管理端动态路由无法注册）pluginId={} id={}",
+                            pid,
+                            item.getId());
+                    continue;
+                }
                 upsertOneMenu(tid, remark, item, now);
             }
         }
@@ -192,6 +200,31 @@ public class PluginOwnedMenuBootstrapServiceImpl implements PluginOwnedMenuBoots
                 sysRoleFunctionMapper.deleteByFunctionIdAndTenant(functionId, tid);
             }
             sysFunctionMapper.deleteByRemarkAndTenant(remark, tid);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeSysFunctionRowsByIds(List<String> sysFunctionIds) {
+        if (sysFunctionIds == null || sysFunctionIds.isEmpty()) {
+            return;
+        }
+        for (String fid : sysFunctionIds) {
+            if (fid == null || fid.isBlank()) {
+                continue;
+            }
+            String id = fid.trim();
+            List<String> tids = sysFunctionMapper.selectDistinctTenantIdsByFunctionId(id);
+            if (tids == null || tids.isEmpty()) {
+                continue;
+            }
+            for (String tid : tids) {
+                if (tid == null || tid.isBlank()) {
+                    continue;
+                }
+                sysRoleFunctionMapper.deleteByFunctionIdAndTenant(id, tid.trim());
+                sysFunctionMapper.deleteByIdAndTenant(id, tid.trim());
+            }
         }
     }
 }

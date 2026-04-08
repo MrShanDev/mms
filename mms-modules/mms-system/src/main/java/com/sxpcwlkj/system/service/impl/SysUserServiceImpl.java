@@ -513,10 +513,45 @@ public class SysUserServiceImpl implements SysUserService {
         //所有角色
         List<SysFunctionVo> functionVos = new ArrayList<>();
         for (SysRoleVo role : roleVoList) {
-            functionVos.addAll(role.getSysFunctionVoList());
+            if (role.getSysFunctionVoList() != null) {
+                functionVos.addAll(role.getSysFunctionVoList());
+            }
         }
+        // 多角色合并时同一菜单会出现多条；超级管理员一次拉全量菜单时，展示名 name 也可能与其它菜单重复。
+        // Vue Router 要求路由 name 全局唯一，否则注册/跳转异常（普通账号菜单少不易触发）。
+        functionVos = dedupeFunctionVosById(functionVos);
 
         return getAdminMenuTree(functionVos, "1");
+    }
+
+    /** 按资源主键去重，保留首次出现顺序。 */
+    private static List<SysFunctionVo> dedupeFunctionVosById(List<SysFunctionVo> list) {
+        if (list == null || list.isEmpty()) {
+            return list == null ? new ArrayList<>() : list;
+        }
+        Map<String, SysFunctionVo> map = new LinkedHashMap<>();
+        for (SysFunctionVo vo : list) {
+            if (vo == null || vo.getId() == null) {
+                continue;
+            }
+            String id = vo.getId().trim();
+            if (id.isEmpty()) {
+                continue;
+            }
+            map.putIfAbsent(id, vo);
+        }
+        return new ArrayList<>(map.values());
+    }
+
+    /** 与 {@link SysFunctionServiceImpl} 保存校验一致，避免历史脏数据拖垮 getMenu。 */
+    private static boolean isAdminMenuRouteRowValid(SysFunctionVo vo) {
+        if (vo == null) {
+            return false;
+        }
+        if (StringUtil.isEmpty(vo.getPath())) {
+            return false;
+        }
+        return StringUtil.isNotEmpty(vo.getComponent()) || StringUtil.isNotEmpty(vo.getRedirectPath());
     }
 
     private List<AdminMenuTree> getAdminMenuTree(List<SysFunctionVo> functionVos, String funId) {
@@ -525,6 +560,15 @@ public class SysUserServiceImpl implements SysUserService {
         for (SysFunctionVo vo : functionVos) {
             // 只处理类型为1的菜单项
             if (vo.getType() == 1) {
+                if (!isAdminMenuRouteRowValid(vo)) {
+                    log.warn(
+                            "getAdminMenuTree 跳过无效目录菜单行 id={} path={} component={} redirectPath={}（须非空 path 且 component/redirect 至少其一，否则管理端动态路由异常）",
+                            vo.getId(),
+                            vo.getPath(),
+                            vo.getComponent(),
+                            vo.getRedirectPath());
+                    continue;
+                }
                 String parentId = vo.getParentId();
                 parentChildMap.computeIfAbsent(parentId, k -> new ArrayList<>()).add(vo);
             }
@@ -545,7 +589,8 @@ public class SysUserServiceImpl implements SysUserService {
             AdminMenuTree menu = new AdminMenuTree();
             menu.setId(child.getId());
             menu.setPath(child.getPath());
-            menu.setName(child.getName());
+            // 路由 name 须全局唯一；sys_function.name 多为中文展示名，在全量菜单下极易重复导致 Vue Router 异常
+            menu.setName(child.getId());
             menu.setComponent(child.getComponent());
 
             Map<String, Object> meta = new HashMap<>();
@@ -566,9 +611,10 @@ public class SysUserServiceImpl implements SysUserService {
             List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
             menu.setChildren(grandchildren);
             // 勿用 component_name 作为 redirect：若误填中文标题，Vue Router 会按相对路径解析成 /父路径/中文，导致 404
+            // 父级已配置页面组件时勿设 redirect：否则访问父 path（如 /index）会被 Vue Router 直接跳到首个子菜单（如挂在其下的 /personal）
             if (!grandchildren.isEmpty()) {
                 AdminMenuTree first = grandchildren.get(0);
-                if (first != null && StringUtil.isNotEmpty(first.getPath())) {
+                if (first != null && StringUtil.isNotEmpty(first.getPath()) && StringUtil.isEmpty(child.getComponent())) {
                     menu.setRedirect(first.getPath());
                 }
             }

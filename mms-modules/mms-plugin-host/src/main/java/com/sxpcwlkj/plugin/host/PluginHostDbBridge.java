@@ -57,4 +57,12 @@ public interface PluginHostDbBridge {
     default void syncMenuBootstrapFromDescriptor(PluginDescriptor descriptor) {
         /* 无库表桥接或未实现时忽略 */
     }
+
+    /**
+     * 卸载磁盘前：按 JAR 内 {@code script/install.sql} 解析出的 {@code sys_function.id} 删除菜单及角色绑定。
+     * <p>不处理 {@code schema.sql} 建表，由运维手工维护。</p>
+     */
+    default void removeInstallSqlSysFunctionRows(List<String> sysFunctionIds) {
+        /* 无库表桥接或未实现时忽略 */
+    }
 }

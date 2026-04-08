@@ -55,7 +55,10 @@ public class SaTokenStpInterfaceImpl implements StpInterface {
         SysUserVo sysUserVo = MapstructUtil.convert(userVo, SysUserVo.class);
         assert sysUserVo != null;
         String[] roleCodes = sysUserVo.getRoleCodes();
-        list= Arrays.asList(roleCodes);
+        if (roleCodes == null || roleCodes.length == 0) {
+            return list;
+        }
+        list = Arrays.asList(roleCodes);
 
         return list;
     }

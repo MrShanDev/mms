@@ -1,6 +1,7 @@
 package com.sxpcwlkj.system.entity;
 
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.sxpcwlkj.datasource.entity.BaseEntity;
@@ -61,6 +62,11 @@ public class SysFunction extends BaseEntity {
      * 组件路径
      */
     private String component;
+    /**
+     * 默认跳转路径（纯目录无组件时与 component 二选一）
+     */
+    @TableField("redirect_path")
+    private String redirectPath;
     /**
      * 组件名
      */

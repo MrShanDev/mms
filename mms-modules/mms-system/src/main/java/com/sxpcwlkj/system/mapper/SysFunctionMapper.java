@@ -34,4 +34,14 @@ public interface SysFunctionMapper extends BaseMapperPlus<SysFunction, SysFuncti
     @InterceptorIgnore(tenantLine = "true")
     @Delete("DELETE FROM `sys_function` WHERE remark = #{remark} AND tenant_id = #{tenantId}")
     int deleteByRemarkAndTenant(@Param("remark") String remark, @Param("tenantId") String tenantId);
+
+    /** 按功能 id 列举出现过的租户（忽略租户行插件）。 */
+    @InterceptorIgnore(tenantLine = "true")
+    @Select("SELECT DISTINCT tenant_id FROM `sys_function` WHERE id = #{functionId}")
+    List<String> selectDistinctTenantIdsByFunctionId(@Param("functionId") String functionId);
+
+    /** 按主键与租户删除一行（忽略租户行插件）。 */
+    @InterceptorIgnore(tenantLine = "true")
+    @Delete("DELETE FROM `sys_function` WHERE id = #{functionId} AND tenant_id = #{tenantId}")
+    int deleteByIdAndTenant(@Param("functionId") String functionId, @Param("tenantId") String tenantId);
 }

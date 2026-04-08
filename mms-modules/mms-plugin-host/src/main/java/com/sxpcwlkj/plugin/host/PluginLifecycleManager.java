@@ -7,6 +7,7 @@ import com.sxpcwlkj.plugin.PluginDescriptorReader;
 import com.sxpcwlkj.plugin.PluginDescriptorValidator;
 import com.sxpcwlkj.plugin.PluginException;
 import com.sxpcwlkj.plugin.PluginHealthContributor;
+import com.sxpcwlkj.plugin.BundledInstallSqlSupport;
 import com.sxpcwlkj.plugin.PluginConstants;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
 import com.sxpcwlkj.plugin.PluginKind;
@@ -883,6 +884,88 @@ public class PluginLifecycleManager {
             log.debug("readBundledSchemaSql: {}", e.getMessage());
             return Optional.empty();
         }
+    }
+
+    /**
+     * 读取 JAR 内 {@link PluginConstants#INSTALL_SQL_PATH_IN_JAR}（UTF-8），供安装向导预览；安装时在未跳过包内 SQL 的情况下由宿主自动执行。
+     */
+    public Optional<String> readBundledInstallSql(Path jarFile) {
+        if (jarFile == null || !Files.isRegularFile(jarFile)) {
+            return Optional.empty();
+        }
+        try (JarFile jf = new JarFile(jarFile.toFile(), false)) {
+            JarEntry ent = jf.getJarEntry(PluginConstants.INSTALL_SQL_PATH_IN_JAR);
+            if (ent == null || ent.isDirectory()) {
+                return Optional.empty();
+            }
+            long size = ent.getSize();
+            if (size > MAX_BUNDLED_SCHEMA_BYTES) {
+                throw new PluginException("install.sql 超过 2MB，拒绝读取");
+            }
+            try (var in = jf.getInputStream(ent)) {
+                byte[] bytes = in.readAllBytes();
+                if (bytes.length == 0) {
+                    return Optional.empty();
+                }
+                return Optional.of(new String(bytes, StandardCharsets.UTF_8));
+            }
+        } catch (PluginException e) {
+            throw e;
+        } catch (Exception e) {
+            log.debug("readBundledInstallSql: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * 卸载磁盘前：从仍存在的安装目录读取各版本主 JAR 内 {@code script/install.sql}，合并解析出的 {@code sys_function.id}（去重）。
+     *
+     * @param versionOrNull 非空时仅处理该版本目录
+     */
+    public List<String> collectBundledInstallSqlFunctionIds(String pluginId, String versionOrNull) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return List.of();
+        }
+        String pid = pluginId.trim();
+        Path root = resolveRoot();
+        if (!ensurePluginsRoot(root)) {
+            return List.of();
+        }
+        Path base = root.resolve(PluginInstallationLayout.safeSegment(pid));
+        if (!Files.isDirectory(base)) {
+            return List.of();
+        }
+        List<String> versions = new ArrayList<>();
+        if (versionOrNull != null && !versionOrNull.isBlank()) {
+            versions.add(versionOrNull.trim());
+        } else {
+            try (Stream<Path> st = Files.list(base)) {
+                st.filter(Files::isDirectory)
+                        .sorted()
+                        .forEach(p -> versions.add(p.getFileName().toString()));
+            } catch (IOException e) {
+                log.debug("collectBundledInstallSqlFunctionIds 列举版本失败: {}", e.getMessage());
+                return List.of();
+            }
+        }
+        LinkedHashSet<String> ids = new LinkedHashSet<>();
+        for (String ver : versions) {
+            try {
+                Path verDir = PluginInstallationLayout.pluginRoot(root, pid, ver);
+                if (!Files.isDirectory(verDir)) {
+                    continue;
+                }
+                var probeOpt = PluginDescriptorProbe.tryReadForPlugin(verDir, pid);
+                if (probeOpt.isEmpty()) {
+                    continue;
+                }
+                readBundledInstallSql(probeOpt.get().descriptorJar())
+                        .ifPresent(sql -> ids.addAll(BundledInstallSqlSupport.collectAllFunctionIds(sql)));
+            } catch (Exception e) {
+                log.debug("collectBundledInstallSqlFunctionIds {}@{}: {}", pid, ver, e.getMessage());
+            }
+        }
+        return List.copyOf(ids);
     }
 
     private Optional<String> resolveBundledLogoProbeVersion(String pluginId, String versionOrNull) {

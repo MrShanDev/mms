@@ -1,6 +1,7 @@
 package com.sxpcwlkj.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.MapstructUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
 import com.sxpcwlkj.datasource.entity.page.PageQuery;
@@ -59,6 +60,7 @@ public class SysFunctionServiceImpl implements SysFunctionService {
     @Override
     public Boolean updateByIdBase(SysFunctionBo bo) {
         SysFunction convert = MapstructUtil.convert(bo, SysFunction.class);
+        assertType1MenuRouteComplete(convert);
         return baseMapper.updateById(convert) > 0;
     }
 
@@ -66,7 +68,26 @@ public class SysFunctionServiceImpl implements SysFunctionService {
     public Boolean insert(SysFunctionBo bo) {
         bo.setId(null);
         SysFunction convert = MapstructUtil.convert(bo, SysFunction.class);
+        assertType1MenuRouteComplete(convert);
         return baseMapper.insert(convert) > 0;
+    }
+
+    /**
+     * 管理端动态路由（getMenu）要求：类型=目录(1) 时 path 非空，且 component 与 redirect 至少填其一，
+     * 否则 Vue Router 注册异常（超级管理员全量菜单时尤易暴露）。
+     */
+    private static void assertType1MenuRouteComplete(SysFunction f) {
+        if (f == null || f.getType() == null || f.getType() != 1) {
+            return;
+        }
+        if (StringUtil.isEmpty(f.getPath())) {
+            throw new MmsException("目录/菜单须填写路由地址 path，否则管理端无法生成动态路由");
+        }
+        boolean hasComp = StringUtil.isNotEmpty(f.getComponent());
+        boolean hasRedirect = StringUtil.isNotEmpty(f.getRedirectPath());
+        if (!hasComp && !hasRedirect) {
+            throw new MmsException("目录/菜单须填写组件路径 component，或填写默认跳转 redirect（与菜单管理中「路由重定向」一致）");
+        }
     }
 
     @Override
@@ -200,9 +221,10 @@ public class SysFunctionServiceImpl implements SysFunctionService {
             // 递归构建子树
             List<AdminMenuTree> grandchildren = buildAdminMenuTreeWithMap(parentChildMap, child.getId());
             menu.setChildren(grandchildren);
+            // 父级已配置页面组件时勿设 redirect，避免进入父路由时被重定向到第一个子菜单
             if (!grandchildren.isEmpty()) {
                 AdminMenuTree first = grandchildren.get(0);
-                if (first != null && StringUtil.isNotEmpty(first.getPath())) {
+                if (first != null && StringUtil.isNotEmpty(first.getPath()) && StringUtil.isEmpty(child.getComponent())) {
                     menu.setRedirect(first.getPath());
                 }
             }

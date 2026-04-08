@@ -1,6 +1,11 @@
 package com.sxpcwlkj.system.plugin;
 
+import com.sxpcwlkj.plugin.BundledInstallSqlExecutionException;
+import com.sxpcwlkj.plugin.BundledInstallSqlResult;
+import com.sxpcwlkj.plugin.BundledInstallSqlSupport;
 import com.sxpcwlkj.plugin.BundledPluginSchemaExecutor;
+import com.sxpcwlkj.plugin.BundledPluginSchemaSupport;
+import com.sxpcwlkj.plugin.BundledPluginSqlSplitter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -10,6 +15,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * 执行插件 JAR 内 schema.sql（由宿主拆句后传入）。
@@ -24,9 +30,125 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
     private final JdbcTemplate jdbcTemplate;
 
     @Override
+    public BundledInstallSqlResult executeBundledInstallSql(String sql) {
+        List<String> lines = new ArrayList<>();
+        List<String> insertedFunctionIds = new ArrayList<>();
+        List<String> stmts = BundledPluginSqlSplitter.splitStatements(sql);
+        if (stmts.isEmpty()) {
+            lines.add("（install.sql 无有效 SQL 语句，跳过）");
+            return new BundledInstallSqlResult(lines, insertedFunctionIds);
+        }
+        if (stmts.size() > MAX_STATEMENTS) {
+            throw new IllegalArgumentException("install.sql 语句条数超过上限 " + MAX_STATEMENTS);
+        }
+        int unitCount = 0;
+        for (String raw : stmts) {
+            String stmt = raw.trim();
+            if (stmt.isEmpty()) {
+                continue;
+            }
+            if (stmt.length() > MAX_STATEMENT_LEN) {
+                throw new IllegalArgumentException("单条语句过长（>" + MAX_STATEMENT_LEN + "）");
+            }
+            unitCount += BundledInstallSqlSupport.expandToSingleRowInserts(stmt).size();
+        }
+        if (unitCount > MAX_STATEMENTS) {
+            throw new IllegalArgumentException("install.sql 展开后的插入条数超过上限 " + MAX_STATEMENTS);
+        }
+        int n = 0;
+        for (String raw : stmts) {
+            String stmt = raw.trim();
+            if (stmt.isEmpty()) {
+                continue;
+            }
+            List<String> units = BundledInstallSqlSupport.expandToSingleRowInserts(stmt);
+            for (String unit : units) {
+                if (unit.length() > MAX_STATEMENT_LEN) {
+                    throw new IllegalArgumentException("单条语句过长（>" + MAX_STATEMENT_LEN + "）");
+                }
+                BundledPluginInstallSqlGuard.assertStatementAllowed(unit);
+                n++;
+                String fid = BundledInstallSqlSupport.extractFirstFunctionIdFromInsert(unit);
+                if (fid != null && !fid.isBlank() && sysFunctionIdExists(fid.trim())) {
+                    lines.add(
+                            String.format(
+                                    Locale.ROOT,
+                                    "[SKIP] #%d sys_function.id 已存在，已跳过 — %s",
+                                    n,
+                                    preview(unit)));
+                    continue;
+                }
+                long t0 = System.currentTimeMillis();
+                try {
+                    jdbcTemplate.execute((Connection c) -> {
+                        try (Statement st = c.createStatement()) {
+                            st.execute(unit);
+                        }
+                        return null;
+                    });
+                    lines.add(String.format(Locale.ROOT, "[OK] #%d (%d ms) %s", n, System.currentTimeMillis() - t0, preview(unit)));
+                    if (fid != null && !fid.isBlank()) {
+                        insertedFunctionIds.add(fid.trim());
+                    }
+                } catch (Exception e) {
+                    if (isDuplicateKeyException(e)) {
+                        lines.add(String.format(Locale.ROOT, "[SKIP] #%d 主键或唯一约束重复，已跳过 — %s", n, preview(unit)));
+                        continue;
+                    }
+                    lines.add(String.format(Locale.ROOT, "[FAIL] #%d %s — %s", n, preview(unit), e.getMessage()));
+                    throw new BundledInstallSqlExecutionException(
+                            new ArrayList<>(lines),
+                            new ArrayList<>(insertedFunctionIds),
+                            "install.sql 第 " + n + " 条失败: " + e.getMessage(),
+                            e);
+                }
+            }
+        }
+        lines.add("install.sql 共处理 " + n + " 条插入（含按主键预检跳过与重复键跳过）。");
+        return new BundledInstallSqlResult(lines, insertedFunctionIds);
+    }
+
+    private boolean sysFunctionIdExists(String id) {
+        try {
+            Number c =
+                    jdbcTemplate.queryForObject(
+                            "SELECT COUNT(*) FROM sys_function WHERE id = ?", Number.class, id);
+            return c != null && c.longValue() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isDuplicateKeyException(Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            if (t instanceof java.sql.SQLException se) {
+                String state = se.getSQLState();
+                if ("23000".equals(state) || "23505".equals(state)) {
+                    return true;
+                }
+                int code = se.getErrorCode();
+                if (code == 1062 || code == 2627) {
+                    return true;
+                }
+            }
+            String m = t.getMessage();
+            if (m != null) {
+                String lower = m.toLowerCase(Locale.ROOT);
+                if (lower.contains("duplicate entry")
+                        || lower.contains("duplicate key")
+                        || lower.contains("unique constraint")
+                        || lower.contains("already exists")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
     public List<String> executeBundledSchema(String sql) {
         List<String> lines = new ArrayList<>();
-        List<String> stmts = splitStatements(sql);
+        List<String> stmts = BundledPluginSqlSplitter.splitStatements(sql);
         if (stmts.isEmpty()) {
             lines.add("（无有效 SQL 语句，跳过）");
             return lines;
@@ -44,6 +166,17 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
                 throw new IllegalArgumentException("单条语句过长（>" + MAX_STATEMENT_LEN + "）");
             }
             BundledPluginSchemaSqlGuard.assertStatementAllowed(stmt);
+            Optional<String> createTable = BundledPluginSchemaSupport.extractCreateTableName(stmt);
+            if (createTable.isPresent() && physicalTableExists(createTable.get())) {
+                n++;
+                lines.add(
+                        String.format(
+                                Locale.ROOT,
+                                "[SKIP] #%d 物理表已存在，跳过 CREATE TABLE — %s",
+                                n,
+                                preview(stmt)));
+                continue;
+            }
             n++;
             long t0 = System.currentTimeMillis();
             try {
@@ -63,61 +196,25 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
         return lines;
     }
 
+    private boolean physicalTableExists(String tableName) {
+        if (tableName == null || tableName.isBlank()) {
+            return false;
+        }
+        String tn = tableName.trim();
+        try {
+            Number c =
+                    jdbcTemplate.queryForObject(
+                            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND LOWER(table_name) = LOWER(?)",
+                            Number.class,
+                            tn);
+            return c != null && c.longValue() > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private static String preview(String stmt) {
         String one = stmt.replace('\n', ' ').trim();
         return one.length() > 160 ? one.substring(0, 157) + "…" : one;
-    }
-
-    static List<String> splitStatements(String sql) {
-        String cleaned = stripLineComments(sql);
-        List<String> out = new ArrayList<>();
-        StringBuilder cur = new StringBuilder();
-        for (String line : cleaned.split("\\R")) {
-            String t = line.trim();
-            if (t.isEmpty()) {
-                continue;
-            }
-            if (t.contains("--")) {
-                int i = t.indexOf("--");
-                t = t.substring(0, i).trim();
-                if (t.isEmpty()) {
-                    continue;
-                }
-            }
-            if (t.endsWith(";")) {
-                cur.append(t.substring(0, t.length() - 1));
-                String s = cur.toString().trim();
-                if (!s.isEmpty()) {
-                    out.add(s);
-                }
-                cur.setLength(0);
-            } else {
-                if (cur.length() > 0) {
-                    cur.append('\n');
-                }
-                cur.append(t);
-            }
-        }
-        String last = cur.toString().trim();
-        if (!last.isEmpty()) {
-            out.add(last);
-        }
-        return out;
-    }
-
-    private static String stripLineComments(String sql) {
-        if (sql == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String line : sql.split("\\R")) {
-            String t = line;
-            int idx = t.indexOf("--");
-            if (idx >= 0) {
-                t = t.substring(0, idx);
-            }
-            sb.append(t).append('\n');
-        }
-        return sb.toString();
     }
 }

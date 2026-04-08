@@ -33,9 +33,20 @@ demo:
     message-template: "演示模式下禁止{operation}操作 [实体: {entity}, 方法: {method}]"
     allowed-users:                        # 白名单用户（不受演示拦截）
       - admin
-    allowed-methods:                      # 白名单方法名
-      - initSign
-      - updateIpById
+    # allowed-methods：含「.」= MappedStatement 全限定 id（或 Mapper短类名.方法 后缀），精确到具体 Mapper；无「.」= 仅方法短名（全库同名均放行，慎用）
+    allowed-methods:
+      - com.sxpcwlkj.framework.mapper.SysSignMapper.initSign
+      - com.sxpcwlkj.system.mapper.SysUserMapper.updateIpById
+      - com.sxpcwlkj.system.mapper.SysPluginVersionMapper.insert
+      - com.sxpcwlkj.system.mapper.SysPluginVersionMapper.update
+      - com.sxpcwlkj.system.mapper.SysPluginVersionMapper.updateById
+      - com.sxpcwlkj.system.mapper.SysPluginVersionMapper.delete
+      - com.sxpcwlkj.system.mapper.SysPluginMapper.insert
+      - com.sxpcwlkj.system.mapper.SysPluginMapper.updateById
+      - com.sxpcwlkj.system.mapper.PluginOwnedMenuTenantFreeMapper.insertMenu
+      - com.sxpcwlkj.system.mapper.PluginOwnedMenuTenantFreeMapper.updateMenu
+      - com.sxpcwlkj.system.mapper.SysFunctionMapper.deleteByRemarkAndTenant
+      - com.sxpcwlkj.system.mapper.SysRoleFunctionMapper.deleteByFunctionIdAndTenant
 
 # ---------------------------------------------------------------------------
 # 验证码

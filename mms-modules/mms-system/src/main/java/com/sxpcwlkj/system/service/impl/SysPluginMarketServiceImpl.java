@@ -19,6 +19,7 @@ import com.sxpcwlkj.plugin.host.PluginHostDbBridge;
 import com.sxpcwlkj.system.service.SysPluginMarketService;
 import com.sxpcwlkj.system.service.SysPluginVersionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static com.sxpcwlkj.system.service.impl.PluginHostDbBridgeImpl.PLUGIN_REGISTRY_TENANT;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SysPluginMarketServiceImpl implements SysPluginMarketService {
@@ -163,6 +165,12 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             throw new IllegalArgumentException("pluginId 不能为空");
         }
         String pid = pluginId.trim();
+        try {
+            List<String> installIds = pluginLifecycleManager.collectBundledInstallSqlFunctionIds(pid, null);
+            pluginHostDbBridge.removeInstallSqlSysFunctionRows(installIds);
+        } catch (Exception e) {
+            log.warn("市场删除插件：按 install.sql 清理 sys_function 失败（继续卸载磁盘） pluginId={} — {}", pid, e.getMessage());
+        }
         // 先卸载内存中的 ClassLoader / 子进程 / 路由，再删磁盘，避免运行中删除 JAR 失败（尤其 Windows）
         pluginLifecycleManager.unloadAllVersionsOfPlugin(pid);
         pluginLifecycleManager.uninstallFromDisk(pid, null, false);

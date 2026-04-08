@@ -2,6 +2,8 @@ package com.sxpcwlkj.system.service;
 
 import com.sxpcwlkj.plugin.PluginDescriptor;
 
+import java.util.List;
+
 /**
  * 插件在 {@code plugin.json} 中声明的 {@code menuBootstrap} 与 {@code sys_function} 同步。
  */
@@ -16,4 +18,9 @@ public interface PluginOwnedMenuBootstrapService {
      * 插件已无库表版本记录且将清理磁盘时：删除各租户下 remark 归属该插件的菜单及角色绑定。
      */
     void removeAllForPlugin(String pluginId);
+
+    /**
+     * 卸载时按 {@code script/install.sql} 解析出的主键 id 删除菜单及角色绑定（各租户；不限 remark）。
+     */
+    void removeSysFunctionRowsByIds(List<String> sysFunctionIds);
 }

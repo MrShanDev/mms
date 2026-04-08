@@ -90,4 +90,13 @@ public class PluginHostDbBridgeImpl implements PluginHostDbBridge {
         pluginOwnedMenuBootstrapService.ifAvailable(s -> s.syncOnInstall(descriptor));
         adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
     }
+
+    @Override
+    public void removeInstallSqlSysFunctionRows(List<String> sysFunctionIds) {
+        if (sysFunctionIds == null || sysFunctionIds.isEmpty()) {
+            return;
+        }
+        pluginOwnedMenuBootstrapService.ifAvailable(s -> s.removeSysFunctionRowsByIds(sysFunctionIds));
+        adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
+    }
 }

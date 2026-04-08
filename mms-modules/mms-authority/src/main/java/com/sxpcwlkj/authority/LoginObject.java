@@ -255,12 +255,27 @@ public class LoginObject<T> {
 
     public static String getLoginUserName() {
         try {
-            String id=getLoginId();
-            if(id==null) {
+            String id = getLoginId();
+            if (id == null) {
                 return null;
             }
-            return RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + id);
-        }catch (NotWebContextException e){
+            String cached = RedisUtil.getCacheObject(RedisConstant.ADMIN_NAME + id);
+            if (cached != null && !cached.isBlank()) {
+                return cached;
+            }
+            // ADMIN_NAME 与登录响应写入不同步或缓存过期时，从管理端会话对象取账号（与 allowed-users、演示放行一致）
+            try {
+                Object sessionUser = RedisUtil.getCacheObject(RedisConstant.ADMIN_KEY + id);
+                if (sessionUser instanceof Map<?, ?> m) {
+                    Object un = m.get("userName");
+                    if (un != null && !un.toString().isBlank()) {
+                        return un.toString().trim();
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            return null;
+        } catch (NotWebContextException e) {
             return null;
         }
     }
