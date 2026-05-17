@@ -24,11 +24,19 @@ import com.sxpcwlkj.system.service.SysConfigService;
 import com.sxpcwlkj.system.service.SysFunctionService;
 import com.sxpcwlkj.system.service.SysNoticeService;
 import com.sxpcwlkj.system.service.SysUserService;
+import com.sxpcwlkj.system.service.SystemRuntimeInfoService;
+import com.sxpcwlkj.system.entity.vo.SystemRuntimeInfoVo;
+import com.sxpcwlkj.system.entity.vo.SystemRuntimeTrendVo;
+import com.sxpcwlkj.system.monitor.SystemRuntimeSseHub;
+import com.sxpcwlkj.system.service.SystemRuntimeTrendService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -54,6 +62,9 @@ public class HomeController extends BaseController {
     private final SysRoleMapper sysRoleMapper;
     private final SysTenantMapper sysTenantMapper;
     private final SysNoticeMapper sysNoticeMapper;
+    private final SystemRuntimeInfoService systemRuntimeInfoService;
+    private final SystemRuntimeTrendService systemRuntimeTrendService;
+    private final SystemRuntimeSseHub systemRuntimeSseHub;
 
     /**
      * 控制台默认数据
@@ -168,6 +179,34 @@ public class HomeController extends BaseController {
         list.add(map4);
 
         return R.success(list);
+    }
+
+    /**
+     * 系统运行信息（实时）：OS/CPU/内存/磁盘/JDK/JVM/数据库等
+     */
+    @SaCheckLogin
+    @GetMapping("/runtimeInfo")
+    public R<SystemRuntimeInfoVo> runtimeInfo() {
+        return R.success(systemRuntimeInfoService.getRuntimeInfo());
+    }
+
+    /**
+     * 系统运行趋势（实时采样）：CPU/内存/JVM 内存
+     */
+    @SaCheckLogin
+    @GetMapping("/runtimeTrend")
+    public R<SystemRuntimeTrendVo> runtimeTrend(@RequestParam(defaultValue = "120") int limit) {
+        return R.success(systemRuntimeTrendService.getTrend(limit));
+    }
+
+    /**
+     * SSE：系统运行状态实时推送
+     * <p>注意：EventSource 无法自定义 Header，这里通过 query 透传 Authorization token。</p>
+     */
+    @GetMapping(value = "/runtimeSse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter runtimeSse(@RequestParam("Authorization") String authorization) {
+        SseEmitter emitter = systemRuntimeSseHub.register(authorization);
+        return emitter;
     }
 
     /**

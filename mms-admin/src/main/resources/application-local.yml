@@ -1,14 +1,14 @@
 # 演示模式配置（与 script/config 约定一致，覆盖主配置 application.yml）
 demo:
   mode:
-    enabled: true
+    enabled: false
 
---- # powerjob 配置
-powerjob:
+--- # power-job 配置
+power-job:
   worker:
     # 如何开启调度中心请查看文档教程
     enabled: false
-    # 需要先在 powerjob 登录页执行应用注册后才能使用
+    # 需要先在 power-job 登录页执行应用注册后才能使用
     app-name: mms
     max-appended-wf-context-length: 4096
     max-result-length: 4096

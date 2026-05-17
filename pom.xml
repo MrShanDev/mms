@@ -704,35 +704,6 @@
                     </compilerArgs>
                 </configuration>
             </plugin>
-            <!-- 单元测试使用 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <!-- 根据打包环境执行对应的@Tag测试方法 -->
-                    <groups>${profiles.active}</groups>
-                    <!-- 排除标签 -->
-                    <excludedGroups>exclude</excludedGroups>
-                </configuration>
-            </plugin>
-            <!-- 依赖安全扫描 -->
-<!--            <plugin>-->
-<!--                <groupId>org.owasp</groupId>-->
-<!--                <artifactId>dependency-check-maven</artifactId>-->
-<!--                <version>${dependency-check.version}</version>-->
-<!--                <configuration>-->
-<!--                    <format>HTML</format>-->
-<!--                    <failBuildOnCVSS>8</failBuildOnCVSS>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-            <!-- 依赖版本升级检查 -->
-<!--            <plugin>-->
-<!--                <groupId>org.codehaus.mojo</groupId>-->
-<!--                <artifactId>versions-maven-plugin</artifactId>-->
-<!--                <version>${versions-maven-plugin.version}</version>-->
-<!--            </plugin>-->
-            <!-- 统一版本号管理 -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>

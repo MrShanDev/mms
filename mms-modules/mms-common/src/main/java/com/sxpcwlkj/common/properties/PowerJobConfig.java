@@ -13,7 +13,7 @@ import tech.powerjob.worker.PowerJobWorker;
  */
 @Configuration
 @ConditionalOnBean(PowerJobWorker.class)
-@ConditionalOnProperty(prefix = "powerjob.worker", name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = "power-job.worker", name = "enabled", havingValue = "true")
 @EnableScheduling
 public class PowerJobConfig {
 
