@@ -1,36 +1,58 @@
-# script
+# mms/script (DB Scripts & Docker Assets)
 
-#### Description
-项目用到的一些扩展文件
+English | [简体中文](README.md)
 
-#### Software Architecture
-Software architecture description
+This folder contains runtime assets for the **MMS backend**, including:
 
-#### Installation
+- **Database initialization scripts** (`db/`)
+- **Upgrade SQL scripts** (`upgrade/`)
+- **Docker compose & config templates** (`docker/`)
+- Helper scripts (e.g. `mms-tool.sh`)
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+---
 
-#### Instructions
+## Layout
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+```text
+script/
+├── db/
+├── upgrade/
+├── docker/
+├── docker-compose/     # offline docker-compose binaries (legacy)
+└── mms-tool.sh
+```
 
-#### Contribution
+---
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+## Database
 
+Init SQL:
 
-#### Gitee Feature
+- `db/mms.sql`
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+Upgrade SQLs:
+
+- `upgrade/*.sql`
+
+> Some plugins also ship their own `script/install.sql` / `schema.sql` inside plugin modules; those are applied via the host plugin installation mechanism.
+
+---
+
+## Docker
+
+The `docker/docker-compose.yml` starts MySQL/Redis/Nginx and some MMS services (depending on the images you use).
+
+1) Create `.env`:
+
+```bash
+cp docker/.env.example docker/.env
+```
+
+2) Start:
+
+```bash
+cd docker
+docker compose up -d
+```
+
+> Note: the current compose uses `network_mode: "host"` and mounts volumes under `/docker/...` on the host machine.
