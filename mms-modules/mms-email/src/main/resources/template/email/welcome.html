@@ -1,45 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 28px; font-weight: bold; color: #1890ff; margin-bottom: 10px; }
-        .welcome { font-size: 20px; color: #52c41a; }
-        .content { color: #333333; line-height: 1.8; }
-        .feature-box { background-color: #f0f9ff; padding: 20px; border-radius: 6px; margin: 20px 0; }
-        .feature-item { margin: 10px 0; }
-        .btn { display: inline-block; background-color: #1890ff; color: #ffffff; padding: 12px 30px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999999; font-size: 12px; text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <style>
+    body { margin: 0; padding: 0; background: linear-gradient(148deg, #eff6ff 0%, #f5f3ff 45%, #f8fafc 100%); -webkit-font-smoothing: antialiased; }
+    table { border-collapse: collapse; }
+    .wrap { width: 100%; padding: 28px 12px 40px; }
+    .card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 14px 48px rgba(37, 99, 235, 0.12), 0 1px 0 rgba(255, 255, 255, 0.93) inset;
+      border: 1px solid rgba(129, 140, 248, 0.28);
+    }
+    .bar { height: 4px; background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4); }
+    .inner { padding: 38px 36px 26px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: #1e293b; }
+    .badge {
+      display: inline-block;
+      margin: 0 auto 14px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1d4ed8;
+      background: rgba(59, 130, 246, 0.12);
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+    .headline-wrap { text-align: center; }
+    .welcome { margin: 0 0 6px; font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; }
+    .brand { margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #4338ca; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #c7d2fe, transparent); margin: 24px 0; }
+    .lead { margin: 0 0 12px; font-size: 16px; line-height: 1.75; color: #334155; }
+    .sub { margin: 0 0 18px; font-size: 14px; line-height: 1.72; color: #64748b; }
+    .feature-wrap {
+      border-radius: 14px;
+      padding: 18px 20px;
+      background: radial-gradient(circle at 0% 0%, rgba(99, 102, 241, 0.09), transparent 55%), radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.08), transparent 50%), linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 22px;
+    }
+    .feature-title { font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 14px; }
+    .row { margin: 0 0 10px; padding: 10px 12px 10px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(226, 232, 240, 0.95); font-size: 13px; color: #334155; display: flex; align-items: flex-start; gap: 10px; }
+    .row:last-child { margin-bottom: 0; }
+    .bullet { flex-shrink: 0; margin-top: 2px; width: 22px; height: 22px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .cta-wrap { text-align: center; margin: 26px 0 8px; }
+    .btn {
+      display: inline-block;
+      padding: 13px 32px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 999px;
+      background: linear-gradient(120deg, #2563eb, #6366f1);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+      letter-spacing: 0.02em;
+    }
+    .muted { margin: 16px 0 0; text-align: center; font-size: 12px; color: #94a3b8; line-height: 1.65; }
+    .footer {
+      padding: 20px 36px 28px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.75;
+      color: #94a3b8;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      border-top: 1px solid #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">#{appName}</div>
-            <div class="welcome">🎉 欢迎加入！</div>
-        </div>
-        <div class="content">
-            <p>尊敬的 <strong>#{username}</strong>，您好！</p>
-            <p>欢迎加入 #{appName}！我们很高兴您成为我们的一员。</p>
-            <div class="feature-box">
-                <h3>您可以开始：</h3>
-                <div class="feature-item">✓ #{feature1}</div>
-                <div class="feature-item">✓ #{feature2}</div>
-                <div class="feature-item">✓ #{feature3}</div>
+<table class="wrap" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="center">
+      <table class="card" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;">
+        <tr><td><div class="bar"></div></td></tr>
+        <tr>
+          <td class="inner">
+            <div class="headline-wrap">
+              <span class="badge">WELCOME · 迎新</span>
+              <div class="welcome">欢迎加入 ✨</div>
+              <div class="brand">#{appName}</div>
             </div>
-            <p style="text-align: center;">
-                <a href="#{loginUrl}" class="btn">立即登录</a>
-            </p>
-            <p>如有任何问题，请随时联系我们的客服团队。</p>
-        </div>
-        <div class="footer">
-            此邮件由系统自动发送，请勿直接回复<br>
-            客服邮箱：#{supportEmail}<br>
-            © #{year} #{appName}. All rights reserved.
-        </div>
-    </div>
+            <div class="divider"></div>
+            <p class="lead">尊敬的 <strong>#{username}</strong>，您好！</p>
+            <p class="sub">很高兴您成为 <strong>#{appName}</strong> 的一员。这里为您整理了几件「上手就能用」的小事，按需探索即可：</p>
+            <div class="feature-wrap">
+              <div class="feature-title">您可以现在开始</div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0;">
+                <tr>
+                  <td style="padding-bottom:10px;">
+                    <table role="presentation" width="100%" cellpadding="12" cellspacing="0" border="0" style="border-radius:10px;background:rgba(255,255,255,0.92);border:1px solid #e2e8f0;font-size:13px;line-height:1.55;color:#334155;">
+                      <tr>
+                        <td width="38" valign="top" align="center" style="vertical-align:top;">
+                          <div style="display:inline-block;width:22px;height:22px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:11px;line-height:22px;text-align:center;font-weight:700;">1</div>
+                        </td>
+                        <td valign="top">#{feature1}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding-bottom:10px;">
+                    <table role="presentation" width="100%" cellpadding="12" cellspacing="0" border="0" style="border-radius:10px;background:rgba(255,255,255,0.92);border:1px solid #e2e8f0;font-size:13px;line-height:1.55;color:#334155;">
+                      <tr>
+                        <td width="38" valign="top" align="center" style="vertical-align:top;">
+                          <div style="display:inline-block;width:22px;height:22px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:11px;line-height:22px;text-align:center;font-weight:700;">2</div>
+                        </td>
+                        <td valign="top">#{feature2}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table role="presentation" width="100%" cellpadding="12" cellspacing="0" border="0" style="border-radius:10px;background:rgba(255,255,255,0.92);border:1px solid #e2e8f0;font-size:13px;line-height:1.55;color:#334155;">
+                      <tr>
+                        <td width="38" valign="top" align="center" style="vertical-align:top;">
+                          <div style="display:inline-block;width:22px;height:22px;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:11px;line-height:22px;text-align:center;font-weight:700;">3</div>
+                        </td>
+                        <td valign="top">#{feature3}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="cta-wrap">
+              <a class="btn" href="#{loginUrl}" target="_blank" rel="noopener noreferrer">进入系统登录</a>
+            </div>
+            <div class="muted">若您对平台有任何疑问，欢迎通过客服与我们联系：<strong>#{supportEmail}</strong></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="footer">
+            本邮件为欢迎信 · 系统自动发送请勿直接回复<br />
+            © #{year} #{appName}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>

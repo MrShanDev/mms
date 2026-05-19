@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.code.entity.ConfigEntity;
@@ -315,8 +316,24 @@ public class CommonController extends BaseController {
     @PostMapping("/emailCode")
     public R<Object> emailCode(@RequestBody EmailBo bo, HttpServletRequest request) {
         Integer type = bo.getType();
-        String emali = bo.getEmail();
         String keytype = "updatePhone:";
+        String emali = bo.getEmail();
+        SysUserVo pwdResetCaller = null;
+        // 重置密码验证码：必须使用当前账号数据库中的真实绑定邮箱发送，且不依赖前端传入的明文/脱敏地址
+        if (Objects.equals(type, 3)) {
+            keytype = "password:";
+            SysUserVo full = sysUserService.selectVoById(LoginObject.getLoginId());
+            if (full == null || StrUtil.isBlank(full.getEmail())) {
+                return R.fail("请先绑定邮箱");
+            }
+            emali = full.getEmail().trim();
+            pwdResetCaller = full;
+        } else {
+            if (StrUtil.isBlank(emali)) {
+                return R.fail("邮箱不能为空");
+            }
+            emali = emali.trim();
+        }
         if (Objects.equals(environment.getProperty("spring.profiles.active"), "prod")) {
             try {
                 String ip = null;
@@ -343,8 +360,21 @@ public class CommonController extends BaseController {
             return R.fail("发送频繁,请稍后再发送哦！");
         }
         String code = RandomUtil.randomNumbers(6);
-        R<Object> result = emailService.sendEmailCode(bo.getEmail(), code);
-
+        R<Object> result;
+        if (Objects.equals(type, 3)) {
+            String displayName = "用户";
+            if (pwdResetCaller != null) {
+                String n = StrUtil.blankToDefault(pwdResetCaller.getNickName(), pwdResetCaller.getUserName());
+                if (StrUtil.isNotBlank(n)) {
+                    displayName = StrUtil.trim(n);
+                }
+            }
+            result = emailService.sendPasswordReset(emali, displayName, code);
+        } else if (Objects.equals(type, 1)) {
+            result = emailService.sendBindEmailCode(emali, code);
+        } else {
+            result = emailService.sendRegisterCode(emali, code);
+        }
         if (!result.getStatus()) {
             log.error("验证码发送异常 => {}", result.getMsg());
             return result;

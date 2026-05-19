@@ -1,37 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; padding: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .header { text-align: center; margin-bottom: 30px; }
-        .logo { font-size: 24px; font-weight: bold; color: #722ed1; }
-        .content { color: #333333; line-height: 1.6; }
-        .change-box { background-color: #f9f0ff; border-left: 4px solid #722ed1; padding: 20px; margin: 20px 0; }
-        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e8e8e8; color: #999999; font-size: 12px; text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <style>
+    body { margin: 0; padding: 0; background: linear-gradient(152deg, #faf5ff 0%, #f5f3ff 40%, #f8fafc 100%); -webkit-font-smoothing: antialiased; }
+    table { border-collapse: collapse; }
+    .wrap { width: 100%; padding: 28px 12px 40px; }
+    .card {
+      max-width: 560px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 42px rgba(91, 33, 182, 0.1), 0 1px 0 rgba(255, 255, 255, 0.93) inset;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+    }
+    .bar { height: 4px; background: linear-gradient(90deg, #6d28d9, #a855f7, #818cf8); }
+    .inner { padding: 36px 36px 26px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: #1e293b; }
+    .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; color: #6b21a8; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
+    .brand { font-size: 22px; font-weight: 700; color: #4c1d95; text-align: center; margin: 0 0 6px; letter-spacing: -0.02em; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #e9d5ff, transparent); margin: 22px 0; }
+    .lead { margin: 0 0 10px; font-size: 15px; line-height: 1.75; color: #334155; }
+    .notice {
+      border-radius: 14px;
+      padding: 20px 20px;
+      margin: 8px 0 16px;
+      background: radial-gradient(circle at 10% -20%, rgba(168, 85, 247, 0.15), transparent 45%), linear-gradient(180deg, #faf5ff 0%, #ede9fe 100%);
+      border: 1px solid rgba(139, 92, 246, 0.32);
+      box-shadow: 0 1px 6px rgba(76, 29, 149, 0.07);
+    }
+    .lbl { font-size: 11px; font-weight: 700; color: #5b21b6; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px; }
+    .txt { margin: 0 0 12px; font-size: 14px; line-height: 1.6; color: #334155; word-break: break-word; }
+    .txt:last-of-type { margin-bottom: 0; }
+    .warn {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.62;
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      margin-top: 14px;
+    }
+    .footer {
+      padding: 20px 36px 28px;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.75;
+      color: #94a3b8;
+      background: linear-gradient(180deg, #fafafa 0%, #f5f3ff 100%);
+      border-top: 1px solid #ede9fe;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">#{appName}</div>
-        </div>
-        <div class="content">
-            <p>尊敬的 <strong>#{username}</strong>，您好！</p>
-            <p>您的账户发生了以下变动：</p>
-            <div class="change-box">
-                <strong>变动类型：</strong>#{changeType}<br>
-                <strong>变动时间：</strong>#{changeTime}<br>
-                <strong>变动内容：</strong>#{changeContent}
+<table class="wrap" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="center">
+      <table class="card" role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;">
+        <tr><td><div class="bar"></div></td></tr>
+        <tr>
+          <td class="inner">
+            <div class="eyebrow">ACCOUNT · 账号动态</div>
+            <div class="brand">#{appName}</div>
+            <div class="divider"></div>
+            <p class="lead">尊敬的 <strong>#{username}</strong>：</p>
+            <p class="lead" style="margin-top:-4px;">我们侦测到您的账户发生了<strong>与安全或资料相关</strong>的变动，详情如下：</p>
+            <div class="notice">
+              <div class="lbl">变动类型 Type</div>
+              <div class="txt"><strong style="color:#4c1d95;">#{changeType}</strong></div>
+              <div class="lbl">变动时间 · Time</div>
+              <div class="txt">#{changeTime}</div>
+              <div class="lbl">变动内容 · Detail</div>
+              <div class="txt">#{changeContent}</div>
             </div>
-            <p>如非本人操作，请立即联系客服处理。</p>
-        </div>
-        <div class="footer">
-            此邮件由系统自动发送，请勿直接回复<br>
-            客服邮箱：#{supportEmail}<br>
-            © #{year} #{appName}. All rights reserved.
-        </div>
-    </div>
+            <div class="warn"><strong>不是您本人？</strong>请尽快修改登录密码或联系管理员 / 客服，并核对近期登录环境与设备。<br />如需支持：<strong>#{supportEmail}</strong></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="footer">
+            系统通知邮件 · 请勿直接回复<br />
+            © #{year} #{appName}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
 </body>
 </html>

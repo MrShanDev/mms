@@ -108,6 +108,14 @@ public interface SysUserService {
     Boolean resetPwd(ResetPwdBo bo);
 
     /**
+     * 当前登录用户重置密码（已通过邮箱验证码等二次验证的场景，不校验旧密码）。
+     *
+     * @param password 新密码（明文，由服务端加密入库）
+     * @return 是否更新成功
+     */
+    Boolean resetPwdWithoutOld(String password);
+
+    /**
      * 根据手机号查询用户
      * @param phone 手机号
      * @return 用户

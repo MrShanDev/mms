@@ -32,6 +32,8 @@ public class SystemRuntimeInfoVo implements Serializable {
         private Long startTimeMs;
         private Long uptimeMs;
         private Long pid;
+        /** 配置的主 HTTP 端口（来自 {@code server.port}），供首页运行态展示 */
+        private Integer serverPort;
 
         private String jdkVersion;
         private String jvmName;

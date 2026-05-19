@@ -218,6 +218,37 @@ public class SysUserController extends BaseController {
         return R.success(baseService.resetPwd(bo));
     }
 
+    /**
+     * 邮箱验证码重置当前用户密码（不校验旧密码）
+     *
+     * @param bo 验证码与新密码
+     * @return 是否成功
+     */
+    @MmsLog(
+        module = "个人中心",
+        operType = OperationType.UPDATE,
+        description = "邮箱验证码重置密码"
+    )
+    @SaCheckLogin
+    @PostMapping("/resetPwdEmail")
+    public R<Boolean> resetPwdEmail(@Validated @RequestBody ResetPwdEmailBo bo) {
+        SysUserVo full = baseService.selectVoById(LoginObject.getLoginId());
+        if (full == null || full.getEmail() == null || full.getEmail().isBlank()) {
+            return R.fail("请先绑定邮箱");
+        }
+        String emailTrim = full.getEmail().trim();
+        String key = RedisUtil.EMAIL_CODES_KEY + "password:" + emailTrim;
+        Object code = RedisUtil.getCacheObject(key);
+        if (code == null) {
+            return R.fail("验证码已过期！");
+        }
+        if (!Objects.equals(bo.getCode(), code)) {
+            return R.fail("验证码不正确！");
+        }
+        RedisUtil.deleteObject(key);
+        return R.success(baseService.resetPwdWithoutOld(bo.getPassword()));
+    }
+
 
     /**
      * 重置密码:管理员

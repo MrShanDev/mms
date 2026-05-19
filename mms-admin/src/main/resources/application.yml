@@ -11,13 +11,25 @@
 --- # 项目基础信息
 sxpcwlkj:
   # 名称
-  name: mmsAdmin
-  # 描述（较长，springdoc.info.description 等与之一致时可复用文案）
-  describe: 一款多模块化管理系统（Modular management system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (十年磨一剑，我们的目标是做最优价值的开源项目)！
+  name: mms Admin
+  # 描述（较长；管理端首页「系统说明」与 OpenAPI summary 分列展示）
+  describe: |
+    1. 🚀 虚拟线程支持：基于 JDK 21 虚拟线程，并发性能提升 10-100 倍
+    2. 📦 模块化设计：采用 Maven 多模块架构，各功能模块独立开发、部署和维护
+    3. 🏢 多租户支持：灵活的多租户架构，支持数据隔离和资源共享
+    4. 🔒 权限管理：基于 Sa-Token 1.43.0 的 RBAC 权限控制，支持菜单、按钮级别权限
+    5. ⚡ 代码生成：内置低代码生成引擎，支持前后端代码一键生成
+    6. 💾 多数据源：支持 MySQL、Oracle、PostgreSQL、SQL Server 等多种数据库
+    7. ☁️ 对象存储：集成 x-file-storage，支持阿里云、腾讯云、华为云等主流云存储
+    8. 📨 消息与任务调度：集成 RabbitMQ、RocketMQ、Kafka 等中间件；PowerJob 分布式定时任务调度
+    9. 📊 可观测与性能：Spring Boot Admin 3.5.6 应用健康监控；启动速度提升约 15–25%，内存占用减少约 10–15%
+    10. 🛡️ 安全防护：支持 XSS、SQL 注入防护，接口加签验签等安全机制
+    11. 🌐 国际化与字典：多语言切换；统一数据字典管理，支持动态配置
+    12. 📝📢👤 日志与运营管理：完善的操作日志记录与查询；系统公告与消息通知；用户信息、密码、头像等自助维护
   # 版本（与工程 revision 对齐时便于对外展示）
   version: "21"
   # 文档站点
-  docUrl: https://www.mmsadmin.cn/
+  docUrl: https://www.mmsadmin.cn
   # 版权年份
   copyrightYear: 2018
   # 机构 / 团队
@@ -306,7 +318,7 @@ springdoc:
       packages-to-scan: com.sxpcwlkj.plugin.host
   info:
     title: '标题：mmsAdmin多租户管理系统_接口文档'
-    description: '描述：一款多模块化管理系统（Modular management system），简称：MMS，是一款基于多应用模块用户、商品、支付、订单、分销、日志、定时、通信、直播、广告、文章等多模块应用开源系统，可快速的应用与各类项目研发中，定期更新功能修复、上新、技术栈分享 (十年磨一剑，我们的目标是做最优价值的开源项目)！'
+    description: 'MMS 多模块化管理系统：JDK21 虚拟线程与 Maven 多模块、Sa-Token RBAC、多租户与代码生成、多数据源、x-file-storage 与主流 MQ、PowerJob、Spring Boot Admin、安全加固与国际化、字典/日志/公告/个人中心及性能优化。完整能力条目见管理端首页「系统说明」。'
     version: '版本号: 21'
     contact:
       name: mmsAdmin

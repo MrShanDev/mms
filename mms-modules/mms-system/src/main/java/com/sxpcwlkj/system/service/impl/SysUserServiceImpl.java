@@ -409,6 +409,25 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    public Boolean resetPwdWithoutOld(String newPassword) {
+
+        if (newPassword.length() < 6) {
+            throw new MmsException("密码至少6位！");
+        }
+        SysUserVo userVo = baseMapper.selectVoById(LoginObject.getLoginId());
+        if (StringUtil.isEmpty(userVo.getAesKey())) {
+            throw new MmsException("缺少加密KEY!");
+        }
+        userVo.setPassword(SignUtil.pressWord(newPassword, userVo.getAesKey()));
+        userVo.setPasswordStrength(PasswordStrengthCheckerUtil.checkStrength(newPassword));
+        int row = baseMapper.update(null, new LambdaUpdateWrapper<SysUser>()
+            .set(SysUser::getPassword, userVo.getPassword())
+            .set(SysUser::getPasswordStrength, userVo.getPasswordStrength())
+            .eq(SysUser::getUserId, LoginObject.getLoginId()));
+        return row > 0;
+    }
+
+    @Override
     public Boolean resetPwdSuper(ResetPwdSuperBo bo) {
         SysUserVo userVo = baseMapper.selectVoById(LoginObject.getLoginId());
         //更新key
