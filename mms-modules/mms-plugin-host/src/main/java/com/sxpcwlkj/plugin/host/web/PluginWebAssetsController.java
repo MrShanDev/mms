@@ -2,7 +2,10 @@ package com.sxpcwlkj.plugin.host.web;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.sxpcwlkj.plugin.PluginInstallationLayout;
+import com.sxpcwlkj.plugin.host.DiskPluginSlot;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
+import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
+import com.sxpcwlkj.plugin.host.PluginManifestView;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -15,6 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,7 +32,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class PluginWebAssetsController {
 
+    private static final String CURRENT_ALIAS = "current";
+
     private final PluginHostProperties pluginHostProperties;
+    private final PluginLifecycleManager pluginLifecycleManager;
 
     /**
      * @param resourcePath Spring 6 {@code {*}} 捕获剩余路径段，如 {@code assets/remoteEntry.js}
@@ -39,25 +50,115 @@ public class PluginWebAssetsController {
             return ResponseEntity.notFound().build();
         }
         Path root = resolvePluginsRoot();
-        String idSeg = PluginInstallationLayout.safeSegment(pluginId);
-        String verSeg = PluginInstallationLayout.safeSegment(pluginVersion);
-        Path base = PluginInstallationLayout.webDirectory(root, idSeg, verSeg).normalize();
-        Path rel = Path.of(resourcePath.replace("\\", "/"));
-        if (rel.isAbsolute()) {
+        String resolvedVersion = resolvePluginVersion(pluginId, pluginVersion, resourcePath, root);
+        if (resolvedVersion == null || resolvedVersion.isBlank()) {
             return ResponseEntity.notFound().build();
         }
-        Path file = base.resolve(rel).normalize();
-        if (!file.startsWith(base) || !Files.isRegularFile(file)) {
+        String idSeg = PluginInstallationLayout.safeSegment(pluginId);
+        String verSeg = PluginInstallationLayout.safeSegment(resolvedVersion);
+        Path base = PluginInstallationLayout.webDirectory(root, idSeg, verSeg).normalize();
+        Path rel = normalizeRelativePath(resourcePath);
+        if (rel == null) {
+            return ResponseEntity.notFound().build();
+        }
+        Path file = resolveExistingFile(base, rel);
+        if (file == null) {
             return ResponseEntity.notFound().build();
         }
         FileSystemResource body = new FileSystemResource(file);
         MediaType mediaType = probeMediaType(file);
-        CacheControl cc = CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
+        CacheControl cc = resolveCacheControl(rel);
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .cacheControl(cc)
                 .header("X-Content-Type-Options", "nosniff")
                 .body(body);
+    }
+
+    private String resolvePluginVersion(String pluginId, String pluginVersion, String resourcePath, Path root) {
+        if (pluginVersion == null || pluginVersion.isBlank()) {
+            return null;
+        }
+        String requested = pluginVersion.trim();
+        if (!CURRENT_ALIAS.equalsIgnoreCase(requested)) {
+            return requested;
+        }
+        String pid = pluginId == null ? "" : pluginId.trim();
+        if (pid.isBlank()) {
+            return null;
+        }
+
+        Set<String> candidateVersions = new LinkedHashSet<>();
+        for (PluginManifestView m : pluginLifecycleManager.listManifests()) {
+            if (pid.equals(m.id()) && m.version() != null && !m.version().isBlank()) {
+                candidateVersions.add(m.version().trim());
+            }
+        }
+        pluginLifecycleManager.listDiskSlots().stream()
+                .filter(s -> pid.equals(s.pluginId()) && s.libHasJars())
+                .sorted(Comparator.comparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER).reversed())
+                .map(DiskPluginSlot::version)
+                .filter(v -> v != null && !v.isBlank())
+                .map(String::trim)
+                .forEach(candidateVersions::add);
+
+        String idSeg = PluginInstallationLayout.safeSegment(pid);
+        Path rel = normalizeRelativePath(resourcePath);
+        if (rel == null) {
+            return null;
+        }
+
+        List<String> ordered = new ArrayList<>(candidateVersions);
+        for (String version : ordered) {
+            Path base = PluginInstallationLayout.webDirectory(root, idSeg, PluginInstallationLayout.safeSegment(version)).normalize();
+            Path file = base.resolve(rel).normalize();
+            if (file.startsWith(base) && Files.isRegularFile(file)) {
+                return version;
+            }
+        }
+        return ordered.isEmpty() ? null : ordered.get(0);
+    }
+
+    private static Path normalizeRelativePath(String resourcePath) {
+        if (resourcePath == null) {
+            return null;
+        }
+        String normalized = resourcePath.replace("\\", "/").trim();
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.isBlank()) {
+            return null;
+        }
+        Path rel = Path.of(normalized);
+        return rel.isAbsolute() ? null : rel;
+    }
+
+    private static Path resolveExistingFile(Path base, Path rel) {
+        Path direct = base.resolve(rel).normalize();
+        if (direct.startsWith(base) && Files.isRegularFile(direct)) {
+            return direct;
+        }
+
+        String relText = rel.toString().replace("\\", "/");
+        String doubledAssetsPrefix = "assets/assets/";
+        if (relText.startsWith(doubledAssetsPrefix)) {
+            String fallbackText = "assets/" + relText.substring(doubledAssetsPrefix.length());
+            Path fallbackRel = Path.of(fallbackText);
+            Path fallback = base.resolve(fallbackRel).normalize();
+            if (fallback.startsWith(base) && Files.isRegularFile(fallback)) {
+                return fallback;
+            }
+        }
+        return null;
+    }
+
+    private static CacheControl resolveCacheControl(Path rel) {
+        String relText = rel.toString().replace("\\", "/").toLowerCase();
+        if (relText.endsWith("/remoteentry.js") || relText.equals("remoteentry.js")) {
+            return CacheControl.noCache().mustRevalidate();
+        }
+        return CacheControl.maxAge(7, TimeUnit.DAYS).cachePublic();
     }
 
     private static MediaType probeMediaType(Path file) {
@@ -98,10 +199,33 @@ public class PluginWebAssetsController {
     }
 
     private Path resolvePluginsRoot() {
+        Path userDir = Path.of(System.getProperty("user.dir", ".")).toAbsolutePath().normalize();
+        Path direct = userDir.resolve("plugins").normalize();
+
+        Path parent = userDir.getParent();
+        Path sibling = parent == null ? null : parent.resolve("plugins").normalize();
+
         String rd = pluginHostProperties.getRootDir();
         if (rd != null && !rd.isBlank()) {
-            return Path.of(rd.trim()).toAbsolutePath().normalize();
+            Path configured = Path.of(rd.trim()).toAbsolutePath().normalize();
+            if (Files.isDirectory(configured)) {
+                return configured;
+            }
+            if (Files.isDirectory(direct)) {
+                return direct;
+            }
+            if (sibling != null && Files.isDirectory(sibling)) {
+                return sibling;
+            }
+            return configured;
         }
-        return Path.of(System.getProperty("user.dir", "."), "mms-plugins").toAbsolutePath().normalize();
+
+        if (Files.isDirectory(direct)) {
+            return direct;
+        }
+        if (sibling != null && Files.isDirectory(sibling)) {
+            return sibling;
+        }
+        return direct;
     }
 }

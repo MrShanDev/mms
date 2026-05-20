@@ -31,8 +31,8 @@ public class SysPlugin extends BaseEntity {
     private String description;
 
     /**
-     * 上架来源：0 官方 1 用户安装登记 2 预留；见 {@link com.sxpcwlkj.common.constants.PluginListingSource}
+     * 上架来源：0 官方 1 用户安装登记 2 预留；旧库可能尚未加 listing_source 列，先做兼容不参与 ORM 持久化。
      */
-    @TableField("listing_source")
+    @TableField(exist = false)
     private Integer listingSource;
 }
