@@ -3,6 +3,7 @@ package com.sxpcwlkj.plugin.host;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.annotation.SaMode;
 import cn.dev33.satoken.stp.StpUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.context.DemoModeContextHolder;
@@ -53,7 +54,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
- * 插件宿主运维接口（仅超级管理员；动态 Controller 注册属后续阶段）。
+ * 插件宿主运维接口（超级管理员与管理员；动态 Controller 注册属后续阶段）。
  */
 @RestController
 @RequestMapping("system/pluginHost")
@@ -100,7 +101,7 @@ public class PluginHostController {
                 .body(logo.get());
     }
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/status")
     public R<Map<String, Object>> status() {
         Map<String, Object> body = new HashMap<>();
@@ -117,14 +118,14 @@ public class PluginHostController {
         return R.success(body);
     }
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/reload")
     public R<List<PluginEntrySummary>> reload() {
         pluginLifecycleManager.reload();
         return R.success(pluginLifecycleManager.listSummaries());
     }
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/health")
     public R<List<PluginHealthRow>> health() {
         return R.success(pluginLifecycleManager.collectHealth());
@@ -133,7 +134,7 @@ public class PluginHostController {
     /**
      * 插件安装向导第一步：数据源与宿主侧能力探测（不读上传文件）。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/installReadiness")
     public R<Map<String, Object>> installReadiness() {
         Map<String, Object> body = new HashMap<>();
@@ -151,7 +152,7 @@ public class PluginHostController {
     /**
      * 反射调用已加载插件 {@link com.sxpcwlkj.plugin.MmsPlugin} 上的公有实例方法（参数个数与 args 一致）。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/invoke")
     public R<Object> invoke(@RequestBody PluginInvokeRequest body) {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()
@@ -184,7 +185,7 @@ public class PluginHostController {
     /**
      * 当前已加载插件的 manifest 列表（与 JAR 内 {@code plugin.json} 对齐，含 {@code frontend}）。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/manifests")
     public R<List<PluginManifestView>> manifests() {
         return R.success(pluginLifecycleManager.listManifests());
@@ -194,7 +195,7 @@ public class PluginHostController {
      * 读取插件独立日志尾部（{@code logback} {@code plugin_sift} → {@code logs/plugins/{pluginId}@{version}.log}）。
      * 仅收录在插件 MDC（{@code pluginKey}）下输出的 <strong>INFO 及以上</strong> 日志；宿主其它日志不在此文件。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/pluginLogTail")
     public R<PluginLogTailVo> pluginLogTail(
             @RequestParam String pluginId,
@@ -235,7 +236,7 @@ public class PluginHostController {
     /**
      * 截断清空插件独立日志文件（0 字节）；不影响 logback 后续继续写入同一文件。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/pluginLogClear")
     public R<PluginLogTailVo> pluginLogClear(@RequestBody PluginLogClearRequest body) {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
@@ -298,7 +299,7 @@ public class PluginHostController {
         return Optional.of(ver.trim());
     }
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/subprocesses")
     public R<List<PluginSubprocessSnapshot>> subprocesses() {
         return R.success(pluginLifecycleManager.listSubprocessSnapshots());
@@ -379,7 +380,7 @@ public class PluginHostController {
     /**
      * 从磁盘删除插件目录后全量重载；{@code version} 为空则删除该 {@code pluginId} 下所有版本。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/uninstall")
     public R<Void> uninstall(@RequestBody PluginUninstallRequest body) throws Exception {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
@@ -405,7 +406,7 @@ public class PluginHostController {
      * 全量 {@link PluginLifecycleManager#reload()}；{@link ActivateVersionReloadScope#SINGLE_TARGET} 仅
      * {@link PluginLifecycleManager#reloadSingleActivated}（不保证依赖拓扑）。</p>
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/activateVersion")
     public R<List<PluginEntrySummary>> activateVersion(@RequestBody PluginActivateVersionRequest body) {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()
@@ -437,7 +438,7 @@ public class PluginHostController {
      * <p>若 {@code skipBundledSchemaExecution=false}（默认），则依次自动执行 JAR 内 {@code META-INF/mms/schema.sql}（白名单 DDL）、
      * {@code script/install.sql}（白名单：{@code INSERT [IGNORE] INTO sys_function | sys_dict | sys_dict_data}；主键已存在则跳过），再落盘安装。</p>
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping(value = "/install", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Map<String, Object>> install(
             @RequestParam("file") MultipartFile file,
@@ -481,7 +482,9 @@ public class PluginHostController {
     public ResponseEntity<StreamingResponseBody> installStream(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "skipBundledSchemaExecution", defaultValue = "false") boolean skipBundledSchemaExecution) {
-        StpUtil.checkRole("super_admin");
+        if (!StpUtil.hasRole("super_admin") && !StpUtil.hasRole("admin")) {
+            return badNdjsonDone(PluginInstallStreamResultCode.REQUEST_FORBIDDEN, "需要超级管理员或管理员角色");
+        }
         if (file == null || file.isEmpty()) {
             return badNdjsonDone(PluginInstallStreamResultCode.REQUEST_FILE_EMPTY, "file 不能为空");
         }
@@ -852,7 +855,7 @@ public class PluginHostController {
     /**
      * 安装前预览：读取 JAR 内 {@code META-INF/mms/schema.sql} 全文（过长则截断），不写入磁盘、不执行 SQL。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping(value = "/bundledSchemaPreview", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Map<String, Object>> bundledSchemaPreview(@RequestParam("file") MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {

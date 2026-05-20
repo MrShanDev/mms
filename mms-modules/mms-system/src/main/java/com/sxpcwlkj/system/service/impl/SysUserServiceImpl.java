@@ -3,6 +3,7 @@ package com.sxpcwlkj.system.service.impl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.DesensitizedUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -18,6 +19,7 @@ import com.sxpcwlkj.datasource.entity.page.TableDataInfo;
 import com.sxpcwlkj.datasource.mapper.DataBaseHelper;
 import com.sxpcwlkj.framework.config.ValidatedGroupConfig;
 import com.sxpcwlkj.framework.entity.RsaKeyEntity;
+import com.sxpcwlkj.framework.utils.AddressUtil;
 import com.sxpcwlkj.framework.utils.SignUtil;
 import com.sxpcwlkj.system.entity.*;
 import com.sxpcwlkj.system.entity.bo.ResetPwdBo;
@@ -517,7 +519,9 @@ public class SysUserServiceImpl implements SysUserService {
         userInfo.put("email",DesensitizedUtil.email(Convert.toStr(sysUser.getEmail(), "")));
         userInfo.put("phoneNumber", DesensitizedUtil.mobilePhone(Convert.toStr(sysUser.getPhoneNumber(), "")));
         userInfo.put("sex",Convert.toStr(sysUser.getSex(), ""));
-        userInfo.put("loginIp",Convert.toStr(sysUser.getLoginIp(), ""));
+        String loginIpStr = Convert.toStr(sysUser.getLoginIp(), "");
+        userInfo.put("loginIp", loginIpStr);
+        userInfo.put("loginRegion", formatLoginIpRegion(loginIpStr));
         userInfo.put("loginDate",Convert.toStr(sysUser.getLoginDate(), ""));
         userInfo.put("roleName",Convert.toStr(sysUser.getRoleName(), ""));
         userInfo.put("passwordStrength",Convert.toStr(sysUser.getPasswordStrength(), ""));
@@ -671,6 +675,77 @@ public class SysUserServiceImpl implements SysUserService {
             .map(SysRoleVo::getCode)
             .filter(Objects::nonNull)
             .anyMatch(SystemCommonEnum.SUPER_ADMIN.getCode()::equals);
+    }
+
+    /**
+     * 个人中心展示：根据最后登录 IP 解析归属地（沿用 {@link AddressUtil} / ip2region）。
+     * 本机、内网或无法解析时返回「未知」。
+     */
+    private static String formatLoginIpRegion(String loginIp) {
+        if (StrUtil.isBlank(loginIp)) {
+            return "未知";
+        }
+        String ip = loginIp.trim();
+        if (isNonPublicOrLocalIp(ip)) {
+            return "未知";
+        }
+        String raw = AddressUtil.getCityInfo(ip);
+        if (StrUtil.isBlank(raw) || "未知".equals(raw) || raw.contains("内网")) {
+            return "未知";
+        }
+        return compactIpRegionLabel(raw);
+    }
+
+    private static boolean isNonPublicOrLocalIp(String ip) {
+        String lower = ip.toLowerCase(Locale.ROOT);
+        if ("127.0.0.1".equals(lower)
+            || "localhost".equals(lower)
+            || "::1".equals(lower)
+            || "0:0:0:0:0:0:0:1".equals(lower)) {
+            return true;
+        }
+        if (lower.startsWith("10.")) {
+            return true;
+        }
+        if (lower.startsWith("192.168.")) {
+            return true;
+        }
+        if (lower.startsWith("172.")) {
+            int o2 = secondIpv4Octet(lower);
+            return o2 >= 16 && o2 <= 31;
+        }
+        return false;
+    }
+
+    private static int secondIpv4Octet(String ipv4) {
+        try {
+            String[] p = ipv4.split("\\.");
+            if (p.length >= 2) {
+                return Integer.parseInt(p[1]);
+            }
+        } catch (Exception ignored) {
+            // ignore
+        }
+        return -1;
+    }
+
+    /** 将 ip2region 管线字段压成「省-市」样式 */
+    private static String compactIpRegionLabel(String raw) {
+        String[] seg = raw.split("\\|");
+        List<String> parts = new ArrayList<>();
+        for (String s : seg) {
+            if (StrUtil.isBlank(s) || "0".equals(s) || "中国".equals(s)) {
+                continue;
+            }
+            parts.add(s);
+        }
+        if (parts.isEmpty()) {
+            return "未知";
+        }
+        if (parts.size() >= 2) {
+            return parts.get(0) + "-" + parts.get(1);
+        }
+        return parts.get(0);
     }
 
 }

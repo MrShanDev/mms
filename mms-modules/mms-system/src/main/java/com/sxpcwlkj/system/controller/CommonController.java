@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.controller.BaseController;
 import com.sxpcwlkj.common.code.entity.ConfigEntity;
@@ -41,10 +42,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * mms公共接口
@@ -127,16 +133,22 @@ public class CommonController extends BaseController {
         if(key==null){
             return R.fail("key不能为空！");
         }
-        //登录二维码
-        String codeUrl= wxCodeService.getCode(new WxCodeBo(key)
-            .typeLogin()
-            .paramData(key));
-        return R.success("二维码获取成功",codeUrl);
+        try {
+            //登录二维码
+            String codeUrl = wxCodeService.getCode(new WxCodeBo(key)
+                .typeLogin()
+                .paramData(key));
+            return R.success("二维码获取成功", codeUrl);
+        } catch (Exception e) {
+            log.error("获取微信登录二维码失败", e);
+            return R.fail("获取微信二维码失败，请稍后重试");
+        }
     }
 
     /**
-     * 查询二维码状态
-     * @param key 二维码key
+     * 查询登录扫码状态（与 {@code /common/wxLogin/stream} 并行保留）。
+     * <p>用途：短轮询、Apifox/排障、未接 SSE 的客户端；返回体与历史行为一致，扫码成功时仍在此接口内完成登录与 Cookie。</p>
+     * @param key 与 {@code /common/getWxCode} 一致的二维码 key
      */
     @SaIgnore
     @PostMapping("/queryWxCodeState")
@@ -184,6 +196,103 @@ public class CommonController extends BaseController {
         }
         return R.fail("系统异常！");
 
+    }
+
+    /**
+     * 微信扫码登录：扫码结果 SSE，替代浏览器短轮询 {@code /common/queryWxCodeState}。
+     * <p>终态为「扫码成功」时只推 {@code {"ok":true,"login":true}}，客户端须再请求一次
+     * {@code POST /common/queryWxCodeState} 完成会话写入、Cookie（避免在已 chunked 的 SSE 响应上追加 Set-Cookie）。</p>
+     */
+    @SaIgnore
+    @GetMapping(value = "/wxLogin/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter wxLoginStream(@RequestParam("key") String key) {
+        if (key == null || key.isBlank()) {
+            throw new MmsException("key不能为空");
+        }
+        SseEmitter emitter = new SseEmitter(0L);
+        AtomicBoolean disconnected = new AtomicBoolean(false);
+        emitter.onCompletion(() -> disconnected.set(true));
+        emitter.onTimeout(() -> disconnected.set(true));
+        emitter.onError(e -> disconnected.set(true));
+
+        CompletableFuture.runAsync(() -> {
+            final long tickMs = 2500L;
+            final long maxMs = 70_000L;
+            final long deadline = System.currentTimeMillis() + maxMs;
+            while (!disconnected.get() && System.currentTimeMillis() < deadline) {
+                try {
+                    WxCodeBo wxCodeBo = wxCodeService.getCodeState(new WxCodeBo(key).typeLogin());
+                    Integer st = wxCodeBo.getState();
+                    if (Objects.equals(st, WxCodeStatusEnum.WAITING.getValue())
+                        || Objects.equals(st, WxCodeStatusEnum.SCANNED.getValue())) {
+                        Map<String, Object> tick = new LinkedHashMap<>();
+                        tick.put("phase", Objects.equals(st, WxCodeStatusEnum.WAITING.getValue()) ? "waiting" : "scanned");
+                        sendCommonWxSse(emitter, "tick", tick);
+                        sleepQuietCommon(tickMs);
+                        continue;
+                    }
+                    if (Objects.equals(st, WxCodeStatusEnum.FAILING.getValue())) {
+                        sendCommonWxSse(emitter, "done", wxLoginStreamDone(false, false, "扫码失败！"));
+                        emitter.complete();
+                        return;
+                    }
+                    if (Objects.equals(st, WxCodeStatusEnum.SUCCEED.getValue())) {
+                        sendCommonWxSse(emitter, "done", wxLoginStreamDone(true, true, null));
+                        emitter.complete();
+                        return;
+                    }
+                    sendCommonWxSse(emitter, "done", wxLoginStreamDone(false, false, "系统异常！"));
+                    emitter.complete();
+                    return;
+                } catch (Exception e) {
+                    log.error("wxLogin stream error, key={}", key, e);
+                    try {
+                        sendCommonWxSse(emitter, "done", wxLoginStreamDone(false, false, "系统异常！"));
+                        emitter.completeWithError(e);
+                    } catch (Exception ignored) {
+                        try {
+                            emitter.complete();
+                        } catch (Exception ignored2) {
+                            // ignore
+                        }
+                    }
+                    return;
+                }
+            }
+            if (!disconnected.get()) {
+                try {
+                    sendCommonWxSse(emitter, "done", wxLoginStreamDone(false, false, "二维码已失效"));
+                    emitter.complete();
+                } catch (Exception ignored) {
+                    // ignore
+                }
+            }
+        });
+
+        return emitter;
+    }
+
+    private static Map<String, Object> wxLoginStreamDone(boolean ok, boolean login, String msg) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("ok", ok);
+        m.put("login", login);
+        if (msg != null) {
+            m.put("msg", msg);
+        }
+        return m;
+    }
+
+    private static void sendCommonWxSse(SseEmitter emitter, String eventName, Map<String, Object> payload)
+        throws IOException {
+        emitter.send(SseEmitter.event().name(eventName).data(JSONUtil.toJsonStr(payload)));
+    }
+
+    private static void sleepQuietCommon(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
 

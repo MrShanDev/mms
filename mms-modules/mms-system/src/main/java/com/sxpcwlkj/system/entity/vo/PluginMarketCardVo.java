@@ -84,4 +84,14 @@ public class PluginMarketCardVo {
     private Long subprocessPid;
 
     private String subprocessLastError;
+
+    /**
+     * 与 {@code sys_plugins.listing_source} 对齐；无库表登记时为 null（仅磁盘安装等）。
+     */
+    private Integer listingSource;
+
+    /**
+     * 是否允许「彻底卸载」（purge）及移除库表登记等对插件包的删除类操作；官方上架为 false。
+     */
+    private Boolean purgeAllowed;
 }

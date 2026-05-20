@@ -15,6 +15,9 @@ public final class PluginInstallStreamResultCode {
     /** 安装流程正常结束。 */
     public static final String SUCCESS = "PLUGIN_INSTALL_SUCCESS";
 
+    /** 无安装权限或角色不足。 */
+    public static final String REQUEST_FORBIDDEN = "PLUGIN_INSTALL_REQUEST_FORBIDDEN";
+
     /** 请求未携带文件或文件为空。 */
     public static final String REQUEST_FILE_EMPTY = "PLUGIN_INSTALL_REQUEST_FILE_EMPTY";
 

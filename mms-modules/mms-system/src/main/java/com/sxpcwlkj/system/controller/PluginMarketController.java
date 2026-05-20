@@ -1,6 +1,7 @@
 package com.sxpcwlkj.system.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaMode;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.utils.R;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
@@ -25,7 +26,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 插件市场：合并 sys_plugins 元数据与宿主运行时状态（仅超级管理员）。
+ * 插件市场：合并 sys_plugins 元数据与宿主运行时状态（超级管理员与管理员）。
  */
 @Tag(name = "系统管理模块-插件市场", description = "插件市场卡片数据")
 @RequestMapping("system/pluginMarket")
@@ -38,7 +39,7 @@ public class PluginMarketController {
     private final PluginMarketSysConfigService pluginMarketSysConfigService;
     private final PluginLifecycleManager pluginLifecycleManager;
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/cards")
     public R<List<PluginMarketCardVo>> cards() {
         return R.success(sysPluginMarketService.listMarketCards());
@@ -47,7 +48,7 @@ public class PluginMarketController {
     /**
      * 移除库表市场登记与版本记录并重载；不删除磁盘（与 {@link #purge} 区分）。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/removeCatalog")
     public R<Void> removeCatalog(@RequestBody PluginMarketRemoveBo body) {
         if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
@@ -65,7 +66,7 @@ public class PluginMarketController {
     /**
      * 停用：将该插件所有版本的「激活」标记清零并重载；不删磁盘、不删市场登记，便于稍后重新激活或升级。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/deactivate")
     public R<Void> pluginDeactivate(@RequestBody PluginMarketRemoveBo body) {
         if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
@@ -87,7 +88,7 @@ public class PluginMarketController {
     /**
      * 插件专属 sys_config（键前缀 {@code mms.plugin.{pluginId}.}），按当前登录租户读取。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/pluginSysConfig")
     public R<java.util.List<PluginMarketSysConfigVo>> pluginSysConfig(@RequestParam String pluginId) {
         if (pluginId == null || pluginId.isBlank()) {
@@ -103,7 +104,7 @@ public class PluginMarketController {
     /**
      * 批量保存插件配置项（upsert）；不删除未出现在列表中的已有键，需另行清理接口时再加。
      */
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/pluginSysConfig")
     public R<Void> savePluginSysConfig(@RequestBody PluginMarketSysConfigSaveBo body) {
         if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
@@ -121,7 +122,7 @@ public class PluginMarketController {
         }
     }
 
-    @SaCheckRole("super_admin")
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/purge")
     public R<Void> purge(@RequestBody PluginMarketRemoveBo body) {
         if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {

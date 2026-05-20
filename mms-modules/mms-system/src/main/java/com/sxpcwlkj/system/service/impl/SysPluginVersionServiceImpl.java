@@ -9,6 +9,7 @@ import com.sxpcwlkj.plugin.PluginInstallationLayout;
 import com.sxpcwlkj.plugin.PluginSysConfigDef;
 import com.sxpcwlkj.plugin.PluginSysConfigKeys;
 import com.sxpcwlkj.plugin.PluginSysConfigOperations;
+import com.sxpcwlkj.common.constants.PluginListingSource;
 import com.sxpcwlkj.plugin.host.PluginHostProperties;
 import com.sxpcwlkj.plugin.host.PluginVersionCoordinate;
 import com.sxpcwlkj.system.entity.SysPlugin;
@@ -285,6 +286,7 @@ public class SysPluginVersionServiceImpl implements SysPluginVersionService {
             p.setTenantId(tenantId);
             p.setStatus(1);
             p.setSort(100);
+            p.setListingSource(PluginListingSource.USER);
             sysPluginMapper.insert(p);
         } else {
             boolean need = (existing.getName() == null || existing.getName().isBlank())

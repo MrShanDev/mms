@@ -29,4 +29,10 @@ public class SysPlugin extends BaseEntity {
     private String iconUrl;
 
     private String description;
+
+    /**
+     * 上架来源：0 官方 1 用户安装登记 2 预留；见 {@link com.sxpcwlkj.common.constants.PluginListingSource}
+     */
+    @TableField("listing_source")
+    private Integer listingSource;
 }

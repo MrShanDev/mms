@@ -11,6 +11,7 @@ import com.sxpcwlkj.plugin.host.PluginLifecycleEventType;
 import com.sxpcwlkj.plugin.host.PluginLifecycleManager;
 import com.sxpcwlkj.plugin.host.PluginSubprocessSnapshot;
 import com.sxpcwlkj.plugin.host.PluginManifestView;
+import com.sxpcwlkj.common.constants.PluginListingSource;
 import com.sxpcwlkj.system.entity.SysPlugin;
 import com.sxpcwlkj.system.entity.SysPluginVersion;
 import com.sxpcwlkj.system.entity.vo.PluginMarketCardVo;
@@ -143,12 +144,31 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         return PluginJarLocationStatus.OK;
     }
 
+    /**
+     * 官方上架（{@link PluginListingSource#OFFICIAL}）禁止移除库表登记、禁止 purge 磁盘。
+     */
+    private void assertDestructiveMutationAllowed(String pluginId) {
+        String pid = pluginId.trim();
+        SysPlugin row =
+                sysPluginMapper.selectOne(
+                        Wrappers.<SysPlugin>lambdaQuery()
+                                .eq(SysPlugin::getPluginId, pid)
+                                .eq(SysPlugin::getTenantId, PLUGIN_REGISTRY_TENANT)
+                                .last("LIMIT 1"));
+        if (row != null
+                && row.getListingSource() != null
+                && row.getListingSource() == PluginListingSource.OFFICIAL) {
+            throw new IllegalArgumentException("官方上架插件不可卸载或删除库表登记，请联系发行方维护。");
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void removeCatalogEntry(String pluginId) {
         if (pluginId == null || pluginId.isBlank()) {
             throw new IllegalArgumentException("pluginId 不能为空");
         }
+        assertDestructiveMutationAllowed(pluginId);
         String tid = PLUGIN_REGISTRY_TENANT;
         String pid = pluginId.trim();
         pluginHostDbBridge.onUninstallDiskFinished(pid, null);
@@ -164,6 +184,7 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         if (pluginId == null || pluginId.isBlank()) {
             throw new IllegalArgumentException("pluginId 不能为空");
         }
+        assertDestructiveMutationAllowed(pluginId);
         String pid = pluginId.trim();
         try {
             var installDeclared = pluginLifecycleManager.collectBundledInstallSqlDeclaredIds(pid, null);
@@ -208,7 +229,11 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             vo.setName(catalog.getName());
             vo.setIconUrl(catalog.getIconUrl());
             vo.setDescription(catalog.getDescription());
+            vo.setListingSource(catalog.getListingSource());
         }
+        Integer src = vo.getListingSource();
+        boolean official = src != null && src == PluginListingSource.OFFICIAL;
+        vo.setPurgeAllowed(!official);
         String icon = vo.getIconUrl();
         if (icon == null || icon.isBlank()) {
             vo.setIconUrl(
