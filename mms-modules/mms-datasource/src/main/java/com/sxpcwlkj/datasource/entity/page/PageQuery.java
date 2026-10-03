@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.SqlUtil;
 import com.sxpcwlkj.common.utils.StringUtil;
@@ -32,28 +33,28 @@ public class PageQuery implements Serializable {
     /**
      * 分页大小
      */
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @TableField(exist = false)
     private Integer pageSize;
 
     /**
      * 当前页数
      */
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @TableField(exist = false)
     private Integer pageNum;
 
     /**
      * 排序列
      */
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @TableField(exist = false)
     private String orderByColumn;
 
     /**
      * 排序的方向desc或者asc
      */
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @TableField(exist = false)
     private String isAsc;
 
