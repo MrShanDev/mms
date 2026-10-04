@@ -323,7 +323,7 @@ springdoc:
     contact:
       name: mmsAdmin
       email: sxpcwlkj@163.com
-      url: https://gitee.com/mmsAdmin/mms
+      url: https://gitee.com/LumeCode/mms
   components:
     security-schemes:
       apiKey:

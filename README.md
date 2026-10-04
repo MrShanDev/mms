@@ -31,8 +31,8 @@
 
 | 名称   |  别名  |                  项目地址                  | 注意事项                                                                                                    |
 | ------ | :----: | :-----------------------------------------: | ----------------------------------------------------------------------------------------------------------- |
-| mms    | 标准版 |  -[Gitee](https://gitee.com/mmsAdmin/mms)  | 🙋功能齐全的手架系统<br/> 📢完全具备高效的项目开发<br/> 📢完多租户模式灵活开启<br/>📢支持低代码自动生成模式 |
-| mms-ui | 标准版 | -[Gitee](https://gitee.com/mmsAdmin/mms-ui) | 🙋适配mms后端系统的管理界面项目                                                                             |
+| mms    | 标准版 |  -[Gitee](https://gitee.com/LumeCode/mms)  | 🙋功能齐全的手架系统<br/> 📢完全具备高效的项目开发<br/> 📢完多租户模式灵活开启<br/>📢支持低代码自动生成模式 |
+| mms-ui | 标准版 | -[Gitee](https://gitee.com/LumeCode/mms-ui) | 🙋适配mms后端系统的管理界面项目                                                                             |
 
 ## 📦开发语言与技术栈
 
@@ -417,22 +417,22 @@ mms
 # 😎 LICENSE
 
 ::: tip MIT License
-[https://gitee.com/mmsAdmin/mms/blob/master/LICENSE](https://gitee.com/mmsAdmin/mms/blob/master/LICENSE)
+[https://gitee.com/LumeCode/mms/blob/master/LICENSE](https://gitee.com/LumeCode/mms/blob/master/LICENSE)
 :::
 
 ## ❌免责条款
 
 &emsp;&emsp;您充分了解并同意，您必须为自己使用本服务及注册帐号下的一切行为负责，包括您所发表的任何内容以及由此产生的任何后果。您应对本服务中的内容自行加以判断，并自行承担因使用内容而引起的所有风险。
 
-&emsp;&emsp;[mms](https://gitee.com/mmsAdmin/mms),[mms-ui](https://gitee.com/mmsAdmin/mms-ui) 对网站上所显示的信息或资料的准确性、内容、完整性、合法性、可靠性、可操作性或可用性不承担任何责任。
+&emsp;&emsp;[mms](https://gitee.com/LumeCode/mms),[mms-ui](https://gitee.com/LumeCode/mms-ui) 对网站上所显示的信息或资料的准确性、内容、完整性、合法性、可靠性、可操作性或可用性不承担任何责任。
 
-&emsp;&emsp;[mms](https://gitee.com/mmsAdmin/mms),[mms-ui](https://gitee.com/mmsAdmin/mms-ui) 二次开发使用者因为违法而触犯中华人民共和国法律的，一切后果自己负责，`mms 作者` 不承担任何责任。
+&emsp;&emsp;[mms](https://gitee.com/LumeCode/mms),[mms-ui](https://gitee.com/LumeCode/mms-ui) 二次开发使用者因为违法而触犯中华人民共和国法律的，一切后果自己负责，`mms 作者` 不承担任何责任。
 
 &emsp;&emsp;本声明未涉及的问题参见国家有关法律法规，当本声明与国家法律法规冲突时，以国家法律法规为准。
 
 ## 🧪学习 & 商用
 
-&emsp;&emsp;[mms](https://gitee.com/mmsAdmin/mms),[mms-ui](https://gitee.com/mmsAdmin/mms-ui) 是免费和开源的，可免费用于 `学习`、`商业使用` 。
+&emsp;&emsp;[mms](https://gitee.com/LumeCode/mms),[mms-ui](https://gitee.com/LumeCode/mms-ui) 是免费和开源的，可免费用于 `学习`、`商业使用` 。
 
 ## 🔧 技术架构与核心组件
 
@@ -581,7 +581,7 @@ mms
 如有问题可以通过以下方式联系技术支持：
 
 - 官方网站：[https://www.mmsadmin.cn](https://www.mmsadmin.cn)
-- Gitee仓库：[https://gitee.com/mmsAdmin/mms](https://gitee.com/mmsAdmin/mms)
+- Gitee仓库：[https://gitee.com/LumeCode/mms](https://gitee.com/LumeCode/mms)
 - 邮箱：sxpcwlkj@163.com
 - QQ群：待定
 
