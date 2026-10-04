@@ -39,12 +39,12 @@
 <div style="text-align: center;float: left;width: 100%;">
    <img style="margin: 5px ;float: left;height: 20px" src="https://img.shields.io/badge/language-JAVA-<COLOR>.svg" alt=""/>
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Docker-pink.svg" alt=""/>
-   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Vue3.2-34495e?logo=vue.j" alt="vue" />
-   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Vite4-646cff?logo=vite&logoColor=white" alt="vite" />
-   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-TypeScript4.9-blue?logo=typescript&logoColor=white" alt="typescript" />
+   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Vue3.5-34495e?logo=vue.j" alt="vue" />
+   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Vite6-646cff?logo=vite&logoColor=white" alt="vite" />
+   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-TypeScript5.9-blue?logo=typescript&logoColor=white" alt="typescript" />
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Pinia2-yellow?logo=picpay&logoColor=white" alt="Pinia2" />
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-ESLint-4b32c3?logo=eslint&logoColor=white" alt="eslint" />
-   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-pnpm7-F69220?logo=pnpm&logoColor=white" alt="pnpm" />
+   <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-pnpm8-F69220?logo=pnpm&logoColor=white" alt="pnpm" />
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Prettier-ef9421?logo=Prettier&logoColor=white" alt="Prettier">
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Sass-1D365D?logo=Sass&logoColor=white" alt="Sass">
    <img style="margin: 5px ;float: left;height: 20px"  src="https://img.shields.io/badge/language-Wind%20CSS-06B6D4?logo=Tailwind%20CSS&logoColor=white" alt="WindCSS">
@@ -57,13 +57,13 @@
 1. **🚀 虚拟线程支持**：基于 JDK 21 虚拟线程，并发性能提升 10-100 倍
 2. **📦 模块化设计**：采用 Maven 多模块架构，各功能模块独立开发、部署和维护
 3. **🏢 多租户支持**：灵活的多租户架构，支持数据隔离和资源共享
-4. **🔒 权限管理**：基于 Sa-Token 1.43.0 的 RBAC 权限控制，支持菜单、按钮级别权限
+4. **🔒 权限管理**：基于 Sa-Token 1.44.0 的 RBAC 权限控制，支持菜单、按钮级别权限
 5. **⚡ 代码生成**：内置低代码生成引擎，支持前后端代码一键生成
 6. **💾 多数据源**：支持 MySQL、Oracle、PostgreSQL、SQL Server 等多种数据库
 7. **☁️ 对象存储**：集成 x-file-storage，支持阿里云、腾讯云、华为云等主流云存储
 8. **📨 消息队列**：支持 RabbitMQ、RocketMQ、Kafka 等消息中间件
 9. **⏰ 定时任务**：集成 PowerJob，支持分布式定时任务调度
-10. **📊 监控管理**：集成 Spring Boot Admin 3.5.6，提供应用健康监控
+10. **📊 监控管理**：集成 Spring Boot Admin 3.5.11，提供应用健康监控
 11. **🛡️ 安全防护**：支持 XSS、SQL 注入防护，接口加签验签等安全机制
 12. **🌐 国际化支持**：支持多语言切换
 13. **📚 数据字典**：统一数据字典管理，支持动态配置
@@ -113,7 +113,7 @@
 - **MySQL 8.0+**
 - **Redis 6.x+**
 - **Maven 3.6+**
-- **Node.js 16+** (前端项目)
+- **Node.js 18+** (前端项目)
 - **Docker** (可选，用于容器化部署)
 
 ### 部署步骤
