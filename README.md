@@ -1,15 +1,16 @@
 <div align="center">
    <br/> 
-   <a href="#">
-     <img width="150" src="https://mmsadmin.cn/logo.png">
+   <a href="https://mmsadmin.cn">
+     <img width="150" src="https://mmsadmin.cn/logo.png" alt="MMS logo">
    </a>
-   <h1>模块化管理系统</h1>
+   <h1>MMS（模块化管理系统，Modular Management System）</h1>
+   <p><strong>mms · 主后端 / 核心基础框架</strong></p>
    <br/>
 </div>
 
 [English](README.en.md) | 简体中文
 
-> 说明：本目录是 **MMS 主后端**（`mms-plus` 工作区中的 Git 子模块）。如果你在 `mms-plus` 根目录工作，建议先阅读根目录的 [README.md](../README.md) 了解整体架构与插件体系。
+> 说明：本仓库是 **MMS 主后端**（核心基础框架），也是 MMS 体系其他前端/端侧项目的服务端。整体架构、插件体系与部署指南见在线文档 [mmsadmin.cn](https://mmsadmin.cn)。
 
 ## ⚡️系统介绍
 
