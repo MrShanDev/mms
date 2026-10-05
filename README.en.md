@@ -1,4 +1,12 @@
-# MMS (Main Backend)
+<div align="center">
+   <br/>
+   <a href="https://mmsadmin.cn">
+     <img width="150" src="https://mmsadmin.cn/logo.png" alt="MMS logo">
+   </a>
+   <h1>Modular Management System (MMS)</h1>
+   <p><strong>mms · Main Backend / Core Framework</strong></p>
+   <br/>
+</div>
 
 English | [简体中文](README.md)
 
