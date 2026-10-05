@@ -6,6 +6,7 @@
    <h1>模块化管理系统</h1>
    <p>MMS · Modular Management System</p>
    <p><strong>mms · 主后端 / 核心基础框架</strong></p>
+   <p><a href="https://mmsadmin.cn/">📘 在线文档 · mmsadmin.cn</a> · <a href="https://gitee.com/LumeCode/mms">Gitee</a> · <a href="https://github.com/MrShanDev/mms">GitHub</a></p>
    <br/>
 </div>
 
