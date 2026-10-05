@@ -5,7 +5,7 @@
    </a>
    <h1>Modular Management System (MMS)</h1>
    <p><strong>mms · Main Backend / Core Framework</strong></p>
-   <p><a href="https://mmsadmin.cn/">📘 Online Docs · mmsadmin.cn</a> · <a href="https://gitee.com/LumeCode/mms">Gitee</a> · <a href="https://github.com/MrShanDev/mms">GitHub</a></p>
+   <p><a href="https://mmsadmin.cn/">📘 Online Docs · mmsadmin.cn</a> · <a href="https://gitee.com/MrShanDev/mms">Gitee</a> · <a href="https://github.com/MrShanDev/mms">GitHub</a></p>
    <br/>
 </div>
 
@@ -22,7 +22,7 @@ For the overall architecture, plugin system, and deployment guides, see the onli
 1. Clone and enter the project:
 
 ```bash
-git clone https://gitee.com/LumeCode/mms.git
+git clone https://gitee.com/MrShanDev/mms.git
 cd mms
 ```
 
