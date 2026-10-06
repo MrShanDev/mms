@@ -29,7 +29,7 @@
 
 <p align="center">
   <a href="https://mmsadmin.cn/" target="_blank" rel="noopener noreferrer">
-    <img src="script/img/mms-plugin-ecosystem-poster.png" width="100%" alt="MMS 模块化管理系统：模块化组合、插件安装、丰富插件市场、自研插件，配套 mmsadmin.cn 技术文档站">
+    <img src="script/img/mms-plugin-ecosystem-poster.webp" width="100%" alt="MMS 模块化管理系统：模块化组合、插件安装、丰富插件市场、自研插件，配套 mmsadmin.cn 技术文档站">
   </a>
 </p>
 
