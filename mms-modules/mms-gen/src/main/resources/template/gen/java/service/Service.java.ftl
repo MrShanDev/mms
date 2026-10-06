@@ -16,6 +16,10 @@ import java.util.Set;
  * @describe  支持自定义扩展,已继承接口：{insert、deleteById、updateByIdBase、selectById、getByEntityListPage}（更多查看BaseService接口）
  */
 public interface ${ClassName}Service extends BaseService<${ClassName}, ${ClassName}Vo, ${ClassName}Bo> {
+    <#if formLayout==3>
+    ${ClassName}Vo selectSingleton();
+    Boolean saveSingleton(${ClassName}Bo bo);
+    </#if>
     <#if formLayout==2 >
     /**
     * ${tableComment}列表

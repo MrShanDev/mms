@@ -1,4 +1,3 @@
-import {BaseEntity} from "/@/types/global";
 
 /**
 * 对象实体Vo
@@ -19,7 +18,7 @@ export declare interface ${FunctionName}Vo extends BaseEntity {
     </#if>
 </#list>
 <#if formLayout==2 >
-      ${tableId}s:string;
+      ${tableId}s:string[];
       children: ${FunctionName}Vo[];
 </#if>
 }
@@ -43,7 +42,7 @@ export declare interface ${FunctionName}Bo extends BaseEntity {
     </#if>
 </#list>
 <#if formLayout==2 >
-    ${tableId}s:string;
+    ${tableId}s:string[];
     children: ${FunctionName}Vo[];
 </#if>
 }

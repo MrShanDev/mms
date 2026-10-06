@@ -37,6 +37,8 @@ import com.sxpcwlkj.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +51,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SysUserServiceImpl implements SysUserService {
 
+    private final ObjectProvider<AdminLoginPermissionCacheService> permissionCacheProvider;
     private final SysUserMapper baseMapper;
     private final SysDeptMapper sysDeptMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
@@ -93,12 +96,12 @@ public class SysUserServiceImpl implements SysUserService {
             throw new MmsException("账号已存在!");
         }
         // 检查账号是否去重
-        SysUser sysUserPhone = baseMapper.selectByUserPhone(bo.getPhoneNumber());
+        SysUser sysUserPhone = StringUtil.isNotEmpty(bo.getPhoneNumber()) ? baseMapper.selectByUserPhone(bo.getPhoneNumber()) : null;
         if (sysUserPhone != null) {
             throw new MmsException("手机号已存在!");
         }
         // 检查账号是否去重
-        SysUser sysUserEmail = baseMapper.selectByUserName(bo.getEmail());
+        SysUser sysUserEmail = StringUtil.isNotEmpty(bo.getEmail()) ? baseMapper.selectByUserEmail(bo.getEmail()) : null;
         if (sysUserEmail != null) {
             throw new MmsException("邮箱已存在!");
         }
@@ -160,6 +163,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Boolean updateByIdBase(SysUserBo bo) {
+        assertManageableUser(bo.getUserId());
         // 检查账号是否去重
         SysUser sysUserName = baseMapper.selectByUserName(bo.getUserName());
         if (sysUserName != null) {
@@ -168,14 +172,14 @@ public class SysUserServiceImpl implements SysUserService {
             }
         }
         // 检查账号是否去重
-        SysUser sysUserPhone = baseMapper.selectByUserPhone(bo.getPhoneNumber());
+        SysUser sysUserPhone = StringUtil.isNotEmpty(bo.getPhoneNumber()) ? baseMapper.selectByUserPhone(bo.getPhoneNumber()) : null;
         if (sysUserPhone != null) {
             if (!bo.getUserId().equals(sysUserPhone.getUserId())) {
                 throw new MmsException("手机号已存在!");
             }
         }
         // 检查账号是否去重
-        SysUser sysUserEmail = baseMapper.selectByUserName(bo.getEmail());
+        SysUser sysUserEmail = StringUtil.isNotEmpty(bo.getEmail()) ? baseMapper.selectByUserEmail(bo.getEmail()) : null;
         if (sysUserEmail != null) {
             if (!bo.getUserId().equals(sysUserEmail.getUserId())) {
                 throw new MmsException("邮箱已存在!");
@@ -195,6 +199,7 @@ public class SysUserServiceImpl implements SysUserService {
         String[] array = DataUtil.getCatStr(ids, ",");
         int rows = 0;
         for (String id:array){
+            assertManageableUser(id);
             if (userHasSuperAdminRole(id)) {
                 throw new MmsException("超级管理员不能删除!");
             }
@@ -209,8 +214,45 @@ public class SysUserServiceImpl implements SysUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean imports(Set<SysUserExportVo> list) {
+        if (list == null || list.isEmpty() || list.size() > 1000) throw new MmsException("请导入 1 至 1000 条用户");
+        Set<String> accounts = new HashSet<>(); Set<String> phones = new HashSet<>(); Set<String> emails = new HashSet<>();
+        List<SysUserBo> users = new ArrayList<>();
+        for (var row : list) {
+            if (row == null || row.getUserName() == null || !row.getUserName().matches("[A-Za-z0-9_@.-]{3,64}")) throw new MmsException("用户账号格式无效");
+            if (!accounts.add(row.getUserName()) || baseMapper.selectByUserName(row.getUserName()) != null) throw new MmsException("用户账号重复: " + row.getUserName());
+            if (StringUtil.isNotEmpty(row.getPhoneNumber()) && (!row.getPhoneNumber().matches("[0-9+ -]{6,20}") || !phones.add(row.getPhoneNumber()) || baseMapper.selectByUserPhone(row.getPhoneNumber()) != null)) throw new MmsException("手机号无效或重复");
+            if (StringUtil.isNotEmpty(row.getEmail()) && (!row.getEmail().matches("[^\\s@]+@[^\\s@]+\\.[^\\s@]+") || !emails.add(row.getEmail()) || baseMapper.selectByUserEmail(row.getEmail()) != null)) throw new MmsException("邮箱无效或重复");
+            SysUserBo bo = new SysUserBo(); bo.setUserName(row.getUserName()); bo.setNickName(row.getNickName());
+            bo.setEmail(row.getEmail()); bo.setPhoneNumber(row.getPhoneNumber()); bo.setUserType("1");
+            if (StringUtil.isNotEmpty(row.getDepartment())) {
+                var departments = sysDeptMapper.selectList(new LambdaQueryWrapper<SysDept>().eq(SysDept::getDeptName, row.getDepartment()));
+                if (departments.size() != 1) throw new MmsException("部门名称不存在或不唯一: " + row.getDepartment());
+                bo.setDeptId(departments.getFirst().getDeptId());
+            }
+            // 导入账户不继承权限，使用随机密码并禁用；管理员完成重置与授权后再启用。
+            bo.setPassword(java.util.UUID.randomUUID().toString()); bo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_CLOSE.getValue());
+            bo.setSex("0"); users.add(bo);
+        }
+        for (var bo : users) if (!insert(bo)) throw new MmsException("用户导入失败");
         return true;
+    }
+
+    private List<String> departmentScopeIds(String deptId) {
+        if (StringUtil.isEmpty(deptId)) return List.of();
+        // sys_dept 使用 parent_id 树，不依赖不存在的 ancestors 列。
+        List<SysDept> departments = sysDeptMapper.selectList(new LambdaQueryWrapper<SysDept>());
+        Set<String> selected = new LinkedHashSet<>();
+        selected.add(deptId);
+        boolean added;
+        do {
+            added = false;
+            for (SysDept department : departments) {
+                if (selected.contains(department.getParentId())) added |= selected.add(department.getDeptId());
+            }
+        } while (added);
+        return new ArrayList<>(selected);
     }
 
     private Wrapper<SysUser> buildQueryWrapper(SysUserBo bo) {
@@ -223,14 +265,7 @@ public class SysUserServiceImpl implements SysUserService {
 //            .eq(StringUtil.isNotEmpty(bo.getStatus()), "u.status", bo.getStatus())
             // 手机号
             .like(StringUtil.isNotEmpty(bo.getPhoneNumber()), "u.phonenumber", bo.getPhoneNumber())
-            .and(ObjectUtil.isNotNull(bo.getDeptId()), w -> {
-                List<SysDept> deptList = sysDeptMapper.selectList(new LambdaQueryWrapper<SysDept>()
-                    .select(SysDept::getDeptId)
-                    .apply(DataBaseHelper.findInSet(bo.getDeptId(), "ancestors")));
-                List<String> ids = StreamUtil.toList(deptList, SysDept::getDeptId);
-                ids.add(bo.getDeptId());
-                w.in("u.dept_id", ids);
-            });
+            .in(StringUtil.isNotEmpty(bo.getDeptId()), "u.dept_id", departmentScopeIds(bo.getDeptId()));
 
         // 等级过滤：等级低的用户，看不到比他等级高的用户 (等级值越小，职级越高)
         if (!LoginObject.getLoginSuper()) {
@@ -431,7 +466,8 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Boolean resetPwdSuper(ResetPwdSuperBo bo) {
-        SysUserVo userVo = baseMapper.selectVoById(LoginObject.getLoginId());
+        assertManageableUser(bo.getUserId());
+        SysUserVo userVo = baseMapper.selectVoById(bo.getUserId());
         //更新key
         userVo.setAesKey(Objects.requireNonNull(SignUtil.getAesKey()).getSecretKey());
         //加密密码
@@ -451,28 +487,45 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Boolean setUserRoleSuper(SetUserRoleSuperBo bo) {
-
-        List<String> result = bo.getRoleCodes().stream().filter(roleCode -> SystemCommonEnum.SUPER_ADMIN.getCode().equals(roleCode)).toList();
-        if (!result.isEmpty()) {
-            throw new MmsException("超级管理员不可被修改！");
+        assertManageableUser(bo.getUserId());
+        if (userHasSuperAdminRole(bo.getUserId())) {
+            throw new MmsException("超级管理员角色不可修改");
         }
-        //删除用户与角色管理
-        int rows = sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, bo.getUserId()));
-        for (String roleCode : bo.getRoleCodes()) {
-            // 新增用户与角色管理
-            SysUserRole sysUserRole = new SysUserRole();
-            sysUserRole.setUserId(bo.getUserId());
-            SysRoleVo sysRoleVo = sysRoleMapper.selectByCode(roleCode);
-            sysUserRole.setRoleId(sysRoleVo.getId());
-            rows = sysUserRoleMapper.insert(sysUserRole);
-            if (rows == 0) {
-                throw new MmsException("操作失败");
+        // 校验完成后再替换授权，避免未知角色导致先删后失败。
+        List<SysRoleVo> roles = new ArrayList<>();
+        for (String code : new LinkedHashSet<>(bo.getRoleCodes())) {
+            SysRoleVo role = sysRoleMapper.selectByCode(code);
+            if (role == null || SystemCommonEnum.SUPER_ADMIN.getCode().equals(code)) {
+                throw new MmsException("角色不存在或不允许分配");
+            }
+            if (!LoginObject.getLoginSuper() && (role.getLevel() == null || role.getLevel() < getCurrentUserMinLevel())) {
+                throw new MmsException("不能分配高于当前用户职级的角色");
+            }
+            roles.add(role);
+        }
+        sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, bo.getUserId()));
+        for (SysRoleVo role : roles) {
+            SysUserRole relation = new SysUserRole();
+            relation.setUserId(bo.getUserId());
+            relation.setRoleId(role.getId());
+            if (sysUserRoleMapper.insert(relation) == 0) throw new MmsException("角色分配失败");
+        }
+        permissionCacheProvider.getObject().refreshAllCachedAdminUsers();
+        return Boolean.TRUE;
+    }
+
+    private void assertManageableUser(String userId) {
+        if (StringUtil.isEmpty(userId) || baseMapper.selectById(userId) == null) {
+            throw new MmsException("用户不存在");
+        }
+        if (LoginObject.getLoginSuper()) return;
+        int currentLevel = getCurrentUserMinLevel();
+        for (SysRoleVo role : sysRoleMapper.selectByUserIdList(userId)) {
+            if (SystemCommonEnum.SUPER_ADMIN.getCode().equals(role.getCode())
+                || (role.getLevel() != null && role.getLevel() < currentLevel)) {
+                throw new MmsException("不能操作高于当前用户职级的账户");
             }
         }
-        if (rows > 0) {
-            return Boolean.TRUE;
-        }
-        throw new MmsException("操作失败");
     }
 
     @Override

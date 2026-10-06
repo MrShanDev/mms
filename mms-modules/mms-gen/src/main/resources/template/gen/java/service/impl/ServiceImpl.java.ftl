@@ -48,6 +48,23 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
         return baseMapper;
     }
 
+    <#if formLayout==3>
+    @Override
+    public ${ClassName}Vo selectSingleton() {
+        Page<${ClassName}Vo> page = baseMapper.selectVoPage(new Page<>(1, 1, false),
+                Wrappers.<${ClassName}>lambdaQuery().orderByAsc(${ClassName}::get${TableId}));
+        return page.getRecords().isEmpty() ? null : page.getRecords().get(0);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveSingleton(${ClassName}Bo bo) {
+        ${ClassName}Vo current = selectSingleton();
+        if (current == null) return insert(bo);
+        bo.set${TableId}(current.get${TableId}());
+        return updateByIdBase(bo);
+    }
+    </#if>
     <#if formLayout==2 >
     @Override
     public List<${ClassName}Vo> queryTree(boolean isAll,int showLevel) {

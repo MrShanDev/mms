@@ -94,7 +94,20 @@ public class SysNoticeServiceImpl extends BaseServiceImpl<SysNotice, SysNoticeVo
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean imports(Set<SysNoticeExport> list) {
+        if (list == null || list.isEmpty() || list.size() > 1000) throw new com.sxpcwlkj.common.exception.MmsException("请导入 1 至 1000 条公告");
+        for (var row : list) {
+            if (row == null || row.getTitle() == null || row.getTitle().isBlank() || row.getContent() == null || row.getContent().isBlank()
+                || row.getType() == null || !Set.of(1, 2).contains(row.getType()))
+                throw new com.sxpcwlkj.common.exception.MmsException("公告标题、内容和类型(1/2)必须有效");
+        }
+        for (var row : list) {
+            // 白名单赋值，不导入 ID、租户、审计字段；公告先禁用，审核后启用。
+            SysNotice obj = new SysNotice(); obj.setTitle(row.getTitle()); obj.setContent(row.getContent()); obj.setType(row.getType());
+            obj.setStatus(SystemCommonEnum.SYS_COMMON_STATE_CLOSE.getValue());
+            if (baseMapper.insert(obj) != 1) throw new com.sxpcwlkj.common.exception.MmsException("公告导入失败");
+        }
         return true;
     }
 

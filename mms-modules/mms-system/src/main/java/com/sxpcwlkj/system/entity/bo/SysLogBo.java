@@ -26,7 +26,7 @@ public class SysLogBo  extends BaseEntity {
 	/**
 	 * 日志主键
 	 */
-	@NotBlank(message = "日志主键不能为空" ,groups = {ValidatedGroupConfig.update.class})
+	@NotNull(message = "日志主键不能为空" ,groups = {ValidatedGroupConfig.update.class})
 	private Long operId;
 	/**
 	 * 模块名称
@@ -61,7 +61,7 @@ public class SysLogBo  extends BaseEntity {
 	/**
 	 * 操作人员ID
 	 */
-	@NotBlank(message = "操作人员ID不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
+	@NotNull(message = "操作人员ID不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
 	private Long userId;
 	/**
 	 * 操作人员账号
@@ -111,7 +111,7 @@ public class SysLogBo  extends BaseEntity {
 	/**
 	 * 消耗时间(毫秒)
 	 */
-	@NotBlank(message = "消耗时间(毫秒)不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
+	@NotNull(message = "消耗时间(毫秒)不能为空" ,groups = {ValidatedGroupConfig.insert.class,ValidatedGroupConfig.update.class})
 	private Long costTime;
 	/**
 	 * 用户代理

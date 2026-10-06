@@ -14,15 +14,18 @@ import com.sxpcwlkj.system.service.SysDictService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 系统字典
+ * 字典管理
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统字典",description = "系统管理模块-系统字典")
+@Tag(name = "系统管理模块-字典管理",description = "系统管理模块-字典管理")
 @RequestMapping("system/dict")
 @RestController
 @RequiredArgsConstructor
@@ -68,7 +71,7 @@ public class SysDictController extends BaseController {
     )
     @SaCheckPermission("system:dict:edit")
     @PutMapping
-    public R<Boolean> edit(@Validated @RequestBody(required = false) SysDictBo bo) {
+    public R<Boolean> edit(@Validated @RequestBody SysDictBo bo) {
         return R.success(baseService.updateByIdBase(bo));
     }
 
@@ -84,7 +87,7 @@ public class SysDictController extends BaseController {
     )
     @SaCheckPermission("system:dict:insert")
     @PostMapping
-    public R<Boolean> insert(@Validated @RequestBody(required = false) SysDictBo bo) {
+    public R<Boolean> insert(@Validated @RequestBody SysDictBo bo) {
         return R.success(baseService.insert(bo));
     }
 
@@ -100,8 +103,13 @@ public class SysDictController extends BaseController {
     )
     @SaCheckPermission("system:dict:delete")
     @DeleteMapping("/{id}")
-    public R<Boolean> delete(@PathVariable Long id) {
-        return R.success(baseService.deleteById(id));
+    @Transactional(rollbackFor = Exception.class)
+    public R<Boolean> delete(@PathVariable String id) {
+        // 先解析全部 ID，再执行，兼容前端多选删除且避免半途解析失败。
+        List<Long> ids = Arrays.stream(id.split(",")).map(String::trim).map(Long::valueOf).toList();
+        boolean changed = false;
+        for (Long dictId : ids) changed = baseService.deleteById(dictId) || changed;
+        return R.success(changed);
     }
 
 

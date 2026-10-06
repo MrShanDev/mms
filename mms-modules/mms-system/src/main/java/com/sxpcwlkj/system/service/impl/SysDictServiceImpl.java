@@ -24,6 +24,7 @@ import com.sxpcwlkj.system.service.SysDictService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,6 +65,7 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     public SysDictVo selectVoById(Long id) {
         SysDictVo sysDictVo = baseMapper.selectVoById(id);
+        if (sysDictVo == null) return null;
         List<SysDictDataVo> vos = sysDictDataMapper.selectVoList(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, sysDictVo.getFieldName()).orderByAsc(SysDictData::getSort));
         if (vos == null) {
             vos = new ArrayList<>();
@@ -77,13 +79,14 @@ public class SysDictServiceImpl implements SysDictService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateByIdBase(SysDictBo bo) {
         int row;
         SysDict convert = MapstructUtil.convert(bo, SysDict.class);
 
         // 字典值维护
         List<SysDictDataBo> list = bo.getList();
-        if (list != null && !list.isEmpty()) {
+        if (list != null) {
             sysDictDataMapper.delete(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, bo.getFieldName()));
             for (SysDictDataBo data : list) {
                 SysDictData convertData = MapstructUtil.convert(data, SysDictData.class);
@@ -97,6 +100,7 @@ public class SysDictServiceImpl implements SysDictService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean insert(SysDictBo bo) {
         SysDict convert = MapstructUtil.convert(bo, SysDict.class);
         int row = baseMapper.insert(convert);
@@ -116,8 +120,10 @@ public class SysDictServiceImpl implements SysDictService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteById(Long id) {
         SysDict bo = baseMapper.selectById(id);
+        if (bo == null) return false;
         sysDictDataMapper.delete(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, bo.getFieldName()));
         return baseMapper.deleteById(id) > 0;
     }

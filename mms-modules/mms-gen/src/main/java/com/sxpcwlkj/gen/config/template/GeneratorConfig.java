@@ -38,6 +38,9 @@ public class GeneratorConfig {
             String configContent = StreamUtils.copyToString(isConfig, StandardCharsets.UTF_8);
             GeneratorInfo generator = JsonUtil.parseObject(configContent, GeneratorInfo.class);
             assert generator != null;
+            if (type == 3) {
+                generator.getTemplates().removeIf(item -> "vue/dialog.vue.ftl".equals(item.getTemplateName()));
+            }
             for (TemplateInfo templateInfo : generator.getTemplates()) {
                     // 模板文件
                     InputStream isTemplate = this.getClass().getResourceAsStream(template + templateInfo.getTemplateName());

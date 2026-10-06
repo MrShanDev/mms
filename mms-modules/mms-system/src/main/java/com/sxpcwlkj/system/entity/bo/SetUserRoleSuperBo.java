@@ -2,7 +2,7 @@ package com.sxpcwlkj.system.entity.bo;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
-import org.apache.logging.log4j.core.config.plugins.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 

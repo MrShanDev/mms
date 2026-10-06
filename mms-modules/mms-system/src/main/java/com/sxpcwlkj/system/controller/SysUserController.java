@@ -48,12 +48,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 系统用户
+ * 用户管理
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统用户",description = "系统管理模块-系统用户")
+@Tag(name = "系统管理模块-用户管理",description = "系统管理模块-用户管理")
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -149,11 +149,11 @@ public class SysUserController extends BaseController {
     @SaCheckPermission("system:user:import")
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) throws IOException {
-        ExcelUtil.download(response, SysUserExportVo.class, "系统用户");
+        ExcelUtil.download(response, SysUserExportVo.class, "用户管理");
     }
 
     /**
-     * 导入系统用户
+     * 导入用户管理
      * @param file 模版文件
      */
     @MmsLog(
@@ -172,7 +172,7 @@ public class SysUserController extends BaseController {
     }
 
     /**
-     * 导出系统用户
+     * 导出用户管理
      */
     @MmsLog(
         module = "用户管理",
@@ -187,11 +187,11 @@ public class SysUserController extends BaseController {
         List<SysUserExportVo> data = MapstructUtil.convert(list, SysUserExportVo.class);
 
         // 使用封装后的安全导出方法
-        ExcelUtil.safeExport(response, SysUserExportVo.class, "系统用户", data, pageQuery);
+        ExcelUtil.safeExport(response, SysUserExportVo.class, "用户管理", data, pageQuery);
     }
 
     /**
-     * 打印系统用户
+     * 打印用户管理
      * @param user 查询条件
      * @param pageQuery 分页条件
      */
@@ -203,7 +203,7 @@ public class SysUserController extends BaseController {
         List<SysUserVo> list= baseService.selectPageUserList(user, pageQuery).getRows();
         List<SysUserExportVo> data= MapstructUtil.convert(list,SysUserExportVo.class);
         PrintObject<SysUserExportVo>  printObject=   new PrintObject<SysUserExportVo>()
-            .setTitle("系统用户")
+            .setTitle("用户管理")
             .setData(data);
         return R.response(Boolean.TRUE,printObject);
     }
@@ -268,7 +268,8 @@ public class SysUserController extends BaseController {
         operType = OperationType.UPDATE,
         description = "管理员重置密码"
     )
-    @SaCheckLogin
+    @SaCheckPermission("system:user:edit")
+    @Transactional
     @PostMapping("/resetPwdSuper")
     public R<Boolean> resetPwdSuper(@Validated @RequestBody  ResetPwdSuperBo bo) {
         return R.success(baseService.resetPwdSuper(bo));
@@ -301,6 +302,8 @@ public class SysUserController extends BaseController {
         operType = OperationType.UPDATE,
         description = "设置用户角色"
     )
+    @SaCheckPermission("system:user:edit")
+    @Transactional
     @PostMapping("/setUserRole")
     public R<Boolean> setUserRole(@Validated @RequestBody SetUserRoleSuperBo bo) {
         return R.success("设置用户角色成功",baseService.setUserRoleSuper(bo));

@@ -109,7 +109,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
     @Override
     public SysConfigVo selectVoById(Serializable id) {
         SysConfigVo sysConfigVo = this.getBaseMapper().selectVoById(id);
-        if (sysConfigVo != null && !sysConfigVo.getConfigValue().isEmpty()) {
+        if (sysConfigVo != null && sysConfigVo.getConfigValue() != null && !sysConfigVo.getConfigValue().isEmpty()) {
             List<String> list = Arrays.asList(sysConfigVo.getConfigValue().split(","));
             sysConfigVo.setConfigValues(list);
             if (!list.isEmpty()) {
@@ -152,22 +152,25 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateByCodes(List<SysConfigBo> bos) {
-        if (bos != null && !bos.isEmpty()) {
-            for (SysConfigBo bo : bos) {
-                if (bo.getConfigKey() == null || bo.getConfigKey().isEmpty()) {
-                    continue;
-                }
-
-                this.updateByIdBase(bo);
-                this.initBase();
-                this.initSms();
-                this.initEmail();
-                applicationContext.publishEvent(new ContextRefreshedEvent(applicationContext));
+        if (bos == null || bos.isEmpty()) return false;
+        for (SysConfigBo bo : bos) {
+            if (bo == null || StringUtil.isEmpty(bo.getConfigKey())) {
+                throw new MmsException("配置编码不能为空");
             }
-            return true;
+            SysConfig existing = baseMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
+                .eq(SysConfig::getConfigKey, bo.getConfigKey()).last("LIMIT 1"));
+            if (!(existing == null ? this.insert(bo) : this.updateByIdBase(bo))) {
+                throw new MmsException("配置保存失败");
+            }
         }
-        return false;
+        // 全部写入完成后统一刷新，避免每一项触发一次全量刷新。
+        this.initBase();
+        this.initSms();
+        this.initEmail();
+        applicationContext.publishEvent(new ContextRefreshedEvent(applicationContext));
+        return true;
     }
 
     @Override
@@ -181,7 +184,7 @@ public class SysConfigServiceImpl extends BaseServiceImpl<SysConfig, SysConfigVo
                 }
                 bo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
                 bo.setConfigType(1);
-                this.insert(bo);
+                // 回显缺省值，不在查询时创建数据库记录。
             } else {
                 bo.setConfigValue(vo.getConfigValue());
                 if (bo.getValueType() != null && !bo.getValueType().isEmpty()) {

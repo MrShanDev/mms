@@ -56,7 +56,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     private Wrapper<SysRole> buildQueryWrapper(SysRoleBo bo) {
 
         QueryWrapper<SysRole> wrapper = Wrappers.query();
-        wrapper.eq(StringUtil.isNotEmpty(bo.getStatus()), "status", SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
+        wrapper.eq(StringUtil.isNotEmpty(bo.getStatus()), "status", bo.getStatus());
         wrapper.like(StringUtil.isNotEmpty(bo.getName()), "name", bo.getName());
         wrapper.like(StringUtil.isNotEmpty(bo.getCode()), "code", bo.getCode());
 
@@ -95,6 +95,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     @Override
     public SysRoleVo selectVoById(String id) {
         SysRoleVo vo = baseMapper.selectVoById(id);
+        if (vo == null) return null;
         // 系统菜单
         List<AdminMenuTree> functionTree = sysFunctionService.getAllMenuTree();
         vo.setFunctionTree(functionTree);
@@ -124,7 +125,7 @@ public class SysRoleServiceImpl implements SysRoleService {
 
         String[] defChecked = bo.getDefChecked();
 
-        if (defChecked != null && defChecked.length > 0) {
+        if (defChecked != null) {
             // 先清理删除
             sysRoleFunctionMapper.delete(new LambdaQueryWrapper<SysRoleFunction>().eq(SysRoleFunction::getRoleId, bo.getId()));
             for (String aLong : defChecked) {

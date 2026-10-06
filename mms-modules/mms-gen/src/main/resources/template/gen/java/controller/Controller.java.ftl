@@ -41,6 +41,22 @@ import java.util.Set;
 public class ${ClassName}Controller extends BaseController{
     private final ${ClassName}Service baseService;
 
+    <#if formLayout==3>
+    /** 单页面配置回显：无记录时返回 null，不在读取时创建数据。 */
+    @SaCheckPermission("${moduleName}:${functionName}:query")
+    @GetMapping("/singleton")
+    public R<${ClassName}Vo> singleton() {
+        return success(baseService.selectSingleton());
+    }
+
+    /** 明确保存时新增或更新单页面配置。 */
+    @MmsLog(module = "${tableComment}", operType = OperationType.UPDATE, description = "保存${tableComment}")
+    @SaCheckPermission("${moduleName}:${functionName}:edit")
+    @PutMapping("/singleton")
+    public R<Boolean> saveSingleton(@RequestBody @Validated(ValidatedGroupConfig.insert.class) ${ClassName}Bo bo) {
+        return success(baseService.saveSingleton(bo));
+    }
+    <#else>
     <#if formLayout==1 >
     /**
     * 分页列表-${tableComment}
@@ -183,4 +199,5 @@ public class ${ClassName}Controller extends BaseController{
              .setData(data);
              return R.response(Boolean.TRUE,printObject);
     }
+    </#if>
 }

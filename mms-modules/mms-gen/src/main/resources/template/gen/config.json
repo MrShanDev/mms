@@ -65,7 +65,11 @@
     },
     {
       "templateName": "vue/dialog.vue.ftl",
-      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/dialog.vue"
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/components/${FunctionName}Dialog.vue"
+    },
+    {
+      "templateName": "vue/form.vue.ftl",
+      "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/components/${FunctionName}Form.vue"
     }
   ]
 }

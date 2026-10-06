@@ -18,12 +18,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- *  系统角色
+ *  角色管理
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统角色",description = "系统管理模块-系统角色")
+@Tag(name = "系统管理模块-角色管理",description = "系统管理模块-角色管理")
 @RequestMapping("system/role")
 @RestController
 @RequiredArgsConstructor

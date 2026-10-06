@@ -27,6 +27,87 @@
 
 🍃MMS文档: [mms](https://mmsadmin.cn/)
 
+## 页面展示
+
+当前管理端实景截图，展示登录、系统工作台、账户表单、权限管理、配置、代码生成和插件市场。每行两张，点击图片查看原图；也可右键在新窗口打开。
+
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <strong>登录页面</strong><br>
+      <a href="script/img/preview-login.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-login.jpg" width="100%" alt="登录页面">
+      </a>
+    </td>
+    <td width="50%" align="center">
+      <strong>系统管理工作台</strong><br>
+      <a href="script/img/preview-dashboard.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-dashboard.jpg" width="100%" alt="系统管理工作台">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>新增用户表单</strong><br>
+      <a href="script/img/preview-user-form.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-user-form.jpg" width="100%" alt="新增用户表单">
+      </a>
+    </td>
+    <td width="50%" align="center">
+      <strong>新增角色与菜单权限</strong><br>
+      <a href="script/img/preview-role-form.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-role-form.jpg" width="100%" alt="新增角色与菜单权限">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>角色管理</strong><br>
+      <a href="script/img/preview-roles.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-roles.jpg" width="100%" alt="角色管理">
+      </a>
+    </td>
+    <td width="50%" align="center">
+      <strong>菜单管理</strong><br>
+      <a href="script/img/preview-menus.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-menus.jpg" width="100%" alt="菜单管理">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>字典管理</strong><br>
+      <a href="script/img/preview-dictionaries.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-dictionaries.jpg" width="100%" alt="字典管理">
+      </a>
+    </td>
+    <td width="50%" align="center">
+      <strong>系统基础设置</strong><br>
+      <a href="script/img/preview-settings.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-settings.jpg" width="100%" alt="系统基础设置">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <strong>代码生成</strong><br>
+      <a href="script/img/preview-generator.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-generator.jpg" width="100%" alt="代码生成">
+      </a>
+    </td>
+    <td width="50%" align="center">
+      <strong>插件市场</strong><br>
+      <a href="script/img/preview-plugins.jpg" target="_blank" rel="noopener noreferrer">
+        <img src="script/img/preview-plugins.jpg" width="100%" alt="插件市场">
+      </a>
+    </td>
+  </tr>
+</table>
+
+代码生成与插件市场截图为未导入表、未安装插件时的界面；用户与角色表单仅展示，未提交新增。
+
+截图文件统一位于本仓 [`script/img/`](script/img/)，前端 `mms-ui` README 复用同一套图片。
+
 ## 🧩系统版本
 
 <img src="https://img.shields.io/badge/MMS-V1.X-green"/>
@@ -332,91 +413,6 @@ mms
 - 确保代码通过所有测试
 - 编写清晰的提交信息
 
-## 🎳演示图例
-
-<table>
-  <tr>
-   <th><p>登录页面</p></th>
-   <th><p>后台首页</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/01.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/02.png"/></th>
-  </tr>
-<tr>
-   <th><p>用户管理</p></th>
-   <th><p>新增用户</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/03.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/04.png"/></th>
-  </tr>
-<tr>
-   <th><p>角色管理</p></th>
-   <th><p>添加角色</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/05.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/06.png"/></th>
-  </tr>
-<tr>
-   <th><p>菜单管理</p></th>
-   <th><p>部门管理</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/07.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/08.png"/></th>
-  </tr>
-<tr>
-   <th><p>字典管理</p></th>
-   <th><p>添加字典</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/09.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/10.png"/></th>
-  </tr>
-<tr>
-   <th><p>系统设置</p></th>
-   <th><p>消息公告</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/11.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/12.png"/></th>
-  </tr>
-<tr>
-   <th><p>代码生成1</p></th>
-   <th><p>代码生成2</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/13.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/14.png"/></th>
-  </tr>
-<tr>
-   <th><p>代码生成3</p></th>
-   <th><p>代码生成4</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/15.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/16.png"/></th>
-  </tr>
-<tr>
-   <th><p>定时任务</p></th>
-   <th><p>对象存储</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/17.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/18.png"/></th>
-  </tr>
-<tr>
-   <th><p>扩展工具</p></th>
-   <th><p>个人中心</p></th>
-  </tr>
-  <tr>
-   <th><img src="https://mmsadmin.cn/images/mms/19.png"/></th>
-   <th><img src="https://mmsadmin.cn/images/mms/20.png"/></th>
-  </tr>
-</table>
-
 # 😎 LICENSE
 
 ::: tip MIT License
@@ -663,3 +659,56 @@ mms
 ### v1.0.0 (2023-12-01)
 
 - [发布] MMS模块化管理系统正式开源发布
+
+## 开发工具安装与检查
+
+安装 Node.js 通常会带上 npm，但不会自动安装 pnpm。nvm 用于安装和切换 Node.js 版本；Maven 是 Java 后端的构建工具，其命令为 `mvn`，需要单独安装。
+
+**macOS / Linux / WSL：安装 nvm、Node.js 和 pnpm**
+
+按照 [nvm 官方安装说明](https://github.com/nvm-sh/nvm#installing-and-updating)安装 nvm，然后重新打开终端。已有 Node.js 且无需切换版本时，可以跳过 nvm。
+
+```bash
+# 安装 nvm（官方安装脚本）
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
+```
+
+重新打开终端后执行：
+
+```bash
+command -v nvm
+nvm install 22
+nvm use 22
+nvm alias default 22
+node -v
+npm -v
+npm install -g pnpm@10
+pnpm -v
+```
+
+切换 nvm 管理的 Node.js 版本后，如果找不到 pnpm，需要在当前版本下重新安装。Node.js 25 起不再附带 Corepack，教程不依赖 Corepack 自动提供 pnpm。原生 Windows 使用 [nvm-windows](https://github.com/coreybutler/nvm-windows)或 Node.js 官方安装包，不运行上述 nvm Shell 安装脚本。
+
+**安装 Maven（后端需要）**
+
+先安装 JDK 21，并按 [Maven 官方说明](https://maven.apache.org/install.html)安装 Maven。macOS 已安装 Homebrew 时：
+
+```bash
+brew install maven
+```
+
+Linux / Windows 可下载 Maven 二进制包、解压，将其 `bin` 目录加入 `PATH`。将 `JAVA_HOME` 指向 JDK 21 的实际安装目录，重新打开终端后检查：
+
+```bash
+java -version
+mvn -v
+```
+
+`mvn -v` 显示的 Java 版本应与项目使用的 JDK 一致。macOS 已安装 JDK 21 时，可在当前终端设置：
+
+```bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+export PATH="$JAVA_HOME/bin:$PATH"
+mvn -v
+```
+
+若提示 `mvn: command not found`，检查 Maven 是否安装，以及 Maven 的 `bin` 是否已加入当前终端的 `PATH`。仅运行 `mms-ui` 不需要 Maven；启动或构建 Java 后端需要。

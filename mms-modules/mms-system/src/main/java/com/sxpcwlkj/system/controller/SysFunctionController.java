@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 系统资源
+ * 菜单管理
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统资源",description = "系统管理模块-系统资源")
+@Tag(name = "系统管理模块-菜单管理",description = "系统管理模块-菜单管理")
 @RequestMapping("system/function")
 @RestController
 @RequiredArgsConstructor

@@ -1,6 +1,8 @@
-powerjob：定时任务
-test-sql：测试数据
-mms.pdma.json:元数建模源文件 http://www.pdmaner.com/
-mms.sql：主数据库
-mms.gen.sql：代码生产
-开放端 / mms-servers 相关 SQL：见 mms-plus 仓库 script/db/servers/
+初始化顺序和兼容条件见同目录 README.md。
+mms.sql：系统核心初始化
+mms-gen.sql：代码生成初始化
+mms-plugin.sql：插件市场与版本初始化（依赖 mms.sql）
+mms-job.sql：PowerJob 4.3.9 初始化（可使用独立调度库）
+patch/、upgrade/：历史增量脚本，新库初始化后不应批量执行。
+mms.pdma、mms.pdma.json：历史建模文件，不作为当前初始化基线。
+业务插件 SQL 位于母仓 mms-plugins/<模块>/script/。

@@ -109,6 +109,6 @@ public class SysLogServiceImpl extends BaseServiceImpl<SysLog, SysLogVo,SysLogBo
 
     @Override
     public Boolean imports(Set<SysLogExport> list) {
-        return true;
+        throw new com.sxpcwlkj.common.exception.MmsException("该模块尚未实现批量导入，请使用新增功能");
     }
 }

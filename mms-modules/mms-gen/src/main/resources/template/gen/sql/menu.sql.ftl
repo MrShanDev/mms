@@ -3,6 +3,15 @@
     <#assign dbTime = "getDate()">
 </#if>
 
+<#if formLayout==3>
+# 单页面：仅注册页面、回显与保存权限。
+INSERT INTO `sys_function`(`parent_id`,`path`,`name`,`component`,`language_code`,`type`,`sort`,`icon`,`status`,`visible`,`is_iframe`,`is_open_link`,`is_link`,`keep_alive`,`always_show`,`tenant_id`,`created_time`,`updated_time`,`revision`)
+values (${menuId},'/${moduleName}/${functionName}','${tableComment}','${moduleName}/${functionName}/index','${tableComment}',1,1,'',1,-1,-1,-1,'',1,-1,'000000',${dbTime},${dbTime},1);
+<#list ['query', 'edit'] as action>
+INSERT INTO `sys_function`(`parent_id`,`name`,`permission`,`type`,`sort`,`status`,`tenant_id`,`created_time`,`updated_time`,`revision`)
+values ((SELECT `min_id` FROM (SELECT MAX(id) AS min_id FROM `sys_function` WHERE `name` = '${tableComment}') AS a),'${tableComment}-${action}','${moduleName}:${functionName}:${action}',2,1,1,'000000',${dbTime},${dbTime},1);
+</#list>
+<#else>
 #菜单
 INSERT INTO `sys_function`(`parent_id`,`path`,`name`,`component`,`language_code`,`type`,`sort`,`icon`,`status`,`visible`,`is_iframe`,`is_open_link`,`is_link`,`keep_alive`,`always_show`,`tenant_id`,`created_time`,`updated_time`,`revision`)
 values (${menuId},'/${moduleName}/${functionName}','${tableComment}','${moduleName}/${functionName}/index','${tableComment}',1,1,'',1,-1,-1,-1,'',1,-1,'000000',${dbTime},${dbTime},1);
@@ -38,3 +47,5 @@ values ((SELECT `min_id` FROM  (SELECT MAX(id) AS min_id FROM `sys_function` WHE
 #打印
 INSERT INTO `sys_function`(`parent_id`,`name`,`permission`,`type`,`sort`,`status`,`tenant_id`,`created_time`,`updated_time`,`revision`)
 values ((SELECT `min_id` FROM  (SELECT MAX(id) AS min_id FROM `sys_function` WHERE `name` = '${tableComment}') AS a),'${tableComment}-打印','${moduleName}:${functionName}:print',2,9,1,'000000',${dbTime},${dbTime},1);
+
+</#if>

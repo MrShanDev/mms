@@ -1,10 +1,74 @@
+<#if formLayout==3>
 <template>
+  <SystemPage title="${tableComment}" description="配置${tableComment}信息，修改后保存生效。" eyebrow="业务管理">
+    <div class="layout-padding">
+      <el-tabs type="border-card" model-value="settings">
+        <el-tab-pane label="${tableComment}" name="settings">
+          <div class="generated-settings-pane" v-loading="loading">
+            <${FunctionName}Form ref="formRef" :model-value="form" />
+            <el-button type="primary" :loading="saving" :disabled="loading || !loaded" v-auth="'${moduleName}:${functionName}:edit'" @click="save">保存</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+  </SystemPage>
+</template>
+<script setup lang="ts">
+  import { onMounted, ref } from 'vue';
+  import { ElMessage } from 'element-plus';
+  import SystemPage from '/@/views/system/shared/SystemPage.vue';
+  import ${FunctionName}Form from './components/${FunctionName}Form.vue';
+  import { ${functionName}Api } from './index';
+  import type { ${FunctionName}Bo } from './type';
+  const api = ${functionName}Api();
+  const formRef = ref();
+  const defaults = () => ({
+    <#list formList as field>
+      <#if !field.primaryPk>
+      ${field.attrName}: <#if field.attrType=='Integer' || field.attrType=='Long' || field.attrType=='Double' || field.attrType=='BigDecimal'><#if field.attrName=='status' || field.attrName=='sort'>1<#else>0</#if><#else>''</#if>,
+      </#if>
+    </#list>
+  } as ${FunctionName}Bo);
+  const form = ref(defaults());
+  const loading = ref(false);
+  const loaded = ref(false);
+  const saving = ref(false);
+  const load = async () => {
+    loading.value = true;
+    try {
+      const res = await api.singleton();
+      form.value = { ...defaults(), ...(res.data ?? {}) };
+      loaded.value = true;
+    } catch { ElMessage.error('加载失败，请刷新后重试'); }
+    finally { loading.value = false; }
+  };
+  const save = async () => {
+    if (saving.value || !loaded.value || !await formRef.value.validate()) return;
+    saving.value = true;
+    try {
+      await api.saveSingleton(form.value);
+      ElMessage.success('保存成功');
+      await load();
+    } catch { ElMessage.error('保存失败，请稍后重试'); }
+    finally { saving.value = false; }
+  };
+  onMounted(load);
+</script>
+<style scoped lang="scss">
+  .generated-settings-pane { max-width: 760px; padding: 5px 12px 16px; }
+  @media (max-width: 600px) { .generated-settings-pane { padding: 5px 0 12px; } }
+</style>
+
+<#else>
+<template>
+  <SystemPage title="${tableComment}" description="管理${tableComment}信息与维护数据。" eyebrow="业务管理">
     <div class="block">
         <#if (formLayout == 1) && (queryList?? && queryList?size gt 0) >
         <!-- 功能栏  -->
         <div class="views-tool">
             <div class="tool-left">
-                <el-form :inline="true" size="default" :model="state.tableData.param" class="form-tool" @keyup.enter="getTableData">
+                <div class="tool-left-title">筛选查询</div>
+                <el-form :inline="true" size="default" :model="state.tableData.param" class="form-tool" @keyup.enter="onSearch">
                     <#list queryList as field>
                         <el-form-item>
                             <#if field.queryFormType == 'text' || field.queryFormType == 'textarea' || field.queryFormType == 'editor'>
@@ -35,7 +99,7 @@
                         </el-form-item>
                     </#list>
                     <el-form-item>
-                        <el-button size="default" type="primary" @click="getTableData" v-auth="'${moduleName}:${functionName}:list'">
+                        <el-button size="default" type="primary" @click="onSearch" v-auth="'${moduleName}:${functionName}:list'">
                             <SvgIcon name="iconfont icon-search1" />{{ $t("message.form.search") }}
                         </el-button>
                     </el-form-item>
@@ -44,8 +108,8 @@
         </div>
         </#if>
         <!-- Table  -->
-        <div class="${moduleName}-${functionName}-container layout-padding <#if (formLayout == 1) && (queryList?? && queryList?size gt 0) > m-t-0 <#else> mt-5 </#if> p-t-0">
-            <el-card shadow="hover" class="layout-padding-auto">
+        <div class="${moduleName}-${functionName}-container layout-padding">
+            <el-card shadow="never" class="layout-padding-auto">
                 <el-container>
                     <el-header>
                         <#if formLayout==1 >
@@ -63,14 +127,14 @@
                         <div class="system-dept-search">
                             <el-button size="small" type="primary"  @click="clickExpand">
                                 <el-icon><ele-Sort /></el-icon>
-                                {{ expand.state ? "全部关闭" : "全部展开" }}
+                                {{ expand.state ? "全部折叠" : "全部展开" }}
                             </el-button>
                             <el-button
                                 size="small"
                                 type="success"
                                 class="ml10"
                                 v-auth="'${moduleName}:${functionName}:insert'"
-                                @click="onCURD({ type: curdEnum.EDIT, ids: '1' })"
+                                @click="onCURD({ type: curdEnum.INSERT })"
                             >
                                 <el-icon>
                                     <ele-DocumentAdd />
@@ -99,7 +163,7 @@
                             </#if>
                             <#list gridList as field>
                             <#if field.attrName == 'status'>
-                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" show-overflow-tooltip>
+                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" width="90" show-overflow-tooltip>
                                 <template #default="scope">
                                   <fast-switch
                                     v-model="scope.row.status"
@@ -113,21 +177,21 @@
                             <#elseif field.formDict??>
                             <fast-table-column prop="${field.attrName}" label="${field.fieldComment!}" dict-type="${field.formDict}"></fast-table-column>
                             <#elseif field.primaryPk>
-                            <el-table-column v-if="false" prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center"></el-table-column>
+                            <el-table-column v-if="false" prop="${field.attrName}" label="${field.fieldComment!}" min-width="140" header-align="center" align="center"></el-table-column>
                             <#elseif field.formType == 'datetime'>
-                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center" show-overflow-tooltip>
+                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" min-width="140" header-align="center" align="center" show-overflow-tooltip>
                                 <template #default="scope">
                                    {{ $ut.parseTime(scope.row.${field.attrName}, "{y}-{m}-{d} {h}:{i}:{s}") }}
                                 </template>
                             </el-table-column>
                             <#elseif field.formType == 'date'>
-                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center" show-overflow-tooltip>
+                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" min-width="140" header-align="center" align="center" show-overflow-tooltip>
                                 <template #default="scope">
                                    {{ $ut.parseTime(scope.row.${field.attrName}, "{y}-{m}-{d}") }}
                                 </template>
                             </el-table-column>
                             <#elseif field.formType == 'image'>
-                                <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center" show-overflow-tooltip>
+                                <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" min-width="140" header-align="center" align="center" show-overflow-tooltip>
                                     <template #default="scope">
                                         <el-image
                                             style="height: 50px"
@@ -143,10 +207,10 @@
                                     </template>
                                 </el-table-column>
                             <#else>
-                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" header-align="center" align="center"></el-table-column>
+                            <el-table-column prop="${field.attrName}" label="${field.fieldComment!}" min-width="140" header-align="center" align="center"></el-table-column>
                             </#if>
                             </#list>
-                            <el-table-column fixed="right" label="操作" width="<#if formLayout==1 > 100 <#else> 120 </#if>">
+                            <el-table-column fixed="right" label="操作" width="<#if formLayout==1>100<#else>120</#if>">
                                 <template #default="scope">
                                     <#if formLayout==2 >
                                     <el-tooltip placement="top" :content="$t('message.form.insertSon')">
@@ -193,10 +257,12 @@
             <${FunctionName}Dialog ref="${functionName}DialogRef" @refresh="formSubmit"/>
         </div>
     </div>
+  </SystemPage>
 </template>
 //ModuleName ${tableComment}
 <script setup lang="ts" name="${moduleName}${FunctionName}">
     import {defineAsyncComponent, onMounted, reactive, ref} from "vue";
+    import SystemPage from "/@/views/system/shared/SystemPage.vue";
     import {ElMessage, ElMessageBox} from "element-plus";
     import {CURDEnum} from "/@/enums/CURDEnum";
     import {generateUUID, isEmpty} from "/@/utils/mms";
@@ -214,7 +280,7 @@
     </#if>
     </#list>
     const ${functionName}DialogRef = ref();
-    const ${FunctionName}Dialog = defineAsyncComponent(() => import('/@/views/${moduleName}/${functionName}/dialog.vue'));
+    const ${FunctionName}Dialog = defineAsyncComponent(() => import('/@/views/${moduleName}/${functionName}/components/${FunctionName}Dialog.vue'));
     const TableTool = defineAsyncComponent(() => import("/@/components/table-tool/index.vue"));
 
     const curdEnum = CURDEnum;
@@ -257,6 +323,7 @@
         expand.value.state = !expand.value.state;
     };
     </#if>
+    const onSearch = () => { state.tableData.param.pageNum = 1; getTableData(); };
     // 初始化表格数据
     const getTableData = () => {
         state.tableData.loading = true;
@@ -282,6 +349,7 @@
             return false;
             </#if>
             <#if formLayout==2 >
+            if (!obj.ids) { ${functionName}DialogRef.value.openDialog(obj.type); return; }
             baseApi.query(obj.ids).then((res) => {
                 ${functionName}DialogRef.value.openDialog(obj.type, res.data);
             }).catch(async (err) => {
@@ -339,7 +407,8 @@
             NextLoading.open();
             baseApi.edit(row).then(row => {
                 ${functionName}DialogRef.value.closeDialog();
-                ElMessage.success(row.msg)
+                ElMessage.success(row.msg);
+                getTableData();
             }).catch(async err => {
                 ${functionName}DialogRef.value.resetLoading();
                 ElMessage.warning(err);
@@ -366,6 +435,7 @@
     // 分页改变
     const onHandleSizeChange = (val: number) => {
         state.tableData.param.pageSize = val;
+        state.tableData.param.pageNum = 1;
         getTableData();
     };
     // 分页改变
@@ -375,7 +445,7 @@
     };
     //选择项改变
     const handleSelectionChange = (val: ${FunctionName}Vo[]) => {
-        state.tableData.param.selectIds = val.map((item: any) => item.id).join(",");
+        state.tableData.param.selectIds = val.map((item: any) => item.${tableId}).join(",");
     };
     </#if>
     // 页面加载时
@@ -387,3 +457,5 @@
 <style scoped lang="scss">
 
 </style>
+
+</#if>

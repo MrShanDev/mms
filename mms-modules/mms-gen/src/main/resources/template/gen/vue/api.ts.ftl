@@ -1,67 +1,24 @@
 import request from '/@/utils/request';
-import {getEnv} from "/@/utils/mms";
-import {AxiosPromise} from "axios";
-import {SysEnum} from "/@/enums/SysEnum";
-import {EncryptTypeEnum} from "/@/enums/EncryptTypeEnum";
-import {${FunctionName}Bo,${FunctionName}Vo} from '/@/views/${moduleName}/${functionName}/type';
-/**
-* ${tableComment}-Api
-* ${FunctionName}
-*/
+import { getEnv } from '/@/utils/mms';
+import { SysEnum } from '/@/enums/SysEnum';
+import { EncryptTypeEnum } from '/@/enums/EncryptTypeEnum';
+import type { ${FunctionName}Bo, ${FunctionName}Vo } from './type';
+type Result<T> = { code: number; msg: string; data: T };
+const headers = { 'Encrypt-State': SysEnum.SYS_COMMON_STATE_CLOSE, 'Encrypt-Type': EncryptTypeEnum.AES };
+// 宿主请求拦截器返回 JSON 响应体，而非 AxiosResponse。
+const call = <T>(config: object): Promise<T> => request(config) as unknown as Promise<T>;
 export function ${functionName}Api() {
-    return {
-        list: (params?: object): AxiosPromise<Array<${FunctionName}Vo>> => {
-            return request({
-                url: getEnv()+'/${moduleName}/${functionName}/list',
-                method: 'post',
-                data: params,
-                headers: {
-                    'Encrypt-State':SysEnum.SYS_COMMON_STATE_CLOSE,
-                    'Encrypt-Type': EncryptTypeEnum.AES
-                },
-            });
-        },
-        edit: (params?: ${FunctionName}Bo): AxiosPromise<boolean> => {
-            return request({
-                url: getEnv()+'/${moduleName}/${functionName}',
-                method: 'put',
-                data: params,
-                headers: {
-                    'Encrypt-State':SysEnum.SYS_COMMON_STATE_CLOSE,
-                    'Encrypt-Type': EncryptTypeEnum.AES
-                },
-            });
-        },
-        query: (id?: number | string): AxiosPromise<${FunctionName}Vo> => {
-            return request({
-                url: getEnv()+'/${moduleName}/${functionName}/'+id,
-                method: 'get',
-                headers: {
-                    'Encrypt-State':SysEnum.SYS_COMMON_STATE_CLOSE,
-                    'Encrypt-Type': EncryptTypeEnum.AES
-                },
-            });
-        },
-        insert: (params?: ${FunctionName}Bo): AxiosPromise<boolean> => {
-            return request({
-                url: getEnv()+'/${moduleName}/${functionName}',
-                method: 'post',
-                data: params,
-                headers: {
-                    'Encrypt-State':SysEnum.SYS_COMMON_STATE_CLOSE,
-                    'Encrypt-Type': EncryptTypeEnum.AES
-                },
-            });
-        },
-        delete: (id?: number | string): AxiosPromise<boolean> => {
-            return request({
-                url: getEnv()+'/${moduleName}/${functionName}/' + id,
-                method: 'delete',
-                headers: {
-                    'Encrypt-State':SysEnum.SYS_COMMON_STATE_CLOSE,
-                    'Encrypt-Type': EncryptTypeEnum.AES
-                },
-            });
-        },
-    };
+  const prefix = getEnv() + '/${moduleName}/${functionName}';
+  return {
+    <#if formLayout==3>
+    singleton: () => call<Result<${FunctionName}Vo | null>>({ url: prefix + '/singleton', method: 'get', headers }),
+    saveSingleton: (data: ${FunctionName}Bo) => call<Result<boolean>>({ url: prefix + '/singleton', method: 'put', data, headers }),
+    <#else>
+    list: (data?: object) => call<<#if formLayout==1>{ rows: ${FunctionName}Vo[]; total: number }<#else>Result<${FunctionName}Vo[]></#if>>({ url: prefix + '/list', method: 'post', data, headers }),
+    query: (id?: string | number) => call<Result<${FunctionName}Vo>>({ url: prefix + '/' + id, method: 'get', headers }),
+    insert: (data?: ${FunctionName}Bo) => call<Result<boolean>>({ url: prefix, method: 'post', data, headers }),
+    edit: (data?: ${FunctionName}Bo) => call<Result<boolean>>({ url: prefix, method: 'put', data, headers }),
+    delete: (ids?: string | number) => call<Result<boolean>>({ url: prefix + '/' + ids, method: 'delete', headers }),
+    </#if>
+  };
 }

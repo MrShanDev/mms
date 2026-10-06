@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 系统部门
+ * 部门管理
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统部门",description = "系统管理模块-系统部门")
+@Tag(name = "系统管理模块-部门管理",description = "系统管理模块-部门管理")
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -120,7 +120,7 @@ public class SysDeptController extends BaseController{
     @SaCheckPermission("system:dept:import")
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) throws IOException {
-        ExcelUtil.download(response, SysDeptExport.class, "系统部门");
+        ExcelUtil.download(response, SysDeptExport.class, "部门管理");
     }
 
     /**
@@ -147,7 +147,7 @@ public class SysDeptController extends BaseController{
     public void export(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysDeptBo bo,HttpServletResponse response) throws IOException {
         List<SysDeptVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
         List<SysDeptExport> data= MapstructUtil.convert(list,SysDeptExport.class);
-        ExcelUtil.export(response, SysDeptExport.class, "系统部门",data);
+        ExcelUtil.export(response, SysDeptExport.class, "部门管理",data);
     }
 
     /**
@@ -161,7 +161,7 @@ public class SysDeptController extends BaseController{
         List<SysDeptVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
         List<SysDeptExport> data= MapstructUtil.convert(list,SysDeptExport.class);
         PrintObject<SysDeptExport>  printObject=   new PrintObject<SysDeptExport>()
-             .setTitle("系统部门")
+             .setTitle("部门管理")
              .setData(data);
              return R.response(Boolean.TRUE,printObject);
     }

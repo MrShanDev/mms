@@ -69,15 +69,18 @@ public class SysOssServiceImpl implements SysOssService {
         if (vo != null) {
             try {
                 String base64String = "";
-                if (vo.getPlatform().equals(OssTypeEnum.local.getType()+"-1")) {
+                if ((OssTypeEnum.local.getType()+"-1").equals(vo.getPlatform())) {
                     SysOssConfigVo configVo = sysOssConfigService.selectVoByKey("local-plus");
+                    if (configVo == null) return vo;
                     String filePath = configVo.getExt1() + configVo.getPrefix() + "/" + vo.getFileName();
                     File file = new File(filePath);
                     if (!file.exists()) {
                         return vo;
                     }
-                    FileInputStream fis = new FileInputStream(file);
-                    byte[] fileContent = fis.readAllBytes();
+                    byte[] fileContent;
+                    try (FileInputStream fis = new FileInputStream(file)) {
+                        fileContent = fis.readAllBytes();
+                    }
                     // 读取图片文件 /Users/shanpengnian/mms/localFile
                     BufferedImage bufferedImage = ImageIO.read(file);
                     if(bufferedImage!=null){
@@ -91,8 +94,13 @@ public class SysOssServiceImpl implements SysOssService {
                     }
                 } else {
                     URL url = URI.create(vo.getUrl()).toURL();
-                    InputStream inputStream = url.openConnection().getInputStream();
-                    BufferedImage bufferedImage = ImageIO.read(inputStream);
+                    java.net.URLConnection connection = url.openConnection();
+                    connection.setConnectTimeout(5000);
+                    connection.setReadTimeout(5000);
+                    BufferedImage bufferedImage;
+                    try (InputStream inputStream = connection.getInputStream()) {
+                        bufferedImage = ImageIO.read(inputStream);
+                    }
                     if(bufferedImage != null){
                         // 在这里可以对图片进行处理
                         vo.setWidth(bufferedImage.getWidth() + "");
@@ -105,9 +113,7 @@ public class SysOssServiceImpl implements SysOssService {
                         // 从ByteArrayOutputStream中获取字节数据
                         byte[] imageBytes = baos.toByteArray();
                         vo.setSize(imageBytes.length + "");
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
-                        byte[] bytes = byteArrayOutputStream.toByteArray();
+                        byte[] bytes = imageBytes;
                         Base64 base64Encoder = new Base64();
                         base64String = base64Encoder.encodeToString(bytes);
                     }

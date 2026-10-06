@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 系统公告
+ * 通知公告
  * @module 系统管理模块
  * @author mmsAdmin
  * @Doc <a href='https://www.mmsadmin.com'>MMS文档</a>
  */
-@Tag(name = "系统管理模块-系统公告",description = "系统管理模块-系统公告")
+@Tag(name = "系统管理模块-通知公告",description = "系统管理模块-通知公告")
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -120,7 +120,7 @@ public class SysNoticeController extends BaseController{
     @SaCheckPermission("system:notice:import")
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) throws IOException {
-        ExcelUtil.download(response, SysNoticeExport.class, "系统公告");
+        ExcelUtil.download(response, SysNoticeExport.class, "通知公告");
     }
 
     /**
@@ -157,7 +157,7 @@ public class SysNoticeController extends BaseController{
     public void export(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysNoticeBo bo,HttpServletResponse response) throws IOException {
         List<SysNoticeVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
         List<SysNoticeExport> data= MapstructUtil.convert(list,SysNoticeExport.class);
-        ExcelUtil.export(response, SysNoticeExport.class, "系统公告",data);
+        ExcelUtil.export(response, SysNoticeExport.class, "通知公告",data);
     }
 
     /**
@@ -171,7 +171,7 @@ public class SysNoticeController extends BaseController{
         List<SysNoticeVo> list= baseService.selectListVoPage(bo, bo.getPageQuery()).getRows();
         List<SysNoticeExport> data= MapstructUtil.convert(list,SysNoticeExport.class);
         PrintObject<SysNoticeExport>  printObject=   new PrintObject<SysNoticeExport>()
-             .setTitle("系统公告")
+             .setTitle("通知公告")
              .setData(data);
              return R.response(Boolean.TRUE,printObject);
     }

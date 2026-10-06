@@ -136,15 +136,13 @@ public class SysConfigController extends BaseController{
      */
     @SaCheckRole("super_admin")
     @PostMapping("/configs")
-    public R<Boolean> configs(@Validated @RequestBody(required = false) List<SysConfigBo> bos) {
+    public R<Boolean> configs(@Validated @RequestBody List<SysConfigBo> bos) {
         return success(baseService.updateByCodes(bos));
     }
 
-    private final SmsService smsService;
-
-    @SaCheckLogin
+    @SaCheckRole("super_admin")
     @GetMapping("/sendSms/{phone}")
     public R<Object> sendSms(@PathVariable String phone) {
-        return smsService.sendSms(phone, "123456");
+        return R.fail("测试短信接口已停用，请使用验证码接口并配置短信服务");
     }
 }
