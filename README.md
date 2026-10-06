@@ -27,6 +27,12 @@
 
 🍃MMS文档: [mms](https://mmsadmin.cn/)
 
+<p align="center">
+  <a href="https://mmsadmin.cn/" target="_blank" rel="noopener noreferrer">
+    <img src="script/img/mms-plugin-ecosystem-poster.png" width="100%" alt="MMS 模块化管理系统：模块化组合、插件安装、丰富插件市场、自研插件，配套 mmsadmin.cn 技术文档站">
+  </a>
+</p>
+
 ## 页面展示
 
 当前管理端实景截图，展示登录、系统工作台、账户表单、权限管理、配置、代码生成和插件市场。每行两张，点击图片查看原图；也可右键在新窗口打开。
