@@ -12,6 +12,14 @@ import org.springframework.stereotype.Repository;
 * @author ${author}
 * @Doc ${website}
 */
+<#assign hasCreator=false hasDept=false>
+<#list fieldList as field>
+<#if field.attrName=="createdBy"><#assign hasCreator=true></#if>
+<#if field.attrName=="deptId"><#assign hasDept=true></#if>
+</#list>
+<#if formLayout!=3 && hasCreator>
+@com.sxpcwlkj.common.annotation.DataScope(table="${tableName}"<#if hasDept>, deptColumn="dept_id"</#if>)
+</#if>
 @Mapper
 @Repository
 public interface ${ClassName}Mapper extends BaseMapperPlus<${ClassName}, ${ClassName}Vo> {

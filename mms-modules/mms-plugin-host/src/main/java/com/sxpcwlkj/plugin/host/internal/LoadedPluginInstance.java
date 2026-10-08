@@ -48,7 +48,7 @@ public final class LoadedPluginInstance implements AutoCloseable {
             for (MmsPlugin p : entryPoints) {
                 try {
                     p.onUnload();
-                } catch (Exception ex) {
+                } catch (Exception | LinkageError ex) {
                     // 卸载失败不阻断关闭 ClassLoader
                 }
             }
@@ -58,11 +58,14 @@ public final class LoadedPluginInstance implements AutoCloseable {
         for (int i = unloadHooks.size() - 1; i >= 0; i--) {
             try {
                 unloadHooks.get(i).run();
-            } catch (Exception ex) {
+            } catch (Exception | LinkageError ex) {
                 // 钩子失败不阻断 ClassLoader 关闭
             }
         }
-        releasePluginSpringBeans.run();
-        classLoader.close();
+        try {
+            releasePluginSpringBeans.run();
+        } finally {
+            classLoader.close();
+        }
     }
 }

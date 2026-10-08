@@ -191,21 +191,7 @@ public class OperLogServiceImpl implements OperLogService {
 
                 // 安全获取租户ID，处理可能的类型转换
                 Object tenantIdObj = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userIdStr);
-                Long tenantId = 0L;
-                if (tenantIdObj != null) {
-                    if (tenantIdObj instanceof Long) {
-                        tenantId = (Long) tenantIdObj;
-                    } else if (tenantIdObj instanceof String) {
-                        try {
-                            tenantId = Long.parseLong((String) tenantIdObj);
-                        } catch (NumberFormatException ex) {
-                            log.warn("租户ID格式错误: {}", tenantIdObj);
-                        }
-                    } else if (tenantIdObj instanceof Number) {
-                        tenantId = ((Number) tenantIdObj).longValue();
-                    }
-                }
-                operLog.setTenantId(tenantId);
+                operLog.setTenantId(tenantIdObj == null ? "000000" : String.valueOf(tenantIdObj));
 
                 try {
                     List<String> roleList = StpUtil.getRoleList();
@@ -217,12 +203,12 @@ public class OperLogServiceImpl implements OperLogService {
                 // 未登录时设置为null
                 operLog.setUserId(null);
                 operLog.setUserName("匿名");
-                operLog.setTenantId(0L);
+                operLog.setTenantId("000000");
             }
         } catch (Exception e) {
             operLog.setUserId(null);
             operLog.setUserName("匿名");
-            operLog.setTenantId(0L);
+            operLog.setTenantId("000000");
         }
 
         // 获取请求信息

@@ -17,6 +17,12 @@ public class SystemRuntimeInfoVo implements Serializable {
     private Mem jvmMemory;
     private List<Disk> disks;
     private Db db;
+    private Redis redis;
+
+    @Data
+    public static class Redis implements Serializable {
+        private boolean connected;
+    }
     private DbPool dbPool;
     private List<SlowSql> slowSqlRecent;
 

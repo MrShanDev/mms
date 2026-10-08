@@ -40,6 +40,7 @@ class GeneratorLayoutTemplateTest {
                     }
                 }
             }
+            if (layout != 3) check(rendered.get("java/mapper/Mapper.java.ftl").contains("@com.sxpcwlkj.common.annotation.DataScope"), "Generated creator-owned table lacks data scope");
             String page = rendered.get("vue/index.vue.ftl");
             String controller = rendered.get("java/controller/Controller.java.ftl");
             String api = rendered.get("vue/api.ts.ftl");
@@ -62,6 +63,8 @@ class GeneratorLayoutTemplateTest {
                 check(!controller.contains("@PostMapping(\"/list\")"), "Singleton has list endpoint");
                 check(api.contains("saveSingleton") && !api.contains("/list"), "Singleton API mismatch");
                 check(!rendered.get("sql/menu.sql.ftl").contains("demo:sample:list"), "Singleton registers list permission");
+                check(rendered.get("sql/singleton.sql.ftl").contains("UNIQUE KEY uk_singleton_tenant"), "Singleton schema invariant missing");
+                check(rendered.get("java/service/impl/ServiceImpl.java.ftl").contains("SingletonGuard.execute"), "Singleton concurrent guard missing");
             }
             System.out.println("Layout " + layout + ": all templates rendered and contracts verified");
         }
@@ -104,7 +107,9 @@ class GeneratorLayoutTemplateTest {
         fields.add(field("parentId", "上级", "String", false, false));
         fields.add(field("sort", "排序", "Integer", false, false));
         fields.add(field("status", "状态", "Integer", false, false));
-        data.put("fieldList", fields); data.put("formList", fields); data.put("listList", fields); data.put("gridList", fields);
+        List<Map<String,Object>> allFields = new ArrayList<>(fields);
+        allFields.add(field("createdBy", "创建人", "Long", false, false));
+        data.put("fieldList", allFields); data.put("formList", fields); data.put("listList", fields); data.put("gridList", fields);
         data.put("queryList", List.of(fields.get(1))); data.put("importList", List.of());
         data.put("fastList", List.of()); data.put("baseClass", new HashMap<>());
         return data;

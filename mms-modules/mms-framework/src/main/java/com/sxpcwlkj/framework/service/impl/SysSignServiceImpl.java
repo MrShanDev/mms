@@ -43,6 +43,7 @@ public class SysSignServiceImpl implements SysSignService {
         if(StringUtil.isBlank(appId)){
             throw  new MmsException("客户端请求头缺少["+Constants.APPID+"]参数。");
         }
+        if (appId.length() != 16 || !appId.matches("[A-Za-z0-9_-]{16}")) throw new MmsException("App-Id必须为16位字母、数字或下划线/连字符");
         // 持久化
         SysSign sysSign = initSign(appId, timeout);
         // 设置Cookie
@@ -57,7 +58,7 @@ public class SysSignServiceImpl implements SysSignService {
             sysSign.setId(IdUtil.getSnowflakeNextId());
             sysSign.setAppId(appid);
             sysSign.setSecretKey(Objects.requireNonNull(SignUtil.getAesKey()).getSecretKey());
-            sysSign.setTimeOut(DateUtil.offset(new Date(), DateField.SECOND, timeOut));
+            sysSign.setTimeOut(new Date(System.currentTimeMillis() + (long) timeOut));
             sysSign.setUserId(LoginObject.getLoginId());
             sysSign.setCreatedBy(LoginObject.isLogin()?Long.parseLong(Objects.requireNonNull(LoginObject.getLoginId())):0);
             sysSign.setCreatedTime(new Date());
@@ -66,6 +67,11 @@ public class SysSignServiceImpl implements SysSignService {
                 RedisUtil.setCacheObject(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), sysSign);
                 RedisUtil.expire(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), Duration.ofSeconds(10));
             }
+        }
+        if (sysSign != null) {
+            sysSign.setTimeOut(new Date(System.currentTimeMillis() + (long) timeOut));
+            if (sysSignMapper.renewSign(sysSign) != 1) throw new MmsException("签名会话续期失败");
+            RedisUtil.setCacheObject(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), sysSign, Duration.ofSeconds(10));
         }
         return sysSign;
     }
@@ -76,7 +82,7 @@ public class SysSignServiceImpl implements SysSignService {
         sysSign.setAppId(appid);
         sysSign.setPublicKey(publicKey);
         sysSign.setPrivateKey(privateKey);
-        sysSign.setTimeOut(DateUtil.offset(new Date(), DateField.SECOND, timeOut));
+        sysSign.setTimeOut(new Date(System.currentTimeMillis() + (long) timeOut));
         sysSign.setUserId(LoginObject.getLoginId());
         Boolean flag = sysSignMapper.insert(sysSign)>0;
         if(flag){
@@ -90,16 +96,12 @@ public class SysSignServiceImpl implements SysSignService {
     public SysSign getSign() {
         SysSign sysSign = RedisUtil.getCacheObject(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId());
         if(sysSign==null){
-            sysSign = sysSignMapper.selectOne(new LambdaQueryWrapper<SysSign>().eq(SysSign::getUserId,LoginObject.getLoginId()).last("LIMIT 1"));
+            sysSign = sysSignMapper.selectOne(new LambdaQueryWrapper<SysSign>().eq(SysSign::getUserId,LoginObject.getLoginId()).orderByDesc(SysSign::getTimeOut).last("LIMIT 1"));
             RedisUtil.setCacheObject(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), sysSign);
             RedisUtil.expire(RedisConstant.ENCRYPTION_APP_ID+LoginObject.getLoginId(), Duration.ofSeconds(10));
         }
-        if(sysSign!=null){
-            if(sysSign.getTimeOut().getTime()>new Date().getTime()){
-                return sysSign;
-            }
-        }
-        return sysSign;
+        if (sysSign != null && sysSign.getAppId() != null && sysSign.getAppId().length() == 16 && sysSign.getTimeOut() != null && sysSign.getTimeOut().after(new Date())) return sysSign;
+        return null;
     }
 
     @Override

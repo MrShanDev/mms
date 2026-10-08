@@ -34,7 +34,7 @@ public class SysRoleController extends BaseController {
     /**
      * 获取列表
      */
-    @MssSafety
+    @MssSafety(isRepetition = false)
     @SaCheckPermission("system:role:list")
     @PostMapping("/list")
     public R<PageResult<SysRoleVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysRoleBo bo) {

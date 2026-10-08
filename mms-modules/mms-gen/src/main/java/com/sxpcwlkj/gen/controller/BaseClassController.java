@@ -17,6 +17,7 @@ import java.util.List;
  * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
+@com.sxpcwlkj.common.annotation.PlatformAdmin
 @RestController
 @RequestMapping("gen/baseClass")
 @AllArgsConstructor

@@ -12,11 +12,11 @@ import lombok.Data;
 @Data
 public class ResetPwdBo {
    @NotBlank(message = "旧密码不能为空")
-   @Size(min = 4, max = 16, message = "旧密码长度在{min}到{max}个字符")
+   @Size(min = 6, max = 128, message = "旧密码长度在{min}到{max}个字符")
    private String oldPassword;
 
    @NotBlank(message = "新密码不能为空")
-   @Size(min = 4, max = 16, message = "新密码长度在{min}到{max}个字符")
+   @Size(min = 8, max = 128, message = "新密码长度在{min}到{max}个字符")
    private String password;
 
 

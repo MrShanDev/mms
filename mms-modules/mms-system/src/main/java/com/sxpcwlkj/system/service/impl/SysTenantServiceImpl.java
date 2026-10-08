@@ -24,7 +24,7 @@ public class SysTenantServiceImpl implements SysTenantService {
 
     @Override
     public List<SysTenantVo> selectOpenList() {
-        List<SysTenant> sysTenants = sysTenantMapper.selectList(new QueryWrapper<SysTenant>().eq("status", 0));
+        List<SysTenant> sysTenants = sysTenantMapper.selectList(new QueryWrapper<SysTenant>().eq("status", 1));
         return BeanCopyUtil.convert(sysTenants, SysTenantVo.class);
     }
 

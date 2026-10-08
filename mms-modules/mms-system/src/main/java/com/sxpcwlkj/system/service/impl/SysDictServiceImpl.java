@@ -81,6 +81,7 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updateByIdBase(SysDictBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         int row;
         SysDict convert = MapstructUtil.convert(bo, SysDict.class);
 
@@ -102,6 +103,7 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean insert(SysDictBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         SysDict convert = MapstructUtil.convert(bo, SysDict.class);
         int row = baseMapper.insert(convert);
         // 字典值维护
@@ -122,6 +124,7 @@ public class SysDictServiceImpl implements SysDictService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteById(Long id) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         SysDict bo = baseMapper.selectById(id);
         if (bo == null) return false;
         sysDictDataMapper.delete(new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getFieldName, bo.getFieldName()));

@@ -43,7 +43,7 @@ public class BaseEntity extends PageQuery {
      * 数据状态（0=禁用，1=启用）
      */
     @TableField(fill = FieldFill.INSERT)
-    private Integer status = 0;
+    private Integer status;
 
     /**
      * 显示排序（升序排列）

@@ -28,6 +28,7 @@ import java.util.List;
  * @Doc mmsadmin.cn
  */
 @Slf4j
+@com.sxpcwlkj.common.annotation.PlatformAdmin
 @RestController
 @RequestMapping("gen/dataSource")
 @AllArgsConstructor

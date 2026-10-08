@@ -95,6 +95,7 @@ public class SysUserVo extends BaseEntityVo {
     /**
      * 密码
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
     /**
      * 密码强度
@@ -121,6 +122,7 @@ public class SysUserVo extends BaseEntityVo {
     /**
      * 对称性秘钥
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String aesKey;
 
     /**

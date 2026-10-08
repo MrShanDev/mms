@@ -35,7 +35,7 @@ public class SysOperLog implements Serializable {
     /**
      * 租户ID
      */
-    private Long tenantId;
+    private String tenantId;
 
     /**
      * 模块名称

@@ -52,7 +52,9 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
             if (stmt.length() > MAX_STATEMENT_LEN) {
                 throw new IllegalArgumentException("单条语句过长（>" + MAX_STATEMENT_LEN + "）");
             }
-            unitCount += BundledInstallSqlSupport.expandToSingleRowInserts(stmt).size();
+            List<String> units = BundledInstallSqlSupport.expandToSingleRowInserts(stmt);
+            for (String unit : units) BundledPluginInstallSqlGuard.assertStatementAllowed(unit);
+            unitCount += units.size();
         }
         if (unitCount > MAX_STATEMENTS) {
             throw new IllegalArgumentException("install.sql 展开后的插入条数超过上限 " + MAX_STATEMENTS);
@@ -206,6 +208,57 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
         return false;
     }
 
+    /** MySQL DDL 自动提交：失败/中断保留记录，禁止静默重放。业务表卸载时保留。 */
+    @Override
+    public synchronized List<String> executeBundledSchema(String pluginId, String version, String sql) {
+        List<String> statements = BundledPluginSqlSplitter.splitStatements(sql);
+        if (statements.size() > MAX_STATEMENTS) throw new IllegalArgumentException("SQL 语句过多");
+        for (String statement : statements) {
+            if (statement.length() > MAX_STATEMENT_LEN) throw new IllegalArgumentException("SQL 语句过长");
+            BundledPluginSchemaSqlGuard.assertStatementAllowed(statement.trim());
+        }
+        String checksum;
+        try {
+            checksum = java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(sql.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException impossible) { throw new IllegalStateException(impossible); }
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS sys_plugin_schema_history ("
+                + "plugin_id VARCHAR(191) NOT NULL, plugin_version VARCHAR(128) NOT NULL, "
+                + "checksum CHAR(64) NOT NULL, state VARCHAR(16) NOT NULL, "
+                + "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
+                + "PRIMARY KEY(plugin_id, plugin_version))");
+        var records = jdbcTemplate.queryForList(
+                "SELECT checksum, state FROM sys_plugin_schema_history WHERE plugin_id=? AND plugin_version=?",
+                pluginId, version);
+        if (!records.isEmpty()) {
+            var record = records.get(0);
+            if (!checksum.equals(record.get("checksum"))) throw new IllegalStateException("同版本 schema.sql 校验和变化，必须发布新版本");
+            if ("APPLIED".equals(record.get("state"))) return List.of("[SKIP] 该版本数据库脚本已执行");
+            throw new IllegalStateException("数据库迁移失败或中断，需核对实际结构并恢复执行记录，禁止自动重放");
+        }
+        // 同一插件的新版本可能只升级 Java/UI，完全相同的 DDL 不再执行。
+        Integer previouslyApplied = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM sys_plugin_schema_history WHERE plugin_id=? AND checksum=? AND state='APPLIED'",
+                Integer.class, pluginId, checksum);
+        if (previouslyApplied != null && previouslyApplied > 0) {
+            jdbcTemplate.update("INSERT INTO sys_plugin_schema_history(plugin_id,plugin_version,checksum,state) VALUES (?,?,?,?)",
+                    pluginId, version, checksum, "APPLIED");
+            return List.of("[SKIP] 相同数据库脚本已由该插件其他版本执行");
+        }
+        jdbcTemplate.update("INSERT INTO sys_plugin_schema_history(plugin_id,plugin_version,checksum,state) VALUES (?,?,?,?)",
+                pluginId, version, checksum, "RUNNING");
+        try {
+            List<String> result = executeBundledSchema(sql);
+            jdbcTemplate.update("UPDATE sys_plugin_schema_history SET state='APPLIED' WHERE plugin_id=? AND plugin_version=?", pluginId, version);
+            return result;
+        } catch (RuntimeException failure) {
+            try {
+                jdbcTemplate.update("UPDATE sys_plugin_schema_history SET state='FAILED' WHERE plugin_id=? AND plugin_version=?", pluginId, version);
+            } catch (RuntimeException recordFailure) { failure.addSuppressed(recordFailure); }
+            throw failure;
+        }
+    }
+
     @Override
     public List<String> executeBundledSchema(String sql) {
         List<String> lines = new ArrayList<>();
@@ -216,6 +269,10 @@ public class BundledPluginSchemaExecutorImpl implements BundledPluginSchemaExecu
         }
         if (stmts.size() > MAX_STATEMENTS) {
             throw new IllegalArgumentException("语句条数超过上限 " + MAX_STATEMENTS);
+        }
+        for (String raw : stmts) {
+            if (raw.length() > MAX_STATEMENT_LEN) throw new IllegalArgumentException("单条语句过长");
+            BundledPluginSchemaSqlGuard.assertStatementAllowed(raw.trim());
         }
         int n = 0;
         for (String raw : stmts) {

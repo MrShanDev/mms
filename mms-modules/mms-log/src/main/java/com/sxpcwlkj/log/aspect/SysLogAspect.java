@@ -151,21 +151,7 @@ public class SysLogAspect {
 
                     // 安全获取租户ID，处理可能的类型转换
                     Object tenantIdObj = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + userIdStr);
-                    Long tenantId = 0L;
-                    if (tenantIdObj != null) {
-                        if (tenantIdObj instanceof Long) {
-                            tenantId = (Long) tenantIdObj;
-                        } else if (tenantIdObj instanceof String) {
-                            try {
-                                tenantId = Long.parseLong((String) tenantIdObj);
-                            } catch (NumberFormatException ex) {
-                                log.warn("租户ID格式错误: {}", tenantIdObj);
-                            }
-                        } else if (tenantIdObj instanceof Number) {
-                            tenantId = ((Number) tenantIdObj).longValue();
-                        }
-                    }
-                    sysOperLog.setTenantId(tenantId);
+                    sysOperLog.setTenantId(tenantIdObj == null ? "000000" : String.valueOf(tenantIdObj));
 
                     // 获取角色信息
                     try {
@@ -179,13 +165,13 @@ public class SysLogAspect {
                     // 未登录时设置为null
                     sysOperLog.setUserId(null);
                     sysOperLog.setUserName("匿名");
-                    sysOperLog.setTenantId(0L);
+                    sysOperLog.setTenantId("000000");
                 }
             } catch (Exception e) {
                 log.warn("获取用户信息失败", e);
                 sysOperLog.setUserId(null);
                 sysOperLog.setUserName("匿名");
-                sysOperLog.setTenantId(0L);
+                sysOperLog.setTenantId("000000");
             }
 
             // 获取IP和地理位置
@@ -270,7 +256,7 @@ public class SysLogAspect {
             // 保存响应数据
             Boolean saveResponseData = SAVE_RESPONSE_DATA.get();
             if (saveResponseData != null && saveResponseData && result != null) {
-                String jsonResult = JSON.toJSONString(result);
+                String jsonResult = com.sxpcwlkj.log.utils.AuditSanitizer.toJson(result);
                 sysOperLog.setJsonResult(StrUtil.sub(jsonResult, 0, 2000)); // 限制长度
             }
 
@@ -324,7 +310,7 @@ public class SysLogAspect {
                 params = filterSensitiveData(params, excludeParams);
             }
 
-            return JSONUtil.toJsonStr(params);
+            return com.sxpcwlkj.log.utils.AuditSanitizer.toJson(params, excludeParams);
         } catch (Exception e) {
             log.warn("获取请求参数失败", e);
             return "";
@@ -368,7 +354,7 @@ public class SysLogAspect {
                     filtered.put(key, filterSensitiveData(objMap, excludeParams));
                 } catch (Exception e) {
                     // 转换失败，直接使用原值
-                    filtered.put(key, value);
+                    filtered.put(key, "[不可序列化]");
                 }
             }
         }

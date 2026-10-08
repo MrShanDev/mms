@@ -22,7 +22,7 @@ import java.util.List;
 public interface SysRoleFunctionMapper extends BaseMapper<SysRoleFunction> {
 
     @InterceptorIgnore(tenantLine = "true")
-    @Select("SELECT f.* FROM  `sys_function` f LEFT JOIN `sys_role_function` o ON f.`id`=o.`function_id` WHERE o.`role_id`=#{roldId}   ORDER BY f.`sort` ")
+    @Select("SELECT f.* FROM  `sys_function` f LEFT JOIN `sys_role_function` o ON f.`id`=o.`function_id` AND f.tenant_id=o.tenant_id WHERE o.`role_id`=#{roldId} AND o.status=1   ORDER BY f.`sort` ")
     List<SysFunction> selectByRoleId(@Param("roldId") String roldId);
 
     /** 插件卸载：删除角色与指定功能 id 的绑定（本租户）。 */

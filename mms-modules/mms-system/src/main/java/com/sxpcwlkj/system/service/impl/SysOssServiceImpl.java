@@ -41,7 +41,9 @@ import java.util.List;
 public class SysOssServiceImpl implements SysOssService {
 
     private final SysOssMapper baseMapper;
-    private final SysOssConfigService sysOssConfigService;
+    private final org.dromara.x.file.storage.core.FileStorageService fileStorageService;
+    private final SystemFileRecorder recorder;
+
 
     @Override
     public TableDataInfo<SysOssVo> selectPageList(SysOssBo bo, PageQuery pageQuery) {
@@ -65,68 +67,8 @@ public class SysOssServiceImpl implements SysOssService {
         return toBase64(vo);
     }
 
-    private SysOssVo toBase64(SysOssVo vo){
-        if (vo != null) {
-            try {
-                String base64String = "";
-                if ((OssTypeEnum.local.getType()+"-1").equals(vo.getPlatform())) {
-                    SysOssConfigVo configVo = sysOssConfigService.selectVoByKey("local-plus");
-                    if (configVo == null) return vo;
-                    String filePath = configVo.getExt1() + configVo.getPrefix() + "/" + vo.getFileName();
-                    File file = new File(filePath);
-                    if (!file.exists()) {
-                        return vo;
-                    }
-                    byte[] fileContent;
-                    try (FileInputStream fis = new FileInputStream(file)) {
-                        fileContent = fis.readAllBytes();
-                    }
-                    // 读取图片文件 /Users/shanpengnian/mms/localFile
-                    BufferedImage bufferedImage = ImageIO.read(file);
-                    if(bufferedImage!=null){
-                        // 在这里可以对图片进行处理
-                        vo.setWidth(bufferedImage.getWidth() + "");
-                        vo.setHeight(bufferedImage.getHeight() + "");
-                        vo.setSize(fileContent.length + "");
-                        // 将图片转换为Base64编码的字符串
-                        Base64 base64Encoder = new Base64();
-                        base64String = base64Encoder.encodeToString(fileContent);
-                    }
-                } else {
-                    URL url = URI.create(vo.getUrl()).toURL();
-                    java.net.URLConnection connection = url.openConnection();
-                    connection.setConnectTimeout(5000);
-                    connection.setReadTimeout(5000);
-                    BufferedImage bufferedImage;
-                    try (InputStream inputStream = connection.getInputStream()) {
-                        bufferedImage = ImageIO.read(inputStream);
-                    }
-                    if(bufferedImage != null){
-                        // 在这里可以对图片进行处理
-                        vo.setWidth(bufferedImage.getWidth() + "");
-                        vo.setHeight(bufferedImage.getHeight() + "");
-                        // 创建一个ByteArrayOutputStream来捕获图片数据
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        // 使用ImageIO将BufferedImage写入到ByteArrayOutputStream中
-                        ImageIO.write(bufferedImage, "png", baos);
-
-                        // 从ByteArrayOutputStream中获取字节数据
-                        byte[] imageBytes = baos.toByteArray();
-                        vo.setSize(imageBytes.length + "");
-                        byte[] bytes = imageBytes;
-                        Base64 base64Encoder = new Base64();
-                        base64String = base64Encoder.encodeToString(bytes);
-                    }
-                }
-                if(!base64String.isEmpty()){
-                    vo.setBase64("data:image/png;base64,"+base64String);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                vo.setBase64("");
-            }
-
-        }
+    private SysOssVo toBase64(SysOssVo vo) {
+        // Preview uses the object URL in the browser; never fetch client-editable URLs on the server.
         return vo;
     }
 
@@ -146,6 +88,17 @@ public class SysOssServiceImpl implements SysOssService {
     @Override
     public Boolean deleteById(Serializable ids) {
         String[] array = DataUtil.getCatStr(ids.toString(), ",");
-        return baseMapper.deleteByIds(new ArrayList<>(List.of(array)))>0;
+        List<SysOss> records = new ArrayList<>();
+        for (String id : array) {
+            SysOss record = baseMapper.selectById(id);
+            if (record == null) throw new com.sxpcwlkj.common.exception.MmsException("文件不存在或不属于当前租户");
+            records.add(record);
+        }
+        for (SysOss record : records) {
+            var info = recorder.getByUrl(record.getUrl());
+            if (info == null) throw new com.sxpcwlkj.common.exception.MmsException("历史文件缺少元数据，请先核对并迁移记录");
+            if (!fileStorageService.delete(info)) throw new com.sxpcwlkj.common.exception.MmsException("文件删除失败");
+        }
+        return true;
     }
 }

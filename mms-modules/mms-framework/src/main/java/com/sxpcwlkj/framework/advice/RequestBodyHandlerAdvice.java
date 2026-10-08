@@ -66,14 +66,8 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
     public boolean supports(MethodParameter methodParameter,
                             @NotNull Type targetType,
                             @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
-        if (AnnotatedElementUtils.hasAnnotation(methodParameter.getContainingClass(), MssSafety.class) || methodParameter.hasMethodAnnotation(MssSafety.class)) {
-            MssSafety apiSecurity = methodParameter.getMethodAnnotation(MssSafety.class);
-            if (apiSecurity == null) {
-                return false;
-            }
-            return apiSecurity.decryptRequest() || apiSecurity.isRepetition();
-        }
-        return false;
+        MssSafety security = getApiSecurity(methodParameter);
+        return security != null && (security.decryptRequest() || security.isRepetition());
     }
 
     /**
@@ -99,22 +93,16 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             throw new ParamsException("请求参数body不能为空");
         }
         //记录nonce 防止重复提交
-        String nonce = parameter.getParameterName()+":"+parameter.getExecutable().getName();
+        String nonce = parameter.getContainingClass().getName()+":"+parameter.getExecutable().getName();
         // 加密传参格式固定为ApiSecurityParam
         JSONObject bodyJson = JsonUtil.parseObject(body, JSONObject.class);
-        assert bodyJson != null;
+        if (bodyJson == null) throw new ParamsException("请求参数格式无效");
         ApiSecurityParam apiSecurityParam = JSON.parseObject(bodyJson.toJSONString(), ApiSecurityParam.class);
         // 加密传参ApiSecurityParam可以接收签名参数，这里把签名参数放到header里面，方便在后面afterBodyRead中验签
         HttpHeaders headers = inputMessage.getHeaders();
-        //防重幂等
-        if(apiSecurity.isRepetition()){
-            boolean nonceExists = Boolean.TRUE.equals(stringRedisTemplate.hasKey(NONCE_KEY + nonce));
-            if (nonceExists) {
-                //请求重复
-                throw new MmsException("请求过快，请稍后再试！");
-            }
-            stringRedisTemplate.opsForValue().set(NONCE_KEY + nonce, "1", encryptionProperties.getRepeatedTime(), TimeUnit.MILLISECONDS);
-        }
+        String accountScope = com.sxpcwlkj.authority.LoginObject.getLoginId();
+        if (accountScope == null) accountScope = headers.getFirst(APPID);
+        nonce = String.valueOf(accountScope) + ":" + nonce;
         //解密
         if(apiSecurity.decryptRequest()){
             String timestamp = apiSecurityParam.getTimestamp();
@@ -143,11 +131,21 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             } else {
                 throw new MmsException("加密方式不匹配");
             }
+            rejectDuplicate(apiSecurity, nonce, apiSecurityParam.getData());
             // 使用解密后的数据构造新的读取流, Spring MVC后续读取解析转换为接口
             JSONObject dataJson = JsonUtil.parseObject(apiSecurityParam.getData(), JSONObject.class);
             return new MssHttpInputMessage(headers, new ByteArrayInputStream(JSON.toJSONString(dataJson).getBytes()));
         }
+        rejectDuplicate(apiSecurity, nonce, bodyJson.toJSONString());
         return new MssHttpInputMessage(headers, new ByteArrayInputStream(bodyJson.toString().getBytes()));
+    }
+
+    private void rejectDuplicate(MssSafety security, String scope, String data) {
+        if (!security.isRepetition()) return;
+        String fingerprint = cn.hutool.crypto.digest.DigestUtil.sha256Hex(data == null ? "" : data);
+        Boolean accepted = stringRedisTemplate.opsForValue().setIfAbsent(NONCE_KEY + scope + ":" + fingerprint,
+                "1", Math.max(1,encryptionProperties.getRepeatedTime()), TimeUnit.MILLISECONDS);
+        if (!Boolean.TRUE.equals(accepted)) throw new MmsException("请求过快，请稍后再试！");
     }
 
     /**
@@ -183,7 +181,7 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
                                   @NotNull MethodParameter parameter,
                                   @NotNull Type targetType,
                                   @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
-        return inputMessage;
+        return body;
     }
 
 
@@ -206,7 +204,7 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
             // 判断timestamp时间戳与当前时间是否超过签名有效时长（过期时间根据业务情况进行配置）,如果超过了就提示签名过期
             long now = System.currentTimeMillis();
             log.info("当前时间戳：{}", now - time);
-            if (now - time > encryptionProperties.getValidTime()) {
+            if (Math.abs(now - time) > encryptionProperties.getValidTime()) {
                 throw new MmsException("签名已过期");
             }
         } catch (Exception e) {
@@ -230,7 +228,8 @@ public class RequestBodyHandlerAdvice implements RequestBodyAdvice {
      * @return 接口注解
      */
     MssSafety getApiSecurity(MethodParameter methodParameter) {
-        return methodParameter.getMethodAnnotation(MssSafety.class);
+        MssSafety security = methodParameter.getMethodAnnotation(MssSafety.class);
+        return security != null ? security : AnnotatedElementUtils.findMergedAnnotation(methodParameter.getContainingClass(), MssSafety.class);
     }
 
 }

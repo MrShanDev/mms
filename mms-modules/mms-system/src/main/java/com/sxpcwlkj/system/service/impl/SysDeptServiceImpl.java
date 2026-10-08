@@ -113,7 +113,7 @@ public class SysDeptServiceImpl extends BaseServiceImpl<SysDept, SysDeptVo,SysDe
             if (baseMapper.selectCount(new LambdaQueryWrapper<SysDept>().eq(SysDept::getParentId, id)) > 0) {
                 throw new MmsException("请先处理下级部门");
             }
-            if (sysUserMapper.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getDeptId, id)) > 0) {
+            if (sysUserMapper.countDepartmentReferences(id) > 0) {
                 throw new MmsException("部门仍有关联用户，不能删除");
             }
         }

@@ -1,7 +1,7 @@
 package com.sxpcwlkj.framework.config;
 
 import com.fasterxml.jackson.databind.introspect.Annotated;
-import com.fasterxml.jackson.databind.introspect.NopAnnotationIntrospector;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.sxpcwlkj.common.annotation.Dict;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @author mmsAdmin
  */
 @Component
-public class DictSensitiveAnnotationIntrospector extends NopAnnotationIntrospector {
+public class DictSensitiveAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
     private static final long serialVersionUID = 1L;
 
@@ -21,6 +21,6 @@ public class DictSensitiveAnnotationIntrospector extends NopAnnotationIntrospect
         if (dict != null) {
             return DictSerializer.class;
         }
-        return null;
+        return super.findSerializer(am);
     }
 }

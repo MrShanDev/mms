@@ -59,7 +59,8 @@ public class AuthController extends BaseController {
     @MmsLog(
         module = "系统登录",
         operType = OperationType.LOGIN,
-        description = "用户登录系统"
+        description = "用户登录系统",
+        saveResponseData = false
     )
     @Operation(summary = "登录方法", description = "登录方法,账号、密码、验证码验证登录")
     @SaIgnore
@@ -70,13 +71,14 @@ public class AuthController extends BaseController {
         String token = loginService.login(request, loginBodyBo);
         ajax.put(Constants.TOKEN, token);
         SysUserVo sysUser = sysUserService.getUserRoleAnfFunctionInfo(LoginObject.getLoginId());
-        RedisUtil.setCacheObject(RedisConstant.ADMIN_TENANT_KEY + sysUser.getUserId(), sysUser.getTenantId(), Duration.ofHours(24));
-        RedisUtil.setCacheObject(RedisConstant.ADMIN_KEY + sysUser.getUserId(), sysUser, Duration.ofHours(24));
-        RedisUtil.setCacheObject(RedisConstant.ADMIN_NAME + sysUser.getUserId(), sysUser.getUserName(), Duration.ofHours(24));
+        RedisUtil.setCacheObject(RedisConstant.ADMIN_TENANT_KEY + sysUser.getUserId(), sysUser.getTenantId(), Duration.ofSeconds(cn.dev33.satoken.SaManager.getConfig().getTimeout() > 0 ? cn.dev33.satoken.SaManager.getConfig().getTimeout() : 86400));
+        RedisUtil.setCacheObject(RedisConstant.ADMIN_KEY + sysUser.getUserId(), sysUser, Duration.ofSeconds(cn.dev33.satoken.SaManager.getConfig().getTimeout() > 0 ? cn.dev33.satoken.SaManager.getConfig().getTimeout() : 86400));
+        RedisUtil.setCacheObject(RedisConstant.ADMIN_NAME + sysUser.getUserId(), sysUser.getUserName(), Duration.ofSeconds(cn.dev33.satoken.SaManager.getConfig().getTimeout() > 0 ? cn.dev33.satoken.SaManager.getConfig().getTimeout() : 86400));
         ajax.put(Constants.USERINFO, sysUserService.getUserInfo(sysUser));
         if (LoginObject.isLogin()) {
             //给浏览器端设置一个 Cookie 的 clientKey值 3天
-            sysSignService.loginSetCookie(request, response, 1000 * 60 * 60 * 24 * 3);
+            long seconds = cn.dev33.satoken.SaManager.getConfig().getTimeout();
+            sysSignService.loginSetCookie(request, response, (int)Math.min(Integer.MAX_VALUE, (seconds > 0 ? seconds : 86400) * 1000L));
         }
         return R.success(ajax);
     }

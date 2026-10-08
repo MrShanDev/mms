@@ -47,4 +47,6 @@ public class SysOss extends BaseEntity {
      * 存储平台
      */
     private String platform;
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String fileInfoJson;
 }

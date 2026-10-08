@@ -94,14 +94,6 @@ public class PluginWebAssetsController {
                 candidateVersions.add(m.version().trim());
             }
         }
-        pluginLifecycleManager.listDiskSlots().stream()
-                .filter(s -> pid.equals(s.pluginId()) && s.libHasJars())
-                .sorted(Comparator.comparing(DiskPluginSlot::version, String.CASE_INSENSITIVE_ORDER).reversed())
-                .map(DiskPluginSlot::version)
-                .filter(v -> v != null && !v.isBlank())
-                .map(String::trim)
-                .forEach(candidateVersions::add);
-
         String idSeg = PluginInstallationLayout.safeSegment(pid);
         Path rel = normalizeRelativePath(resourcePath);
         if (rel == null) {

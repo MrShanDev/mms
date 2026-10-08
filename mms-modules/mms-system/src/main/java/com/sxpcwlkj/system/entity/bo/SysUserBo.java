@@ -107,7 +107,7 @@ public class SysUserBo extends BaseEntity {
      * 密码
      */
     @NotBlank(message = "密码不能为空", groups = {ValidatedGroupConfig.insert.class})
-    @Size(min = 6, max = 32, message = "密码长度在{min}-{max}位之间", groups = {ValidatedGroupConfig.insert.class})
+    @Size(min = 8, max = 128, message = "密码长度在{min}-{max}位之间", groups = {ValidatedGroupConfig.insert.class})
     private String password;
 
     /**

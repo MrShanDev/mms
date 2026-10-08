@@ -24,7 +24,7 @@ public class SystemRuntimeSseHub {
 
     public SseEmitter register(String token) {
         // token 无效直接拒绝
-        if (LoginObject.getLoginIdByToken(token) == null) {
+        if (!authorized(token)) {
             throw new MmsException(ErrorCodeEnum.USER_NOT_LOGIN.getValue(), ErrorCodeEnum.USER_NOT_LOGIN.getKey());
         }
 
@@ -43,7 +43,8 @@ public class SystemRuntimeSseHub {
     public void broadcast(Object payload) {
         for (Client c : clients) {
             // token 过期则移除
-            if (LoginObject.getLoginIdByToken(c.token) == null) {
+            if (!authorized(c.token)) {
+                c.emitter.complete();
                 clients.remove(c);
                 continue;
             }
@@ -55,6 +56,12 @@ public class SystemRuntimeSseHub {
                 clients.remove(c);
             }
         }
+    }
+
+    private boolean authorized(String token) {
+        if (LoginObject.getLoginIdByToken(token) == null) return false;
+        var user = LoginObject.getLoginObjectByToken(com.sxpcwlkj.system.entity.vo.SysUserVo.class,token);
+        return user != null && user.getButCodes()!=null && java.util.Arrays.asList(user.getButCodes()).contains("system:monitor:query");
     }
 
     @Data

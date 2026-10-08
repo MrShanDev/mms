@@ -50,4 +50,7 @@ public class SysRoleBo extends BaseEntity {
      */
     @NotNull(message = "权限节点不能为空")
     private String[] defChecked;
+    /** 1 all, 2 custom departments, 3 own department, 4 subtree, 5 self. */
+    private String dataScope;
+    private String dataScopeDeptIds;
 }

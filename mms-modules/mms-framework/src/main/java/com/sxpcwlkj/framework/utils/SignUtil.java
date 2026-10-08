@@ -441,13 +441,12 @@ public class SignUtil {
         Arrays.sort(sortedKeys);
         StringBuilder s2 = new StringBuilder();
         for (String key : sortedKeys) {
-            log.error(params.get(key).toString());
             if (DataUtil.isObjectEmpty(params.get(key))) {
                 continue;
             }
             s2.append(key).append("=").append(params.get(key)).append("&");
         }
-        s2.deleteCharAt(s2.length() - 1);
+        if (!s2.isEmpty()) s2.deleteCharAt(s2.length() - 1);
         return s2.toString();
     }
 

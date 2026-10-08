@@ -21,6 +21,7 @@ import java.util.Date;
  * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
+@com.alibaba.excel.annotation.ExcelIgnoreUnannotated
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AutoMapper(target = SysUserVo.class)

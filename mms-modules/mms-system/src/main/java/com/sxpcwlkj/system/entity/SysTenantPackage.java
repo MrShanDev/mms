@@ -15,10 +15,9 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
 
 @TableName("sys_tenant_package")
-public class SysTenantPackage extends BaseEntity {
+public class SysTenantPackage {
 
     /**
      * 套餐编号

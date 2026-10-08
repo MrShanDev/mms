@@ -15,6 +15,11 @@ public interface BundledPluginSchemaExecutor {
      */
     List<String> executeBundledSchema(String sql);
 
+    /** 按插件版本记录执行结果，旧实现保持兼容。 */
+    default List<String> executeBundledSchema(String pluginId, String version, String sql) {
+        return executeBundledSchema(sql);
+    }
+
     /**
      * 执行 JAR 内 {@link PluginConstants#INSTALL_SQL_PATH_IN_JAR} 拆句后的语句（安装流程自动调用）。
      * <p>白名单：{@code INSERT [IGNORE] INTO sys_function | sys_dict | sys_dict_data}；字典 {@code field_name} 须带

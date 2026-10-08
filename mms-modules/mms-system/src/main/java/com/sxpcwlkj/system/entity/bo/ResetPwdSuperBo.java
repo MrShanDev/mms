@@ -17,6 +17,6 @@ public class ResetPwdSuperBo {
     private String userId;
 
     @NotBlank(message = "新密码不能为空")
-    @Length(min = 6, max = 16, message = "新密码长度在{min}到{max}个字符")
+    @Length(min = 8, max = 128, message = "新密码长度在{min}到{max}个字符")
     private String password;
 }

@@ -51,18 +51,22 @@ public class ${ClassName}ServiceImpl extends BaseServiceImpl<${ClassName}, ${Cla
     <#if formLayout==3>
     @Override
     public ${ClassName}Vo selectSingleton() {
-        Page<${ClassName}Vo> page = baseMapper.selectVoPage(new Page<>(1, 1, false),
+        Page<${ClassName}Vo> page = baseMapper.selectVoPage(new Page<>(1, 2, false),
                 Wrappers.<${ClassName}>lambdaQuery().orderByAsc(${ClassName}::get${TableId}));
+        if (page.getRecords().size() > 1) throw new com.sxpcwlkj.common.exception.MmsException("单表单存在多条数据，请先清理重复记录");
         return page.getRecords().isEmpty() ? null : page.getRecords().get(0);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveSingleton(${ClassName}Bo bo) {
-        ${ClassName}Vo current = selectSingleton();
-        if (current == null) return insert(bo);
-        bo.set${TableId}(current.get${TableId}());
-        return updateByIdBase(bo);
+        return com.sxpcwlkj.framework.utils.SingletonGuard.execute(
+                "${tableName}:" + com.sxpcwlkj.authority.LoginObject.getLoginTenant(), () -> {
+            ${ClassName}Vo current = selectSingleton();
+            if (current == null) return insert(bo);
+            bo.set${TableId}(current.get${TableId}());
+            return updateByIdBase(bo);
+        });
     }
     </#if>
     <#if formLayout==2 >

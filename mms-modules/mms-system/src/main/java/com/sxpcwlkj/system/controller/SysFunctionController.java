@@ -38,7 +38,7 @@ public class SysFunctionController extends BaseController {
      *
      * @return vo
      */
-    @MssSafety
+    @MssSafety(isRepetition = false)
     @SaCheckPermission("system:function:list")
     @PostMapping("/list")
     public R<List<SysFunctionVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysFunctionBo bo) {

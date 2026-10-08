@@ -186,18 +186,12 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
         }
         assertDestructiveMutationAllowed(pluginId);
         String pid = pluginId.trim();
-        try {
-            var installDeclared = pluginLifecycleManager.collectBundledInstallSqlDeclaredIds(pid, null);
-            pluginHostDbBridge.removeBundledInstallSqlInsertRows(
-                    installDeclared.sysFunctionIds(),
-                    installDeclared.sysDictIds(),
-                    installDeclared.sysDictDataIds());
-        } catch (Exception e) {
-            log.warn("市场删除插件：按 install.sql 清理 sys_function 失败（继续卸载磁盘） pluginId={} — {}", pid, e.getMessage());
-        }
-        // 先卸载内存中的 ClassLoader / 子进程 / 路由，再删磁盘，避免运行中删除 JAR 失败（尤其 Windows）
+        pluginLifecycleManager.assertUninstallAllowed(pid, null);
+        var installDeclared = pluginLifecycleManager.collectExclusiveInstallSqlIds(pid, null);
         pluginLifecycleManager.unloadAllVersionsOfPlugin(pid);
         pluginLifecycleManager.uninstallFromDisk(pid, null, false);
+        pluginHostDbBridge.removeBundledInstallSqlInsertRows(
+                installDeclared.sysFunctionIds(), installDeclared.sysDictIds(), installDeclared.sysDictDataIds());
         removeCatalogEntry(pid);
         pluginLifecycleManager.publishPluginLifecycleEvent(
                 PluginLifecycleEvent.of(

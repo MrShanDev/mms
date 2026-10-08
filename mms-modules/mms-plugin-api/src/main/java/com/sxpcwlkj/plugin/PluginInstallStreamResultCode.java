@@ -45,6 +45,8 @@ public final class PluginInstallStreamResultCode {
     /** 库表登记/菜单同步失败且已尝试回滚磁盘。 */
     public static final String DATABASE_REGISTRATION_FAILED = "PLUGIN_INSTALL_DATABASE_REGISTRATION_FAILED";
 
+    public static final String PLUGIN_LOAD_FAILED = "PLUGIN_INSTALL_LOAD_FAILED";
+
     /** 向客户端写入 NDJSON 失败（如连接中断）。 */
     public static final String STREAM_IO_FAILED = "PLUGIN_INSTALL_STREAM_IO_FAILED";
 

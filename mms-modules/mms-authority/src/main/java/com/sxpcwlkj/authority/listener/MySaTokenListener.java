@@ -32,17 +32,8 @@ public class MySaTokenListener implements SaTokenListener {
      */
     @Override
     public void doLogout(String loginType, Object loginId, String tokenValue) {
-        String device = StpUtil.getLoginDeviceTypeByToken(tokenValue);
-        String idPart = loginId.toString();
-        if (DeviceEnum.MOBILE.getType().equals(device)) {
-            RedisUtil.deleteObject(RedisConstant.MOBILE_KEY + idPart);
-        } else if (DeviceEnum.ADMIN.getType().equals(device)) {
-            RedisUtil.deleteObject(RedisConstant.ADMIN_KEY + idPart);
-        } else if (DeviceEnum.DOC.getType().equals(device)) {
-            RedisUtil.deleteObject(RedisConstant.DOC_KEY + idPart);
-        } else if (DeviceEnum.PC.getType().equals(device)) {
-            RedisUtil.deleteObject(RedisConstant.PC_KEY + idPart);
-        }
+        // Account snapshots are shared by concurrent sessions. They expire with their TTL;
+        // account revocation explicitly clears them after the transaction commits.
 
     }
 

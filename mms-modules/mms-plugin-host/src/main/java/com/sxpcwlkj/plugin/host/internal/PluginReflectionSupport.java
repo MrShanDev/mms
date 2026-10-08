@@ -113,6 +113,7 @@ public final class PluginReflectionSupport {
     }
 
     static Method findPublicMethod(Class<?> clazz, String name, int paramCount) {
+        Method match = null;
         for (Method m : clazz.getMethods()) {
             if (m.getDeclaringClass() == Object.class) {
                 continue;
@@ -126,8 +127,12 @@ public final class PluginReflectionSupport {
             if (m.getParameterCount() != paramCount) {
                 continue;
             }
-            return m;
+            if (m.isBridge() || m.isSynthetic()) continue;
+            if (match != null) {
+                throw new IllegalArgumentException("插件能力方法存在同参数数量的重载，无法确定调用签名: " + clazz.getName() + "#" + name);
+            }
+            match = m;
         }
-        return null;
+        return match;
     }
 }

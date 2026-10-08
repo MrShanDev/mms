@@ -39,7 +39,7 @@ public class SysDictController extends BaseController {
      * @param bo 查询条件
      * @return 分页结果
      */
-    @MssSafety
+    @MssSafety(isRepetition = false)
     @SaCheckPermission("system:dict:list")
     @PostMapping("/list")
     public R<PageResult<SysDictVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class)SysDictBo bo) {

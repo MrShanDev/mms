@@ -170,7 +170,7 @@ sa-token:
   is-read-body: true
   is-read-cookie: false
   # token-prefix: "Token_"
-  jwt-secret-key: 01213456789abcdefghijklmnopqrstuvwxyz
+  jwt-secret-key: ${MMS_JWT_SECRET:}
   token-style: uuid
   is-log: false
   info-time-open: true
@@ -231,16 +231,9 @@ mybatis-plus:
 tenant:
   enable: true
   exclusionTable:
-    - sys_user_role
-    - sys_user
     - sys_tenant_package
     - sys_tenant
-    - sys_role_function
-    - sys_role
-    - sys_dept
     - sys_oss_config
-    - sys_oss
-    - sys_function
     - sys_dict_data
     - sys_dict
     - sys_config
@@ -285,7 +278,7 @@ mms:
     url: https://wss.lke.cloud.tencent.com/v1/qbot/chat/sse
     # ollama list 全名如 deepseek-r1:latest；LKE 可为空按厂商约定
     model: ''
-    key: pjJLWvfdzAOdYINoefNLLjtmwNELHGtdFIESwJGtuCagfMGBQgudSrKgmPfdrlXDxAEwZuYsHkGxBhIVXKGBUAriwbEGhZPxyxkhuzxksXDeQcKDyijXDkAUOYmkNiFD
+    key: ${MMS_AI_KEY:}
     context:
       max-turns: 5
 

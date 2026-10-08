@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 class PluginSpringBeanAttachmentTest {
 
@@ -35,6 +36,23 @@ class PluginSpringBeanAttachmentTest {
             att.releaseSession(sid);
             assertFalse(((DefaultListableBeanFactory) ctx.getBeanFactory()).containsSingleton(full));
             assertTrue(destroyed.get());
+        }
+    }
+
+    @Test void registeredBeanIsInitializedProxy() {
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
+            ctx.refresh();
+            Object original = new Object();
+            Object proxy = new Object();
+            ctx.getBeanFactory().addBeanPostProcessor(new org.springframework.beans.factory.config.BeanPostProcessor() {
+                @Override public Object postProcessAfterInitialization(Object bean, String name) {
+                    return bean == original ? proxy : bean;
+                }
+            });
+            var attachment = new PluginSpringBeanAttachment(ctx, null);
+            attachment.registerSingleton("proxy", "svc", original);
+            assertSame(proxy, ctx.getBean("mms.plugin.bean.proxy.svc"));
+            attachment.releaseSession("proxy");
         }
     }
 

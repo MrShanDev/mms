@@ -28,6 +28,7 @@ import java.util.zip.ZipOutputStream;
  * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
+@com.sxpcwlkj.common.annotation.PlatformAdmin
 @RestController
 @RequestMapping("gen/generator")
 @AllArgsConstructor

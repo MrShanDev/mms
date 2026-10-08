@@ -11,6 +11,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpcwlkj.authority.LoginObject;
+import com.sxpcwlkj.framework.utils.PasswordHashUtil;
+import com.sxpcwlkj.framework.utils.AfterCommit;
 import com.sxpcwlkj.common.enums.SystemCommonEnum;
 import com.sxpcwlkj.common.exception.MmsException;
 import com.sxpcwlkj.common.utils.*;
@@ -49,6 +51,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service("sysUser")
 @Slf4j
+@Transactional(rollbackFor = Exception.class)
 public class SysUserServiceImpl implements SysUserService {
 
     private final ObjectProvider<AdminLoginPermissionCacheService> permissionCacheProvider;
@@ -58,6 +61,7 @@ public class SysUserServiceImpl implements SysUserService {
     private final SysRoleMapper sysRoleMapper;
     private final SysRoleFunctionMapper sysUserFunctionMapper;
     private final SysFunctionMapper sysFunctionMapper;
+    private final org.springframework.beans.factory.ObjectProvider<TenantAdministrationService> tenantAdministrationProvider;
     private final SysDeptService sysDeptService;
 
     @Override
@@ -83,12 +87,16 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Boolean insert(SysUserBo bo) {
+        tenantAdministrationProvider.getObject().checkAccountQuota();
+        normalizeContacts(bo);
+        validateDepartment(bo);
         // 初始化头像
         bo.setAvatar(SystemCommonEnum.SYS_USER_AVATAR.getCode());
         // 加盐
         bo.setAesKey(Objects.requireNonNull(SignUtil.getAesKey()).getSecretKey());
         //加密密码
-        String encryptRsa = SignUtil.pressWord(bo.getPassword(), bo.getAesKey());
+        String strength = PasswordStrengthCheckerUtil.checkStrength(bo.getPassword());
+        String encryptRsa = PasswordHashUtil.hash(bo.getPassword());
         bo.setPassword(encryptRsa);
         // 检查账号是否去重
         SysUser sysUserName = baseMapper.selectByUserName(bo.getUserName());
@@ -108,7 +116,7 @@ public class SysUserServiceImpl implements SysUserService {
 
         SysUser sysUser = MapstructUtil.convert(bo, SysUser.class);
         assert sysUser != null;
-        sysUser.setPasswordStrength(PasswordStrengthCheckerUtil.checkStrength(bo.getPassword()));
+        sysUser.setPasswordStrength(strength);
         ValidatorUtil.validateEntity(sysUser, ValidatedGroupConfig.insert.class);
         // 新增用户信息
         int rows = baseMapper.insert(sysUser);
@@ -134,7 +142,7 @@ public class SysUserServiceImpl implements SysUserService {
             Integer minLevel = getCurrentUserMinLevel();
             // 2. 如果目标用户拥有任何职级高于当前用户(level更小)的角色，则禁止查看
             boolean hasHigherLevel = targetRoles.stream()
-                .anyMatch(r -> r.getLevel() != null && r.getLevel() < minLevel);
+                .anyMatch(r -> "1".equals(r.getStatus()) && r.getLevel() != null && r.getLevel() < minLevel);
             if (hasHigherLevel) {
                 return null;
             }
@@ -164,6 +172,9 @@ public class SysUserServiceImpl implements SysUserService {
     @Override
     public Boolean updateByIdBase(SysUserBo bo) {
         assertManageableUser(bo.getUserId());
+        normalizeContacts(bo);
+        validateDepartment(bo);
+        if (userHasSuperAdminRole(bo.getUserId()) && bo.getStatus() != null && bo.getStatus() != 1) throw new MmsException("超级管理员不能禁用");
         // 检查账号是否去重
         SysUser sysUserName = baseMapper.selectByUserName(bo.getUserName());
         if (sysUserName != null) {
@@ -186,9 +197,12 @@ public class SysUserServiceImpl implements SysUserService {
             }
         }
         SysUser user = MapstructUtil.convert(bo, SysUser.class);
+        user.setPassword(null); user.setAesKey(null); user.setTenantId(null);
         ValidatorUtil.validateEntity(bo, ValidatedGroupConfig.update.class);
         int rows = baseMapper.updateById(user);
         if (rows > 0) {
+            if (user.getStatus() != null && user.getStatus() != 1) permissionCacheProvider.getObject().revokeUser(bo.getUserId());
+            else permissionCacheProvider.getObject().refreshUsers(List.of(bo.getUserId()));
             return Boolean.TRUE;
         }
         throw new MmsException("操作失败");
@@ -198,6 +212,10 @@ public class SysUserServiceImpl implements SysUserService {
     public Boolean deleteById(String ids) {
         String[] array = DataUtil.getCatStr(ids, ",");
         int rows = 0;
+        for (String id : array) {
+            assertManageableUser(id);
+            if (userHasSuperAdminRole(id)) throw new MmsException("超级管理员不能删除");
+        }
         for (String id:array){
             assertManageableUser(id);
             if (userHasSuperAdminRole(id)) {
@@ -208,7 +226,11 @@ public class SysUserServiceImpl implements SysUserService {
                 //删除角色
                 sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId, id));
             }
+            baseMapper.deleteNoticeReads(LoginObject.getLoginTenant(), id);
+            baseMapper.deleteThemePreference(LoginObject.getLoginTenant(), id);
+            baseMapper.deleteSignSessions(id);
             rows = baseMapper.deleteById(id);
+            permissionCacheProvider.getObject().revokeUser(id);
         }
         return rows>0;
     }
@@ -262,9 +284,9 @@ public class SysUserServiceImpl implements SysUserService {
             // 账号查询
             .like(StringUtil.isNotEmpty(bo.getUserName()), "u.user_name", bo.getUserName())
             // 账号状态
-//            .eq(StringUtil.isNotEmpty(bo.getStatus()), "u.status", bo.getStatus())
+.eq(bo.getStatus() != null, "u.status", bo.getStatus())
             // 手机号
-            .like(StringUtil.isNotEmpty(bo.getPhoneNumber()), "u.phonenumber", bo.getPhoneNumber())
+            .like(StringUtil.isNotEmpty(bo.getPhoneNumber()), "u.phone_number", bo.getPhoneNumber())
             .in(StringUtil.isNotEmpty(bo.getDeptId()), "u.dept_id", departmentScopeIds(bo.getDeptId()));
 
         // 等级过滤：等级低的用户，看不到比他等级高的用户 (等级值越小，职级越高)
@@ -272,10 +294,10 @@ public class SysUserServiceImpl implements SysUserService {
             Integer minLevel = getCurrentUserMinLevel();
             // 1. 排除拥有 super_admin 角色的用户
             wrapper.apply(
-                "NOT EXISTS (SELECT 1 FROM sys_user_role sur_sa JOIN sys_role sr_sa ON sur_sa.role_id = sr_sa.id WHERE sur_sa.user_id = u.user_id AND sr_sa.code = {0})",
+                "NOT EXISTS (SELECT 1 FROM sys_user_role sur_sa JOIN sys_role sr_sa ON sur_sa.role_id = sr_sa.id AND sur_sa.tenant_id = sr_sa.tenant_id WHERE sur_sa.user_id = u.user_id AND sur_sa.tenant_id = u.tenant_id AND sur_sa.status = 1 AND sr_sa.status = 1 AND sr_sa.code = {0})",
                 SystemCommonEnum.SUPER_ADMIN.getCode());
             // 2. 排除掉 拥有 “比当前用户最高职级(minLevel) 还要高(level < minLevel)” 的角色的用户
-            wrapper.apply("NOT EXISTS (SELECT 1 FROM sys_user_role sur JOIN sys_role sr ON sur.role_id = sr.id WHERE sur.user_id = u.user_id AND sr.level < {0})", minLevel);
+            wrapper.apply("NOT EXISTS (SELECT 1 FROM sys_user_role sur JOIN sys_role sr ON sur.role_id = sr.id AND sur.tenant_id = sr.tenant_id WHERE sur.user_id = u.user_id AND sur.tenant_id = u.tenant_id AND sur.status = 1 AND sr.status = 1 AND sr.level < {0})", minLevel);
         }
 
         return wrapper;
@@ -294,6 +316,7 @@ public class SysUserServiceImpl implements SysUserService {
             return 999999; // 无角色的用户等级设为极低
         }
         return roles.stream()
+            .filter(role -> "1".equals(role.getStatus()))
             .map(SysRoleVo::getLevel)
             .filter(Objects::nonNull)
             .min(Integer::compare)
@@ -302,26 +325,26 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public SysUser selectByUserName(String tenantId, String userName) {
-        return baseMapper.selectOne(new QueryWrapper<SysUser>().eq("user_name", userName).last("LIMIT 1"));
+        return baseMapper.selectForLogin(tenantId == null || tenantId.isBlank() ? "000000" : tenantId, userName);
     }
 
     @Override
     public Boolean updateRsa(String tenantId, String userId) {
         RsaKeyEntity key = SignUtil.getRsaKey();
-        log.info("密码对：'{}','{}','{}','{}'", tenantId, userId, key.getPrivateKey(), key.getPrivateKey());
-        return baseMapper.updateRsa(tenantId, userId, key.getPrivateKey(), key.getPrivateKey()) > 0;
+
+        return baseMapper.updateRsa(tenantId, userId, key.getPublicKey(), key.getPrivateKey()) > 0;
     }
 
     @Override
     public SysUserVo getUserRoleAnfFunctionInfo(String userId) {
         SysUserVo userVo = null;
-        SysUser user = baseMapper.selectById(userId);
+        SysUser user = baseMapper.selectForSession(userId);
 
         if (user != null) {
             userVo = BeanCopyUtil.convert(user, SysUserVo.class);
             //1.角色
             assert userVo != null;
-            List<SysRole> sysRoles = sysUserRoleMapper.roleList(userVo.getUserId());
+            List<SysRole> sysRoles = sysUserRoleMapper.roleList(userVo.getUserId()).stream().filter(r -> Objects.equals(r.getStatus(), 1)).toList();
             List<SysRoleVo> sysRoleVos = BeanCopyUtil.convert(sysRoles, SysRoleVo.class);
 
             //2.资源
@@ -330,7 +353,7 @@ public class SysUserServiceImpl implements SysUserService {
             List<String> list = new ArrayList<>();
             for (SysRoleVo r : sysRoleVos) {
                 userVo.setRoleName(sysRoleVos.get(0).getName());
-                List<SysFunction> fList = sysUserFunctionMapper.selectByRoleId(r.getId());
+                List<SysFunction> fList = sysUserFunctionMapper.selectByRoleId(r.getId()).stream().filter(f -> Objects.equals(f.getStatus(), 1)).toList();
                 List<SysFunctionVo> roleFunctionVoList = BeanCopyUtil.convert(fList, SysFunctionVo.class);
                 r.setSysFunctionVoList(roleFunctionVoList);
                 assert roleFunctionVoList != null;
@@ -341,7 +364,7 @@ public class SysUserServiceImpl implements SysUserService {
                         list.add(functionVo.getPermission());
                     }
                 }
-                r.setPermissions(list.toArray(String[]::new));
+                r.setPermissions(roleFunctionVoList.stream().map(SysFunctionVo::getPermission).filter(StringUtil::isNotEmpty).distinct().toArray(String[]::new));
             }
             //用户角色列表
             userVo.setRoleVoList(sysRoleVos);
@@ -356,21 +379,8 @@ public class SysUserServiceImpl implements SysUserService {
                     .filter(Objects::nonNull)
                     .anyMatch(SystemCommonEnum.SUPER_ADMIN.getCode()::equals);
             if (loginIsSuperAdmin) {
-                sysRoles = sysRoleMapper.selectList(new LambdaQueryWrapper<SysRole>()
-                    .eq(SysRole::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())
-                    .eq(SysRole::getCode, SystemCommonEnum.SUPER_ADMIN.getCode())
-                    .orderByAsc(SysRole::getSort).last("LIMIT 1"));
-                sysRoleVos = BeanCopyUtil.convert(sysRoles, SysRoleVo.class);
-                if (sysRoleVos == null || sysRoleVos.isEmpty()) {
-                    log.warn("未找到启用的 super_admin 角色行，使用占位角色装配全量菜单 userId={}", userVo.getUserId());
-                    SysRoleVo holder = new SysRoleVo();
-                    holder.setCode(SystemCommonEnum.SUPER_ADMIN.getCode());
-                    holder.setName("超级管理员");
-                    sysRoleVos = new ArrayList<>();
-                    sysRoleVos.add(holder);
-                }
-
-                List<SysFunction> functionList = sysFunctionMapper.selectList(new LambdaQueryWrapper<SysFunction>().eq(SysFunction::getStatus, SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue()).orderByAsc(SysFunction::getSort));
+                // Reuse enabled roles from the target account's tenant, independent of caller context.
+                List<SysFunction> functionList = sysFunctionMapper.selectForSessionTenant(user.getTenantId());
                 List<SysFunctionVo> roleFunctionVoList = BeanCopyUtil.convert(functionList, SysFunctionVo.class);
                 sysRoleVos.get(0).setSysFunctionVoList(roleFunctionVoList);
                 assert roleFunctionVoList != null;
@@ -394,6 +404,17 @@ public class SysUserServiceImpl implements SysUserService {
 
         }
 
+        if(userVo!=null && !"000000".equals(userVo.getTenantId())) {
+            java.util.Set<String> allowed=tenantAdministrationProvider.getObject().allowedPermissions(userVo.getTenantId());
+            java.util.Set<String> allowedRoutes=new java.util.HashSet<>();
+            tenantAdministrationProvider.getObject().allowedFunctions(userVo.getTenantId()).forEach(f->allowedRoutes.add(java.util.Objects.toString(f.getComponent(),"")+"|"+java.util.Objects.toString(f.getPath(),"")));
+            for(var role:userVo.getRoleVoList()) {
+                var menus=role.getSysFunctionVoList().stream().filter(f -> java.util.Objects.equals(f.getType(),1) ? allowedRoutes.contains(java.util.Objects.toString(f.getComponent(),"")+"|"+java.util.Objects.toString(f.getPath(),"")) : allowed.contains(f.getPermission())).toList();
+                role.setSysFunctionVoList(menus);
+                role.setPermissions(menus.stream().map(com.sxpcwlkj.system.entity.vo.SysFunctionVo::getPermission).filter(allowed::contains).toArray(String[]::new));
+            }
+            userVo.setButCodes(java.util.Arrays.stream(userVo.getButCodes()).filter(allowed::contains).toArray(String[]::new));
+        }
         return userVo;
     }
 
@@ -428,20 +449,16 @@ public class SysUserServiceImpl implements SysUserService {
         if (StringUtil.isEmpty(userVo.getAesKey())) {
             throw new MmsException("缺少加密KEY!");
         }
-        //加密密码
-
-        String encryptRsa = SignUtil.pressWord(bo.getOldPassword(), userVo.getAesKey());
-        log.info("加密密码:{}", encryptRsa);
-        log.info("数据库密码:{}", userVo.getPassword());
-        if (!userVo.getPassword().equals(encryptRsa)) {
+        if (!PasswordHashUtil.matches(bo.getOldPassword(), userVo.getPassword(), userVo.getAesKey())) {
             throw new MmsException("原密码错误！");
         }
-        userVo.setPassword(SignUtil.pressWord(bo.getPassword(), userVo.getAesKey()));
+        userVo.setPassword(PasswordHashUtil.hash(bo.getPassword()));
         userVo.setPasswordStrength(PasswordStrengthCheckerUtil.checkStrength(bo.getPassword()));
         int row = baseMapper.update(null, new LambdaUpdateWrapper<SysUser>()
             .set(SysUser::getPassword, userVo.getPassword())
             .set(SysUser::getPasswordStrength, userVo.getPasswordStrength())
             .eq(SysUser::getUserId, LoginObject.getLoginId()));
+        if (row > 0) permissionCacheProvider.getObject().revokeUser(LoginObject.getLoginId());
         return row > 0;
     }
 
@@ -455,12 +472,13 @@ public class SysUserServiceImpl implements SysUserService {
         if (StringUtil.isEmpty(userVo.getAesKey())) {
             throw new MmsException("缺少加密KEY!");
         }
-        userVo.setPassword(SignUtil.pressWord(newPassword, userVo.getAesKey()));
+        userVo.setPassword(PasswordHashUtil.hash(newPassword));
         userVo.setPasswordStrength(PasswordStrengthCheckerUtil.checkStrength(newPassword));
         int row = baseMapper.update(null, new LambdaUpdateWrapper<SysUser>()
             .set(SysUser::getPassword, userVo.getPassword())
             .set(SysUser::getPasswordStrength, userVo.getPasswordStrength())
             .eq(SysUser::getUserId, LoginObject.getLoginId()));
+        if (row > 0) permissionCacheProvider.getObject().revokeUser(LoginObject.getLoginId());
         return row > 0;
     }
 
@@ -471,7 +489,7 @@ public class SysUserServiceImpl implements SysUserService {
         //更新key
         userVo.setAesKey(Objects.requireNonNull(SignUtil.getAesKey()).getSecretKey());
         //加密密码
-        userVo.setPassword(SignUtil.pressWord(bo.getPassword(), userVo.getAesKey()));
+        userVo.setPassword(PasswordHashUtil.hash(bo.getPassword()));
         userVo.setPasswordStrength(PasswordStrengthCheckerUtil.checkStrength(bo.getPassword()));
         int rows = baseMapper.update(null, new LambdaUpdateWrapper<SysUser>()
             .eq(SysUser::getUserId, bo.getUserId())
@@ -480,6 +498,7 @@ public class SysUserServiceImpl implements SysUserService {
             .set(SysUser::getAesKey, userVo.getAesKey())
         );
         if (rows > 0) {
+            permissionCacheProvider.getObject().revokeUser(bo.getUserId());
             return Boolean.TRUE;
         }
         throw new MmsException("操作失败");
@@ -495,7 +514,7 @@ public class SysUserServiceImpl implements SysUserService {
         List<SysRoleVo> roles = new ArrayList<>();
         for (String code : new LinkedHashSet<>(bo.getRoleCodes())) {
             SysRoleVo role = sysRoleMapper.selectByCode(code);
-            if (role == null || SystemCommonEnum.SUPER_ADMIN.getCode().equals(code)) {
+            if (role == null || !"1".equals(role.getStatus()) || SystemCommonEnum.SUPER_ADMIN.getCode().equals(code)) {
                 throw new MmsException("角色不存在或不允许分配");
             }
             if (!LoginObject.getLoginSuper() && (role.getLevel() == null || role.getLevel() < getCurrentUserMinLevel())) {
@@ -510,8 +529,19 @@ public class SysUserServiceImpl implements SysUserService {
             relation.setRoleId(role.getId());
             if (sysUserRoleMapper.insert(relation) == 0) throw new MmsException("角色分配失败");
         }
-        permissionCacheProvider.getObject().refreshAllCachedAdminUsers();
+        permissionCacheProvider.getObject().refreshUsers(List.of(bo.getUserId()));
         return Boolean.TRUE;
+    }
+
+    private void normalizeContacts(SysUserBo bo) {
+        if (bo.getPhoneNumber()!=null && bo.getPhoneNumber().isBlank()) bo.setPhoneNumber(null);
+        if (bo.getEmail()!=null && bo.getEmail().isBlank()) bo.setEmail(null);
+    }
+
+    private void validateDepartment(SysUserBo bo) {
+        if (bo.getDeptIds() != null && bo.getDeptIds().length > 0) bo.setDeptId(bo.getDeptIds()[bo.getDeptIds().length - 1]);
+        if (StringUtil.isNotEmpty(bo.getDeptId()) && sysDeptMapper.selectById(bo.getDeptId()) == null)
+            throw new MmsException("部门不存在或不属于当前租户");
     }
 
     private void assertManageableUser(String userId) {
@@ -522,7 +552,7 @@ public class SysUserServiceImpl implements SysUserService {
         int currentLevel = getCurrentUserMinLevel();
         for (SysRoleVo role : sysRoleMapper.selectByUserIdList(userId)) {
             if (SystemCommonEnum.SUPER_ADMIN.getCode().equals(role.getCode())
-                || (role.getLevel() != null && role.getLevel() < currentLevel)) {
+                || ("1".equals(role.getStatus()) && role.getLevel() != null && role.getLevel() < currentLevel)) {
                 throw new MmsException("不能操作高于当前用户职级的账户");
             }
         }
@@ -531,10 +561,10 @@ public class SysUserServiceImpl implements SysUserService {
     @Override
     public Boolean unbind(int type) {
         if(type==1){
-            return baseMapper.update(null, new LambdaUpdateWrapper<SysUser>().set(SysUser::getPhoneNumber, "").eq(SysUser::getUserId, LoginObject.getLoginId())) > 0;
+            return baseMapper.update(null, new LambdaUpdateWrapper<SysUser>().set(SysUser::getPhoneNumber, null).eq(SysUser::getUserId, LoginObject.getLoginId())) > 0;
         }
         if(type==2){
-            return baseMapper.update(null, new LambdaUpdateWrapper<SysUser>().set(SysUser::getEmail, "").eq(SysUser::getUserId, LoginObject.getLoginId())) > 0;
+            return baseMapper.update(null, new LambdaUpdateWrapper<SysUser>().set(SysUser::getEmail, null).eq(SysUser::getUserId, LoginObject.getLoginId())) > 0;
         }
         if(type==3){
             return baseMapper.update(null, new LambdaUpdateWrapper<SysUser>().set(SysUser::getWxOpenid, "").eq(SysUser::getUserId, LoginObject.getLoginId())) > 0;
@@ -614,7 +644,8 @@ public class SysUserServiceImpl implements SysUserService {
         // Vue Router 要求路由 name 全局唯一，否则注册/跳转异常（普通账号菜单少不易触发）。
         functionVos = dedupeFunctionVosById(functionVos);
 
-        return getAdminMenuTree(functionVos, "1");
+        String root=functionVos.stream().filter(f->"/".equals(f.getPath()) && "0".equals(f.getParentId())).map(SysFunctionVo::getId).findFirst().orElse("1");
+        return getAdminMenuTree(functionVos, root);
     }
 
     /** 按资源主键去重，保留首次出现顺序。 */

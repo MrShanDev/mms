@@ -22,6 +22,9 @@ import java.util.List;
 @Repository
 public interface SysFunctionMapper extends BaseMapperPlus<SysFunction, SysFunctionVo> {
     @InterceptorIgnore(tenantLine = "true")
+    @Select("SELECT * FROM sys_function WHERE tenant_id=#{tenantId} AND status=1 ORDER BY sort")
+    List<SysFunction> selectForSessionTenant(@Param("tenantId") String tenantId);
+
     @Select("SELECT f.* FROM `sys_role_function` rf RIGHT JOIN `sys_function` f  ON rf.`function_id`=f.`id` WHERE rf.`role_id`=#{id} and rf.`status`=1 ORDER BY f.`parent_id` ASC ,  f.`sort` DESC")
     List<SysFunction> selectByRoleForIds(@Param("id") String id);
 

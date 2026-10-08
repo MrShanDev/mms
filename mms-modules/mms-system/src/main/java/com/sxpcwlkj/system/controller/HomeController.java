@@ -84,7 +84,7 @@ public class HomeController extends BaseController {
         map.put("systemInfo",mmsAdminProperties);
         map.put("userTool",sysUserService.selectTool());
         map.put("newsTool",sysNoticeService.selectTool());
-        map.put("task","0/0");
+
         return R.success(map);
     }
 
@@ -94,14 +94,7 @@ public class HomeController extends BaseController {
     @SaCheckLogin
     @GetMapping("/memberSex")
     public R<Object> memberSex() {
-        List<Number> list = new ArrayList<>();
-        Long count = 0L;
-        list.add(count);
-        Long count2 = 0L;
-        list.add(count2);
-        Long count3 = 0L;
-        list.add(count3);
-        return R.success(list);
+        return R.fail("基础系统未提供此业务统计，请使用对应业务模块");
     }
 
 
@@ -185,6 +178,7 @@ public class HomeController extends BaseController {
      * 系统运行信息（实时）：OS/CPU/内存/磁盘/JDK/JVM/数据库等
      */
     @SaCheckLogin
+    @cn.dev33.satoken.annotation.SaCheckPermission("system:monitor:query")
     @GetMapping("/runtimeInfo")
     public R<SystemRuntimeInfoVo> runtimeInfo() {
         return R.success(systemRuntimeInfoService.getRuntimeInfo());
@@ -194,19 +188,27 @@ public class HomeController extends BaseController {
      * 系统运行趋势（实时采样）：CPU/内存/JVM 内存
      */
     @SaCheckLogin
+    @cn.dev33.satoken.annotation.SaCheckPermission("system:monitor:query")
     @GetMapping("/runtimeTrend")
     public R<SystemRuntimeTrendVo> runtimeTrend(@RequestParam(defaultValue = "120") int limit) {
         return R.success(systemRuntimeTrendService.getTrend(limit));
     }
 
-    /**
-     * SSE：系统运行状态实时推送
-     * <p>注意：EventSource 无法自定义 Header，这里通过 query 透传 Authorization token。</p>
-     */
+    /** Issue a short-lived single-use ticket; the JWT never appears in an SSE URL. */
+    @cn.dev33.satoken.annotation.SaCheckPermission("system:monitor:query")
+    @org.springframework.web.bind.annotation.PostMapping("/runtimeTicket")
+    public R<String> runtimeTicket() {
+        String ticket = cn.hutool.core.util.IdUtil.simpleUUID();
+        com.sxpcwlkj.redis.RedisUtil.setCacheObject("mms:runtime:ticket:" + ticket,
+                cn.dev33.satoken.stp.StpUtil.getTokenValue(), java.time.Duration.ofSeconds(30));
+        return R.success("success", ticket);
+    }
+
     @GetMapping(value = "/runtimeSse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter runtimeSse(@RequestParam("Authorization") String authorization) {
-        SseEmitter emitter = systemRuntimeSseHub.register(authorization);
-        return emitter;
+    public SseEmitter runtimeSse(@RequestParam("ticket") String ticket) {
+        if (!ticket.matches("[0-9a-f]{32}")) throw new com.sxpcwlkj.common.exception.MmsException("监控连接票据无效",401);
+        String token = com.sxpcwlkj.redis.RedisUtil.getClient().<String>getBucket("mms:runtime:ticket:" + ticket).getAndDelete();
+        return systemRuntimeSseHub.register(token);
     }
 
     /**
@@ -216,64 +218,7 @@ public class HomeController extends BaseController {
     @SaCheckLogin
     @GetMapping("/menu")
     public R<Object> homeMenu() {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        Map<String, Object> map = new HashMap<>();
-        map.put("icon", "iconfont icon-yangan");
-        map.put("label", "会员管理");
-        map.put("path", "/sxpcwlkj/storeMember");
-        map.put("iconColor", "#F72B3F");
-        Map<String, Object> query = new HashMap<>();
-        map.put("query", query);
-        list.add(map);
-
-        Map<String, Object> map2 = new HashMap<>();
-        map2.put("icon", "iconfont icon-wendu");
-        map2.put("label", "实名认证");
-        map2.put("path", "/sxpcwlkj/storeMemberAuthentication");
-        map2.put("iconColor", "#91BFF8");
-        Map<String, Object> query2 = new HashMap<>();
-        map2.put("query", query2);
-        list.add(map2);
-
-        Map<String, Object> map3 = new HashMap<>();
-        map3.put("icon", "iconfont icon-neiqianshujuchucun");
-        map3.put("label", "商品列表");
-        map3.put("path", "/sxpcwlkj/storeProduct");
-        map3.put("iconColor", "#88D565");
-        Map<String, Object> query3 = new HashMap<>();
-        map3.put("query", query3);
-        list.add(map3);
-
-        Map<String, Object> map4 = new HashMap<>();
-        map4.put("icon", "iconfont icon-fuwenbenkuang");
-        map4.put("label", "文章列表");
-        map4.put("path", "/sxpcwlkj/storeArticle");
-        map4.put("iconColor", "#88D565");
-        Map<String, Object> query4 = new HashMap<>();
-        map4.put("query", query4);
-        list.add(map4);
-
-        Map<String, Object> map5 = new HashMap<>();
-        map5.put("icon", "iconfont icon-yangan");
-        map5.put("label", "待付款订单");
-        map5.put("path", "/sxpcwlkj/storeOrder");
-        map5.put("iconColor", "#FBD4A0");
-        Map<String, Object> query5 = new HashMap<>();
-        query5.put("status", 10);
-        map5.put("query", query5);
-        list.add(map5);
-
-        Map<String, Object> map6 = new HashMap<>();
-        map6.put("icon", "iconfont icon-shouye_dongtaihui");
-        map6.put("label", "待发货订单");
-        map6.put("path", "/sxpcwlkj/storeOrder");
-        map6.put("iconColor", "#FBD4A0");
-        Map<String, Object> query6 = new HashMap<>();
-        query6.put("status", 20);
-        map6.put("query", query6);
-        list.add(map6);
-
-        return R.success(list);
+        return R.success(functionService.selectIsFast(9));
     }
 
 
@@ -284,25 +229,7 @@ public class HomeController extends BaseController {
     @SaCheckLogin
     @GetMapping("/orderNum")
     public R<Object> orderNum() {
-        Map<String, Object> map = new HashMap<>();
-        List<BigDecimal> list1 = new ArrayList<>();
-        List<BigDecimal> list2 = new ArrayList<>();
-        //月份集合
-        // 创建日期范围生成器
-        DateTime start = DateUtil.parse("2024-01-01");
-        DateTime end = DateUtil.parse("2024-12-31");
-        DateRange range = DateUtil.range(start, end, DateField.MONTH);
-
-        for (DateTime date : range) {
-            BigDecimal num1 = new BigDecimal(0);
-            list1.add(num1 == null ? new BigDecimal(0) : num1);
-            BigDecimal num2 = new BigDecimal(0);
-            list2.add(num2 == null ? new BigDecimal(0) : num2);
-        }
-        map.put("list1", list1);
-        map.put("list2", list2);
-
-        return R.success(map);
+        return R.fail("基础系统未提供此业务统计，请使用对应业务模块");
     }
 
     /**
@@ -312,45 +239,7 @@ public class HomeController extends BaseController {
     @SaCheckLogin
     @GetMapping("/orderPrice")
     public R<Object> orderPrice() {
-        Map<String, Object> map = new HashMap<>();
-        List<Map<String, Object>> list1 = new ArrayList<>();
-        List<Map<String, Object>> list2 = new ArrayList<>();
-        List<Map<String, Object>> list3 = new ArrayList<>();
-        //月份集合
-        // 创建日期范围生成器
-        DateTime start = DateUtil.parse("2024-01-01");
-        DateTime end = DateUtil.parse("2024-12-31");
-        DateRange range = DateUtil.range(start, end, DateField.MONTH);
-
-        int i = 1;
-        for (DateTime date : range) {
-            //{ value: 0, stationName: 's1' },
-            Map<String, Object> map1 = new HashMap<>();
-            BigDecimal num1 = new BigDecimal(0);
-            num1 = num1 == null ? new BigDecimal(0) : num1;
-            map1.put("value", num1);
-            map1.put("stationName", "s" + i);
-            list1.add(map1);
-
-            Map<String, Object> map2 = new HashMap<>();
-            BigDecimal num2 = new BigDecimal(0);
-            num2 = num2 == null ? new BigDecimal(0) : num2;
-            map2.put("value", num2);
-            map2.put("stationName", "s" + i);
-            list2.add(map2);
-
-            Map<String, Object> map3 = new HashMap<>();
-            map3.put("value", num1.add(num2));
-            map3.put("stationName", "s" + i);
-            list3.add(map3);
-
-            i++;
-        }
-        map.put("list1", list1);
-        map.put("list2", list2);
-        map.put("list3", list3);
-
-        return R.success(map);
+        return R.fail("基础系统未提供此业务统计，请使用对应业务模块");
     }
 
 

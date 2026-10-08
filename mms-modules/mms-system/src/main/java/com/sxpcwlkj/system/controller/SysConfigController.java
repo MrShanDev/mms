@@ -45,10 +45,11 @@ public class SysConfigController extends BaseController{
      * @param bo 查询条件
      * @return 分页结果
      */
-    @MssSafety
+    @MssSafety(isRepetition = false)
     @SaCheckPermission("system:config:list")
     @PostMapping("/list")
     public R<PageResult<SysConfigVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysConfigBo bo){
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
          return R.success(baseService.selectListVoPage(bo, bo.getPageQuery()).toPageResult());
     }
 
@@ -61,6 +62,7 @@ public class SysConfigController extends BaseController{
     @SaCheckPermission("system:config:query")
     @GetMapping("/{id}")
     public R<SysConfigVo> queryById(@PathVariable String id) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.selectVoById(id));
     }
 
@@ -79,6 +81,7 @@ public class SysConfigController extends BaseController{
     @SaCheckPermission("system:config:edit")
     @PutMapping
     public R<Boolean> edit(@Validated @RequestBody SysConfigBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.updateByIdBase(bo));
     }
 
@@ -96,6 +99,7 @@ public class SysConfigController extends BaseController{
     @SaCheckPermission("system:config:insert")
     @PostMapping
     public R<Boolean> insert(@Validated @RequestBody SysConfigBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.insert(bo));
     }
 
@@ -113,6 +117,7 @@ public class SysConfigController extends BaseController{
     @SaCheckPermission("system:config:delete")
     @DeleteMapping("/{ids}")
     public R<Boolean> delete(@PathVariable String ids) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.deleteById(ids));
     }
 
@@ -126,6 +131,7 @@ public class SysConfigController extends BaseController{
     @SaCheckRole("super_admin")
     @PostMapping("/getConfigs")
     public R<List<SysConfigVo>> getConfigs(@Validated @RequestBody List<SysConfigBo> bos) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.selectByCodes(bos));
     }
 
@@ -137,6 +143,7 @@ public class SysConfigController extends BaseController{
     @SaCheckRole("super_admin")
     @PostMapping("/configs")
     public R<Boolean> configs(@Validated @RequestBody List<SysConfigBo> bos) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return success(baseService.updateByCodes(bos));
     }
 

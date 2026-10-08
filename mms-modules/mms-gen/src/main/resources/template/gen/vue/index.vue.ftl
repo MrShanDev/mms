@@ -1,12 +1,14 @@
 <#if formLayout==3>
 <template>
   <SystemPage title="${tableComment}" description="配置${tableComment}信息，修改后保存生效。" eyebrow="业务管理">
+    <template #actions>
+      <el-button type="primary" :loading="saving" :disabled="loading || !loaded" v-auth="'${moduleName}:${functionName}:edit'" @click="save">保存</el-button>
+    </template>
     <div class="layout-padding">
       <el-tabs type="border-card" model-value="settings">
         <el-tab-pane label="${tableComment}" name="settings">
           <div class="generated-settings-pane" v-loading="loading">
             <${FunctionName}Form ref="formRef" :model-value="form" />
-            <el-button type="primary" :loading="saving" :disabled="loading || !loaded" v-auth="'${moduleName}:${functionName}:edit'" @click="save">保存</el-button>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -62,6 +64,39 @@
 <#else>
 <template>
   <SystemPage title="${tableComment}" description="管理${tableComment}信息与维护数据。" eyebrow="业务管理">
+                    <template #actions>
+                        <#if formLayout==1 >
+                        <!-- 新增/导入/导出/打印 -->
+                        <TableTool ref="tableToolRef"
+                                   tableComment="${tableComment}"
+                                   functionName="${functionName}"
+                                   modelName="${moduleName}"
+                                   :key="componentKey"
+                                   :param="state.tableData.param"
+                                   @close="componentKey = generateUUID()"
+                                   @insert="onCURD" @deletes="onCURD" />
+                        <#elseif formLayout==2 >
+                        <!-- 功能栏 -->
+                        <div class="system-dept-search">
+                            <el-button size="default" type="primary"  @click="clickExpand">
+                                <el-icon><ele-Sort /></el-icon>
+                                {{ expand.state ? "全部折叠" : "全部展开" }}
+                            </el-button>
+                            <el-button
+                                size="default"
+                                type="success"
+                                class="ml10"
+                                v-auth="'${moduleName}:${functionName}:insert'"
+                                @click="onCURD({ type: curdEnum.INSERT })"
+                            >
+                                <el-icon>
+                                    <ele-DocumentAdd />
+                                </el-icon>
+                                新增
+                            </el-button>
+                        </div>
+                        </#if>
+                    </template>
     <div class="block">
         <#if (formLayout == 1) && (queryList?? && queryList?size gt 0) >
         <!-- 功能栏  -->
@@ -111,39 +146,7 @@
         <div class="${moduleName}-${functionName}-container layout-padding">
             <el-card shadow="never" class="layout-padding-auto">
                 <el-container>
-                    <el-header>
-                        <#if formLayout==1 >
-                        <!-- 新增/导入/导出/打印 -->
-                        <TableTool ref="tableToolRef"
-                                   tableComment="${tableComment}"
-                                   functionName="${functionName}"
-                                   modelName="${moduleName}"
-                                   :key="componentKey"
-                                   :param="state.tableData.param"
-                                   @close="componentKey = generateUUID()"
-                                   @insert="onCURD" @deletes="onCURD" />
-                        <#elseif formLayout==2 >
-                        <!-- 功能栏 -->
-                        <div class="system-dept-search">
-                            <el-button size="small" type="primary"  @click="clickExpand">
-                                <el-icon><ele-Sort /></el-icon>
-                                {{ expand.state ? "全部折叠" : "全部展开" }}
-                            </el-button>
-                            <el-button
-                                size="small"
-                                type="success"
-                                class="ml10"
-                                v-auth="'${moduleName}:${functionName}:insert'"
-                                @click="onCURD({ type: curdEnum.INSERT })"
-                            >
-                                <el-icon>
-                                    <ele-DocumentAdd />
-                                </el-icon>
-                                新增
-                            </el-button>
-                        </div>
-                        </#if>
-                    </el-header>
+
                     <el-main>
                         <!-- Table -->
                         <el-table :data="state.tableData.data"

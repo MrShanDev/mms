@@ -241,7 +241,7 @@ public class PluginLifecycleManager {
         unloadAllVersionsOfPlugin(pluginId.trim());
         try {
             tryLoadOne(dirId, dirVer, verDir, springVer);
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.warn("reloadSingleActivated 加载失败 {}@{}: {}", pluginId, version, e.getMessage(), e);
             dispatchPluginLifecycleEvent(
                     PluginLifecycleEvent.of(
@@ -274,7 +274,7 @@ public class PluginLifecycleManager {
             }
             dispatchPluginLifecycleEvent(
                     PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_UNLOADED, lp.getDescriptor(), "unloadOneKey", null));
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             Runnable popErr = PluginMdc.pushPluginContext(pid, ver);
             try {
                 log.error("卸载插件失败: {}", key, e);
@@ -362,7 +362,7 @@ public class PluginLifecycleManager {
                                     return;
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (Exception | LinkageError e) {
                             log.debug(
                                     "孤儿目录探测 plugin.json 失败，仍参与磁盘加载: {} {}",
                                     verDir,
@@ -413,7 +413,7 @@ public class PluginLifecycleManager {
         List<PluginDependencySort.PluginLoadSlot> ordered = new ArrayList<>();
         try {
             ordered.addAll(PluginDependencySort.sortDiskSlots(slots));
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.warn("磁盘插件依赖拓扑排序失败，按目录字典序加载: {}", e.getMessage());
         }
         Set<PluginDependencySort.PluginLoadSlot> seen = new LinkedHashSet<>(ordered);
@@ -431,7 +431,7 @@ public class PluginLifecycleManager {
         for (PluginDependencySort.PluginLoadSlot s : ordered) {
             try {
                 tryLoadOne(s.folderPluginId(), s.folderVersion(), s.versionDir(), springVer);
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
                 log.warn("插件目录加载失败 {} : {}", s.versionDir().toAbsolutePath(), e.getMessage());
             }
         }
@@ -441,7 +441,7 @@ public class PluginLifecycleManager {
         List<PluginVersionCoordinate> ordered = new ArrayList<>();
         try {
             ordered.addAll(PluginDependencySort.sortCoordinates(root, coords));
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.warn("插件依赖拓扑排序失败，按列表原序加载: {}", e.getMessage());
         }
         Set<PluginVersionCoordinate> seen = new LinkedHashSet<>(ordered);
@@ -463,7 +463,7 @@ public class PluginLifecycleManager {
             }
             try {
                 tryLoadOne(dirId, dirVer, verDir, springVer);
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
                 log.warn("插件加载失败 {}@{}: {}", c.pluginId(), c.version(), e.getMessage());
             }
         }
@@ -608,6 +608,10 @@ public class PluginLifecycleManager {
             for (PluginHealthContributor h : ServiceLoader.load(PluginHealthContributor.class, ucl)) {
                 healthEntries.add(h);
             }
+        } catch (java.util.ServiceConfigurationError | LinkageError | RuntimeException failure) {
+            try { ucl.close(); } catch (IOException closeFailure) { failure.addSuppressed(closeFailure); }
+            if (subprocessPortLeased) portLeases.releaseForPluginKey(key);
+            throw new PluginException("插件 SPI 加载失败: " + key, failure);
         } finally {
             Thread.currentThread().setContextClassLoader(old);
         }
@@ -648,7 +652,7 @@ public class PluginLifecycleManager {
                 if (healthEntries.isEmpty()) {
                     log.warn("插件未注册 PluginHealthContributor SPI，建议补充健康探针: {}", key);
                 }
-            } catch (Exception ex) {
+            } catch (Exception | LinkageError ex) {
                 log.error("插件 onLoad 失败: {}", key, ex);
                 throw ex;
             } finally {
@@ -656,7 +660,14 @@ public class PluginLifecycleManager {
                 popMdc.run();
             }
             unloadHooks = ctx.takeUnloadHooksSnapshot();
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
+            for (MmsPlugin entry : entries) {
+                try { entry.onUnload(); } catch (Exception | LinkageError cleanup) { e.addSuppressed(cleanup); }
+            }
+            List<Runnable> partialHooks = ctx.takeUnloadHooksSnapshot();
+            for (int i = partialHooks.size() - 1; i >= 0; i--) {
+                try { partialHooks.get(i).run(); } catch (RuntimeException | LinkageError cleanup) { e.addSuppressed(cleanup); }
+            }
             dispatchPluginLifecycleEvent(
                     PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_LOAD_FAILED, desc, e.getMessage(), e));
             if (springAttach != null) {
@@ -678,7 +689,7 @@ public class PluginLifecycleManager {
                         r -> {
                             try {
                                 r.registerMvc(desc, ucl);
-                            } catch (Exception ex) {
+                            } catch (Exception | LinkageError ex) {
                                 throw new PluginException("HOST_MVC 路由注册失败: " + key, ex);
                             }
                         });
@@ -701,7 +712,7 @@ public class PluginLifecycleManager {
                 subprocessManager.stop(prevKey, properties);
                 try {
                     previousLoaded.close();
-                } catch (Exception e) {
+                } catch (Exception | LinkageError e) {
                     String prevId = previousLoaded.getDescriptor().getId();
                     String prevVer = previousLoaded.getDescriptor().getVersion();
                     Runnable popPrev = PluginMdc.pushPluginContext(prevId, prevVer);
@@ -740,7 +751,14 @@ public class PluginLifecycleManager {
                             desc,
                             "descriptor=" + descJar.getFileName(),
                             null));
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
+            for (MmsPlugin entry : entries) {
+                try { entry.onUnload(); } catch (Exception | LinkageError cleanup) { e.addSuppressed(cleanup); }
+            }
+            List<Runnable> partialHooks = ctx.takeUnloadHooksSnapshot();
+            for (int i = partialHooks.size() - 1; i >= 0; i--) {
+                try { partialHooks.get(i).run(); } catch (RuntimeException | LinkageError cleanup) { e.addSuppressed(cleanup); }
+            }
             dispatchPluginLifecycleEvent(
                     PluginLifecycleEvent.of(PluginLifecycleEventType.PLUGIN_LOAD_FAILED, desc, e.getMessage(), e));
             throw e;
@@ -773,7 +791,7 @@ public class PluginLifecycleManager {
             for (PluginHealthContributor h : lp.getHealthContributors()) {
                 try {
                     rows.add(new PluginHealthRow(pid, ver, h.health(), "OK"));
-                } catch (Exception e) {
+                } catch (Exception | LinkageError e) {
                     log.warn("插件健康探针异常: {}@{} — {}", pid, ver, e.toString());
                     rows.add(new PluginHealthRow(pid, ver, e.getMessage(), "ERROR"));
                 }
@@ -848,7 +866,7 @@ public class PluginLifecycleManager {
                     return bytes.length == 0 ? Optional.empty() : Optional.of(bytes);
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.debug("readBundledLogoPng {}@{}: {}", pid, ver, e.getMessage());
             return Optional.empty();
         }
@@ -881,7 +899,7 @@ public class PluginLifecycleManager {
             }
         } catch (PluginException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.debug("readBundledSchemaSql: {}", e.getMessage());
             return Optional.empty();
         }
@@ -912,7 +930,7 @@ public class PluginLifecycleManager {
             }
         } catch (PluginException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.debug("readBundledInstallSql: {}", e.getMessage());
             return Optional.empty();
         }
@@ -972,12 +990,46 @@ public class PluginLifecycleManager {
                                     dictIds.addAll(d.sysDictIds());
                                     dictDataIds.addAll(d.sysDictDataIds());
                                 });
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
                 log.debug("collectBundledInstallSqlDeclaredIds {}@{}: {}", pid, ver, e.getMessage());
             }
         }
         return new BundledInstallSqlSupport.DeclaredInstallSqlIds(
                 List.copyOf(functionIds), List.copyOf(dictIds), List.copyOf(dictDataIds));
+    }
+
+    public void assertUninstallAllowed(String pluginId, String version) {
+        boolean removingLoaded = loadedPlugins.values().stream().anyMatch(p -> pluginId.equals(p.getDescriptor().getId())
+                && (version == null || version.isBlank() || version.equals(p.getDescriptor().getVersion())));
+        if (!removingLoaded) return;
+        for (LoadedPluginInstance plugin : loadedPlugins.values()) {
+            var descriptor = plugin.getDescriptor();
+            if (pluginId.equals(descriptor.getId()) || descriptor.getDependencies() == null) continue;
+            for (var dependency : descriptor.getDependencies()) {
+                if (pluginId.equals(dependency.getId()) && !Boolean.TRUE.equals(dependency.getOptional())) {
+                    throw new PluginException("插件仍被启用插件依赖，请先停用依赖方: " + descriptor.getId());
+                }
+            }
+        }
+    }
+
+    public BundledInstallSqlSupport.DeclaredInstallSqlIds collectExclusiveInstallSqlIds(String pluginId, String version) {
+        var target = collectBundledInstallSqlDeclaredIds(pluginId, version);
+        Set<String> functions = new java.util.HashSet<>();
+        Set<String> dicts = new java.util.HashSet<>();
+        Set<String> data = new java.util.HashSet<>();
+        for (DiskPluginSlot slot : listDiskSlots()) {
+            if (!pluginId.equals(slot.pluginId()) || (version != null && !version.isBlank() && !version.equals(slot.version()))) {
+                var retained = collectBundledInstallSqlDeclaredIds(slot.pluginId(), slot.version());
+                functions.addAll(retained.sysFunctionIds());
+                dicts.addAll(retained.sysDictIds());
+                data.addAll(retained.sysDictDataIds());
+            }
+        }
+        return new BundledInstallSqlSupport.DeclaredInstallSqlIds(
+                target.sysFunctionIds().stream().filter(id -> !functions.contains(id)).toList(),
+                target.sysDictIds().stream().filter(id -> !dicts.contains(id)).toList(),
+                target.sysDictDataIds().stream().filter(id -> !data.contains(id)).toList());
     }
 
     /**
@@ -1118,7 +1170,7 @@ public class PluginLifecycleManager {
             }
             List<PluginSysConfigDef> sc = pr.get().descriptor().getSysConfig();
             return sc == null || sc.isEmpty() ? List.of() : List.copyOf(sc);
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.debug("probeSysConfigDefsFromDisk {}@{}: {}", pluginId, version, e.getMessage());
             return List.of();
         }
@@ -1219,13 +1271,13 @@ public class PluginLifecycleManager {
             Path verDir = PluginInstallationLayout.pluginRoot(root, pluginId.trim(), version.trim());
             return PluginDescriptorProbe.tryReadForPlugin(verDir, pluginId.trim())
                     .map(PluginDescriptorProbe.ProbeResult::descriptor);
-        } catch (Exception e) {
+        } catch (Exception | LinkageError e) {
             log.warn("readInstalledDescriptor {}@{}: {}", pluginId, version, e.getMessage());
             return Optional.empty();
         }
     }
 
-    public PluginDescriptor installJarFromUpload(Path tempJarFile) throws Exception {
+    public PluginDescriptor validateJarForInstall(Path tempJarFile) throws Exception {
         PluginDescriptor d = PluginDescriptorReader.readFromJar(tempJarFile);
         PluginDescriptorValidator.validateStructureOrThrow(d);
         PluginCompatibilityChecker.verifyDependencyFingerprintOrThrow(tempJarFile, d);
@@ -1233,23 +1285,61 @@ public class PluginLifecycleManager {
         if (!PluginDescriptorValidator.satisfiesHost(d, properties.getHostMmsRevision(), springVer)) {
             throw new PluginException("插件与宿主版本不兼容: " + d.getId());
         }
-        Path root = resolveRoot();
-        Path libDir = PluginInstallationLayout.libDirectory(root, d.getId(), d.getVersion());
-        Files.createDirectories(libDir);
-        String fn = tempJarFile.getFileName().toString();
-        if (!fn.toLowerCase(Locale.ROOT).endsWith(".jar")) {
-            fn = PluginInstallationLayout.safeSegment(d.getId()) + "-" + d.getVersion() + ".jar";
+        HostServices hostServices = hostServicesProvider.getIfAvailable();
+        if (hostServices == null) hostServices = NoopHostServices.INSTANCE;
+        PluginDescriptorValidator.validateHostServicesContractOrThrow(d, hostServices.hostImplementedContractVersion());
+        try (java.util.jar.JarFile jar = new java.util.jar.JarFile(tempJarFile.toFile())) {
+            String entryClass = d.getEntryClass();
+            if (entryClass != null && !entryClass.isBlank()) {
+                String path = entryClass.replace('.', '/') + ".class";
+                if (jar.getEntry(path) == null && jar.getEntry("BOOT-INF/classes/" + path) == null) {
+                    throw new PluginException("插件入口类不在安装包内: " + entryClass);
+                }
+                if (d.runtimeModeOrDefault() != PluginRuntimeMode.INDEPENDENT_PROCESS) {
+                    try (URLClassLoader preflight = new URLClassLoader(new URL[]{tempJarFile.toUri().toURL()}, MmsPlugin.class.getClassLoader())) {
+                        Class<?> type = Class.forName(entryClass, false, preflight);
+                        if (type.getClassLoader() != preflight) {
+                            throw new PluginException("插件入口类与宿主已加载类冲突，禁止使用宿主中的旧实现: " + entryClass);
+                        }
+                        if (!MmsPlugin.class.isAssignableFrom(type)) throw new PluginException("入口未实现宿主 MmsPlugin 契约");
+                        type.getDeclaredConstructors();
+                        type.getDeclaredMethods();
+                    } catch (LinkageError | ReflectiveOperationException failure) {
+                        throw new PluginException("插件入口类型链接失败: " + entryClass, failure);
+                    }
+                }
+            }
+            if (d.getFrontend() != null && d.getFrontend().getModulePackage() != null
+                    && !d.getFrontend().getModulePackage().isBlank()
+                    && jar.getEntry("META-INF/mms/web/assets/remoteEntry.js") == null) {
+                throw new PluginException("声明了联邦页面但缺少 assets/remoteEntry.js，请使用 fed-web 构建");
+            }
         }
-        Path target = libDir.resolve(fn);
-        Files.copy(tempJarFile, target, StandardCopyOption.REPLACE_EXISTING);
-        Files.createDirectories(PluginInstallationLayout.dataDirectory(root, d.getId(), d.getVersion()));
-        Files.createDirectories(PluginInstallationLayout.temporaryDirectory(root, d.getId(), d.getVersion()));
-        Path webRoot = PluginInstallationLayout.webDirectory(root, d.getId(), d.getVersion());
+        if (Files.exists(PluginInstallationLayout.pluginRoot(resolveRoot(), d.getId(), d.getVersion()))) {
+            throw new PluginException("插件版本已存在，请使用新版本号升级: " + d.getId() + "@" + d.getVersion());
+        }
+        return d;
+    }
+
+    public PluginDescriptor installJarFromUpload(Path tempJarFile) throws Exception {
+        PluginDescriptor d = validateJarForInstall(tempJarFile);
+        Path root = resolveRoot();
+        Files.createDirectories(root);
+        Path targetVersion = PluginInstallationLayout.pluginRoot(root, d.getId(), d.getVersion());
+        if (Files.exists(targetVersion)) {
+            throw new PluginException("插件版本已存在，请使用新版本号升级，禁止覆盖正在使用的版本: " + d.getId() + "@" + d.getVersion());
+        }
+        Path staging = Files.createTempDirectory(root, ".plugin-install-");
         try {
-            PluginWebBundleExtractor.extractFromJar(tempJarFile, webRoot);
-            log.info("插件联邦静态资源目录已同步: {}@{} -> {}", d.getId(), d.getVersion(), webRoot);
-        } catch (IOException e) {
-            throw new PluginException("解压插件联邦前端失败: " + e.getMessage(), e);
+            Files.createDirectories(staging.resolve("lib"));
+            Files.copy(tempJarFile, staging.resolve("lib/plugin.jar"));
+            Files.createDirectories(staging.resolve("data"));
+            Files.createDirectories(staging.resolve("tmp"));
+            PluginWebBundleExtractor.extractFromJar(tempJarFile, staging.resolve("web"));
+            Files.createDirectories(targetVersion.getParent());
+            Files.move(staging, targetVersion);
+        } finally {
+            deleteRecursive(staging);
         }
         return d;
     }
@@ -1278,7 +1368,7 @@ public class PluginLifecycleManager {
                 dispatchPluginLifecycleEvent(
                         PluginLifecycleEvent.of(
                                 PluginLifecycleEventType.PLUGIN_UNLOADED, lp.getDescriptor(), "reload/uninstallAll 批量卸载", null));
-            } catch (Exception e) {
+            } catch (Exception | LinkageError e) {
                 Runnable popErr = PluginMdc.pushPluginContext(pid, ver);
                 try {
                     log.error("卸载插件失败: {}", k, e);

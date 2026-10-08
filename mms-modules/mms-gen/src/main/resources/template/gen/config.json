@@ -70,6 +70,10 @@
     {
       "templateName": "vue/form.vue.ftl",
       "generatorPath": "${frontendPath}/src/views/${moduleName}/${functionName}/components/${FunctionName}Form.vue"
+    },
+    {
+      "templateName": "sql/singleton.sql.ftl",
+      "generatorPath": "${backendPath}/menu/${tableName}_singleton.sql"
     }
   ]
 }

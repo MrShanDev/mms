@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PluginReflectionSupportTest {
 
@@ -14,6 +15,14 @@ class PluginReflectionSupportTest {
         public String hello(String name) {
             return "hi " + name;
         }
+    }
+
+    public static class Overloaded implements MmsPlugin {
+        public String call(String value) { return value; }
+        public String call(Integer value) { return value.toString(); }
+    }
+    @Test void rejectsAmbiguousOverloads() {
+        assertThrows(IllegalArgumentException.class, () -> PluginReflectionSupport.findPublicMethod(Overloaded.class, "call", 1));
     }
 
     @Test

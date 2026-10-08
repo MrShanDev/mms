@@ -98,7 +98,9 @@ class SystemAdminRegressionTest {
         SysDictDataMapper data = mock(SysDictDataMapper.class);
         SysDictServiceImpl service = new SysDictServiceImpl(mapper, data);
         assertNull(service.selectVoById(123L));
-        assertFalse(service.deleteById(123L));
+        try (var context = org.mockito.Mockito.mockStatic(com.sxpcwlkj.authority.LoginObject.class)) {
+            assertFalse(service.deleteById(123L));
+        }
         verifyNoInteractions(data);
     }
     @Test void dictionaryControllerAcceptsBatchIds() {
@@ -128,7 +130,7 @@ class SystemAdminRegressionTest {
         when(users.selectById("target")).thenReturn(new SysUser());
         SysUserRoleMapper assignments = mock(SysUserRoleMapper.class);
         SysRoleMapper roles = mock(SysRoleMapper.class);
-        SysUserServiceImpl service = new SysUserServiceImpl(null, users, null, assignments, roles, null, null, null);
+        SysUserServiceImpl service = new SysUserServiceImpl(null, users, null, assignments, roles, null, null, null, null);
         SetUserRoleSuperBo bo = new SetUserRoleSuperBo(); bo.setUserId("target"); bo.setRoleCodes(List.of("missing"));
         try (MockedStatic<LoginObject> login = mockStatic(LoginObject.class)) {
             login.when(LoginObject::getLoginSuper).thenReturn(true);
@@ -145,7 +147,7 @@ class SystemAdminRegressionTest {
         when(roles.selectByUserIdList("actor")).thenReturn(List.of(operator));
         when(roles.selectByUserIdList("target")).thenReturn(List.of(admin));
         SysUserRoleMapper assignments = mock(SysUserRoleMapper.class);
-        SysUserServiceImpl service = new SysUserServiceImpl(null, users, null, assignments, roles, null, null, null);
+        SysUserServiceImpl service = new SysUserServiceImpl(null, users, null, assignments, roles, null, null, null, null);
         SetUserRoleSuperBo bo = new SetUserRoleSuperBo(); bo.setUserId("target"); bo.setRoleCodes(List.of("operator"));
         try (MockedStatic<LoginObject> login = mockStatic(LoginObject.class)) {
             login.when(LoginObject::getLoginSuper).thenReturn(false);

@@ -206,7 +206,7 @@ public class GlobalException {
     @ExceptionHandler(NotLoginException.class)
     public R<Void> handleNotLoginException(NotLoginException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
-        log.error("请求地址'{}',认证失败'{}',无法访问系统资源", requestUrl, e.getMessage());
+        log.warn("请求地址'{}',认证失败，原因类型{}", requestUrl, e.getType());
         return R.fail(ErrorCodeEnum.USER_NOT_LOGIN.getKey(), "认证失败，无法访问系统资源");
     }
 
@@ -237,6 +237,7 @@ public class GlobalException {
     @ExceptionHandler(MyBatisSystemException.class)
     public R<Void> handleCannotFindDataSourceException(MyBatisSystemException e, HttpServletRequest request) {
         Throwable rootCause = getRootCause(e);
+        if (rootCause instanceof MmsException controlled) return R.fail(controlled.getCode(), controlled.getMessage());
         // 2.1 如果是演示模式异常，按演示模式异常处理
         if (rootCause instanceof DemoModeException) {
             return handleDemoModeException((DemoModeException) rootCause);
@@ -248,7 +249,7 @@ public class GlobalException {
             return R.fail("未找到数据源，请联系管理员确认");
         }
         log.error("请求地址'{}', Mybatis系统异常", requestUrl, e);
-        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), message != null ? message : ErrorCodeEnum.INTERNAL_ERROR.getValue());
+        return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), "数据库操作失败，请联系管理员");
     }
 
     // 3. 处理数据访问异常
@@ -256,6 +257,7 @@ public class GlobalException {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<Void> handleDataAccessException(DataAccessException e) {
         Throwable rootCause = getRootCause(e);
+        if (rootCause instanceof MmsException controlled) return R.fail(controlled.getCode(), controlled.getMessage());
 
         // 3.1 如果是演示模式异常，按演示模式异常处理
         if (rootCause instanceof DemoModeException) {
@@ -272,6 +274,7 @@ public class GlobalException {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public R<?> handlePersistenceException(PersistenceException e) {
         Throwable rootCause = getRootCause(e);
+        if (rootCause instanceof MmsException controlled) return R.fail(controlled.getCode(), controlled.getMessage());
 
         // 4.1 如果是演示模式异常，按演示模式异常处理
         if (rootCause instanceof DemoModeException) {
@@ -287,11 +290,16 @@ public class GlobalException {
     /**
      * 拦截未知的运行时异常
      */
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public R<Void> handleResponseStatusException(org.springframework.web.server.ResponseStatusException e) {
+        return R.fail(e.getStatusCode().value(), e.getReason() == null ? "请求参数无效" : e.getReason());
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生未知异常.", requestUrl, e);
-        String msg = e.getMessage() != null ? e.getMessage() : ErrorCodeEnum.INTERNAL_ERROR.getValue();
+        String msg = ErrorCodeEnum.INTERNAL_ERROR.getValue();
         return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), msg);
     }
 
@@ -303,8 +311,8 @@ public class GlobalException {
     public R<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
 
         String requestUrl = request.getRequestURI();
-        log.error("请求地址'{}',发生验证异常:'{}'", requestUrl, e.getMessage());
-        String message = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
+        log.warn("请求地址'{}',参数校验失败", requestUrl);
+        String message = e.getBindingResult().getFieldError() == null ? "参数校验失败" : e.getBindingResult().getFieldError().getDefaultMessage();
         return R.fail(message);
     }
 
@@ -400,7 +408,7 @@ public class GlobalException {
     public R<Void> handleException(Exception e, HttpServletRequest request) {
         String requestUrl = request.getRequestURI();
         log.error("请求地址'{}',发生系统异常.", requestUrl, e);
-        String msg = e.getMessage() != null ? e.getMessage() : ErrorCodeEnum.INTERNAL_ERROR.getValue();
+        String msg = ErrorCodeEnum.INTERNAL_ERROR.getValue();
         return R.fail(ErrorCodeEnum.INTERNAL_ERROR.getKey(), msg);
     }
 

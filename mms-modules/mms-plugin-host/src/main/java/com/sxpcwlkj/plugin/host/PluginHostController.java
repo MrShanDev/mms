@@ -120,7 +120,7 @@ public class PluginHostController {
 
     @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/reload")
-    public R<List<PluginEntrySummary>> reload() {
+    public synchronized R<List<PluginEntrySummary>> reload() {
         pluginLifecycleManager.reload();
         return R.success(pluginLifecycleManager.listSummaries());
     }
@@ -382,19 +382,21 @@ public class PluginHostController {
      */
     @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/uninstall")
-    public R<Void> uninstall(@RequestBody PluginUninstallRequest body) throws Exception {
+    public synchronized R<Void> uninstall(@RequestBody PluginUninstallRequest body) throws Exception {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()) {
             return R.fail("pluginId 不能为空");
         }
+        pluginLifecycleManager.assertUninstallAllowed(body.pluginId(), body.version());
         BundledInstallSqlSupport.DeclaredInstallSqlIds installIds =
-                pluginLifecycleManager.collectBundledInstallSqlDeclaredIds(body.pluginId(), body.version());
+                pluginLifecycleManager.collectExclusiveInstallSqlIds(body.pluginId(), body.version());
+        pluginLifecycleManager.unloadAllVersionsOfPlugin(body.pluginId());
+        pluginLifecycleManager.uninstallFromDisk(body.pluginId(), body.version());
         pluginHostDbBridge.ifAvailable(
                 b ->
                         b.removeBundledInstallSqlInsertRows(
                                 installIds.sysFunctionIds(),
                                 installIds.sysDictIds(),
                                 installIds.sysDictDataIds()));
-        pluginLifecycleManager.uninstallFromDisk(body.pluginId(), body.version());
         pluginHostDbBridge.ifAvailable(b -> b.onUninstallDiskFinished(body.pluginId(), body.version()));
         pluginLifecycleManager.reload();
         return R.success();
@@ -408,7 +410,7 @@ public class PluginHostController {
      */
     @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @PostMapping("/activateVersion")
-    public R<List<PluginEntrySummary>> activateVersion(@RequestBody PluginActivateVersionRequest body) {
+    public synchronized R<List<PluginEntrySummary>> activateVersion(@RequestBody PluginActivateVersionRequest body) {
         if (body == null || body.pluginId() == null || body.pluginId().isBlank()
                 || body.version() == null || body.version().isBlank()) {
             return R.fail("pluginId 与 version 不能为空");
@@ -417,6 +419,8 @@ public class PluginHostController {
         if (bridge == null) {
             return R.fail("未启用插件库表能力，请执行 sys_plugin_version 脚本并包含 mms-system");
         }
+        Optional<PluginManifestView> previous = pluginLifecycleManager.listManifests().stream()
+                .filter(manifest -> body.pluginId().equals(manifest.id())).findFirst();
         try {
             bridge.activateInstalledVersion(body.pluginId(), body.version());
         } catch (IllegalArgumentException | IllegalStateException ex) {
@@ -429,6 +433,17 @@ public class PluginHostController {
             pluginLifecycleManager.reloadSingleActivated(body.pluginId(), body.version());
         } else {
             pluginLifecycleManager.reload();
+        }
+        boolean activated = pluginLifecycleManager.listSummaries().stream()
+                .anyMatch(summary -> body.pluginId().equals(summary.pluginId()) && body.version().equals(summary.version()));
+        if (!activated) {
+            if (previous.isPresent()) {
+                bridge.activateInstalledVersion(previous.get().id(), previous.get().version());
+                pluginLifecycleManager.readInstalledDescriptor(previous.get().id(), previous.get().version())
+                        .ifPresent(bridge::syncMenuBootstrapFromDescriptor);
+                pluginLifecycleManager.reload();
+            }
+            return R.fail("目标版本加载失败，已尝试恢复原激活版本，请检查插件日志");
         }
         return R.success(pluginLifecycleManager.listSummaries());
     }
@@ -643,7 +658,7 @@ public class PluginHostController {
     /**
      * 与历史 {@code /install} 行为一致；{@code progress} 非空时输出分步说明（用于 {@code /installStream}）。
      */
-    private InstallRunResult runPluginInstall(
+    private synchronized InstallRunResult runPluginInstall(
             Path tempJar, boolean skipBundledSchemaExecution, ProgressEmitter progress) {
         BiConsumer<String, String> emit =
                 (level, text) -> {
@@ -653,6 +668,15 @@ public class PluginHostController {
                 };
 
         emit.accept("info", "已接收插件包，开始安装流程…");
+        PluginDescriptor candidate;
+        try {
+            candidate = pluginLifecycleManager.validateJarForInstall(tempJar);
+        } catch (Exception | LinkageError ex) {
+            return InstallRunResult.failure(PluginInstallStreamResultCode.JAR_VALIDATION_FAILED,
+                    "安装前校验失败（未执行 SQL）: " + ex.getMessage());
+        }
+        Optional<PluginManifestView> previous = pluginLifecycleManager.listManifests().stream()
+                .filter(manifest -> candidate.getId().equals(manifest.id())).findFirst();
         List<String> schemaLog = null;
         List<String> installSqlLog = null;
         /** 本次 install.sql 实际 INSERT 成功的主键，后续步骤失败时用于删行回滚 */
@@ -677,7 +701,7 @@ public class PluginHostController {
                 if (hasSchema) {
                     emit.accept("info", "建表：正在执行 META-INF/mms/schema.sql…");
                     try {
-                        schemaLog = executor.executeBundledSchema(schemaOpt.get());
+                        schemaLog = executor.executeBundledSchema(candidate.getId(), candidate.getVersion(), schemaOpt.get());
                         emit.accept("info", "建表：schema.sql 已执行完成");
                         if (schemaLog != null) {
                             for (String line : schemaLog) {
@@ -801,6 +825,22 @@ public class PluginHostController {
 
         emit.accept("info", "正在全量重载插件（类加载、路由、联邦资源等）…");
         pluginLifecycleManager.reload();
+        boolean loaded = pluginLifecycleManager.listSummaries().stream()
+                .anyMatch(summary -> installed.getId().equals(summary.pluginId())
+                        && installed.getVersion().equals(summary.version()) && "LOADED".equals(summary.state()));
+        if (!loaded) {
+            rollbackBundledInstallSqlInsertedRows(installSqlInsertedFunctionIds, installSqlInsertedDictIds,
+                    installSqlInsertedDictDataIds, progress);
+            PluginHostDbBridge bridge = pluginHostDbBridge.getIfAvailable();
+            if (bridge != null && previous.isPresent()) {
+                bridge.activateInstalledVersion(previous.get().id(), previous.get().version());
+                pluginLifecycleManager.readInstalledDescriptor(previous.get().id(), previous.get().version())
+                        .ifPresent(bridge::syncMenuBootstrapFromDescriptor);
+                pluginLifecycleManager.reload();
+            }
+            return InstallRunResult.failure(PluginInstallStreamResultCode.PLUGIN_LOAD_FAILED,
+                    "插件已登记但运行加载失败，请检查插件日志；数据库和安装包保留以便修复，未认定安装成功");
+        }
         emit.accept("info", "插件安装已完成");
 
         Map<String, Object> body = new HashMap<>();

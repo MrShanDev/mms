@@ -27,6 +27,8 @@ public class OssServiceImpl implements OssService {
 
     @Override
     public FileInfo upload(MultipartFile file) {
+        if (file == null || file.isEmpty()) throw new com.sxpcwlkj.common.exception.MmsException("上传文件不能为空");
+        if (file.getSize() > 20L * 1024 * 1024) throw new com.sxpcwlkj.common.exception.MmsException("单文件不能超过20MB");
 
         FileInfo fileInfo = fileStorageService.of(file)
                 //保存到相对路径下，为了方便管理，不需要可以不写

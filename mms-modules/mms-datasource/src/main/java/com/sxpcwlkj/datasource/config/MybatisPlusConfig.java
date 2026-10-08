@@ -38,6 +38,7 @@ import java.util.Set;
 public class MybatisPlusConfig {
     private final TenantProperties tenantProperties;
     private final DemoModeInterceptor demoModeInterceptor;
+    private final com.sxpcwlkj.datasource.permission.DataScopeHandler dataScopeHandler;
 
     //插件
     @Bean
@@ -47,7 +48,8 @@ public class MybatisPlusConfig {
         interceptor.addInnerInterceptor(demoModeInterceptor);
 
         //多租户插件
-        if (Boolean.TRUE.equals(tenantProperties.getEnable())) {
+        // Single-application mode also isolates the default tenant's existing data.
+        {
             final Set<String> tenantExclusions = normalizeTenantExclusions(tenantProperties.getExclusionTable());
             interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
                 @Override
@@ -78,6 +80,8 @@ public class MybatisPlusConfig {
                 }
             }));
         }
+
+        interceptor.addInnerInterceptor(new com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor(dataScopeHandler));
 
         // 防止全表更新与删除
         interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
@@ -128,4 +132,3 @@ public class MybatisPlusConfig {
  * DynamicTableNameInnerInterceptor 动态表名插件
  * https://baomidou.com/pages/2a45ff/
  */
-

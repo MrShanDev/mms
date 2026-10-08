@@ -43,6 +43,13 @@ public class LoginObject<T> {
 
     private Class<T> clazz;
 
+    /** Shared platform configuration belongs to the default platform tenant. */
+    public static void requirePlatformAdmin() {
+        if (!isLogin() || !getLoginSuper() || !"000000".equals(getLoginTenant()))
+            throw new MmsException("仅平台超级管理员可操作共享配置", 403);
+    }
+
+
     /** 历史种子库内置超管主键，仅作文档/兼容引用；超管能力以角色代码 {@code super_admin} 为准。 */
     public final static String SUPER_ID = "1";
 
@@ -97,7 +104,10 @@ public class LoginObject<T> {
             return "000000";
         }
         String tenantId = RedisUtil.getCacheObject(RedisConstant.ADMIN_TENANT_KEY + id);
-        return tenantId != null && !tenantId.isBlank() ? tenantId : "000000";
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new MmsException("登录租户上下文已失效，请重新登录", 401);
+        }
+        return tenantId;
     }
 
     /**

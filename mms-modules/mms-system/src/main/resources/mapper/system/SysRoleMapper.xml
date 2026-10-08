@@ -9,20 +9,20 @@
     </select>
 
     <select id="selectByUserId" resultType="com.sxpcwlkj.system.entity.vo.SysRoleVo">
-        SELECT *
+        SELECT r.*
         FROM `sys_user_role` ur
-                 LEFT JOIN `sys_role` r ON ur.`role_id` = r.`id`
-        WHERE ur.`user_id` = #{userId}
+                 LEFT JOIN `sys_role` r ON ur.`role_id` = r.`id` AND ur.tenant_id = r.tenant_id
+        WHERE ur.`user_id` = #{userId} AND ur.status = 1
         ORDER BY r.`sort` DESC LIMIT 1
     </select>
     <select id="selectByCode" resultType="com.sxpcwlkj.system.entity.vo.SysRoleVo">
         SELECT *  FROM `sys_role` WHERE `code`=#{roleCode}
     </select>
     <select id="selectByUserIdList" resultType="com.sxpcwlkj.system.entity.vo.SysRoleVo">
-        SELECT *
+        SELECT r.*
         FROM `sys_user_role` ur
-                 LEFT JOIN `sys_role` r ON ur.`role_id` = r.`id`
-        WHERE ur.`user_id` = #{userId}
+                 LEFT JOIN `sys_role` r ON ur.`role_id` = r.`id` AND ur.tenant_id = r.tenant_id
+        WHERE ur.`user_id` = #{userId} AND ur.status = 1
         ORDER BY r.`sort`
     </select>
 </mapper>

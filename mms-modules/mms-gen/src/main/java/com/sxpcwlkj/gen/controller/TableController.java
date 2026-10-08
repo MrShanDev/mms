@@ -24,6 +24,7 @@ import java.util.List;
 @Slf4j
 @Validated
 @RequiredArgsConstructor
+@com.sxpcwlkj.common.annotation.PlatformAdmin
 @RestController
 @RequestMapping("gen/table")
 public class TableController extends BaseController {

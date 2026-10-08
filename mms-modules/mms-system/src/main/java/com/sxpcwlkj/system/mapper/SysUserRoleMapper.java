@@ -28,7 +28,7 @@ public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRo
      * @return
      */
     @InterceptorIgnore(tenantLine = "true")
-    @Select("SELECT  r.* FROM  `sys_user_role` ur LEFT JOIN  `sys_role` r  ON ur.`role_id`=r.`id` WHERE ur.`user_id`=#{userId} ORDER BY r.`sort` ")
+    @Select("SELECT  r.* FROM  `sys_user_role` ur LEFT JOIN  `sys_role` r  ON ur.`role_id`=r.`id` AND ur.tenant_id=r.tenant_id WHERE ur.`user_id`=#{userId} AND ur.status=1 ORDER BY r.`sort` ")
     List<SysRole> roleList(@Param("userId") String userId);
 
 

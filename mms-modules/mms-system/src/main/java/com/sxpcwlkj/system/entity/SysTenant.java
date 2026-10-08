@@ -25,6 +25,9 @@ import java.util.Map;
 
 @TableName("sys_tenant")
 public class SysTenant{
+    /** Legacy mandatory column; tenant_id remains the actual primary key. */
+    @JsonIgnore
+    private String id;
 
     /**
      * 租户编号
@@ -62,6 +65,7 @@ public class SysTenant{
     /**
      * 过期时间
      */
+    @TableField(updateStrategy=com.baomidou.mybatisplus.annotation.FieldStrategy.ALWAYS)
     private Date expireTime;
     /**
      * 账号数量

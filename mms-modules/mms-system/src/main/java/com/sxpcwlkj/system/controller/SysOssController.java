@@ -45,7 +45,7 @@ public class SysOssController extends BaseController {
     /**
      * 列表
      */
-    @MssSafety
+    @MssSafety(isRepetition = false)
     @SaCheckPermission("system:oss:list")
     @PostMapping("/list")
     public R<PageResult<SysOssVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class) SysOssBo bo) {
@@ -78,6 +78,7 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:edit")
     @PutMapping
     public R<Boolean> edit(@Validated @RequestBody SysOssBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return R.success(baseService.updateByIdBase(bo));
     }
 
@@ -94,18 +95,8 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:insert")
     @PostMapping
     public R<Boolean> insert(MultipartFile file) {
-        FileInfo fileInfo=ossService.upload(file);
-        SysOssBo sysOssBo = new SysOssBo();
-        sysOssBo.setUrl(fileInfo.getUrl());
-        sysOssBo.setFileName(fileInfo.getFilename());
-        sysOssBo.setOriginalName(fileInfo.getOriginalFilename());
-        sysOssBo.setFileSuffix(fileInfo.getExt());
-        sysOssBo.setPlatform(fileInfo.getPlatform());
-        sysOssBo.setContentType(fileInfo.getContentType());
-        sysOssBo.setBasePath(fileInfo.getBasePath());
-        sysOssBo.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
-        sysOssBo.setSort(0);
-        return R.success(baseService.insert(sysOssBo));
+        ossService.upload(file);
+        return R.success(true);
     }
 
     /**
@@ -121,13 +112,6 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:delete")
     @DeleteMapping("/{id}")
     public R<Boolean> delete(@PathVariable Long id) {
-        SysOssVo vo = baseService.selectVoById(id);
-        if (vo != null) {
-            boolean delete = fileStorageService.delete(vo.getUrl());
-            if (!delete) {
-                return R.fail("桶删除失败");
-            }
-        }
         return R.success(baseService.deleteById(id));
     }
 
@@ -139,6 +123,7 @@ public class SysOssController extends BaseController {
     @SaCheckRole("super_admin")
     @GetMapping("/config/queryDef")
     public R<String> queryDef() {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return R.success("success",sysOssConfigService.queryDef());
     }
 
@@ -150,6 +135,7 @@ public class SysOssController extends BaseController {
     @SaCheckRole("super_admin")
     @GetMapping("/config/{key}")
     public R<SysOssConfigVo> queryByKey(@PathVariable String key) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return R.success(sysOssConfigService.selectVoByKey(key));
     }
 
@@ -161,6 +147,7 @@ public class SysOssController extends BaseController {
     @SaCheckRole("super_admin")
     @PutMapping("/config/edit")
     public R<Boolean> edit(@Validated @RequestBody SysOssConfigBo bo) {
+        com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         return R.success(sysOssConfigService.updateByIdBaseXml(bo));
     }
 

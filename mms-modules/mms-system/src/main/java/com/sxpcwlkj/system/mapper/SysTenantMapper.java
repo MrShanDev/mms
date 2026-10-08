@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Mapper
 @Repository
 public interface SysTenantMapper extends BaseMapper<SysTenant> {
+    @org.apache.ibatis.annotations.Select("SELECT * FROM sys_tenant WHERE tenant_id=#{id} FOR UPDATE")
+    SysTenant lockById(@org.apache.ibatis.annotations.Param("id") String id);
 }

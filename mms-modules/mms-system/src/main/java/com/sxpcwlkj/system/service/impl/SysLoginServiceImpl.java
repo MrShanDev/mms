@@ -1,6 +1,9 @@
 package com.sxpcwlkj.system.service.impl;
 
-import cn.hutool.core.lang.Assert;
+import cn.dev33.satoken.stp.StpUtil;
+import com.sxpcwlkj.framework.utils.PasswordHashUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import java.util.Objects;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.sxpcwlkj.authority.LoginObject;
 import com.sxpcwlkj.common.code.entity.CaptchaEntity;
@@ -51,38 +54,54 @@ public class SysLoginServiceImpl implements SysLoginService {
     private final SysUserMapper sysUserMapper;
 
     private final TenantProperties tenantProperties;
+    private final TenantAdministrationService tenantAdministration;
 
     private final SysConfigService sysConfigService;
 
     @Override
     public String login(HttpServletRequest request,LoginBodyBo loginBodyBo) {
+        String tenantId = loginBodyBo.getTenantId();
+        if (tenantId == null || tenantId.isBlank()) tenantId = "000000";
+        if ("platform".equals(loginBodyBo.getLoginMode()) || "application".equals(loginBodyBo.getLoginMode())) {
+            if(!"000000".equals(tenantId)) throw new MmsException("平台或单应用登录不能指定业务租户",403);
+        }
+        if("tenant".equals(loginBodyBo.getLoginMode()) && "000000".equals(tenantId)) throw new MmsException("请填写业务租户编号");
+        tenantAdministration.checkTenant(tenantId);
+        loginBodyBo.setTenantId(tenantId);
+        // Use the stored account ID so case-insensitive database aliases cannot bypass lockout.
+        SysUser sysUser = sysUserService.selectByUserName(tenantId, loginBodyBo.getUsername());
+        String identity = sysUser == null ? "unknown:" + loginBodyBo.getUsername().trim().toLowerCase(java.util.Locale.ROOT) : "user:" + sysUser.getUserId();
+        String attemptKey = "mms:login:fail:" + tenantId.toLowerCase(java.util.Locale.ROOT) + ":" + identity;
+        var attempts = RedisUtil.getClient().getAtomicLong(attemptKey);
+        if (attempts.get() >= 5) throw new LoginException("登录失败次数过多，请15分钟后重试");
         //验证验证码
         verfyCaptcha(loginBodyBo.getUsername(), loginBodyBo.getCodeKey(), loginBodyBo.getCode(), loginBodyBo.getUuid());
 
         //用户名与密码验证
-        SysUser sysUser = sysUserService.selectByUserName(loginBodyBo.getTenantId(), loginBodyBo.getUsername());
         // 效验
         if (null == sysUser) {
-            throw new LoginException("账号不存在!");
-        }
-        // 账号是否禁用
-        if (!sysUser.getStatus().equals(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
-            throw new LoginException("账号已禁用!");
-        }
-        //解密数据库的密码
-        String pressWord = SignUtil.pressWord(loginBodyBo.getPassword(), sysUser.getAesKey());
-        try {
-            Assert.equals(pressWord, sysUser.getPassword());
-        } catch (Exception e) {
-            log.error(e.getMessage());
+            attempts.incrementAndGet(); attempts.expire(java.time.Duration.ofMinutes(15));
             throw new LoginException("账号与密码有误!");
         }
+        // 账号是否禁用
+        if (!Objects.equals(sysUser.getStatus(), SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue())) {
+            throw new LoginException("账号已禁用!");
+        }
+        if (!PasswordHashUtil.matches(loginBodyBo.getPassword(), sysUser.getPassword(), sysUser.getAesKey())) {
+            attempts.incrementAndGet(); attempts.expire(java.time.Duration.ofMinutes(15));
+            throw new LoginException("账号与密码有误!");
+        }
+        if (PasswordHashUtil.isLegacy(sysUser.getPassword())) {
+            String upgraded = PasswordHashUtil.migrateVerifiedLegacy(loginBodyBo.getPassword());
+            sysUserMapper.upgradePassword(sysUser.getUserId(), sysUser.getTenantId(), sysUser.getPassword(), upgraded);
+        }
+        attempts.delete();
         //验证租户
         verfyTenement(sysUser);
         //进行登记登记
         updateSysUser(request,sysUser);
         //获取当前会话的token值
-        return LoginObject.loginToken(sysUser.getUserId(), DeviceEnum.ADMIN.getType(), 10000000L, "id", sysUser.getUserId());
+        return LoginObject.loginToken(sysUser.getUserId(), DeviceEnum.ADMIN.getType(), cn.dev33.satoken.SaManager.getConfig().getTimeout(), "id", sysUser.getUserId());
     }
 
     @Override
@@ -105,7 +124,8 @@ public class SysLoginServiceImpl implements SysLoginService {
             if(StringUtil.isEmpty(code)){
                 throw new MmsException("The verification code cannot be empty");
             }
-            Map<String, Object> data = RedisUtil.getCacheObject(uuid);
+            if (uuid == null || !uuid.matches("[0-9a-fA-F]{32}") || codeKey == null) throw new LoginException("验证码参数无效");
+            Map<String, Object> data = RedisUtil.getClient().<Map<String, Object>>getBucket("mms:captcha:" + uuid).getAndDelete();
             if (ObjectUtils.isEmpty(data)) {
                 log.info("登录：验证码失效！");
                 throw new LoginException("Verification code failure");
@@ -129,7 +149,7 @@ public class SysLoginServiceImpl implements SysLoginService {
      */
     @Override
     public void verfyTenement(SysUser sysUser) {
-        if (tenantProperties.getEnable()) {
+        if (Boolean.TRUE.equals(tenantProperties.getEnable())) {
             //租户
             SysTenant sysTenant = sysTenantService.selectById(sysUser.getTenantId());
             if (ObjectUtils.isEmpty(sysTenant)) {

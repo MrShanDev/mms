@@ -41,14 +41,8 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
      */
     @Override
     public boolean supports(MethodParameter returnType, @NotNull Class<? extends HttpMessageConverter<?>> converterType) {
-        if (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), MssSafety.class) || returnType.hasMethodAnnotation(MssSafety.class)) {
-            MssSafety apiSecurity = returnType.getMethodAnnotation(MssSafety.class);
-            if (apiSecurity == null) {
-                return false;
-            }
-            return  apiSecurity.encryptResponse();
-        }
-        return false;
+        MssSafety security = getApiSecurity(returnType);
+        return security != null && security.encryptResponse();
     }
 
     /**
@@ -125,7 +119,8 @@ public class ResponseResultBodyAdvice implements ResponseBodyAdvice<Object> {
      * @return 接口注解
      */
     MssSafety getApiSecurity(MethodParameter methodParameter) {
-        return methodParameter.getMethodAnnotation(MssSafety.class);
+        MssSafety security = methodParameter.getMethodAnnotation(MssSafety.class);
+        return security != null ? security : org.springframework.core.annotation.AnnotatedElementUtils.findMergedAnnotation(methodParameter.getContainingClass(), MssSafety.class);
     }
 
     /**

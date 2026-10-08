@@ -68,7 +68,7 @@ public class SysUserController extends BaseController {
      *
      * @return 用户列表
      */
-    @MssSafety(decryptRequest = true)
+    @MssSafety(decryptRequest = true, isRepetition = false)
     @SaCheckPermission("system:user:list")
     @PostMapping("/list")
     public R<PageResult<SysUserVo>> listPage(@RequestBody @Validated(ValidatedGroupConfig.query.class)  SysUserBo user) {
@@ -246,14 +246,13 @@ public class SysUserController extends BaseController {
         }
         String emailTrim = full.getEmail().trim();
         String key = RedisUtil.EMAIL_CODES_KEY + "password:" + emailTrim;
-        Object code = RedisUtil.getCacheObject(key);
+        Object code = RedisUtil.getClient().getBucket(key).getAndDelete();
         if (code == null) {
             return R.fail("验证码已过期！");
         }
         if (!Objects.equals(bo.getCode(), code)) {
             return R.fail("验证码不正确！");
         }
-        RedisUtil.deleteObject(key);
         return R.success(baseService.resetPwdWithoutOld(bo.getPassword()));
     }
 
@@ -341,7 +340,7 @@ public class SysUserController extends BaseController {
         String keyType = "updatePhone:";
         String phone = bo.getPhone();
         String key = RedisUtil.PHONE_CODES_KEY + keyType + phone;
-        Object code = RedisUtil.getCacheObject(key);
+        Object code = RedisUtil.getClient().getBucket(key).getAndDelete();
         if (code == null) {
             return R.fail("验证码已过期！");
         }
@@ -369,7 +368,7 @@ public class SysUserController extends BaseController {
         String keyType = "updatePhone:";
         String email = bo.getEmail();
         String key = RedisUtil.EMAIL_CODES_KEY + keyType + email;
-        Object code = RedisUtil.getCacheObject(key);
+        Object code = RedisUtil.getClient().getBucket(key).getAndDelete();
         if (code == null) {
             return R.fail("验证码已过期！");
         }

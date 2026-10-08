@@ -51,6 +51,11 @@ public final class PluginSpringBeanAttachment {
         try {
             dlb.autowireBean(bean);
             Object exposed = dlb.initializeBean(bean, fullName);
+            if (exposed != bean) {
+                dlb.destroySingleton(fullName);
+                dlb.registerSingleton(fullName, exposed);
+            }
+            dlb.registerDisposableBean(fullName, () -> dlb.destroyBean(bean));
             registerMvcIfNeeded(loadSessionId, exposed);
         } catch (Exception e) {
             throw new PluginException("插件单例初始化失败: " + logicalName, e);
@@ -74,6 +79,7 @@ public final class PluginSpringBeanAttachment {
         sessionToBeanNames.computeIfAbsent(loadSessionId, k -> new ArrayList<>()).add(fullName);
         try {
             Object exposed = dlb.getBean(fullName);
+            dlb.registerDisposableBean(fullName, () -> dlb.destroyBean(bean));
             registerMvcIfNeeded(loadSessionId, exposed);
         } catch (Exception e) {
             throw new PluginException("插件单例登记后解析失败: " + logicalName, e);

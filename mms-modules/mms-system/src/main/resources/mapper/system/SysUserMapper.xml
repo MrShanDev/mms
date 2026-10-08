@@ -22,7 +22,7 @@
     <select id="selectPageUserList" resultType="com.sxpcwlkj.system.entity.vo.SysUserVo">
         SELECT dp.`dept_name` AS department,  u.*
         FROM
-        `sys_user` u LEFT JOIN  `sys_dept` dp ON u.`dept_id`=dp.`dept_id`
+        `sys_user` u LEFT JOIN  `sys_dept` dp ON u.`dept_id`=dp.`dept_id` AND u.tenant_id=dp.tenant_id
          ${ew.getCustomSqlSegment}
     </select>
 </mapper>

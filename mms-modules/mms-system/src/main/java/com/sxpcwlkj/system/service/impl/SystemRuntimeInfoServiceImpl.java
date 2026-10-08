@@ -44,6 +44,7 @@ public class SystemRuntimeInfoServiceImpl implements SystemRuntimeInfoService {
     private final Environment environment;
     private final DataSource dataSource;
     private final SlowSqlRecorder slowSqlRecorder;
+    private final org.springframework.beans.factory.ObjectProvider<org.springframework.data.redis.connection.RedisConnectionFactory> redisFactory;
 
     /** 采样间隔（ms）：用于计算 CPU 使用率 */
     private static final int CPU_SAMPLE_MS = 300;
@@ -69,6 +70,14 @@ public class SystemRuntimeInfoServiceImpl implements SystemRuntimeInfoService {
         vo.setJvmMemory(buildJvmMemory());
         vo.setDisks(buildDisks(fs));
         vo.setDb(buildDb());
+        SystemRuntimeInfoVo.Redis redis = new SystemRuntimeInfoVo.Redis();
+        try {
+            var factory = redisFactory.getIfAvailable();
+            if (factory != null) try (var connection = factory.getConnection()) {
+                redis.setConnected("PONG".equalsIgnoreCase(connection.ping()));
+            }
+        } catch (Exception ignored) { redis.setConnected(false); }
+        vo.setRedis(redis);
         vo.setDbPool(buildDbPool());
         vo.setSlowSqlRecent(buildSlowSqlRecent());
 

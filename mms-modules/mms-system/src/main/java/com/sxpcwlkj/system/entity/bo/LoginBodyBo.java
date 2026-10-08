@@ -17,7 +17,7 @@ public class LoginBodyBo {
      */
     @Schema(description = "账号",type = "string", example = "demo", maxLength = 16, minLength = 3, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "账号不能为空")
-    @Size(min = 3, max = 16, message = "账号长度在{min}到{max}个字符")
+    @Size(min = 3, max = 64, message = "账号长度在{min}到{max}个字符")
     private String username;
 
     /**
@@ -25,7 +25,7 @@ public class LoginBodyBo {
      */
     @Schema(description = "账号密码", type = "string",example = "******", maxLength = 32, minLength = 6, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, max = 32, message = "密码长度在{min}到{max}个字符")
+    @Size(min = 6, max = 128, message = "密码长度在{min}到{max}个字符")
      private String password;
     /**
      * 验证码
@@ -52,5 +52,7 @@ public class LoginBodyBo {
      * 租户ID
      */
     private String tenantId;
+    @jakarta.validation.constraints.Pattern(regexp="platform|tenant|application")
+    private String loginMode;
 
 }

@@ -19,7 +19,8 @@ CREATE TABLE `sys_notice` (
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   `sort` int DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+ KEY ix_notice_tenant_status_time (tenant_id,status,created_time)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统公告;';
 
 
@@ -173,7 +174,8 @@ CREATE TABLE `sys_role` (
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+ UNIQUE KEY uk_role_tenant_code (tenant_id,code)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统角色';
 
 INSERT INTO `sys_role` (`id`, `name`, `code`, `sort`, `data_scope`, `data_scope_dept_ids`, `status`, `level`, `remark`, `tenant_id`, `revision`, `created_by`, `created_time`, `updated_by`, `updated_time`) VALUES
@@ -212,7 +214,7 @@ CREATE TABLE `sys_tenant_package` (
   `id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '套餐编号',
   `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '套餐名',
   `status` int DEFAULT NULL COMMENT '租户状态;0正常 1停用',
-  `function_ids` varchar(900) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '关联的菜单编号',
+  `function_ids` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '关联的菜单编号',
   `remark` varchar(900) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
   `revision` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '乐观锁',
   `created_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '创建人',
@@ -226,7 +228,7 @@ CREATE TABLE `sys_tenant_package` (
 -- sys_log
 CREATE TABLE `sys_log` (
   `oper_id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
-  `tenant_id` bigint DEFAULT '0' COMMENT '租户ID',
+  `tenant_id` varchar(32) DEFAULT '000000' COMMENT '租户ID',
   `module` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '模块名称',
   `oper_type` int DEFAULT '0' COMMENT '操作类型(0其它 1新增 2修改 3删除 4查询 5导出 6导入 7登录 8退出 9授权 10清空)',
   `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '' COMMENT '操作描述',
@@ -253,7 +255,8 @@ CREATE TABLE `sys_log` (
   KEY `idx_user_id` (`user_id`),
   KEY `idx_oper_type` (`oper_type`),
   KEY `idx_oper_time` (`oper_time`),
-  KEY `idx_status` (`status`)
+  KEY `idx_status` (`status`),
+ KEY ix_log_tenant_time (tenant_id,oper_time)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='操作日志记录表';
 
 
@@ -295,7 +298,8 @@ CREATE TABLE `sys_dict` (
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+ UNIQUE KEY uk_dict_tenant_field (tenant_id,field_name)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统字典';
 
 INSERT INTO `sys_dict` (`id`, `name`, `field_name`, `type`, `sort`, `status`, `tenant_id`, `revision`, `created_by`, `created_time`, `updated_by`, `updated_time`, `remark`) VALUES
@@ -341,7 +345,12 @@ CREATE TABLE `sys_user` (
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   `sort` int DEFAULT '0' COMMENT '排序',
-  PRIMARY KEY (`user_id`)
+  PRIMARY KEY (`user_id`),
+ UNIQUE KEY uk_user_tenant_name (tenant_id,user_name),
+ UNIQUE KEY uk_user_tenant_phone (tenant_id,phone_number),
+ UNIQUE KEY uk_user_tenant_email (tenant_id,email),
+ KEY ix_user_tenant_dept (tenant_id,dept_id),
+ KEY ix_user_tenant_status_created (tenant_id,status,created_time)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统用户';
 
 INSERT INTO `sys_user` (`user_id`, `dept_id`, `post_ids`, `user_name`, `nick_name`, `user_type`, `email`, `phone_number`, `wx_openid`, `wx_un_open_id`, `sex`, `avatar`, `aes_key`, `password`, `password_strength`, `status`, `del_flag`, `login_ip`, `login_date`, `public_key`, `private_key`, `remark`, `tenant_id`, `revision`, `created_by`, `created_time`, `updated_by`, `updated_time`, `sort`) VALUES
@@ -443,7 +452,8 @@ CREATE TABLE `sys_role_function` (
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+ UNIQUE KEY uk_role_function (tenant_id,role_id,function_id)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='角色功能;';
 
 INSERT INTO `sys_role_function` (`id`, `role_id`, `function_id`, `remark`, `status`, `sort`, `tenant_id`, `revision`, `created_by`, `created_time`, `updated_by`, `updated_time`) VALUES
@@ -598,7 +608,8 @@ CREATE TABLE `sys_user_role` (
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+ UNIQUE KEY uk_user_role (tenant_id,user_id,role_id), KEY ix_user_role_role (tenant_id,role_id)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色;';
 
 INSERT INTO `sys_user_role` (`id`, `user_id`, `role_id`, `status`, `sort`, `remark`, `tenant_id`, `revision`, `created_by`, `created_time`, `updated_by`, `updated_time`) VALUES
@@ -620,7 +631,8 @@ CREATE TABLE `sys_config` (
   `created_time` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新者',
   `updated_time` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新者',
-  PRIMARY KEY (`id`,`tenant_id`)
+  PRIMARY KEY (`id`,`tenant_id`),
+ UNIQUE KEY uk_config_tenant_key (tenant_id,config_key)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='配置表';
 
 INSERT INTO `sys_config` (`id`, `config_name`, `config_key`, `config_value`, `config_type`, `tenant_id`, `revision`, `remark`, `status`, `sort`, `created_by`, `created_time`, `updated_by`, `updated_time`) VALUES
@@ -719,3 +731,28 @@ CREATE TABLE `sys_user_theme_preference` (
   updated_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (tenant_id, user_id)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户外观与控制台偏好';
+
+-- v2.1 core: persisted notice reads and monitoring permission.
+CREATE TABLE sys_notice_read (
+ tenant_id varchar(32) NOT NULL, user_id varchar(32) NOT NULL, notice_id varchar(32) NOT NULL,
+ read_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ PRIMARY KEY (tenant_id,user_id,notice_id), KEY ix_notice_read_notice (tenant_id,notice_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO sys_function(parent_id,name,permission,type,status,tenant_id,revision,created_time,updated_time)
+ SELECT id,'运行监控','system:monitor:query',2,1,tenant_id,1,NOW(),NOW()
+ FROM sys_function WHERE id='2';
+
+ALTER TABLE sys_oss ADD COLUMN file_info_json LONGTEXT COMMENT '存储服务完整元数据';
+
+ALTER TABLE sys_sign ADD KEY idx_sign_user_expiry(user_id,time_out);
+
+-- Platform tenant menu only; safe to run again without duplicating rows.
+INSERT INTO sys_function(id,parent_id,path,name,component,language_code,permission,type,sort,icon,status,visible,is_iframe,is_open_link,is_link,keep_alive,always_show,is_fast,tenant_id,revision,created_by,created_time,updated_by,updated_time)
+SELECT 2061000000000000101,'3','/system/tenant','租户管理','system/tenant/index','租户管理','super_admin',1,8,'iconfont icon-application',1,-1,-1,-1,'',1,-1,0,'000000',0,'1',NOW(),'1',NOW()
+WHERE NOT EXISTS (SELECT 1 FROM sys_function WHERE tenant_id='000000' AND path='/system/tenant');
+INSERT INTO sys_function(id,parent_id,name,component,permission,type,sort,status,visible,tenant_id,revision,created_by,created_time,updated_by,updated_time)
+SELECT 2061000000000000102,CAST(id AS CHAR),'租户查询','','system:tenant:list',2,1,1,-1,'000000',0,'1',NOW(),'1',NOW()
+FROM sys_function p WHERE p.tenant_id='000000' AND p.path='/system/tenant'
+AND NOT EXISTS (SELECT 1 FROM sys_function WHERE tenant_id='000000' AND permission='system:tenant:list' AND type=2);
+UPDATE sys_function SET language_code='租户管理',permission='super_admin',icon='iconfont icon-application' WHERE tenant_id='000000' AND path='/system/tenant' AND component='system/tenant/index';

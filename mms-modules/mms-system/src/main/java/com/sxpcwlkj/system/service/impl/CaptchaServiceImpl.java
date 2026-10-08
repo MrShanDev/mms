@@ -105,7 +105,7 @@ public class CaptchaServiceImpl implements CaptchaService {
             }
         }
 
-        RedisUtil.setCacheObject(DataUtil.getString(data.get(CaptchaEntity.CODE.UUID.getValue())), data, Duration.ofMinutes(Constants.CAPTCHA_EXPIRATION));
+        RedisUtil.setCacheObject("mms:captcha:" + DataUtil.getString(data.get(CaptchaEntity.CODE.UUID.getValue())), data, Duration.ofMinutes(Constants.CAPTCHA_EXPIRATION));
         data.remove(CaptchaEntity.CODE.TYPE.getValue());
         data.remove(CaptchaEntity.CODE.CAPTCHA_VALUE.getValue());
         data.remove(CaptchaEntity.CODE.CAPTCHA_KEY.getValue());

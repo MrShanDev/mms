@@ -22,7 +22,6 @@ import java.util.List;
 @Mapper
 @Repository
 public interface SysRoleMapper extends BaseMapperPlus<SysRole,SysRoleVo> {
-    @InterceptorIgnore(tenantLine = "true")
     Page<SysRoleVo> selectPageList(@Param("page") Page<SysUser> page, @Param(Constants.WRAPPER) Wrapper<SysRole> queryWrapper);
 
     /**
@@ -30,14 +29,12 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole,SysRoleVo> {
      * @param userId id
      * @return vo
      */
-    @InterceptorIgnore(tenantLine = "true")
     SysRoleVo selectByUserId(@Param("userId") String userId);
     /**
      * 查询用户所有角色
      * @param userId id
      * @return vo
      */
-    @InterceptorIgnore(tenantLine = "true")
     List<SysRoleVo> selectByUserIdList(@Param("userId") String userId);
 
     /**
@@ -45,6 +42,5 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole,SysRoleVo> {
      * @param roleCode 编码
      * @return vo
      */
-    @InterceptorIgnore(tenantLine = "true")
     SysRoleVo selectByCode(@Param("roleCode") String roleCode);
 }

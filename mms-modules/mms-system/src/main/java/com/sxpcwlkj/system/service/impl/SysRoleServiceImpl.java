@@ -18,6 +18,7 @@ import com.sxpcwlkj.system.entity.bo.SysRoleBo;
 import com.sxpcwlkj.system.entity.vo.SysFunctionVo;
 import com.sxpcwlkj.system.entity.vo.SysRoleVo;
 import com.sxpcwlkj.system.mapper.SysFunctionMapper;
+import com.sxpcwlkj.system.mapper.SysDeptMapper;
 import com.sxpcwlkj.system.mapper.SysRoleFunctionMapper;
 import com.sxpcwlkj.system.mapper.SysRoleMapper;
 import com.sxpcwlkj.system.mapper.SysUserRoleMapper;
@@ -37,10 +38,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service("sysRole")
 @Slf4j
+@org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
 public class SysRoleServiceImpl implements SysRoleService {
 
     private final AdminLoginPermissionCacheService adminLoginPermissionCacheService;
     private final SysRoleMapper baseMapper;
+    private final SysDeptMapper sysDeptMapper;
     private final SysFunctionMapper sysFunctionMapper;
     private final SysRoleFunctionMapper sysRoleFunctionMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
@@ -86,6 +89,7 @@ public class SysRoleServiceImpl implements SysRoleService {
             return 999999;
         }
         return roles.stream()
+            .filter(role -> "1".equals(role.getStatus()))
             .map(SysRoleVo::getLevel)
             .filter(java.util.Objects::nonNull)
             .min(Integer::compare)
@@ -96,6 +100,7 @@ public class SysRoleServiceImpl implements SysRoleService {
     public SysRoleVo selectVoById(String id) {
         SysRoleVo vo = baseMapper.selectVoById(id);
         if (vo == null) return null;
+        assertManageableRole(vo);
         // 系统菜单
         List<AdminMenuTree> functionTree = sysFunctionService.getAllMenuTree();
         vo.setFunctionTree(functionTree);
@@ -111,103 +116,100 @@ public class SysRoleServiceImpl implements SysRoleService {
         return vo;
     }
 
-    @Override
-    public Boolean updateByIdBase(SysRoleBo bo) {
-        int row;
-        SysRole sysRole = baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, bo.getCode()).last("LIMIT 1"));
-        if (sysRole != null) {
-            if (!bo.getId().equals(sysRole.getId())) {
-                throw new MmsException("角色标识重复!");
-            }
-        }
-
-        // 角色资源
-
-        String[] defChecked = bo.getDefChecked();
-
-        if (defChecked != null) {
-            // 先清理删除
-            sysRoleFunctionMapper.delete(new LambdaQueryWrapper<SysRoleFunction>().eq(SysRoleFunction::getRoleId, bo.getId()));
-            for (String aLong : defChecked) {
-                //这里需要处理一下，el-tree 的选择数据，如果子项数不全部选择，是不返回父节点的
-                checkFunction(aLong, bo.getId());
-                SysRoleFunction roleFunction = new SysRoleFunction();
-                roleFunction.setRoleId(bo.getId());
-                roleFunction.setFunctionId(aLong);
-                roleFunction.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
-                sysRoleFunctionMapper.insert(roleFunction);
-            }
-        }
-
-        SysRole base = MapstructUtil.convert(bo, SysRole.class);
-        row = baseMapper.updateById(base);
-        if (row > 0) {
-            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
-            return Boolean.TRUE;
-        }
-        throw new MmsException("操作失败");
+    private void assertManageableRole(SysRoleVo role) {
+        if (role == null) throw new MmsException("角色不存在");
+        if (!LoginObject.getLoginSuper() && ("super_admin".equals(role.getCode()) || role.getLevel() == null
+                || role.getLevel() < getCurrentUserMinLevel())) throw new MmsException("无权操作该角色");
     }
 
-    private void checkFunction(String funId,String roleId){
-        //当前资源
-        SysFunctionVo sysRoleFunction= sysFunctionMapper.selectVoById(funId);
-        if(sysRoleFunction!=null){
-            //查看当前这个资源的父资源，是否被记录进来
-            SysRoleFunction funRole= sysRoleFunctionMapper.selectOne(new LambdaQueryWrapper<SysRoleFunction>()
-                .eq(SysRoleFunction::getRoleId,roleId)
-                .eq(SysRoleFunction::getFunctionId,sysRoleFunction.getParentId())
-            );
-            if(funRole==null){
-                SysRoleFunction role = new SysRoleFunction();
-                role.setRoleId(roleId);
-                role.setFunctionId(sysRoleFunction.getParentId());
-                role.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
-                sysRoleFunctionMapper.insert(role);
-                checkFunction(sysRoleFunction.getParentId(), roleId);
+    private java.util.Set<String> validateGrant(SysRoleBo bo) {
+        if (!LoginObject.getLoginSuper() && ("super_admin".equals(bo.getCode()) || bo.getLevel() == null
+                || bo.getLevel() < getCurrentUserMinLevel())) throw new MmsException("不能创建或提升高于自己的角色");
+        if (bo.getDataScope() == null) bo.setDataScope("5");
+        if (!java.util.Set.of("1","2","3","4","5").contains(bo.getDataScope())) throw new MmsException("数据范围无效");
+        if (!LoginObject.getLoginSuper()) {
+            // Only the tenant super administrator may expand department/all data access.
+            if (!"5".equals(bo.getDataScope())) throw new MmsException("数据范围授权需超级管理员操作");
+        }
+        if ("2".equals(bo.getDataScope())) {
+            if (bo.getDataScopeDeptIds() == null || bo.getDataScopeDeptIds().isBlank()) throw new MmsException("自定义数据范围必须选择部门");
+            java.util.Set<String> departments = new java.util.LinkedHashSet<>();
+            for (String id : bo.getDataScopeDeptIds().split(",")) {
+                id = id.trim();
+                if (id.isEmpty() || sysDeptMapper.selectById(id) == null) throw new MmsException("数据范围部门不存在或不属于当前租户");
+                departments.add(id);
+            }
+            bo.setDataScopeDeptIds(String.join(",", departments));
+        } else bo.setDataScopeDeptIds(null);
+        java.util.Set<String> grants = new java.util.LinkedHashSet<>();
+        if (bo.getDefChecked() != null) for (String selected : bo.getDefChecked()) {
+            String id = selected; java.util.Set<String> path = new java.util.HashSet<>();
+            while (id != null && !id.isBlank() && !"0".equals(id)) {
+                if (!path.add(id)) throw new MmsException("菜单父链存在循环");
+                SysFunctionVo menu = sysFunctionMapper.selectVoById(id);
+                if (menu == null) throw new MmsException("菜单不存在或不属于当前租户");
+                if (!LoginObject.getLoginSuper() && StringUtil.isNotEmpty(menu.getPermission())
+                        && !cn.dev33.satoken.stp.StpUtil.hasPermission(menu.getPermission()))
+                    throw new MmsException("不能授予自己没有的权限");
+                grants.add(id); id = menu.getParentId();
             }
         }
+        return grants;
+    }
 
+    private void replaceGrants(String roleId, java.util.Set<String> grants) {
+        sysRoleFunctionMapper.delete(new LambdaQueryWrapper<SysRoleFunction>().eq(SysRoleFunction::getRoleId, roleId));
+        for (String id : grants) {
+            SysRoleFunction relation = new SysRoleFunction(); relation.setRoleId(roleId); relation.setFunctionId(id); relation.setStatus(1);
+            if (sysRoleFunctionMapper.insert(relation) != 1) throw new MmsException("授权失败");
+        }
+    }
+
+    private java.util.List<String> assignedUsers(String roleId) {
+        return sysUserRoleMapper.selectList(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId, roleId))
+                .stream().map(SysUserRole::getUserId).distinct().toList();
+    }
+
+    @Override
+    public Boolean updateByIdBase(SysRoleBo bo) {
+        SysRoleVo current = baseMapper.selectVoById(bo.getId()); assertManageableRole(current);
+        if ("super_admin".equals(current.getCode()) && (!"super_admin".equals(bo.getCode()) || !java.util.Objects.equals(bo.getStatus(),1)))
+            throw new MmsException("超级管理员角色不能改名或禁用");
+        java.util.Set<String> grants = validateGrant(bo);
+        SysRole duplicate = baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, bo.getCode()).last("LIMIT 1"));
+        if (duplicate != null && !bo.getId().equals(duplicate.getId())) throw new MmsException("角色标识重复");
+        SysRole role = MapstructUtil.convert(bo, SysRole.class); role.setTenantId(null);
+        if (baseMapper.updateById(role) != 1) throw new MmsException("角色修改失败或版本已变化");
+        replaceGrants(bo.getId(), grants);
+        adminLoginPermissionCacheService.refreshUsers(assignedUsers(bo.getId()));
+        return true;
     }
 
     @Override
     public Boolean insert(SysRoleBo bo) {
-        SysRole sysRole = baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, bo.getCode()).last("LIMIT 1"));
-        if (sysRole != null) {
-            throw new MmsException("角色标识重复!");
-        }
-        int row;
-        SysRole base = MapstructUtil.convert(bo, SysRole.class);
-        row = baseMapper.insert(base);
-        if (row > 0) {
-            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
-            return Boolean.TRUE;
-        }
-        throw new MmsException("操作失败");
+        if ("super_admin".equals(bo.getCode())) throw new MmsException("不能新增超级管理员角色");
+        java.util.Set<String> grants = validateGrant(bo);
+        if (baseMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getCode, bo.getCode()).last("LIMIT 1")) != null)
+            throw new MmsException("角色标识重复");
+        SysRole role = MapstructUtil.convert(bo, SysRole.class); role.setId(null);
+        if (baseMapper.insert(role) != 1) throw new MmsException("角色新增失败");
+        replaceGrants(role.getId(), grants); return true;
     }
 
     @Override
     public Boolean deleteById(String ids) {
         String[] array = DataUtil.getCatStr(ids, ",");
-        int rows=0;
+        java.util.Set<String> users = new java.util.LinkedHashSet<>();
         for (String id : array) {
-            SysRole sysRole = baseMapper.selectById(id);
-            if (sysRole == null) {
-                throw new MmsException("数据有误!");
-            }
-            if (sysRole.getCode().equals(SystemCommonEnum.SUPER_ADMIN.getCode())) {
-                throw new MmsException("超级管理员不能删除!");
-            }
-            // 删除 用户-角色
-            sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId, id));
-            // 删除 角色-资源
-            sysRoleFunctionMapper.delete(new LambdaQueryWrapper<SysRoleFunction>().eq(SysRoleFunction::getRoleId, id));
-            // 删除角色
-            rows = baseMapper.deleteById(id);
+            SysRoleVo role = baseMapper.selectVoById(id); assertManageableRole(role);
+            if ("super_admin".equals(role.getCode())) throw new MmsException("超级管理员角色不能删除");
+            users.addAll(assignedUsers(id));
         }
-        if (rows > 0) {
-            adminLoginPermissionCacheService.refreshAllCachedAdminUsers();
-            return Boolean.TRUE;
+        for (String id : array) {
+            sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId,id));
+            sysRoleFunctionMapper.delete(new LambdaQueryWrapper<SysRoleFunction>().eq(SysRoleFunction::getRoleId,id));
+            if (baseMapper.deleteById(id) != 1) throw new MmsException("角色删除失败");
         }
-        throw new MmsException("操作失败");
+        adminLoginPermissionCacheService.refreshUsers(users); return true;
     }
 }

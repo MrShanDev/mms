@@ -14,6 +14,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SysSignMapper extends BaseMapperPlus<SysSign,SysSign> {
 
-    @Insert("insert into sys_sign(id,user_id,app_id,secret_key,public_key,private_key,time_out,created_time,created_by) values(#{id},#{userId},#{appId},#{secretKey},#{publicKey},#{privateKey},#{timeOut},#{createdTime},#{createdBy})")
+    @Insert("insert into sys_sign(id,user_id,app_id,secret_key,public_key,private_key,time_out,created_time,created_by,revision,tenant_id,status) values(#{id},#{userId},#{appId},#{secretKey},#{publicKey},#{privateKey},#{timeOut},#{createdTime},#{createdBy},#{revision},#{tenantId},#{status})")
     int initSign(SysSign sysSign);
+
+    @com.baomidou.mybatisplus.annotation.InterceptorIgnore(tenantLine="true",dataPermission="true")
+    @org.apache.ibatis.annotations.Update("UPDATE sys_sign SET time_out=GREATEST(time_out,#{timeOut}) WHERE id=#{id} AND user_id=#{userId}")
+    int renewSign(SysSign sysSign);
 }

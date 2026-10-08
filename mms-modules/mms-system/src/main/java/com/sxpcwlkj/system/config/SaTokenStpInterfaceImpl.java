@@ -32,10 +32,10 @@ public class SaTokenStpInterfaceImpl implements StpInterface {
         List<String> list = new ArrayList<>();
 
         SysUserVo sysUserVo = LoginObject.getLoginObject(SysUserVo.class);
-        assert sysUserVo != null;
+        if (sysUserVo == null) throw new com.sxpcwlkj.common.exception.MmsException("登录信息已失效，请重新登录", 401);
         List<SysRoleVo> roleVoList = sysUserVo.getRoleVoList();
-        for (SysRoleVo r : roleVoList) {
-            list.addAll(Arrays.asList(r.getPermissions()));
+        for (SysRoleVo r : roleVoList == null ? java.util.List.<SysRoleVo>of() : roleVoList) {
+            if (r != null && r.getPermissions() != null) list.addAll(Arrays.asList(r.getPermissions()));
         }
 
         return list;
@@ -53,7 +53,7 @@ public class SaTokenStpInterfaceImpl implements StpInterface {
 
         SysUserVo userVo = LoginObject.getLoginObject(SysUserVo.class);
         SysUserVo sysUserVo = MapstructUtil.convert(userVo, SysUserVo.class);
-        assert sysUserVo != null;
+        if (sysUserVo == null) throw new com.sxpcwlkj.common.exception.MmsException("登录信息已失效，请重新登录", 401);
         String[] roleCodes = sysUserVo.getRoleCodes();
         if (roleCodes == null || roleCodes.length == 0) {
             return list;

@@ -17,6 +17,7 @@ import java.util.Set;
  * @author mmsAdmin
  * @Doc mmsadmin.cn
  */
+@com.sxpcwlkj.common.annotation.PlatformAdmin
 @RestController
 @RequestMapping("gen/fieldType")
 @AllArgsConstructor

@@ -46,23 +46,7 @@ public class WebHandlerInterceptorHandler implements HandlerInterceptor {
         if (!prodProfile.equals(SpringUtil.getActiveProfile())) {
             String url = request.getMethod() + " " + request.getRequestURI();
 
-            // 打印请求参数
-            if (isJsonRequest(request)) {
-                String jsonParam = "";
-                if (request instanceof HttpServletRequestWrapperHandler) {
-                    BufferedReader reader = request.getReader();
-                    jsonParam = IoUtil.read(reader);
-                }
-                log.debug("[PLUS]开始请求 => URL[{}],参数类型[json],参数:[{}]", url, jsonParam);
-            } else {
-                Map<String, String[]> parameterMap = request.getParameterMap();
-                if (MapUtil.isNotEmpty(parameterMap)) {
-                    String parameters = JsonUtil.toJsonString(parameterMap);
-                    log.debug("[PLUS]开始请求 => URL[{}],参数类型[param],参数:[{}]", url, parameters);
-                } else {
-                    log.debug("[PLUS]开始请求 => URL[{}],无参数", url);
-                }
-            }
+            log.debug("[PLUS]开始请求 => URL[{}]", url);
 
             StopWatch stopWatch = new StopWatch();
             invokeTimeTL.set(stopWatch);
@@ -73,6 +57,18 @@ public class WebHandlerInterceptorHandler implements HandlerInterceptor {
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
+        HandlerMethod method = (HandlerMethod) handler;
+        if (com.sxpcwlkj.authority.LoginObject.getCurrentLoginRealm()==com.sxpcwlkj.authority.LoginRealm.SYSTEM_ADMIN && !method.hasMethodAnnotation(cn.dev33.satoken.annotation.SaIgnore.class)) {
+            var policy=SpringUtil.getBeanFactory().getBeanProvider(com.sxpcwlkj.common.tenant.TenantRequestPolicy.class).getIfAvailable();
+            if(policy!=null) {
+                policy.check();
+                var permission=method.getMethodAnnotation(cn.dev33.satoken.annotation.SaCheckPermission.class);
+                if(permission!=null) for(String p:permission.value()) policy.checkPermission(p);
+            }
+        }
+        if (org.springframework.core.annotation.AnnotatedElementUtils.hasAnnotation(method.getBeanType(), com.sxpcwlkj.common.annotation.PlatformAdmin.class)
+                || method.hasMethodAnnotation(com.sxpcwlkj.common.annotation.PlatformAdmin.class))
+            com.sxpcwlkj.authority.LoginObject.requirePlatformAdmin();
         // Sa-Token 1.43.0+ 注解检查已集成到框架,无需手动调用
         // Method method = ((HandlerMethod) handler).getMethod();
         // SaStrategy.me.checkMethodAnnotation.accept(method);
