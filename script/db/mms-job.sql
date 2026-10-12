@@ -1,6 +1,7 @@
--- MMS 开源初始化：PowerJob 4.3.9（pj_ 前缀）
+-- MMS 开源初始化：PowerJob 4.3.9（10 张 pj_ 空表）
 -- UTF-8 / LF；MySQL 5.7.8+、8.x；InnoDB DYNAMIC / utf8mb4_unicode_ci。
 -- 仅用于全新空库；已有表将报错。请先阅读同目录 README.md。
+-- 字段与索引按本项目锁定的 powerjob-server-persistence 4.3.9 核对；升级 PowerJob 时须另做迁移。
 
 SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 

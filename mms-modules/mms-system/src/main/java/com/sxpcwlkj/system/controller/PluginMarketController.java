@@ -13,6 +13,7 @@ import com.sxpcwlkj.system.service.PluginMarketSysConfigService;
 import com.sxpcwlkj.system.service.SysPluginMarketService;
 import com.sxpcwlkj.system.service.SysPluginVersionService;
 import com.sxpcwlkj.system.service.impl.PluginHostDbBridgeImpl;
+import com.sxpcwlkj.system.service.impl.OfficialPluginReleaseService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 插件市场：合并 sys_plugins 元数据与宿主运行时状态（超级管理员与管理员）。
@@ -38,11 +40,27 @@ public class PluginMarketController {
     private final SysPluginVersionService sysPluginVersionService;
     private final PluginMarketSysConfigService pluginMarketSysConfigService;
     private final PluginLifecycleManager pluginLifecycleManager;
+    private final OfficialPluginReleaseService officialPluginReleaseService;
 
     @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
     @GetMapping("/cards")
     public R<List<PluginMarketCardVo>> cards() {
         return R.success(sysPluginMarketService.listMarketCards());
+    }
+
+    /** 仅从随服务端发布的白名单下载公开发行版附件。 */
+    @SaCheckRole(value = {"super_admin", "admin"}, mode = SaMode.OR)
+    @PostMapping("/installRelease")
+    public R<Map<String, Object>> installRelease(@RequestBody PluginMarketRemoveBo body) {
+        LoginObject.requirePlatformAdmin();
+        if (body == null || body.getPluginId() == null || body.getPluginId().isBlank()) {
+            return R.fail("pluginId 不能为空");
+        }
+        try {
+            return officialPluginReleaseService.install(body.getPluginId().trim());
+        } catch (Exception ex) {
+            return R.fail("官方插件下载、校验或安装失败；请检查服务端网络与插件日志");
+        }
     }
 
     /**

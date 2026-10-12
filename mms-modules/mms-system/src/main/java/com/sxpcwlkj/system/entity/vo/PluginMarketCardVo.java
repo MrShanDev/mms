@@ -94,4 +94,11 @@ public class PluginMarketCardVo {
      * 是否允许「彻底卸载」（purge）及移除库表登记等对插件包的删除类操作；官方上架为 false。
      */
     private Boolean purgeAllowed;
+
+    /** 固定官方发行版版本；为空表示无预置下载包。 */
+    private String releaseVersion;
+
+    /** 仅供管理员查看发行说明，下载与鉴权始终在服务端进行。 */
+    private String releasePageUrl;
+
 }

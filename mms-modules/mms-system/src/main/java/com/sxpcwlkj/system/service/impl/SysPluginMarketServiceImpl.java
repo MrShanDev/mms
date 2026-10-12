@@ -49,6 +49,7 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
     private final PluginLifecycleManager pluginLifecycleManager;
     private final PluginHostProperties pluginHostProperties;
     private final PluginHostDbBridge pluginHostDbBridge;
+    private final OfficialPluginReleaseService officialPluginReleaseService;
 
     @Override
     public List<PluginMarketCardVo> listMarketCards() {
@@ -116,6 +117,8 @@ public class SysPluginMarketServiceImpl implements SysPluginMarketService {
             card.setSubprocessLaunchEnabled(pluginHostProperties.isSubprocessLaunchEnabled());
             mergeSubprocessRuntime(card, manifestByPlugin.get(pluginId), hostEnabled);
             card.setSysConfigSchema(pluginLifecycleManager.resolveSysConfigSchema(pluginId));
+            card.setReleaseVersion(officialPluginReleaseService.releaseVersion(pluginId));
+            card.setReleasePageUrl(officialPluginReleaseService.releaseUrl(pluginId));
             out.add(card);
         }
         return out;

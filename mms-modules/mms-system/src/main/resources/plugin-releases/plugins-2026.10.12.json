@@ -1,0 +1,157 @@
+{
+  "releaseTag": "plugins-2026.10.12",
+  "releaseId": 1199899,
+  "releaseUrl": "https://gitee.com/MrShanDev/mms/releases/tag/plugins-2026.10.12",
+  "plugins": [
+    {
+      "pluginId": "mms.plugin.c-base",
+      "version": "1.1.2",
+      "fileName": "mms.plugin.c-base-1.1.2.jar",
+      "size": 9364296,
+      "sha256": "62be98b1882623944a8490a138745432f33e8e67a62565e8c49f5273fee0f409",
+      "assets": [
+        {
+          "id": 3371191,
+          "name": "mms.plugin.c-base-1.1.2.jar",
+          "size": 9364296,
+          "sha256": "62be98b1882623944a8490a138745432f33e8e67a62565e8c49f5273fee0f409"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.datasource",
+      "version": "1.1.2",
+      "fileName": "mms.plugin.datasource-1.1.2.jar",
+      "size": 203579,
+      "sha256": "dbdf4e012e7933cfa3a8833e982fa97195f0717035422f7b5143d6cf523fe19a",
+      "assets": [
+        {
+          "id": 3371192,
+          "name": "mms.plugin.datasource-1.1.2.jar",
+          "size": 203579,
+          "sha256": "dbdf4e012e7933cfa3a8833e982fa97195f0717035422f7b5143d6cf523fe19a"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.redis-inspect",
+      "version": "1.1.2",
+      "fileName": "mms.plugin.redis-inspect-1.1.2.jar",
+      "size": 6865814,
+      "sha256": "37645e817c2c7fd8ea52aadc9544340369164e197e0a0328135e938c32ce07e7",
+      "assets": [
+        {
+          "id": 3371194,
+          "name": "mms.plugin.redis-inspect-1.1.2.jar",
+          "size": 6865814,
+          "sha256": "37645e817c2c7fd8ea52aadc9544340369164e197e0a0328135e938c32ce07e7"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.wechat-bot",
+      "version": "1.1.1",
+      "fileName": "mms.plugin.wechat-bot-1.1.1.jar",
+      "size": 219967,
+      "sha256": "5336f533b53faacd378461a3b794974fbddb4c0b03805cc5735dc459367be3ac",
+      "assets": [
+        {
+          "id": 3371195,
+          "name": "mms.plugin.wechat-bot-1.1.1.jar",
+          "size": 219967,
+          "sha256": "5336f533b53faacd378461a3b794974fbddb4c0b03805cc5735dc459367be3ac"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.syslog",
+      "version": "1.0.10",
+      "fileName": "mms.plugin.syslog-1.0.10.jar",
+      "size": 1504504,
+      "sha256": "83ba931fa9be0effb39ab117ac6ccf029ac62d590f372aa75321fdeba6906afd",
+      "assets": [
+        {
+          "id": 3371196,
+          "name": "mms.plugin.syslog-1.0.10.jar",
+          "size": 1504504,
+          "sha256": "83ba931fa9be0effb39ab117ac6ccf029ac62d590f372aa75321fdeba6906afd"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.c-site",
+      "version": "1.0.6",
+      "fileName": "mms.plugin.c-site-1.0.6.jar",
+      "size": 216304568,
+      "sha256": "d479eee2d993ca5b0e999d909ed19603663244810621915d778e23aafcc69e09",
+      "assets": [
+        {
+          "id": 3371201,
+          "name": "mms.plugin.c-site-1.0.6.jar.part-001",
+          "size": 67108864,
+          "sha256": "b18e44ae36323361dae09160b73475082148f55598e916eadce1bbd9c260d6c8"
+        },
+        {
+          "id": 3371203,
+          "name": "mms.plugin.c-site-1.0.6.jar.part-002",
+          "size": 67108864,
+          "sha256": "a8398fe288f8a92cb8ef84b46c3eb0d2cec44809a47003bdf400bb76de63164a"
+        },
+        {
+          "id": 3371208,
+          "name": "mms.plugin.c-site-1.0.6.jar.part-003",
+          "size": 67108864,
+          "sha256": "04caa218aa36dc71b8fb8e6e4f2398fbd3402e8b1d3384128f35a51d3a19be8f"
+        },
+        {
+          "id": 3371209,
+          "name": "mms.plugin.c-site-1.0.6.jar.part-004",
+          "size": 14977976,
+          "sha256": "ac6c6eb9b6208b532efb5b816e7e137c3b1c18a509e4c044dae6a187dbae4fbc"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.c-member",
+      "version": "1.0.4",
+      "fileName": "mms.plugin.c-member-1.0.4.jar",
+      "size": 106557875,
+      "sha256": "44bfaef93ef09d3d3a620bc908dbf782a721cb255a58b426271ccf51fd51ef64",
+      "assets": [
+        {
+          "id": 3371213,
+          "name": "mms.plugin.c-member-1.0.4.jar.part-001",
+          "size": 67108864,
+          "sha256": "c1b707c0582b4fc35dba00ca626b3376363e193f1ad13ff5c75e6283669e8c2e"
+        },
+        {
+          "id": 3371215,
+          "name": "mms.plugin.c-member-1.0.4.jar.part-002",
+          "size": 39449011,
+          "sha256": "880a1f8b357b277b86ef738e996e5663e7711374548104e7ab4be550738ab4ad"
+        }
+      ]
+    },
+    {
+      "pluginId": "mms.plugin.doc",
+      "version": "1.0.3",
+      "fileName": "mms.plugin.doc-1.0.3.jar",
+      "size": 126995656,
+      "sha256": "e91edd6eb6dfa3a4c6457083585c5db9adccfe675a80bacb3e99782e4732e855",
+      "assets": [
+        {
+          "id": 3371216,
+          "name": "mms.plugin.doc-1.0.3.jar.part-001",
+          "size": 67108864,
+          "sha256": "a032e00cd9a6741fb5b15f223fc2498cb5d00b6acdb50ab561a412f3d070785d"
+        },
+        {
+          "id": 3371218,
+          "name": "mms.plugin.doc-1.0.3.jar.part-002",
+          "size": 59886792,
+          "sha256": "3ad8b2cc96551b68afa390aa55848e72a837c37802c84c68e48fc9ccf2f4a14f"
+        }
+      ]
+    }
+  ]
+}

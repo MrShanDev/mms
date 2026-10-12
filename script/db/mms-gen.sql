@@ -1,4 +1,4 @@
--- MMS 开源初始化：代码生成
+-- MMS 开源初始化：代码生成（6 张表；与当前 mms-gen 实体对应）
 -- UTF-8 / LF；MySQL 5.7.8+、8.x；InnoDB DYNAMIC / utf8mb4_unicode_ci。
 -- 仅用于全新空库；已有表将报错。请先阅读同目录 README.md。
 
@@ -73,7 +73,10 @@ INSERT INTO `sys_gen_field_type` (`id`, `column_type`, `attr_type`, `package_nam
   (28, 'int8', 'Long', NULL, '2026-01-01 00:00:00'),
   (29, 'int4', 'Integer', NULL, '2026-01-01 00:00:00'),
   (30, 'int2', 'Integer', NULL, '2026-01-01 00:00:00'),
-  (31, 'numeric', 'BigDecimal', 'java.math.BigDecimal', '2026-01-01 00:00:00');
+  (31, 'numeric', 'BigDecimal', 'java.math.BigDecimal', '2026-01-01 00:00:00'),
+  (32, 'json', 'String', NULL, '2026-01-01 00:00:00'),
+  (33, 'time', 'String', NULL, '2026-01-01 00:00:00'),
+  (34, 'year', 'Integer', NULL, '2026-01-01 00:00:00');
 
 -- sys_gen_project_modify
 CREATE TABLE `sys_gen_project_modify` (

@@ -133,7 +133,10 @@ INSERT INTO `sys_function` (`id`, `parent_id`, `path`, `name`, `component`, `red
   (1960271825199095844, '1960271825199095839', NULL, '操作日志记录表-查询', NULL, NULL, NULL, NULL, 'system:sysLog:query', 2, 6, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
   (1960271825199095845, '1960271825199095839', NULL, '操作日志记录表-导入', NULL, NULL, NULL, NULL, 'system:sysLog:import', 2, 7, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
   (1960271825199095846, '1960271825199095839', NULL, '操作日志记录表-导出', NULL, NULL, NULL, NULL, 'system:sysLog:export', 2, 8, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
-  (1960271825199095847, '1960271825199095839', NULL, '操作日志记录表-打印', NULL, NULL, NULL, NULL, 'system:sysLog:print', 2, 9, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00');
+  (1960271825199095847, '1960271825199095839', NULL, '操作日志记录表-打印', NULL, NULL, NULL, NULL, 'system:sysLog:print', 2, 9, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  (2061000000000000101, '3', '/system/tenant', '租户管理', 'system/tenant/index', NULL, '租户管理', NULL, 'super_admin', 1, 8, 'iconfont icon-application', 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', 0, '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  (2061000000000000102, '2061000000000000101', NULL, '租户查询', '', NULL, NULL, NULL, 'system:tenant:list', 2, 1, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', 0, '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  (2061000000000000103, '2', NULL, '运行监控', '', NULL, NULL, NULL, 'system:monitor:query', 2, 3, NULL, 1, -1, -1, -1, '', 1, -1, 0, NULL, '000000', 0, '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00');
 
 -- sys_sign
 CREATE TABLE `sys_sign` (
@@ -153,7 +156,8 @@ CREATE TABLE `sys_sign` (
   `updated_by` varchar(32) DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(255) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_sign_user_expiry` (`user_id`,`time_out`)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='系统加签;';
 
 
@@ -279,6 +283,7 @@ CREATE TABLE `sys_oss` (
   `updated_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '更新人',
   `updated_time` datetime DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '备注',
+  `file_info_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '存储服务完整元数据',
   PRIMARY KEY (`oss_id`)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='OSS对象存储表';
 
@@ -592,7 +597,11 @@ INSERT INTO `sys_role_function` (`id`, `role_id`, `function_id`, `remark`, `stat
   ('1959651627425259521', '1744898370860208129', '1856208397166739501', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
   ('1959651627525922817', '1744898370860208129', '1856208397166739502', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
   ('1959651627593031681', '1744898370860208129', '25', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
-  ('1959651627655946242', '1744898370860208129', '18', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00');
+  ('1959651627655946242', '1744898370860208129', '18', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  ('2061000000000000201', '1', '2061000000000000101', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  ('2061000000000000202', '1', '2061000000000000102', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  ('2061000000000000203', '1', '2061000000000000103', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00'),
+  ('2061000000000000204', '1744898370860208129', '2061000000000000103', NULL, 1, 0, '000000', '0', '1', '2026-01-01 00:00:00', '1', '2026-01-01 00:00:00');
 
 -- sys_user_role
 CREATE TABLE `sys_user_role` (
@@ -725,34 +734,19 @@ INSERT INTO `sys_post` (`id`, `code`, `name`, `sort`, `status`, `remark`, `tenan
 
 -- sys_user_theme_preference
 CREATE TABLE `sys_user_theme_preference` (
-  tenant_id varchar(64) NOT NULL,
-  user_id varchar(64) NOT NULL,
-  theme_json json NOT NULL,
-  updated_time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (tenant_id, user_id)
+  `tenant_id` varchar(64) NOT NULL,
+  `user_id` varchar(64) NOT NULL,
+  `theme_json` json NOT NULL,
+  `updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`tenant_id`,`user_id`)
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户外观与控制台偏好';
 
--- v2.1 core: persisted notice reads and monitoring permission.
-CREATE TABLE sys_notice_read (
- tenant_id varchar(32) NOT NULL, user_id varchar(32) NOT NULL, notice_id varchar(32) NOT NULL,
- read_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
- PRIMARY KEY (tenant_id,user_id,notice_id), KEY ix_notice_read_notice (tenant_id,notice_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-INSERT INTO sys_function(parent_id,name,permission,type,status,tenant_id,revision,created_time,updated_time)
- SELECT id,'运行监控','system:monitor:query',2,1,tenant_id,1,NOW(),NOW()
- FROM sys_function WHERE id='2';
-
-ALTER TABLE sys_oss ADD COLUMN file_info_json LONGTEXT COMMENT '存储服务完整元数据';
-
-ALTER TABLE sys_sign ADD KEY idx_sign_user_expiry(user_id,time_out);
-
--- Platform tenant menu only; safe to run again without duplicating rows.
-INSERT INTO sys_function(id,parent_id,path,name,component,language_code,permission,type,sort,icon,status,visible,is_iframe,is_open_link,is_link,keep_alive,always_show,is_fast,tenant_id,revision,created_by,created_time,updated_by,updated_time)
-SELECT 2061000000000000101,'3','/system/tenant','租户管理','system/tenant/index','租户管理','super_admin',1,8,'iconfont icon-application',1,-1,-1,-1,'',1,-1,0,'000000',0,'1',NOW(),'1',NOW()
-WHERE NOT EXISTS (SELECT 1 FROM sys_function WHERE tenant_id='000000' AND path='/system/tenant');
-INSERT INTO sys_function(id,parent_id,name,component,permission,type,sort,status,visible,tenant_id,revision,created_by,created_time,updated_by,updated_time)
-SELECT 2061000000000000102,CAST(id AS CHAR),'租户查询','','system:tenant:list',2,1,1,-1,'000000',0,'1',NOW(),'1',NOW()
-FROM sys_function p WHERE p.tenant_id='000000' AND p.path='/system/tenant'
-AND NOT EXISTS (SELECT 1 FROM sys_function WHERE tenant_id='000000' AND permission='system:tenant:list' AND type=2);
-UPDATE sys_function SET language_code='租户管理',permission='super_admin',icon='iconfont icon-application' WHERE tenant_id='000000' AND path='/system/tenant' AND component='system/tenant/index';
+-- sys_notice_read
+CREATE TABLE `sys_notice_read` (
+  `tenant_id` varchar(32) NOT NULL COMMENT '租户号',
+  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
+  `notice_id` varchar(32) NOT NULL COMMENT '公告ID',
+  `read_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '已读时间',
+  PRIMARY KEY (`tenant_id`,`user_id`,`notice_id`),
+  KEY `ix_notice_read_notice` (`tenant_id`,`notice_id`)
+) ENGINE=InnoDB ROW_FORMAT=DYNAMIC DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='公告已读记录';

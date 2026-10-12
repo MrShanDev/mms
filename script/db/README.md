@@ -4,8 +4,8 @@
 
 | 文件 | 职责 | 初始化数据 |
 | --- | --- | --- |
-| `mms.sql` | 18 张系统核心表，含用户外观偏好表 | 最小管理员、默认租户/部门/岗位、系统角色、菜单/权限、核心字典、空值服务配置 |
-| `mms-gen.sql` | 6 张生成器表 | 当前项目 BaseEntity 基类、31 条通用字段类型映射 |
+| `mms.sql` | 19 张系统核心表，含用户外观偏好和公告已读表 | 最小管理员、默认租户/部门/岗位、系统角色、平台租户菜单与监控权限、核心字典、空值服务配置 |
+| `mms-gen.sql` | 6 张生成器表 | 当前项目 BaseEntity 基类、34 条通用字段类型映射（含 JSON、TIME、YEAR） |
 | `mms-plugin.sql` | 插件市场、安装版本两张表 | 插件市场一级菜单及两类角色授权；安装记录为空 |
 | `mms-job.sql` | PowerJob **4.3.9** 的 10 张 `pj_*` 表 | 不携带账号、应用、任务、实例、工作流和服务器记录 |
 
@@ -13,7 +13,7 @@
 
 - MySQL **5.7.8+** 与 **8.x**。用户外观偏好表使用原生 JSON，不支持 5.7.8 之前版本。
 - MySQL 5.7 使用 `innodb_file_per_table=ON`、`innodb_file_format=Barracuda`、`innodb_large_prefix=ON`，通常为默认配置；8.x 不再设置后两项。采用默认 16 KiB 页大小，索引上限 3072 字节。不以截断唯一索引绕过旧环境限制。
-- 移除 `utf8mb4_0900_ai_ci`、不可见列、历史 dump 的版本条件指令。所有种子 INSERT 明确列名。
+- 移除 `utf8mb4_0900_ai_ci`、不可见列、历史 dump 的版本条件指令。所有种子 INSERT 明确列名；核心库不在建表后重复执行升级用的 ALTER/UPDATE。
 - 不指定库名、执行账户、宿主地址或 DEFINER，使用者自行选择目标库。
 - 普通 CREATE TABLE 遇到已有表会报错；不会 DROP/TRUNCATE 已有表。脚本不保证重复执行，也不是已有库升级脚本。导入失败后检查空库状态，避免带着部分导入结果继续执行。
 
@@ -47,6 +47,6 @@ mysql --default-character-set=utf8mb4 -u root -p mms < mms/script/db/mms-job.sql
 
 已检查编码、表归属、种子列数、主键/唯一键、字符串长度、菜单父级、角色授权、字典引用及敏感数据残留；逐表核对本地 PowerJob 4.3.9 persistence JAR 的全部实体字段，验证 Hibernate 对 `ownerIP` / `peDAG` 的命名结果。公开示例密码已用 Hutool MD5 按项目参数验证。
 
-当前 Docker daemon 未运行，**尚未完成 MySQL 5.7 / 8.x 实际导入及应用登录联调**。本次只整理文件，未对数据库执行写操作。清洗范围仅覆盖这四份初始化 SQL，历史增量及模型文件未同步清洗。
+2026-10-12 在本地 Docker MySQL 8.0 的独立临时空库成功导入 `mms.sql`、`mms-gen.sql`、`mms-job.sql`，验证 35 张表、核心权限、34 条生成器类型映射及关键列/索引后删除临时库。未对现有业务库执行写入；MySQL 5.7.8+ 仍以静态兼容检查为依据，尚未进行真实导入。历史增量及模型文件未同步清洗。
 
 兼容依据：[MySQL 5.7 手册](https://downloads.mysql.com/docs/refman-5.7-en.a4.pdf)、[MySQL 8.0 不可见列与 INSERT 规则](https://dev.mysql.com/doc/refman/8.0/en/invisible-columns.html)。
