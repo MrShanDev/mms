@@ -15,6 +15,7 @@ import com.sxpcwlkj.system.mapper.SysPluginMapper;
 import com.sxpcwlkj.system.mapper.SysPluginVersionMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class PluginSysConfigOperationsImpl implements PluginSysConfigOperations 
     private static final int MAX_VALUE_LEN = 255;
 
     private final SysConfigMapper baseMapper;
+    private final JdbcTemplate jdbcTemplate;
     private final SysPluginMapper sysPluginMapper;
     private final SysPluginVersionMapper sysPluginVersionMapper;
 
@@ -100,25 +102,14 @@ public class PluginSysConfigOperationsImpl implements PluginSysConfigOperations 
         }
         String full = PluginSysConfigKeys.fullKey(pluginId, keySuffix);
         String tid = normalizeTenant(tenantId);
-        SysConfig existing =
-                baseMapper.selectOne(
-                        new LambdaQueryWrapper<SysConfig>()
-                                .eq(SysConfig::getConfigKey, full)
-                                .eq(SysConfig::getTenantId, tid)
-                                .last("LIMIT 1"));
-        if (existing != null) {
-            return;
-        }
-        SysConfig row = new SysConfig();
-        row.setId(String.valueOf(IdWorker.getId()));
-        row.setTenantId(tid);
-        row.setConfigKey(full);
-        row.setConfigName(configName);
-        row.setConfigValue(v);
-        row.setConfigType(2);
-        row.setStatus(SystemCommonEnum.SYS_COMMON_STATE_OPEN.getValue());
-        row.setSort(0);
-        baseMapper.insert(row);
+        // Installation seeds every tenant while the request may still carry the platform
+        // tenant context. A MyBatis select can be narrowed by that context and miss the
+        // explicitly requested tenant; use the database's unique (tenant_id, config_key)
+        // constraint as the atomic source of truth instead.
+        jdbcTemplate.update(
+                "INSERT INTO sys_config (id, tenant_id, config_key, config_name, config_value, config_type, status, sort, revision) "
+                        + "VALUES (?, ?, ?, ?, ?, 2, 1, 0, '1') ON DUPLICATE KEY UPDATE id = id",
+                String.valueOf(IdWorker.getId()), tid, full, configName, v);
     }
 
     @Override

@@ -267,6 +267,14 @@ public final class JdbcPluginBackupAccess implements PluginBackupAccess {
         boolean inSingle = false;
         for (int i = 0; i < script.length(); i++) {
             char c = script.charAt(i);
+            if (!inSingle && c == '-' && i + 1 < script.length() && script.charAt(i + 1) == '-'
+                    && (i + 2 == script.length() || Character.isWhitespace(script.charAt(i + 2)))) {
+                while (i < script.length() && script.charAt(i) != '\n') {
+                    i++;
+                }
+                cur.append('\n');
+                continue;
+            }
             if (c == '\'' && !inSingle) {
                 inSingle = true;
                 cur.append(c);
@@ -280,7 +288,7 @@ public final class JdbcPluginBackupAccess implements PluginBackupAccess {
                 }
             } else if (c == ';' && !inSingle) {
                 String block = cur.toString().trim();
-                if (!block.isEmpty() && !block.startsWith("--")) {
+                if (!block.isEmpty()) {
                     out.add(block);
                 }
                 cur.setLength(0);
@@ -289,7 +297,7 @@ public final class JdbcPluginBackupAccess implements PluginBackupAccess {
             }
         }
         String tail = cur.toString().trim();
-        if (!tail.isEmpty() && !tail.startsWith("--")) {
+        if (!tail.isEmpty()) {
             out.add(tail);
         }
         return out;

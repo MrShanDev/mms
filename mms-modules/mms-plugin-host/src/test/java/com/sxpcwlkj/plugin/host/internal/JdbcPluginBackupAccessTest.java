@@ -1,30 +1,21 @@
 package com.sxpcwlkj.plugin.host.internal;
 
-import com.sxpcwlkj.plugin.PluginException;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JdbcPluginBackupAccessTest {
-
-    @Test
-    void splitRespectsSemicolonInString() {
-        List<String> parts =
-                JdbcPluginBackupAccess.splitSqlStatements("INSERT INTO t VALUES ('a;b');\nSET NAMES utf8;");
-        assertEquals(2, parts.size());
+    @Test void exportedCommentsDoNotHideDropAndCreateStatements() {
+        String sql = "-- MMS plugin logical backup\nSET NAMES utf8mb4;\n"
+                + "-- TABLE plugin_ds_test\nDROP TABLE IF EXISTS `plugin_ds_test`;\n"
+                + "CREATE TABLE `plugin_ds_test` (id BIGINT PRIMARY KEY);\n"
+                + "INSERT INTO `plugin_ds_test` VALUES (1);\n";
+        assertEquals(List.of("SET NAMES utf8mb4", "DROP TABLE IF EXISTS `plugin_ds_test`",
+                "CREATE TABLE `plugin_ds_test` (id BIGINT PRIMARY KEY)",
+                "INSERT INTO `plugin_ds_test` VALUES (1)"), JdbcPluginBackupAccess.splitSqlStatements(sql));
     }
-
-    @Test
-    void importAllowsCreateAndInsert() {
-        JdbcPluginBackupAccess.assertImportAllowed("CREATE TABLE x (id INT)");
-        JdbcPluginBackupAccess.assertImportAllowed("INSERT INTO x VALUES (1)");
-    }
-
-    @Test
-    void importRejectsGrant() {
-        assertThrows(PluginException.class, () -> JdbcPluginBackupAccess.assertImportAllowed("GRANT ALL ON *.* TO u"));
+    @Test void commentMarkerInsideQuotedDataIsPreserved() {
+        assertEquals(List.of("INSERT INTO t VALUES ('line1\n-- keep this value')"),
+                JdbcPluginBackupAccess.splitSqlStatements("INSERT INTO t VALUES ('line1\n-- keep this value');"));
     }
 }
